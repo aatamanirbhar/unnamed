@@ -234,7 +234,7 @@ function AuthPanel({ quote }: { quote: string }) {
             }
           });
 
-    const { error } = await action;
+    const { data, error } = await action;
     setBusy(false);
 
     if (error) {
@@ -242,10 +242,15 @@ function AuthPanel({ quote }: { quote: string }) {
       return;
     }
 
+    if (authMode === "signin") {
+      setMessage("Welcome back.");
+      return;
+    }
+
     setMessage(
-      authMode === "signin"
-        ? "Welcome back."
-        : `Confirmation email sent to ${email}. Check spam or promotions too.`
+      data.session
+        ? "Account created. Email confirmation is currently disabled in Supabase."
+        : `Confirmation email requested for ${email}. Check spam or promotions too.`
     );
   }
 
