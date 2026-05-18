@@ -54,6 +54,53 @@ const signOptions = [
   }
 ];
 
+type FinalizeSignPayload = {
+  status?: string;
+  message?: string;
+};
+
+async function readFunctionPayload(response?: Response | null, error?: unknown): Promise<FinalizeSignPayload> {
+  if (response) {
+    try {
+      const contentType = response.headers.get("content-type") || "";
+      if (contentType.includes("application/json")) {
+        return (await response.clone().json()) as FinalizeSignPayload;
+      }
+
+      const text = await response.clone().text();
+      return text ? { message: text } : {};
+    } catch {
+      // Fall through to the error object below.
+    }
+  }
+
+  if (error && typeof error === "object") {
+    const fallback = error as {
+      message?: unknown;
+      status?: unknown;
+      context?: unknown;
+      response?: Response;
+    };
+
+    if (fallback.context instanceof Response) {
+      return readFunctionPayload(fallback.context);
+    }
+
+    if (fallback.response instanceof Response) {
+      return readFunctionPayload(fallback.response);
+    }
+
+    const message = typeof fallback.message === "string" ? fallback.message : undefined;
+    const status = typeof fallback.status === "string" ? fallback.status : undefined;
+
+    if (message || status) {
+      return { message, status };
+    }
+  }
+
+  return {};
+}
+
 function App() {
   const [path, setPath] = useState(window.location.pathname);
   const [session, setSession] = useState<Session | null>(null);
@@ -186,6 +233,7 @@ function AuthPanel({ quote }: { quote: string }) {
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signup");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [pendingConfirmationEmail, setPendingConfirmationEmail] = useState("");
 
   const authClient = isSupabaseConfigured ? supabase : null;
 
@@ -207,6 +255,37 @@ function AuthPanel({ quote }: { quote: string }) {
     }
   }
 
+  async function resendConfirmationEmail() {
+    if (!authClient) {
+      setMessage("Add your Supabase URL and anon key to .env.local first.");
+      return;
+    }
+
+    const confirmationEmail = pendingConfirmationEmail || email.trim();
+    if (!confirmationEmail) {
+      setMessage("Enter the email address first.");
+      return;
+    }
+
+    setBusy(true);
+    const { error } = await authClient.auth.resend({
+      type: "signup",
+      email: confirmationEmail,
+      options: {
+        emailRedirectTo: getSiteUrl()
+      }
+    });
+    setBusy(false);
+
+    if (error) {
+      setMessage(error.message);
+      return;
+    }
+
+    setPendingConfirmationEmail(confirmationEmail);
+    setMessage(`Confirmation email requested again for ${confirmationEmail}.`);
+  }
+
   async function handleEmailSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage("");
@@ -221,31 +300,44 @@ function AuthPanel({ quote }: { quote: string }) {
       return;
     }
 
+    const normalizedEmail = email.trim();
     setBusy(true);
 
     const action =
       authMode === "signin"
-        ? authClient.auth.signInWithPassword({ email, password })
+        ? authClient.auth.signInWithPassword({ email: normalizedEmail, password })
         : authClient.auth.signUp({
-            email,
+            email: normalizedEmail,
             password,
             options: {
               emailRedirectTo: getSiteUrl()
             }
           });
 
-    const { error } = await action;
+    const { data, error } = await action;
     setBusy(false);
 
     if (error) {
+      if (authMode === "signin" && isEmailNotConfirmedError(error)) {
+        setPendingConfirmationEmail(normalizedEmail);
+        setMessage("That email still needs confirmation. You can resend the confirmation link below.");
+        return;
+      }
+
       setMessage(error.message);
       return;
     }
 
+    if (authMode === "signin") {
+      setMessage("Welcome back.");
+      return;
+    }
+
+    setPendingConfirmationEmail(normalizedEmail);
     setMessage(
-      authMode === "signin"
-        ? "Welcome back."
-        : `Confirmation email sent to ${email}. Check spam or promotions too.`
+      data.session
+        ? "Account created and signed in."
+        : `If confirmation is enabled for this account, Supabase should send a link to ${normalizedEmail}. Check spam or promotions too, then use resend below if needed.`
     );
   }
 
@@ -328,9 +420,24 @@ function AuthPanel({ quote }: { quote: string }) {
       </form>
 
       {message && <p className="form-note">{message}</p>}
+      {pendingConfirmationEmail && (
+        <button
+          className="subtle-action"
+          type="button"
+          disabled={busy}
+          onClick={() => void resendConfirmationEmail()}
+        >
+          {busy ? <Loader2 className="spin" size={16} /> : <RefreshCw size={16} />}
+          Resend confirmation
+        </button>
+      )}
       <p className="rotating-quote">{quote}</p>
     </section>
   );
+}
+
+function isEmailNotConfirmedError(error: { message?: string; code?: string }) {
+  return error.code === "email_not_confirmed" || error.message?.toLowerCase().includes("email not confirmed");
 }
 
 function LoadingScreen({ quote }: { quote: string }) {
@@ -494,16 +601,17 @@ function Dashboard({ user, quote }: { user: User; quote: string }) {
     }
 
     setNotice("Calling the universe's mail room...");
-    const { data, error } = await supabase.functions.invoke("finalize-sign", {
+    const { data, error, response } = await supabase.functions.invoke<FinalizeSignPayload>("finalize-sign", {
       body: { slug }
     });
 
     if (error) {
-      setNotice(error.message);
+      const payload = await readFunctionPayload(response, error);
+      setNotice(payload.message || payload.status || error.message);
       return;
     }
 
-    const result = data as { status?: string; message?: string };
+    const result = data ?? {};
     setNotice(result.message || result.status || "Final sign checked.");
     await refreshDashboard();
   }

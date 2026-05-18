@@ -349,6 +349,14 @@ button:disabled {
   line-height: 1.45;
 }
 
+.subtle-action {
+  width: 100%;
+  margin-top: 10px;
+  color: #fffaf0;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
 .spin {
   animation: spin 950ms linear infinite;
 }
