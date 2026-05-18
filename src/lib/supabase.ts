@@ -18,8 +18,7 @@ export const supabase = isSupabaseConfigured
 export function getSiteUrl() {
   const configuredUrl = (import.meta.env.VITE_SITE_URL as string | undefined)?.trim();
   const runtimeOrigin = window.location.origin;
-  const isLocalOrigin = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(runtimeOrigin);
-  const siteUrl = isLocalOrigin ? configuredUrl || runtimeOrigin : runtimeOrigin;
+  const siteUrl = configuredUrl || runtimeOrigin;
 
   return siteUrl.replace(/\/+$/, "");
 }

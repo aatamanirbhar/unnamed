@@ -136,6 +136,7 @@ create or replace function public.hash_visitor_key(p_visitor_key text)
 returns text
 language sql
 immutable
+set search_path = public, extensions
 as $$
   select encode(digest(coalesce(p_visitor_key, ''), 'sha256'), 'hex')
 $$;
@@ -185,7 +186,7 @@ begin
     where question_id = q.id and visitor_key_hash = v_hash;
   end if;
 
-  if q.results_email_sent_at is not null or (q.status = 'sealed' and not has_slot) then
+  if q.results_email_sent_at is not null or ((q.status = 'sealed' or q.visit_count >= q.response_limit) and not has_slot) then
     select * into owner_profile from public.profiles where id = q.owner_id;
 
     return jsonb_build_object(
@@ -268,11 +269,21 @@ begin
   ) into has_slot;
 
   if q.results_email_sent_at is not null then
-    return jsonb_build_object('status', 'finalized', 'message', 'The final sign has already been sent.');
+    return jsonb_build_object(
+      'status', 'finalized',
+      'message', 'The final sign has already been sent.',
+      'sealed', true,
+      'remainingSlots', 0
+    );
   end if;
 
   if not has_slot and (q.status <> 'open' or q.visit_count >= q.response_limit) then
-    return jsonb_build_object('status', 'expired', 'message', 'This sign has already closed.');
+    return jsonb_build_object(
+      'status', 'expired',
+      'message', 'This sign has already closed.',
+      'sealed', true,
+      'remainingSlots', 0
+    );
   end if;
 
   if not has_slot then
@@ -349,11 +360,21 @@ begin
   ) into has_slot;
 
   if q.results_email_sent_at is not null then
-    return jsonb_build_object('status', 'finalized', 'message', 'The final sign has already been sent.');
+    return jsonb_build_object(
+      'status', 'finalized',
+      'message', 'The final sign has already been sent.',
+      'sealed', true,
+      'remainingSlots', 0
+    );
   end if;
 
-  if q.status <> 'open' and not has_slot then
-    return jsonb_build_object('status', 'expired', 'message', 'This sign has already closed.');
+  if not has_slot and (q.status <> 'open' or q.visit_count >= q.response_limit) then
+    return jsonb_build_object(
+      'status', 'expired',
+      'message', 'This sign has already closed.',
+      'sealed', true,
+      'remainingSlots', 0
+    );
   end if;
 
   if not has_slot then
@@ -413,7 +434,7 @@ begin
     where question_id = q.id and visitor_key_hash = v_hash
   ) into has_slot;
 
-  if q.status = 'sealed' and not has_slot then
+  if (q.status = 'sealed' or q.visit_count >= q.response_limit or q.results_email_sent_at is not null) and not has_slot then
     return jsonb_build_object('found', true, 'expired', true, 'messages', '[]'::jsonb);
   end if;
 
