@@ -65,3 +65,10 @@ export interface PublicMessagesPayload {
     createdAt: string;
   }>;
 }
+
+export interface PublicSubmissionPayload {
+  status?: string;
+  message?: string;
+  sealed?: boolean;
+  remainingSlots?: number;
+}

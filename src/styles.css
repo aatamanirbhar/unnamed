@@ -228,10 +228,6 @@ button:disabled {
   background: #d9e5ff;
 }
 
-.social.instagram {
-  background: #ffe1d1;
-}
-
 .divider {
   display: flex;
   align-items: center;

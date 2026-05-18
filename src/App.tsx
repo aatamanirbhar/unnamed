@@ -6,7 +6,7 @@ import {
   Copy,
   Disc3,
   Eye,
-  Github,
+  Globe,
   Inbox,
   KeyRound,
   Link2,
@@ -18,6 +18,7 @@ import {
   Moon,
   RefreshCw,
   Send,
+  Share2,
   ShieldCheck,
   Sparkles,
   Stars,
@@ -28,12 +29,13 @@ import {
 import { backdrops, quotes } from "./lib/assets";
 import { getVisitorKeyForSlug } from "./lib/identity";
 import { createSlug, normalizeQuestion } from "./lib/slug";
-import { getSiteUrl, isSupabaseConfigured, supabase } from "./lib/supabase";
+import { getSignUrl, getSiteUrl, isSupabaseConfigured, supabase } from "./lib/supabase";
 import type {
   MachineSign,
   MessageRow,
   PublicMessagesPayload,
   PublicQuestionPayload,
+  PublicSubmissionPayload,
   Question,
   VoteChoice,
   VoteRow
@@ -49,11 +51,6 @@ const signOptions = [
     label: "Discord",
     provider: "discord" as Provider,
     className: "social discord"
-  },
-  {
-    label: "Instagram",
-    provider: "instagram" as Provider,
-    className: "social instagram"
   }
 ];
 
@@ -136,7 +133,15 @@ function parseRoute(path: string) {
     return { kind: "expired" as const, slug: parts[1] };
   }
 
+  if (parts.length === 1 && isShareSlug(parts[0])) {
+    return { kind: "sign" as const, slug: parts[0] };
+  }
+
   return { kind: "home" as const };
+}
+
+function isShareSlug(value: string) {
+  return /^[a-z0-9-]{8,40}$/i.test(value);
 }
 
 function CosmicBackdrop({ image }: { image: string }) {
@@ -178,8 +183,7 @@ function Landing({ quote }: { quote: string }) {
 function AuthPanel({ quote }: { quote: string }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [passwordVisible, setPasswordVisible] = useState(false);
-  const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
+  const [authMode, setAuthMode] = useState<"signin" | "signup">("signup");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -212,12 +216,6 @@ function AuthPanel({ quote }: { quote: string }) {
       return;
     }
 
-    if (!passwordVisible) {
-      setPasswordVisible(true);
-      setMessage("If this email already has an account, enter your password. New here? Create one.");
-      return;
-    }
-
     if (password.length < 6) {
       setMessage("Use at least 6 characters for the password.");
       return;
@@ -244,7 +242,11 @@ function AuthPanel({ quote }: { quote: string }) {
       return;
     }
 
-    setMessage(authMode === "signin" ? "Welcome back." : "Check your email if confirmation is on.");
+    setMessage(
+      authMode === "signin"
+        ? "Welcome back."
+        : `Confirmation email sent to ${email}. Check spam or promotions too.`
+    );
   }
 
   return (
@@ -262,7 +264,7 @@ function AuthPanel({ quote }: { quote: string }) {
             type="button"
             onClick={() => void signInWithOAuth(option.provider)}
           >
-            {option.label === "Discord" ? <Disc3 size={17} /> : <Github size={17} />}
+            {option.label === "Discord" ? <Disc3 size={17} /> : <Globe size={17} />}
             {option.label}
           </button>
         ))}
@@ -287,45 +289,41 @@ function AuthPanel({ quote }: { quote: string }) {
           </div>
         </label>
 
-        {passwordVisible && (
-          <label>
-            <span>Password</span>
-            <div className="input-wrap">
-              <KeyRound size={18} />
-              <input
-                required
-                minLength={6}
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-              />
-            </div>
-          </label>
-        )}
-
-        {passwordVisible && (
-          <div className="segmented" aria-label="Authentication mode">
-            <button
-              type="button"
-              className={authMode === "signin" ? "active" : ""}
-              onClick={() => setAuthMode("signin")}
-            >
-              Log in
-            </button>
-            <button
-              type="button"
-              className={authMode === "signup" ? "active" : ""}
-              onClick={() => setAuthMode("signup")}
-            >
-              Sign up
-            </button>
+        <label>
+          <span>Password</span>
+          <div className="input-wrap">
+            <KeyRound size={18} />
+            <input
+              required
+              minLength={6}
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
           </div>
-        )}
+        </label>
+
+        <div className="segmented" aria-label="Authentication mode">
+          <button
+            type="button"
+            className={authMode === "signup" ? "active" : ""}
+            onClick={() => setAuthMode("signup")}
+          >
+            Sign up
+          </button>
+          <button
+            type="button"
+            className={authMode === "signin" ? "active" : ""}
+            onClick={() => setAuthMode("signin")}
+          >
+            Log in
+          </button>
+        </div>
 
         <button className="primary" type="submit" disabled={busy}>
           {busy ? <Loader2 className="spin" size={18} /> : <ArrowRight size={18} />}
-          {passwordVisible ? (authMode === "signin" ? "Log in" : "Create account") : "Continue"}
+          {authMode === "signin" ? "Log in" : "Create account"}
         </button>
       </form>
 
@@ -462,7 +460,7 @@ function Dashboard({ user, quote }: { user: User; quote: string }) {
       return;
     }
 
-    const link = `${getSiteUrl()}/sign/${slug}`;
+    const link = getSignUrl(slug);
     setShareLink(link);
     setQuestion("");
     await navigator.clipboard?.writeText(link).catch(() => undefined);
@@ -472,6 +470,22 @@ function Dashboard({ user, quote }: { user: User; quote: string }) {
   async function copyShareLink(link: string) {
     await navigator.clipboard?.writeText(link).catch(() => undefined);
     setNotice("Share link copied.");
+  }
+
+  async function shareSignLink(link: string, title = "Omenly sign") {
+    if (navigator.share) {
+      await navigator
+        .share({
+          title,
+          text: "Give your sign on Omenly.",
+          url: link
+        })
+        .catch(() => undefined);
+      return;
+    }
+
+    await copyShareLink(link);
+    setNotice("Sharing is not available in this browser, so I copied the link instead.");
   }
 
   async function finalizeSign(slug: string) {
@@ -532,7 +546,7 @@ function Dashboard({ user, quote }: { user: User; quote: string }) {
         <aside className="settings-panel">
           <div className="setting-row">
             <div>
-              <span>Response slots</span>
+              <span>Response limit</span>
               <strong>{limit}</strong>
             </div>
             <input
@@ -544,8 +558,8 @@ function Dashboard({ user, quote }: { user: User; quote: string }) {
             />
           </div>
           <p>
-            Each browser gets one anonymous slot, one vote, and one message. When slots are gone,
-            new visitors see the expired page.
+            Each browser gets one anonymous vote and one message. The link closes when the chosen
+            number of people have responded.
           </p>
           <p className="rotating-quote compact">{quote}</p>
         </aside>
@@ -571,6 +585,10 @@ function Dashboard({ user, quote }: { user: User; quote: string }) {
             <Copy size={18} />
             Copy
           </button>
+          <button type="button" onClick={() => void shareSignLink(shareLink)}>
+            <Share2 size={18} />
+            Share
+          </button>
         </section>
       )}
 
@@ -591,7 +609,7 @@ function Dashboard({ user, quote }: { user: User; quote: string }) {
                 const signMessages = messages.filter((message) => message.question_id === row.id);
                 const yesCount = signVotes.filter((vote) => vote.choice === "yes").length;
                 const noCount = signVotes.filter((vote) => vote.choice === "no").length;
-                const link = `${getSiteUrl()}/sign/${row.slug}`;
+                const link = getSignUrl(row.slug);
                 const isSealed = row.status === "sealed";
 
                 return (
@@ -608,7 +626,7 @@ function Dashboard({ user, quote }: { user: User; quote: string }) {
                     <div className="card-stats">
                       <span>
                         <Eye size={15} />
-                        {row.visit_count}/{row.response_limit} slots
+                        {row.visit_count}/{row.response_limit} responses
                       </span>
                       <span>
                         <ThumbsUp size={15} />
@@ -627,6 +645,10 @@ function Dashboard({ user, quote }: { user: User; quote: string }) {
                       <button type="button" onClick={() => void copyShareLink(link)}>
                         <Link2 size={16} />
                         Copy link
+                      </button>
+                      <button type="button" onClick={() => void shareSignLink(link, row.question_text)}>
+                        <Share2 size={16} />
+                        Share link
                       </button>
                       {isSealed && !row.results_email_sent_at && (
                         <button type="button" onClick={() => void finalizeSign(row.slug)}>
@@ -763,9 +785,9 @@ function SharedSignPage({
       return;
     }
 
-    const result = data as { status?: string; message?: string };
+    const result = data as PublicSubmissionPayload;
     setNotice(result.message || "Your vote was placed in the sky.");
-    await maybeFinalize();
+    await handleSubmissionResult(result);
   }
 
   async function submitMessage(event: FormEvent<HTMLFormElement>) {
@@ -786,21 +808,42 @@ function SharedSignPage({
       return;
     }
 
-    const result = data as { status?: string; message?: string };
+    const result = data as PublicSubmissionPayload;
     setNotice(result.message || "Your anonymous message was added.");
     setMessage("");
     await refreshMessages();
-    await maybeFinalize();
+    await handleSubmissionResult(result);
   }
 
-  async function maybeFinalize() {
-    if (!supabase || payload?.question?.status !== "sealed") {
+  async function handleSubmissionResult(result: PublicSubmissionPayload) {
+    if (!supabase) {
       return;
     }
 
-    await supabase.functions.invoke("finalize-sign", {
-      body: { slug }
-    });
+    const remainingSlots = result.remainingSlots;
+
+    if (typeof remainingSlots === "number") {
+      setPayload((current) =>
+        current?.question
+          ? {
+              ...current,
+              remainingSlots,
+              question: {
+                ...current.question,
+                visitCount: current.question.responseLimit - remainingSlots,
+                status: result.sealed ? "sealed" : current.question.status
+              }
+            }
+          : current
+      );
+    }
+
+    if (result.sealed) {
+      await supabase.functions.invoke("finalize-sign", {
+        body: { slug }
+      });
+      navigate(`/expired/${slug}`);
+    }
   }
 
   if (loading) {
@@ -855,8 +898,8 @@ function SharedSignPage({
         <div className="share-status">
           <Lock size={16} />
           {payload.remainingSlots === 0
-            ? "This is the final response slot."
-            : `${payload.remainingSlots} anonymous slots remain.`}
+            ? "This is the final response."
+            : `${payload.remainingSlots} anonymous responses remain.`}
         </div>
       </section>
 
