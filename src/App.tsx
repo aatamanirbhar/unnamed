@@ -107,9 +107,9 @@ function App() {
       <CosmicBackdrop image={backdrops[backdropIndex].src} />
       <main className="shell">
         {route.kind === "sign" ? (
-          <SharedSignPage quote={quotes[quoteIndex]} slug={route.slug} navigate={navigate} />
+          <SharedSignPage key={route.slug} quote={quotes[quoteIndex]} slug={route.slug} navigate={navigate} />
         ) : route.kind === "expired" ? (
-          <ExpiredPage slug={route.slug} navigate={navigate} />
+          <ExpiredPage key={route.slug} slug={route.slug} navigate={navigate} />
         ) : loadingSession ? (
           <LoadingScreen quote={quotes[quoteIndex]} />
         ) : session ? (
@@ -712,6 +712,7 @@ function SharedSignPage({
   const [message, setMessage] = useState("");
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const loadedRef = useRef(false);
   const visitorKey = useMemo(() => getVisitorKeyForSlug(slug), [slug]);
 
@@ -737,8 +738,8 @@ function SharedSignPage({
 
     async function claimVisit() {
       if (!supabase) {
+        setLoadError("Supabase is not configured for this build.");
         setLoading(false);
-        setPayload({ found: false });
         return;
       }
 
@@ -748,7 +749,7 @@ function SharedSignPage({
       });
 
       if (error) {
-        setNotice(error.message);
+        setLoadError(error.message);
         setLoading(false);
         return;
       }
@@ -839,15 +840,21 @@ function SharedSignPage({
     }
 
     if (result.sealed) {
-      await supabase.functions.invoke("finalize-sign", {
-        body: { slug }
-      });
+      void supabase.functions
+        .invoke("finalize-sign", {
+          body: { slug }
+        })
+        .catch(() => undefined);
       navigate(`/expired/${slug}`);
     }
   }
 
   if (loading) {
     return <LoadingScreen quote={quote} />;
+  }
+
+  if (loadError) {
+    return <LinkProblemPage slug={slug} message={loadError} navigate={navigate} />;
   }
 
   if (!payload?.found || !payload.question) {
@@ -958,6 +965,33 @@ function ExpiredPage({
           This Omenly link has closed. The results and anonymous messages are being sent to the
           person who asked.
         </p>
+      </div>
+      <div className="expired-actions">
+        <button className="primary" type="button" onClick={() => navigate("/")}>
+          <Sparkles size={18} />
+          Get your sign
+        </button>
+        <span>Omen code: {slug}</span>
+      </div>
+    </section>
+  );
+}
+
+function LinkProblemPage({
+  slug,
+  message,
+  navigate
+}: {
+  slug: string;
+  message: string;
+  navigate: (path: string) => void;
+}) {
+  return (
+    <section className="expired-page">
+      <div>
+        <p className="eyebrow">Link problem</p>
+        <h1>This sign could not be opened.</h1>
+        <p>{message}</p>
       </div>
       <div className="expired-actions">
         <button className="primary" type="button" onClick={() => navigate("/")}>

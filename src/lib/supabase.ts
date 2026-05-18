@@ -25,5 +25,5 @@ export function getSiteUrl() {
 }
 
 export function getSignUrl(slug: string) {
-  return `${getSiteUrl()}/${slug}`;
+  return `${getSiteUrl()}/sign/${encodeURIComponent(slug)}`;
 }
