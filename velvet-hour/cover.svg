@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 630 500" width="630" height="500">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a0826"/>
+      <stop offset="50%" stop-color="#3a0a3d"/>
+      <stop offset="100%" stop-color="#2b0a3d"/>
+    </linearGradient>
+    <radialGradient id="glow-pink" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ff5fa2" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#ff5fa2" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow-gold" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffd166" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#ffd166" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="orb-river" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#ffb4d6"/>
+      <stop offset="55%" stop-color="#ff4d9d"/>
+      <stop offset="100%" stop-color="#8a1a5a"/>
+    </radialGradient>
+    <radialGradient id="orb-sam" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#c5c7ff"/>
+      <stop offset="55%" stop-color="#5e60ce"/>
+      <stop offset="100%" stop-color="#2e2c8d"/>
+    </radialGradient>
+    <radialGradient id="orb-iris" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#e4d5ff"/>
+      <stop offset="55%" stop-color="#9b87cf"/>
+      <stop offset="100%" stop-color="#5e4b8b"/>
+    </radialGradient>
+    <filter id="softglow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+    <filter id="textshadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" in="SourceAlpha"/>
+      <feOffset dy="2"/>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background gradient -->
+  <rect width="630" height="500" fill="url(#bg)"/>
+
+  <!-- Mood haze -->
+  <ellipse cx="180" cy="120" rx="220" ry="160" fill="url(#glow-pink)" opacity="0.7"/>
+  <ellipse cx="480" cy="380" rx="220" ry="180" fill="url(#glow-gold)" opacity="0.7"/>
+
+  <!-- Subtle bokeh / disco ball lights -->
+  <g opacity="0.4">
+    <circle cx="80" cy="50" r="2.5" fill="#ffd166"/>
+    <circle cx="540" cy="80" r="2" fill="#ff5fa2"/>
+    <circle cx="600" cy="280" r="2.5" fill="#fff"/>
+    <circle cx="40" cy="320" r="2" fill="#ffd166"/>
+    <circle cx="100" cy="450" r="2" fill="#ff5fa2"/>
+    <circle cx="570" cy="450" r="2.5" fill="#ffd166"/>
+    <circle cx="350" cy="40" r="2" fill="#fff"/>
+    <circle cx="240" cy="470" r="2" fill="#ff5fa2"/>
+    <circle cx="430" cy="60" r="2" fill="#ffd166"/>
+  </g>
+
+  <!-- Faint horizon line implying a bar counter -->
+  <line x1="0" y1="345" x2="630" y2="345" stroke="#ffd166" stroke-width="0.5" opacity="0.25"/>
+
+  <!-- Three character orbs in a row -->
+  <g filter="url(#softglow)">
+    <circle cx="170" cy="310" r="55" fill="#ff5fa2" opacity="0.5"/>
+    <circle cx="315" cy="280" r="65" fill="#9b87cf" opacity="0.5"/>
+    <circle cx="460" cy="310" r="55" fill="#5e60ce" opacity="0.5"/>
+  </g>
+  <circle cx="170" cy="310" r="42" fill="url(#orb-river)"/>
+  <circle cx="170" cy="310" r="42" fill="none" stroke="#ffb4d6" stroke-width="1" opacity="0.6"/>
+
+  <circle cx="315" cy="280" r="50" fill="url(#orb-iris)"/>
+  <circle cx="315" cy="280" r="50" fill="none" stroke="#e4d5ff" stroke-width="1" opacity="0.7"/>
+
+  <circle cx="460" cy="310" r="42" fill="url(#orb-sam)"/>
+  <circle cx="460" cy="310" r="42" fill="none" stroke="#c5c7ff" stroke-width="1" opacity="0.6"/>
+
+  <!-- Tiny pronoun captions -->
+  <text x="170" y="382" font-family="Helvetica, sans-serif" font-size="9" letter-spacing="2.5" text-anchor="middle" fill="#ffb4d6" opacity="0.8">SHE / HER</text>
+  <text x="315" y="358" font-family="Helvetica, sans-serif" font-size="9" letter-spacing="2.5" text-anchor="middle" fill="#e4d5ff" opacity="0.8">SHE / HER</text>
+  <text x="460" y="382" font-family="Helvetica, sans-serif" font-size="9" letter-spacing="2.5" text-anchor="middle" fill="#c5c7ff" opacity="0.8">THEY / THEM</text>
+
+  <!-- Title block -->
+  <text x="315" y="78" font-family="Georgia, serif" font-style="italic" font-size="26" letter-spacing="6" text-anchor="middle" fill="#ffd9e9" opacity="0.85">— LAST CALL AT THE —</text>
+
+  <g filter="url(#textshadow)">
+    <text x="315" y="160" font-family="Georgia, serif" font-style="italic" font-size="68" font-weight="bold" letter-spacing="2" text-anchor="middle" fill="#fff5fa">Velvet Hour</text>
+  </g>
+
+  <!-- Hook line -->
+  <text x="315" y="440" font-family="Georgia, serif" font-style="italic" font-size="22" letter-spacing="3" text-anchor="middle" fill="#ffd166">"Would you stay?"</text>
+  <text x="315" y="470" font-family="Helvetica, sans-serif" font-size="11" font-weight="600" letter-spacing="6" text-anchor="middle" fill="#ff5fa2" opacity="0.9">A QUEER NARRATIVE  ·  3 ROUTES  ·  6 MIN</text>
+</svg>

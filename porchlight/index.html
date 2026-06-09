@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050817">
+<title>Porchlight — One Halloween, Six Doors</title>
+<link rel="stylesheet" href="omenly.css">
+<script>
+  window.OMENLY_CONFIG = {
+    game: 'porchlight',
+    gameTitle: 'Porchlight',
+    price: 3,
+    isHub: false,
+    donateUrl: 'https://www.paypal.me/vikas117/3',
+    allAccessDonateUrl: 'https://www.paypal.me/vikas117/10',
+    theme: { accent: '#ff8c42' }
+    // After AdSense approval, add:
+    // , adsense: { client: 'ca-pub-XXXXXXXXXXXXXXXX', slot: 'XXXXXXXXXX' }
+  };
+</script>
+<script src="omenly.js" defer></script>
+<script defer src="/_vercel/insights/script.js"></script>
+<style>
+  :root {
+    --bg-a: #050817;
+    --bg-b: #0d1228;
+    --ink: #fff5e6;
+    --dim: rgba(255,245,230,0.55);
+    --line: rgba(255,245,230,0.12);
+    --accent: #ff8c42;
+    --moon: #ffe7a0;
+    --warm: #ffb05c;
+    --candle: #ff6b35;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { min-height: 100%; background: var(--bg-a); color: var(--ink); font-family: 'Georgia', 'Times New Roman', serif; -webkit-tap-highlight-color: transparent; overscroll-behavior-y: none; }
+  body { padding: max(28px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(80px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left)); display: flex; flex-direction: column; align-items: center; position: relative; overflow-x: hidden; min-height: 100dvh; }
+
+  /* ── atmosphere ── */
+  #sky { position: fixed; inset: 0; z-index: 0; background:
+      radial-gradient(ellipse at 80% 12%, rgba(255,231,160,0.18), transparent 35%),
+      radial-gradient(ellipse at 20% 90%, rgba(255,140,66,0.08), transparent 60%),
+      linear-gradient(180deg, #050817 0%, #0d1228 50%, #050817 100%);
+    pointer-events: none; }
+  #stars { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+  .star { position: absolute; width: 2px; height: 2px; background: var(--moon); border-radius: 50%; opacity: 0.7; animation: twinkle ease-in-out infinite; }
+  @keyframes twinkle { 0%,100% { opacity: 0.25; } 50% { opacity: 0.9; } }
+  #moon { position: fixed; top: 60px; right: 8vw; width: 80px; height: 80px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, var(--moon), #d4b56b 70%, #8a7240); box-shadow: 0 0 60px rgba(255,231,160,0.35), 0 0 120px rgba(255,231,160,0.2); z-index: 1; pointer-events: none; }
+  #leaves { position: fixed; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+  .leaf { position: absolute; font-size: 16px; opacity: 0; animation: fall linear infinite; color: var(--accent); }
+  @keyframes fall { 0% { transform: translateY(-10vh) translateX(0) rotate(0deg); opacity: 0; } 10% { opacity: 0.7; } 90% { opacity: 0.5; } 100% { transform: translateY(110vh) translateX(40px) rotate(360deg); opacity: 0; } }
+  #grain { position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: 0.05; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); mix-blend-mode: overlay; }
+
+  /* ── porch glow halo (set per scene via CSS var) ── */
+  #porchglow { position: fixed; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 110vw; height: 110vh; z-index: 1; pointer-events: none;
+    background: radial-gradient(ellipse at center, var(--scene-glow, rgba(255,140,66,0.08)) 0%, transparent 55%); transition: background 1.5s ease; }
+
+  /* ── stage ── */
+  #stage { position: relative; z-index: 3; max-width: 720px; width: 100%; padding: 30px 0 40px; }
+  .scene { display: none; animation: fadein 0.9s cubic-bezier(.2,.7,.2,1); }
+  .scene.active { display: block; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── title scene ── */
+  #scene-title { text-align: center; padding-top: 30px; }
+  .crown { font-size: 11px; letter-spacing: 6px; opacity: 0.6; text-transform: uppercase; font-family: 'Helvetica', sans-serif; color: var(--warm); }
+  h1 { font-style: italic; font-weight: normal; font-size: clamp(40px, 8vw, 72px); letter-spacing: 1px; line-height: 1.04; text-shadow: 0 4px 30px rgba(255,140,66,0.4); margin: 20px 0 14px; }
+  h1 span { color: var(--accent); }
+  .sub { font-size: 12px; letter-spacing: 5px; text-transform: uppercase; opacity: 0.7; font-family: 'Helvetica', sans-serif; color: var(--warm); margin-bottom: 38px; }
+  .opener { font-style: italic; font-size: 17px; line-height: 1.75; max-width: 560px; margin: 0 auto 36px; opacity: 0.88; }
+  .opener em { color: var(--accent); font-style: italic; }
+  .credit { font-size: 12px; letter-spacing: 2px; color: var(--dim); font-family: 'Helvetica', sans-serif; margin-top: 56px; }
+
+  /* ── scene cards ── */
+  .place { font-size: 11px; letter-spacing: 5px; text-transform: uppercase; opacity: 0.7; font-family: 'Helvetica', sans-serif; color: var(--warm); margin-bottom: 6px; }
+  .where { font-style: italic; font-size: 26px; line-height: 1.2; margin-bottom: 24px; color: var(--ink); }
+  .where small { display: block; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.55; margin-top: 6px; font-family: 'Helvetica', sans-serif; font-style: normal; color: var(--dim); }
+  .prose { font-size: 17px; line-height: 1.78; opacity: 0.92; margin-bottom: 24px; }
+  .prose p { margin-bottom: 14px; }
+  .prose em { color: var(--accent); font-style: italic; }
+  .prose .said { font-style: italic; opacity: 0.85; }
+  .prose .small { display: block; font-size: 14px; opacity: 0.65; margin-top: 8px; font-style: italic; }
+
+  /* ── choice buttons ── */
+  .choices { display: flex; flex-direction: column; gap: 12px; margin-top: 18px; }
+  .choice { position: relative; background: rgba(255,245,230,0.03); border: 1px solid var(--line); color: var(--ink); padding: 16px 20px; text-align: left; font-family: 'Georgia', serif; font-size: 16px; line-height: 1.5; cursor: pointer; border-radius: 3px; transition: all 0.25s; font-style: italic; }
+  .choice:hover, .choice:focus-visible { background: rgba(255,140,66,0.08); border-color: var(--accent); transform: translateX(4px); outline: none; }
+  .choice:active { transform: translateX(2px); }
+  .choice::before { content: '›'; color: var(--accent); margin-right: 12px; opacity: 0.7; transition: opacity 0.25s; }
+  .choice:hover::before { opacity: 1; }
+  .choice[data-locked]::before { content: '·'; color: var(--dim); }
+  .choice[data-locked] { opacity: 0.4; cursor: not-allowed; font-style: italic; }
+
+  /* ── interstitial (walk between porches) ── */
+  .walk { text-align: center; font-style: italic; font-size: 15px; opacity: 0.65; padding: 30px 0 10px; line-height: 1.75; }
+  .next { display: inline-block; margin-top: 24px; padding: 12px 26px; background: transparent; border: 1px solid var(--accent); color: var(--accent); font-family: 'Helvetica', sans-serif; font-size: 11px; letter-spacing: 4px; text-transform: uppercase; cursor: pointer; transition: all 0.25s; }
+  .next:hover, .next:focus-visible { background: var(--accent); color: var(--bg-a); box-shadow: 0 0 24px rgba(255,140,66,0.4); outline: none; }
+
+  /* ── ending ── */
+  #scene-ending .where { font-size: 32px; }
+  .ending { font-size: 17px; line-height: 1.85; opacity: 0.9; }
+  .ending p { margin-bottom: 18px; }
+  .stats { margin: 40px 0 20px; padding: 22px; border: 1px solid var(--line); border-radius: 3px; background: rgba(255,245,230,0.02); }
+  .stats h3 { font-style: italic; font-weight: normal; font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: var(--warm); margin-bottom: 14px; font-family: 'Helvetica', sans-serif; }
+  .stat-row { display: flex; justify-content: space-between; font-size: 14px; padding: 6px 0; border-bottom: 1px dotted var(--line); opacity: 0.85; }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .v { font-family: 'Helvetica', sans-serif; letter-spacing: 2px; color: var(--accent); }
+  .replay { margin-top: 32px; text-align: center; }
+  .replay button { background: transparent; border: 1px solid var(--line); color: var(--ink); padding: 12px 24px; font-family: 'Helvetica', sans-serif; font-size: 11px; letter-spacing: 4px; text-transform: uppercase; cursor: pointer; transition: all 0.25s; }
+  .replay button:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── donate ── */
+  #donate { position: fixed; bottom: max(16px, env(safe-area-inset-bottom)); right: max(16px, env(safe-area-inset-right)); z-index: 30; }
+  #donate a { display: inline-block; padding: 10px 18px; background: rgba(255,140,66,0.08); border: 1px solid var(--accent); color: var(--accent); text-decoration: none; font-family: 'Helvetica', sans-serif; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; font-weight: 600; transition: all 0.25s; backdrop-filter: blur(6px); }
+  #donate a:hover, #donate a:focus-visible { background: var(--accent); color: var(--bg-a); box-shadow: 0 0 30px var(--accent); outline: none; }
+
+  /* ── candy bag indicator ── */
+  #bag { position: fixed; top: max(16px, env(safe-area-inset-top)); left: max(16px, env(safe-area-inset-left)); z-index: 30; font-family: 'Helvetica', sans-serif; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.7; padding: 8px 12px; border: 1px solid var(--line); background: rgba(5,8,23,0.7); backdrop-filter: blur(6px); }
+  #bag .amt { color: var(--accent); margin-left: 6px; }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 38px; }
+    .where { font-size: 22px; }
+    .prose { font-size: 16px; }
+    .choice { font-size: 15px; padding: 14px 16px; }
+    #moon { width: 56px; height: 56px; top: 40px; right: 6vw; }
+    #donate a { padding: 8px 14px; font-size: 10px; }
+    #bag { font-size: 10px; padding: 6px 10px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .scene, .leaf, .star { animation: none !important; }
+  }
+</style>
+</head>
+<body>
+<div id="sky"></div>
+<div id="stars"></div>
+<div id="moon"></div>
+<div id="leaves"></div>
+<div id="porchglow"></div>
+<div id="grain"></div>
+
+<div id="bag" style="display: none;">PILLOWCASE<span class="amt" id="bag-amt">○○○○○○</span></div>
+
+<div id="stage">
+
+  <!-- ─────────── TITLE ─────────── -->
+  <div class="scene active" id="scene-title">
+    <div class="crown">— OMENLY ARCADE —</div>
+    <h1>Porch<span>light</span></h1>
+    <div class="sub">— ONE HALLOWEEN. SIX DOORS —</div>
+    <div class="opener">
+      The street is the wrong kind of quiet for a Tuesday.
+      <br><br>
+      Down at the cul-de-sac, somebody's porch is still playing the same album they were playing at five o'clock — the orange-cover Carpenters, <em>Top of the World</em> looping from a single open window. The Andersons. Their daughter went to college in Tampa and the house still listens to her playlist out of habit.
+      <br><br>
+      Your pillowcase is two-thirds full. Snickers, Reese's, three Whoppers, one apple from the Vermillions which you'll throw out when nobody's looking. The pumpkin you've been carrying since the first porch is almost out of candle.
+      <br><br>
+      <em>Five porches left on your loop. Then home. Then bed. Then this might be the year you stopped.</em>
+    </div>
+    <button class="next" id="start">— Step off the curb —</button>
+    <div data-omenly-ad style="margin-top: 50px; max-width: 600px; margin-left: auto; margin-right: auto;"></div>
+    <p class="credit">A short story in six knocks. ~15 minutes. Choices matter, a little.</p>
+  </div>
+
+  <!-- ─────────── WALK 1 ─────────── -->
+  <div class="scene" id="scene-walk1">
+    <div class="walk">
+      You cross the street at the diagonal, like a kid who's been doing this loop since you were five.<br>
+      A jack-o-lantern on the Petersons' porch has collapsed into itself. The smell is sweet and slightly burnt.<br><br>
+      <em>Up ahead: the Gordons.</em>
+    </div>
+    <div style="text-align: center; margin-top: 30px;"><button class="next" data-go="scene-gordons-arrive">→</button></div>
+  </div>
+
+  <!-- ─────────── PORCH 1 · THE GORDONS ─────────── -->
+  <div class="scene" id="scene-gordons-arrive">
+    <div class="place">— PORCH ONE —</div>
+    <div class="where">The Gordons<small>4408 Linden Court</small></div>
+    <div class="prose">
+      <p>The Gordons go big every year. The lawn is a graveyard. There's a fog machine pouring milk-thick air into a Tupperware bin of dry ice. An animatronic Frankenstein lurches every six seconds whether you trip the sensor or not — the sensor's been broken since 2019 — and Mr. Gordon, dressed as a vampire in a Members Only jacket, sits at a card table with a metal tray and a smile that's working too hard.</p>
+      <p><span class="said">"Last loop?"</span> he says. <span class="said">"I figured. You're up late for a Tuesday."</span></p>
+      <p>The tray has Snickers, Twix, Reese's, full-size. Two of each left. He has been giving these away since 5:30 and he has, you suspect, been waiting for you.</p>
+    </div>
+    <div class="choices">
+      <button class="choice" data-go="scene-gordons-after" data-kind="1" data-bag="1">Take one. Thank him by name.</button>
+      <button class="choice" data-go="scene-gordons-after" data-taken="1" data-bag="3">Take one of each. The tray's almost empty.</button>
+      <button class="choice" data-go="scene-gordons-after" data-kind="1" data-bag="1">Take a Snickers. Save the rest for the smaller kids still out.</button>
+    </div>
+  </div>
+  <div class="scene" id="scene-gordons-after">
+    <div class="prose">
+      <p>He watches you walk off. You can feel it on the back of your neck the way you feel a dog watch you out a window.</p>
+      <p>The Frankenstein goes off again, six seconds on the dot, into the empty yard.</p>
+      <p class="small">You wonder, briefly, how many candy bars are left now.</p>
+    </div>
+    <div style="text-align: center; margin-top: 20px;"><button class="next" data-go="scene-walk2">— keep walking —</button></div>
+  </div>
+
+  <!-- ─────────── WALK 2 ─────────── -->
+  <div class="scene" id="scene-walk2">
+    <div class="walk">
+      Past the Petersons. Past the house where the new family hasn't been here long enough to decorate. Past the cottonwood that drops its leaves all at once around the end of October — half of them are on the sidewalk and they crackle like newspaper.<br><br>
+      <em>The next porch has its light on but the door doesn't.</em>
+    </div>
+    <div style="text-align: center; margin-top: 30px;"><button class="next" data-go="scene-bowl-arrive">→</button></div>
+  </div>
+
+  <!-- ─────────── PORCH 2 · THE HONOR BOWL ─────────── -->
+  <div class="scene" id="scene-bowl-arrive">
+    <div class="place">— PORCH TWO —</div>
+    <div class="where">Take One<small>4422 Linden Court · light on, door closed</small></div>
+    <div class="prose">
+      <p>A folding chair holds down a plastic skull bowl. <em>TAKE ONE</em> in a Sharpie hand on a square of cardboard, the lettering of an adult who pretends to be bad at lettering. Four mini Hershey's left. A flat seven-pack of Smarties balanced on top, which somebody else clearly brought to <em>share into</em> rather than take from. The wreath on the door is woven corn husks.</p>
+      <p>The porch light has the slight buzz of a bulb thinking about going. Nobody is watching.</p>
+      <p>Inside, very faintly, a kitchen radio. A laugh, far off, like from another room of the house.</p>
+    </div>
+    <div class="choices">
+      <button class="choice" data-go="scene-bowl-after" data-honest="1" data-bag="1">Take one Hershey's. Walk on.</button>
+      <button class="choice" data-go="scene-bowl-after" data-taken="1" data-bag="2">Take two. You walked all the way up here.</button>
+      <button class="choice" data-go="scene-bowl-after" data-taken="3" data-bag="4">Tip the whole bowl into your pillowcase.</button>
+      <button class="choice" data-go="scene-bowl-after" data-kind="2" data-bag="-1">Leave a Snickers from your own bag in the bowl.</button>
+    </div>
+  </div>
+  <div class="scene" id="scene-bowl-after">
+    <div class="prose" id="bowl-after-prose">
+      <p>You back down the steps quietly, like you might if there was a baby asleep upstairs.</p>
+      <p>At the bottom of the walk you look back. The bowl is the way you left it. The porch light still buzzes. The wind moves the corn husks on the wreath and one leaf comes loose.</p>
+    </div>
+    <div style="text-align: center; margin-top: 20px;"><button class="next" data-go="scene-walk3">— keep walking —</button></div>
+  </div>
+
+  <!-- ─────────── WALK 3 ─────────── -->
+  <div class="scene" id="scene-walk3">
+    <div class="walk">
+      Two more streetlights. The Carpenters are still going somewhere behind you. You realize you've been hearing them this whole time and only just noticed again — that loop of <em>Top of the World</em>, looping, looping.<br><br>
+      <em>You stop in front of a house you've stopped in front of every Halloween of your life.</em>
+    </div>
+    <div style="text-align: center; margin-top: 30px;"><button class="next" data-go="scene-russ-arrive">→</button></div>
+  </div>
+
+  <!-- ─────────── PORCH 3 · THE SCREEN DOOR ─────────── -->
+  <div class="scene" id="scene-russ-arrive">
+    <div class="place">— PORCH THREE —</div>
+    <div class="where">The Screen Door<small>4509 Linden Court · the Ferguson house</small></div>
+    <div class="prose">
+      <p>The bell doesn't work. It hasn't worked in seven years. You knock on the screen door and the screen rattles against the frame in the way it always has.</p>
+      <p>From inside: the sound of slippers. The slow kind. The inside door opens first, the screen second, and a small old man stands there in the gold light of the entryway in a brown cardigan.</p>
+      <p><span class="said">"Halloween,"</span> he says. Not as a question.</p>
+      <p><span class="said">"Yes sir."</span></p>
+      <p>He looks at your costume — a 1990s detective, beige overcoat, a thrift-store tie, a fake fedora that's a little too big. He takes that in like it's an answer to a different question. Then he says, <span class="said">"Wait there."</span></p>
+      <p>You wait. The entryway smells like cinnamon and old paper.</p>
+      <p>He comes back with a wax-paper bag. Homemade caramels. The kind nobody's allowed to take anymore.</p>
+    </div>
+    <div class="choices">
+      <button class="choice" data-go="scene-russ-mid" data-kind="1" data-bag="1">Thank him. Eat one in front of him so he knows you trust him.</button>
+      <button class="choice" data-go="scene-russ-mid" data-taken="1" data-bag="1">Thank him warmly. (You'll throw the bag out at home — your mom's rule.)</button>
+      <button class="choice" data-go="scene-russ-mid-refuse">Tell him your mom said no homemade. Politely refuse.</button>
+      <button class="choice" data-go="scene-russ-name" data-kind="2" data-bag="1">Stay. Ask his name.</button>
+    </div>
+  </div>
+  <div class="scene" id="scene-russ-mid">
+    <div class="prose">
+      <p>He nods once. He shuts the screen door first, the inside door second. Through the curtain you see him stop in the hallway, hand on the wall, like he forgot where he was going.</p>
+      <p>The porch is suddenly very dark.</p>
+    </div>
+    <div style="text-align: center; margin-top: 20px;"><button class="next" data-go="scene-walk4">— keep walking —</button></div>
+  </div>
+  <div class="scene" id="scene-russ-mid-refuse">
+    <div class="prose">
+      <p>You tell him about your mom. About the rule. About how it's not personal.</p>
+      <p>He nods once. He understands. He understood, you suspect, before you finished the first sentence.</p>
+      <p><span class="said">"Smart mother,"</span> he says. <span class="said">"You go on now."</span></p>
+      <p>He shuts the screen door first, the inside door second. Through the curtain you see him still standing in the hallway after the doors are closed, the wax-paper bag in his hand, looking at it.</p>
+    </div>
+    <div style="text-align: center; margin-top: 20px;"><button class="next" data-go="scene-walk4">— keep walking —</button></div>
+  </div>
+  <div class="scene" id="scene-russ-name">
+    <div class="prose">
+      <p><span class="said">"What's your name?"</span> you ask, on the porch, because you don't know why but it feels wrong to leave without asking.</p>
+      <p>He looks at you for a long second.</p>
+      <p><span class="said">"Russ,"</span> he says. <span class="said">"Russ Ferguson. My wife used to make these. She'd've been ninety-two next month."</span></p>
+      <p>The caramels in the bag are still warm.</p>
+      <p>He doesn't say anything else for a moment. Then: <span class="said">"You're a good kid. Go on. The little ones will be in bed soon. You should be too."</span></p>
+      <p>He shuts the screen door, gently. Then the inside door. The porch light goes out a moment later. You stand there with a wax-paper bag of caramels you have decided, on the way down the steps, that you are going to eat.</p>
+    </div>
+    <div style="text-align: center; margin-top: 20px;"><button class="next" data-go="scene-walk4">— keep walking —</button></div>
+  </div>
+
+  <!-- ─────────── WALK 4 ─────────── -->
+  <div class="scene" id="scene-walk4">
+    <div class="walk">
+      The wind shifts. It's colder now. You can see your breath, just barely, when you walk under the streetlight by the stop sign.<br><br>
+      <em>The next house should have its porch on. It doesn't.</em>
+    </div>
+    <div style="text-align: center; margin-top: 30px;"><button class="next" data-go="scene-dark-arrive">→</button></div>
+  </div>
+
+  <!-- ─────────── PORCH 4 · THE DARK HOUSE ─────────── -->
+  <div class="scene" id="scene-dark-arrive">
+    <div class="place">— PORCH FOUR —</div>
+    <div class="where">No Pumpkin<small>4517 Linden Court · the Kowalski house</small></div>
+    <div class="prose">
+      <p>No pumpkin. No light. No bowl. But somebody opened the gate this morning — the chain is on the <em>inside</em> of the fence, lying in the leaves.</p>
+      <p>You know this house. Mrs. Kowalski. Polish flag in the window for as long as you've been a kid. She always did peanut M&Ms and a riddle.</p>
+      <p>The flag isn't in the window.</p>
+      <p>You think about last week, when there was an ambulance two streets over and you didn't think to ask whose. You think about it for a long moment, on the dark walkway, with your half-full pillowcase getting heavier.</p>
+    </div>
+    <div class="choices">
+      <button class="choice" data-go="scene-dark-knock" data-kind="1">Knock anyway.</button>
+      <button class="choice" data-go="scene-dark-leave" data-kind="2" data-bag="-1">Leave a Reese's on the welcome mat.</button>
+      <button class="choice" data-go="scene-dark-past">Walk past. Don't look at the windows.</button>
+    </div>
+  </div>
+  <div class="scene" id="scene-dark-knock">
+    <div class="prose">
+      <p>You knock. Three times, like a polite kid.</p>
+      <p>Nothing. Not the kind of nothing where someone might be home. The other kind. You stand on the porch for an extra second because it feels wrong to leave too fast. The wind moves the leaves on the mat. There's a faint outline on the wood where the welcome mat used to be lined up straight and isn't anymore.</p>
+      <p>You go back down the steps slowly. At the bottom you stop and look up at the front window — out of habit, expecting to be waved at — and there isn't anyone there. There isn't anyone there in a way that feels permanent.</p>
+    </div>
+    <div style="text-align: center; margin-top: 20px;"><button class="next" data-go="scene-walk5">— keep walking —</button></div>
+  </div>
+  <div class="scene" id="scene-dark-leave">
+    <div class="prose">
+      <p>You unwrap a Reese's from your bag — no, you put it down still wrapped, that's right — and set it on the welcome mat, off to the side where it won't get stepped on.</p>
+      <p>You're not sure why. She's not coming back tonight. She might not be coming back at all. But you do it anyway, and on the way down the steps you find you're walking slower, the way you walk leaving a church.</p>
+    </div>
+    <div style="text-align: center; margin-top: 20px;"><button class="next" data-go="scene-walk5">— keep walking —</button></div>
+  </div>
+  <div class="scene" id="scene-dark-past">
+    <div class="prose">
+      <p>You keep your eyes on the sidewalk and walk past it like you would a stranger making a phone call. You feel the windows on your shoulders even so. You don't turn your head.</p>
+      <p>At the property line you allow yourself one quick look back. The flag is not in the window. The porch is dark. The leaves on the walk are exactly the way they were.</p>
+      <p class="small">You will think about this porch later, in bed, and you will not be sure why.</p>
+    </div>
+    <div style="text-align: center; margin-top: 20px;"><button class="next" data-go="scene-walk5">— keep walking —</button></div>
+  </div>
+
+  <!-- ─────────── WALK 5 ─────────── -->
+  <div class="scene" id="scene-walk5">
+    <div class="walk">
+      You turn the corner. The Murthys' is on the next block, and even from here you can see their fog machine going. It throws a halo of low cloud across the lawn that the streetlight pushes through in yellow shafts.<br><br>
+      <em>Up the Murthys' driveway, another trick-or-treater is walking. They're wearing exactly your costume.</em>
+    </div>
+    <div style="text-align: center; margin-top: 30px;"><button class="next" data-go="scene-twin-arrive">→</button></div>
+  </div>
+
+  <!-- ─────────── PORCH 5 · THE OTHER DETECTIVE ─────────── -->
+  <div class="scene" id="scene-twin-arrive">
+    <div class="place">— PORCH FIVE —</div>
+    <div class="where">The Other Detective<small>4601 Linden Court · the Murthys</small></div>
+    <div class="prose">
+      <p>Tan coat. Thrift-store tie. Fake fedora a little too big. They've even got the plastic badge from the same Spirit aisle you got yours from.</p>
+      <p>You both stop walking. The Murthys' fog machine wheezes between you. For a second the only sound is the dry-ice hiss and the song that's still going somewhere far behind you — <em>Top of the World</em> — and the moment is so long it gets its own weather.</p>
+      <p><span class="said">"Hey,"</span> the other detective says, in a voice that's a little too old for the costume.</p>
+    </div>
+    <div class="choices">
+      <button class="choice" data-go="scene-twin-friend" data-kind="2">"Hey. Solid look. You went with the L.A. Confidential angle too?"</button>
+      <button class="choice" data-go="scene-twin-pass">Nod once. Walk past them without speaking.</button>
+      <button class="choice" data-go="scene-twin-race" data-raced="1">"Race you to the door."</button>
+    </div>
+  </div>
+  <div class="scene" id="scene-twin-friend">
+    <div class="prose">
+      <p>They laugh — a startled, grateful laugh, like they hadn't been sure how this was going to go.</p>
+      <p><span class="said">"My dad's idea,"</span> they say. <span class="said">"He's a cop. Was a cop. Whatever."</span></p>
+      <p>You walk up the driveway together. Mrs. Murthy opens the door already laughing. <span class="said">"Oh my GOD,"</span> she says, <span class="said">"the boys from</span> <em>L.A. Confidential</em><span class="said">. Vikram come look at this."</span></p>
+      <p>You both get a full-size Twix. The other detective fist-bumps you at the bottom of the steps and goes the other way down the cul-de-sac, the way you'd send a colleague off after a long shift.</p>
+      <p class="small">You will not see them again on this street. You will think about them every Halloween for ten years.</p>
+    </div>
+    <div style="text-align: center; margin-top: 20px;"><button class="next" data-go="scene-walk6" data-bag="1">— keep walking —</button></div>
+  </div>
+  <div class="scene" id="scene-twin-pass">
+    <div class="prose">
+      <p>You nod, the way an adult nods at another adult on a hiking trail. You walk past them. You feel them not say anything back.</p>
+      <p>Mrs. Murthy gives you a Twix, smaller than the one she'd give the kid behind you, you can already tell. <span class="said">"That's a nice costume, honey,"</span> she says, and she means it, but her eyes are already on the porch behind you, on the other coat coming up the driveway.</p>
+      <p class="small">You think about turning back, just to say something. You don't.</p>
+    </div>
+    <div style="text-align: center; margin-top: 20px;"><button class="next" data-go="scene-walk6" data-bag="1">— keep walking —</button></div>
+  </div>
+  <div class="scene" id="scene-twin-race">
+    <div class="prose">
+      <p>You take off. So do they. The fog parts in the shape of two coats running. You get to the porch first because you knew the loose flagstone was there and they didn't — your elbow catches them in the ribs on the second step and you both laugh in the surprised way that has hurt in it.</p>
+      <p>Mrs. Murthy gives you both Twix. The same size. She does not laugh.</p>
+      <p>The other detective doesn't fist-bump you at the bottom of the steps. They walk off down the cul-de-sac the other way, more slowly than they were walking before.</p>
+    </div>
+    <div style="text-align: center; margin-top: 20px;"><button class="next" data-go="scene-walk6" data-bag="1">— keep walking —</button></div>
+  </div>
+
+  <!-- ─────────── WALK 6 ─────────── -->
+  <div class="scene" id="scene-walk6">
+    <div class="walk">
+      The block ends at a stop sign and your house is the second on the right. The porch light is on. Your mom's pumpkin in the window is a tilted-triangle smile, candle still going.<br><br>
+      <em>You are almost home.</em>
+    </div>
+    <div style="text-align: center; margin-top: 30px;"><button class="next" data-go="scene-home-arrive">→</button></div>
+  </div>
+
+  <!-- ─────────── PORCH 6 · HOME ─────────── -->
+  <div class="scene" id="scene-home-arrive">
+    <div class="place">— PORCH SIX —</div>
+    <div class="where">Home<small>4622 Linden Court · your own porch</small></div>
+    <div class="prose">
+      <p>The lights are on. The pumpkin in the window your mom carved is a tilted triangle smile, candle still going. On your porch she's set out a folding chair, a wicker bowl, and a sign on copy paper in her handwriting:</p>
+      <p style="text-align: center; font-family: 'Helvetica', sans-serif; font-style: normal; letter-spacing: 2px; padding: 14px; border: 1px dashed var(--line); margin: 18px 0;">KIDS ONLY · TAKE TWO<br><span style="opacity: 0.7; font-size: 13px;">we're still up if you need a bandaid</span></p>
+      <p>The bowl has been picked clean. Two Almond Joys and a roll of Smarties at the bottom. Behind the door you can hear the TV — something with a laugh track.</p>
+      <p>Your sister is eight. She has had a fever since Friday. She has been the inside of the house all night with your mom while you walked.</p>
+    </div>
+    <div class="choices">
+      <button class="choice" data-go="scene-ending" data-kind="2">Take nothing. The bowl's for whoever's still out.</button>
+      <button class="choice" data-go="scene-ending" data-kind="1" data-bag="1">Take an Almond Joy. The Smarties are for your sister.</button>
+      <button class="choice" data-go="scene-ending" data-taken="2" data-bag="2">Take everything. You're a kid too, technically.</button>
+      <button class="choice" data-go="scene-ending" data-kind="3" data-bag="-3" id="refill-choice">Empty half your bag back into the bowl for the next kid.</button>
+    </div>
+  </div>
+
+  <!-- ─────────── ENDING ─────────── -->
+  <div class="scene" id="scene-ending">
+    <div class="place">— END OF NIGHT —</div>
+    <div class="where" id="ending-title">The Last Halloween</div>
+    <div class="ending" id="ending-prose"></div>
+
+    <div class="stats">
+      <h3>What you carried home</h3>
+      <div class="stat-row"><span>candy</span><span class="v" id="stat-bag">○</span></div>
+      <div class="stat-row"><span>kindnesses</span><span class="v" id="stat-kind">○</span></div>
+      <div class="stat-row"><span>honest takes</span><span class="v" id="stat-honest">○</span></div>
+      <div class="stat-row"><span>extra takes</span><span class="v" id="stat-taken">○</span></div>
+      <div class="stat-row"><span>did you race?</span><span class="v" id="stat-raced">no</span></div>
+    </div>
+
+    <div class="ending" style="margin-top: 30px; opacity: 0.7; font-size: 15px; text-align: center; font-style: italic;">
+      Thanks for walking the loop. If <em>Porchlight</em> stayed with you, the support button is in the corner. The honor system is in the bottom right. You know the drill.
+    </div>
+
+    <div class="replay">
+      <button onclick="location.reload()">— Walk the loop again —</button>
+    </div>
+  </div>
+
+</div>
+
+<div id="donate">
+  <a href="https://www.paypal.me/vikas117/3" target="_blank" rel="noopener" data-omenly-cta>SUPPORT THE NIGHT</a>
+</div>
+
+<script>
+(() => {
+  // ── atmosphere: stars + leaves ──
+  (function stars() {
+    const box = document.getElementById('stars');
+    for (let i = 0; i < 60; i++) {
+      const s = document.createElement('div');
+      s.className = 'star';
+      s.style.left = (Math.random() * 100) + '%';
+      s.style.top = (Math.random() * 70) + '%';
+      s.style.animationDuration = (2 + Math.random() * 4) + 's';
+      s.style.animationDelay = (-Math.random() * 5) + 's';
+      box.appendChild(s);
+    }
+  })();
+  (function leaves() {
+    const box = document.getElementById('leaves');
+    const glyphs = ['❦', '✦', '·', '◦'];
+    for (let i = 0; i < 14; i++) {
+      const l = document.createElement('div');
+      l.className = 'leaf';
+      l.textContent = glyphs[Math.floor(Math.random() * glyphs.length)];
+      l.style.left = (Math.random() * 100) + '%';
+      l.style.fontSize = (10 + Math.random() * 14) + 'px';
+      l.style.animationDuration = (12 + Math.random() * 16) + 's';
+      l.style.animationDelay = (-Math.random() * 20) + 's';
+      box.appendChild(l);
+    }
+  })();
+
+  // ── state ──
+  const state = { kind: 0, honest: 0, taken: 0, raced: 0, bag: 6 };
+  const bagEl = document.getElementById('bag');
+  const bagAmt = document.getElementById('bag-amt');
+  function pip(n) {
+    n = Math.max(0, Math.min(14, n));
+    return '●'.repeat(Math.min(n, 10)) + (n > 10 ? '+' : '');
+  }
+  function refreshBag() {
+    bagAmt.textContent = pip(state.bag);
+  }
+  refreshBag();
+
+  // ── scene routing ──
+  const stage = document.getElementById('stage');
+  const sceneGlow = document.getElementById('porchglow');
+
+  // per-scene atmospheric glow
+  const glowMap = {
+    'scene-title': 'rgba(255,140,66,0.08)',
+    'scene-gordons-arrive': 'rgba(255,140,66,0.16)',
+    'scene-bowl-arrive': 'rgba(255,176,92,0.12)',
+    'scene-russ-arrive': 'rgba(255,176,92,0.18)',
+    'scene-russ-name': 'rgba(255,176,92,0.2)',
+    'scene-dark-arrive': 'rgba(13,18,40,0.5)',
+    'scene-dark-knock': 'rgba(13,18,40,0.6)',
+    'scene-dark-leave': 'rgba(255,140,66,0.05)',
+    'scene-dark-past': 'rgba(13,18,40,0.5)',
+    'scene-twin-arrive': 'rgba(255,140,66,0.1)',
+    'scene-home-arrive': 'rgba(255,231,160,0.2)',
+    'scene-ending': 'rgba(255,231,160,0.14)'
+  };
+
+  function go(id) {
+    const cur = document.querySelector('.scene.active');
+    if (cur) cur.classList.remove('active');
+    const next = document.getElementById(id);
+    if (!next) return;
+    next.classList.add('active');
+    if (glowMap[id]) sceneGlow.style.setProperty('--scene-glow', glowMap[id]);
+    if (id !== 'scene-title') bagEl.style.display = 'block';
+    if (id === 'scene-ending') renderEnding();
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+
+  function apply(btn) {
+    const k = +btn.dataset.kind || 0;
+    const h = +btn.dataset.honest || 0;
+    const t = +btn.dataset.taken || 0;
+    const r = +btn.dataset.raced || 0;
+    const b = +btn.dataset.bag || 0;
+    state.kind += k; state.honest += h; state.taken += t; state.raced += r;
+    state.bag = Math.max(0, state.bag + b);
+    refreshBag();
+  }
+
+  // start button
+  document.getElementById('start').addEventListener('click', () => {
+    bagEl.style.display = 'block';
+    go('scene-walk1');
+  });
+
+  // generic [data-go] navigation
+  stage.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-go]');
+    if (!btn) return;
+    apply(btn);
+    go(btn.dataset.go);
+  });
+
+  // ── refill choice gate (need extra candy) ──
+  const refill = document.getElementById('refill-choice');
+  refill.addEventListener('mouseenter', () => {
+    if (state.bag < 4) refill.dataset.locked = '1';
+  });
+  // also check on every render of home scene
+  const origGo = go;
+  function checkRefill() {
+    if (state.bag < 4) refill.setAttribute('data-locked', '1');
+    else refill.removeAttribute('data-locked');
+  }
+  // wire check when home appears
+  new MutationObserver(() => {
+    if (document.getElementById('scene-home-arrive').classList.contains('active')) checkRefill();
+  }).observe(stage, { attributes: true, subtree: true, attributeFilter: ['class'] });
+  refill.addEventListener('click', (e) => {
+    if (refill.hasAttribute('data-locked')) e.stopImmediatePropagation();
+  }, true);
+
+  // ── ending render ──
+  function renderEnding() {
+    const k = state.kind, t = state.taken, h = state.honest, r = state.raced;
+    let endingTitle = 'The Last Halloween';
+    let prose = '';
+
+    if (k >= 6) {
+      endingTitle = 'The Kind One';
+      prose = `
+        <p>You go inside. The TV is doing something with a laugh track that you can't tell apart from your sister laughing. She is on the couch in a blanket with your mom and a mug of something steaming and a cardboard pumpkin on her head, because she is eight and she committed.</p>
+        <p>You upend your pillowcase onto the coffee table. You let her pick first. She picks a Twix without looking and you let her, because of course she does. The Smarties roll across the table and she catches it before it falls. Your mom looks at you over her glasses and doesn't say anything because she doesn't have to.</p>
+        <p>Later you find the wax paper bag of Russ Ferguson's caramels at the bottom of your pillowcase. You eat one in the kitchen. It's the best thing you've eaten all year. You tell yourself you'll bring his porch a card next week. You will, actually. You won't forget. (You almost will. But you won't.)</p>
+        <p>You go to bed before midnight. The pumpkin in the window burns out around one. Somewhere, faintly, the Carpenters are still going. <em>I'm on the top of the world looking down on creation.</em></p>
+        <p class="small">Goodnight, kid.</p>`;
+    } else if (t >= 4) {
+      endingTitle = 'The Crooked One';
+      prose = `
+        <p>You go inside. The TV is doing something with a laugh track. Your sister is on the couch in a blanket. She asks what you brought back, and you say <em>not much, the loop was light this year</em>, and you set the pillowcase down where she can't see how full it is.</p>
+        <p>Later, in your room with the door closed, you sort. It's a haul. The Hershey bowl alone was four. You arrange the wrappers by color on your bedspread and the colors are the colors of a porch you don't want to think about.</p>
+        <p>The wax paper bag of Russ Ferguson's caramels is at the bottom. You almost throw it out. You don't. You put it in your sock drawer and you don't take a caramel from it that night or the night after. It will sit there for nine months. You will find it in July and it will smell like cinnamon and old paper and you will sit on the floor of your room and not be able to explain to yourself why you cry.</p>
+        <p>Outside, the pumpkin in the window burns out around one. Somewhere, the Carpenters are still going. The bowl on the porch down the street, the one with TAKE ONE in Sharpie on cardboard, is empty when its owner comes out to bring it in at midnight. They will assume kids.</p>
+        <p class="small">Goodnight.</p>`;
+    } else if (h >= 1 && t <= 1 && k <= 3) {
+      endingTitle = 'The Honest One';
+      prose = `
+        <p>You go inside. You took what you were offered and nothing else. Your pillowcase is exactly as heavy as it should be — light enough that your mom raises an eyebrow when you come in.</p>
+        <p><span class="said">"Light loop?"</span> she says.</p>
+        <p><span class="said">"Honest loop,"</span> you say, and you don't know why you say it that way, but it's the truest thing you'll say all week.</p>
+        <p>Your sister picks first because she's eight and because she's sick. You let her have anything she wants. You eat a Reese's. You eat a Twix. You eat a caramel from the wax-paper bag of an old man whose name you may or may not have asked, and you taste cinnamon and old paper and you decide it is the best caramel you have ever eaten because it was given to you by a person whose name was a thing you could have known.</p>
+        <p>You go to bed. The pumpkin burns out around one. The Carpenters loop. You sleep clean.</p>
+        <p class="small">Goodnight.</p>`;
+    } else {
+      endingTitle = 'The Last Halloween';
+      prose = `
+        <p>You go inside. Your sister is on the couch in a blanket. Your mom is making something on the stove that smells like cider. The TV is doing something with a laugh track and the house is warm in the way only an October house is warm — too warm by half a degree, because the heat just kicked on for the first time this year.</p>
+        <p>You set the pillowcase down. You take off the fedora. You take off the coat. You sit on the floor by the couch and put your head on the cushion next to your sister's elbow and she pats your hair with the small hand of an eight-year-old in a cardboard pumpkin hat.</p>
+        <p>Tomorrow is school. Next year — you don't know about next year. Maybe you'll walk the loop with her, when she's well enough. Maybe you won't walk it at all. Maybe by then the Andersons will have stopped looping the orange-cover Carpenters out of habit. Maybe Russ Ferguson's porch light won't come on. Maybe Mrs. Kowalski's flag will be back in the window or maybe it won't.</p>
+        <p>Tonight, though — tonight the pumpkin is still going. The candle is fine. The street is the wrong kind of quiet for a Tuesday but you are inside it now, and inside is a different country.</p>
+        <p class="small">Goodnight, kid.</p>`;
+    }
+
+    document.getElementById('ending-title').textContent = endingTitle;
+    document.getElementById('ending-prose').innerHTML = prose;
+    document.getElementById('stat-bag').textContent = pip(state.bag);
+    document.getElementById('stat-kind').textContent = pip(state.kind);
+    document.getElementById('stat-honest').textContent = pip(state.honest);
+    document.getElementById('stat-taken').textContent = pip(state.taken);
+    document.getElementById('stat-raced').textContent = state.raced ? 'yes' : 'no';
+  }
+})();
+</script>
+</body>
+</html>

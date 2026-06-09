@@ -1,0 +1,42 @@
+{
+  "title": "OMENLY",
+  "tagline": "A small arcade. Made by hand. Play in a browser.",
+  "games": [
+    {
+      "id": "velvet-hour",
+      "title": "Last Call at the Velvet Hour",
+      "blurb": "Three strangers. One closing queer bar. One night left. An interactive story with twelve endings.",
+      "tags": ["narrative", "queer", "story", "18+"],
+      "minutes": 30,
+      "accent": "#ff5fa2",
+      "background": "linear-gradient(135deg, #1a0826, #2b0a3d)",
+      "cover": "velvet-hour/cover.svg",
+      "href": "velvet-hour/",
+      "controls": "touch / mouse"
+    },
+    {
+      "id": "echo",
+      "title": "ECHO",
+      "blurb": "You cannot see. Click to listen. A sonar survival game in pitch dark.",
+      "tags": ["arcade", "survival", "sonar"],
+      "minutes": 5,
+      "accent": "#7fffd4",
+      "background": "linear-gradient(135deg, #001a1f, #002233)",
+      "cover": "echo/cover.svg",
+      "href": "echo/",
+      "controls": "joystick + ping (mobile) / WASD + click (desktop)"
+    },
+    {
+      "id": "porchlight",
+      "title": "Porchlight",
+      "blurb": "One Halloween. Six porches. A small American street, a half-full pillowcase, and a few small choices that stay with you.",
+      "tags": ["narrative", "halloween", "americana", "cozy"],
+      "minutes": 15,
+      "accent": "#ff8c42",
+      "background": "linear-gradient(135deg, #050817, #1a0e22)",
+      "cover": "porchlight/cover.svg",
+      "href": "porchlight/",
+      "controls": "click / tap"
+    }
+  ]
+}

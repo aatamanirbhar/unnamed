@@ -1,0 +1,38 @@
+ECHO — Upload to itch.io
+========================
+
+1. Zip the folder:
+   - Right-click "echo" folder → Send to → Compressed (zipped) folder
+   - Must contain index.html at the ROOT of the zip (not inside a subfolder)
+
+2. Go to https://itch.io/game/new
+
+3. Fill in:
+   - Title: ECHO
+   - Project URL: echo (or whatever)
+   - Short description: A sonar survival game. You cannot see. Click to listen.
+   - Kind of project: HTML
+   - Upload your zip → check "This file will be played in the browser"
+   - Viewport dimensions: leave blank, or set 1280x720 / "fullscreen"
+   - Embed options: check "Fullscreen button" and "Mobile friendly"
+
+4. Genre: Adventure / Action
+   Tags: atmospheric, dark, exploration, minimalist, procedural-generation,
+         singleplayer, sonar, top-down
+
+5. Pricing: "No payment" (the in-game donate button handles tipping)
+
+6. Visibility: Draft first → playtest in the itch.io player → then Public
+
+The PayPal donate button inside the game points to:
+   https://www.paypal.me/vikas117
+
+A reality check:
+- itch.io has ~hundreds of new games per day. Getting noticed needs a good cover
+  image, a 15-second gif preview, and posting it places people will see it
+  (r/WebGames, r/incremental_games, r/IndieDev, Twitter/Bluesky, TikTok clips).
+- A polished free game with a donate button averages a few dollars unless it
+  goes viral. Anything more requires marketing, not just code.
+- The mechanic here (sonar/echolocation) is genuinely uncommon, which gives it
+  a real shot at being shared. Make a 10-second clip of a ping revealing an
+  enemy right next to the player — that's your hook.

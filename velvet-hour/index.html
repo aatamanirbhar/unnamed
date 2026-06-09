@@ -1,0 +1,2056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Last Call at the Velvet Hour</title>
+<link rel="stylesheet" href="omenly.css">
+<script>
+  window.OMENLY_CONFIG = {
+    game: 'velvet-hour',
+    gameTitle: 'Last Call at the Velvet Hour',
+    price: 3,
+    isHub: false,
+    donateUrl: 'https://www.paypal.me/vikas117/3',
+    allAccessDonateUrl: 'https://www.paypal.me/vikas117/10',
+    theme: { accent: '#ff5fa2' }
+    // After AdSense approval, add:
+    // , adsense: { client: 'ca-pub-XXXXXXXXXXXXXXXX', slot: 'XXXXXXXXXX' }
+  };
+</script>
+<script src="omenly.js" defer></script>
+<script defer src="/_vercel/insights/script.js"></script>
+<style>
+  :root {
+    --bg-a: #1a0826;
+    --bg-b: #2b0a3d;
+    --accent: #ff5fa2;
+    --warm: #ffd166;
+    --soft: #f4e9cd;
+    --ink: #f8eef2;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; min-height: 100vh; overflow-x: hidden; background: #0a0410; font-family: 'Georgia', 'Times New Roman', serif; color: var(--ink); user-select: none; -webkit-tap-highlight-color: transparent; }
+  body { display: flex; align-items: center; justify-content: center; padding: 20px; padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left)); }
+  #bg { position: fixed; inset: 0; z-index: 0; transition: background 2s ease; background: linear-gradient(135deg, var(--bg-a), var(--bg-b)); }
+  #bg::after { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 30% 20%, rgba(255,95,162,0.18), transparent 60%), radial-gradient(ellipse at 70% 80%, rgba(255,209,102,0.10), transparent 60%); pointer-events: none; }
+  #grain { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.07; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.9'/></svg>"); mix-blend-mode: overlay; }
+  #stage { position: relative; z-index: 2; width: 100%; max-width: 720px; padding: 32px; }
+  .scene { display: none; }
+  .scene.active { display: block; animation: fadein 0.7s ease; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  h1 { font-family: 'Georgia', serif; font-style: italic; font-weight: normal; font-size: 56px; letter-spacing: 1px; line-height: 1.1; text-align: center; margin-bottom: 12px; text-shadow: 0 2px 30px rgba(255,95,162,0.5); }
+  h1 span { color: var(--accent); }
+  .sub { text-align: center; font-style: italic; opacity: 0.7; margin-bottom: 50px; font-size: 16px; letter-spacing: 2px; }
+  .speaker { font-size: 13px; letter-spacing: 5px; text-transform: uppercase; opacity: 0.55; margin-bottom: 14px; font-family: 'Helvetica', sans-serif; font-weight: 600; }
+  .speaker.river { color: var(--accent); }
+  .speaker.sam { color: #b5b8ff; }
+  .speaker.iris { color: #c9b8ff; }
+  .speaker.you { color: var(--warm); }
+  .speaker.narrator { color: rgba(255,255,255,0.5); }
+  .dialog { font-size: 19px; line-height: 1.65; margin-bottom: 36px; min-height: 100px; font-style: italic; }
+  .dialog .em { font-style: normal; color: var(--soft); }
+  .choices { display: flex; flex-direction: column; gap: 12px; margin-top: 28px; }
+  .choice { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.15); color: var(--ink); padding: 16px 22px; font-family: 'Georgia', serif; font-style: italic; font-size: 17px; cursor: pointer; text-align: left; transition: all 0.25s; backdrop-filter: blur(4px); }
+  .choice { min-height: 56px; -webkit-touch-callout: none; touch-action: manipulation; }
+  .choice:hover, .choice:focus-visible { background: rgba(255,95,162,0.12); border-color: var(--accent); transform: translateX(6px); box-shadow: -4px 0 0 var(--accent); outline: none; }
+  .choice:active { background: rgba(255,95,162,0.22); transform: translateX(8px) scale(0.99); }
+  .choice .tag { display: inline-block; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; padding: 3px 8px; margin-right: 12px; border: 1px solid rgba(255,255,255,0.25); border-radius: 2px; opacity: 0.7; font-style: normal; font-family: 'Helvetica', sans-serif; vertical-align: middle; }
+  .choice.flirty .tag { color: var(--accent); border-color: var(--accent); }
+  .choice.warm .tag { color: var(--warm); border-color: var(--warm); }
+  .choice.curious .tag { color: #b5b8ff; border-color: #b5b8ff; }
+  .next { margin-top: 20px; text-align: center; opacity: 0.5; font-size: 12px; letter-spacing: 4px; text-transform: uppercase; cursor: pointer; transition: opacity 0.3s; font-family: 'Helvetica', sans-serif; }
+  .next:hover { opacity: 1; color: var(--accent); }
+  .characters { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; margin-top: 40px; }
+  .char-card { flex: 1; min-width: 180px; max-width: 200px; padding: 24px 18px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); cursor: pointer; transition: all 0.3s; text-align: center; }
+  .char-card:hover { background: rgba(255,255,255,0.08); transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 12px 40px rgba(255,95,162,0.25); }
+  .char-orb { width: 70px; height: 70px; margin: 0 auto 16px; border-radius: 50%; box-shadow: 0 0 30px currentColor; animation: float 4s ease-in-out infinite; }
+  .char-orb.river { background: radial-gradient(circle at 30% 30%, #ff8fc6, #ff4d9d 60%, #c91a6e); color: #ff5fa2; }
+  .char-orb.sam { background: radial-gradient(circle at 30% 30%, #a3a5ff, #5e60ce 60%, #2e2c8d); color: #5e60ce; animation-delay: -1.3s; }
+  .char-orb.iris { background: radial-gradient(circle at 30% 30%, #d4c5f9, #9b87cf 60%, #5e4b8b); color: #b39ddb; animation-delay: -2.6s; }
+  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  .char-name { font-style: italic; font-size: 20px; margin-bottom: 4px; }
+  .char-pron { font-size: 11px; letter-spacing: 2px; opacity: 0.6; margin-bottom: 12px; text-transform: uppercase; font-family: 'Helvetica', sans-serif; }
+  .char-hint { font-size: 13px; opacity: 0.7; font-style: italic; line-height: 1.4; }
+  .vibe-orb { position: absolute; top: 24px; right: 24px; width: 50px; height: 50px; border-radius: 50%; box-shadow: 0 0 25px currentColor; opacity: 0.7; }
+  .vibe-orb.river { background: radial-gradient(circle at 30% 30%, #ff8fc6, #ff4d9d 60%, #c91a6e); color: #ff5fa2; }
+  .vibe-orb.sam { background: radial-gradient(circle at 30% 30%, #a3a5ff, #5e60ce 60%, #2e2c8d); color: #5e60ce; }
+  .vibe-orb.iris { background: radial-gradient(circle at 30% 30%, #d4c5f9, #9b87cf 60%, #5e4b8b); color: #b39ddb; }
+  #donate { position: fixed; bottom: 16px; right: 16px; z-index: 30; }
+  #donate a { display: inline-block; padding: 10px 18px; background: rgba(255,95,162,0.08); border: 1px solid var(--accent); color: var(--accent); text-decoration: none; font-family: 'Helvetica', sans-serif; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; font-weight: 600; transition: all 0.25s; }
+  #donate a:hover { background: var(--accent); color: #fff; box-shadow: 0 0 30px var(--accent); }
+  #audio-toggle { position: fixed; bottom: 16px; left: 16px; z-index: 30; background: transparent; border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.7); padding: 8px 14px; font-family: 'Helvetica', sans-serif; font-size: 11px; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; }
+  #audio-toggle:hover { color: var(--ink); border-color: var(--ink); }
+  .ending h2 { font-style: italic; font-size: 36px; margin-bottom: 24px; color: var(--warm); text-align: center; }
+  .credit { margin-top: 50px; text-align: center; font-size: 13px; opacity: 0.5; font-style: italic; line-height: 1.7; }
+  .credit p { margin-bottom: 8px; }
+  .restart { display: inline-block; margin-top: 28px; padding: 12px 24px; background: transparent; border: 1px solid var(--warm); color: var(--warm); cursor: pointer; font-family: 'Helvetica', sans-serif; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; transition: all 0.25s; }
+  .restart:hover { background: var(--warm); color: #0a0410; }
+  .progress { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); font-size: 10px; letter-spacing: 4px; opacity: 0.4; text-transform: uppercase; font-family: 'Helvetica', sans-serif; }
+
+  /* Scene illustrations */
+  .illus { position: relative; width: 100%; max-width: 520px; margin: 0 auto 28px; aspect-ratio: 16/9; border-radius: 4px; overflow: hidden; box-shadow: 0 12px 50px rgba(0,0,0,0.55), 0 0 60px rgba(255,95,162,0.18); border: 1px solid rgba(255,255,255,0.08); animation: illusin 1.1s ease; }
+  .illus svg { display: block; width: 100%; height: 100%; }
+  @keyframes illusin { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+
+  /* Character portraits inside cards */
+  .char-portrait { width: 110px; height: 130px; margin: -4px auto 14px; display: block; filter: drop-shadow(0 6px 18px rgba(255,95,162,0.35)); animation: float 4s ease-in-out infinite; }
+  .char-portrait.sam { animation-delay: -1.3s; filter: drop-shadow(0 6px 18px rgba(125,128,255,0.4)); }
+  .char-portrait.iris { animation-delay: -2.6s; filter: drop-shadow(0 6px 18px rgba(179,157,219,0.4)); }
+
+  /* Atmospheric overlays */
+  #disco { position: fixed; top: -120px; left: 50%; transform: translateX(-50%); width: 80px; height: 80px; z-index: 1; pointer-events: none; opacity: 0; transition: opacity 1.5s, top 1.5s; }
+  #disco.on { opacity: 0.8; top: -10px; }
+  #disco .ball { width: 100%; height: 100%; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff, #d9d9e8 40%, #6a6a7a 80%); box-shadow: 0 0 40px rgba(255,255,255,0.4), inset -10px -10px 25px rgba(0,0,0,0.5); animation: spin 8s linear infinite; position: relative; }
+  #disco .ball::before, #disco .ball::after { content: ''; position: absolute; inset: 4px; border-radius: 50%; background-image: linear-gradient(45deg, transparent 45%, rgba(255,255,255,0.4) 50%, transparent 55%), linear-gradient(-45deg, transparent 45%, rgba(255,95,162,0.3) 50%, transparent 55%); background-size: 12px 12px; mix-blend-mode: screen; }
+  #disco .ball::after { background-size: 20px 20px; opacity: 0.6; }
+  #disco .cable { position: absolute; bottom: 100%; left: 50%; width: 1px; height: 80px; background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.3)); }
+  @keyframes spin { from { filter: hue-rotate(0deg); } to { filter: hue-rotate(360deg); } }
+
+  /* Drifting bokeh particles */
+  #bokeh { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+  .bk { position: absolute; border-radius: 50%; filter: blur(1px); opacity: 0.6; animation: drift linear infinite; }
+  @keyframes drift {
+    0% { transform: translateY(110vh) translateX(0); opacity: 0; }
+    10% { opacity: 0.7; }
+    90% { opacity: 0.5; }
+    100% { transform: translateY(-10vh) translateX(40px); opacity: 0; }
+  }
+
+  /* Rain overlay (iris bookstore moments) */
+  #rain { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0; transition: opacity 1.5s; overflow: hidden; }
+  #rain.on { opacity: 0.55; }
+  .drop { position: absolute; top: -10vh; width: 1px; height: 60px; background: linear-gradient(to bottom, transparent, rgba(200,210,240,0.6)); animation: fall linear infinite; }
+  @keyframes fall { to { transform: translateY(120vh); } }
+
+  /* Stage spotlight (river performance) */
+  #spotlight { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0; transition: opacity 2s; background: radial-gradient(ellipse 600px 400px at 50% 30%, rgba(255,209,102,0.18), transparent 70%); }
+  #spotlight.on { opacity: 1; animation: pulse 5s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity: 0.9; } 50% { opacity: 1; } }
+
+  /* Choice tags get a subtle pulse on the highest-warmth option */
+  .choice.flirty { position: relative; }
+  .choice.flirty::after { content: ''; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); opacity: 0.6; animation: pulse-dot 2s ease-in-out infinite; }
+  @keyframes pulse-dot { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+  /* Warmth meter — tiny visual indicator of how the night is going */
+  #meter { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 30; display: flex; gap: 4px; opacity: 0; transition: opacity 0.6s; }
+  #meter.on { opacity: 0.9; }
+  #meter .pip { width: 18px; height: 3px; background: rgba(255,255,255,0.15); border-radius: 1px; transition: background 0.4s, box-shadow 0.4s; }
+  #meter .pip.lit { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 38px; }
+    .dialog { font-size: 17px; }
+    .choice { font-size: 15px; padding: 14px 16px; min-height: 60px; }
+    #stage { padding: 16px; padding-bottom: 96px; }
+    .illus { margin-bottom: 22px; }
+    .char-portrait { width: 90px; height: 110px; }
+    .characters { gap: 12px; }
+    .char-card { min-width: 0; flex: 1 1 100%; max-width: none; }
+    #disco { width: 60px; height: 60px; }
+    #disco.on { top: -16px; }
+    #audio-toggle, #donate a { padding: 10px 14px; font-size: 10px; letter-spacing: 2px; }
+    .vibe-orb { width: 36px; height: 36px; top: 12px; right: 12px; }
+    #meter { bottom: 64px; }
+    .next { padding: 14px 0; }
+  }
+  @media (hover: none) {
+    .choice:hover { transform: none; box-shadow: none; background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.15); }
+    .char-card:hover { transform: none; background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.12); box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<div id="grain"></div>
+<div id="bokeh"></div>
+<div id="disco"><div class="cable"></div><div class="ball"></div></div>
+<div id="spotlight"></div>
+<div id="rain"></div>
+<div id="meter"><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div></div>
+
+<div id="stage">
+  <!-- Title scene -->
+  <div class="scene active" id="scene-title">
+    <h1>Last Call at the <span>Velvet Hour</span></h1>
+    <p class="sub">— THREE STRANGERS. ONE BAR. ONE NIGHT LEFT —</p>
+    <div id="title-illus" class="illus"></div>
+    <div class="dialog" style="text-align: center; font-size: 18px; max-width: 560px; margin: 0 auto 30px;">
+      <span class="em">The Velvet Hour</span> — the only queer bar your hometown ever had — closes for good tomorrow morning. You weren't going to come. Then you were.
+      <br><br>
+      The door is warm wood. The bass inside is muffled but alive. You push it open.
+    </div>
+    <div class="next" id="to-arrival">— STEP INSIDE —</div>
+    <div data-omenly-ad style="margin-top: 40px; max-width: 600px; margin-left: auto; margin-right: auto;"></div>
+    <p class="credit" style="margin-top: 40px;">
+      <span style="opacity: 0.7;">An interactive story.<br>Three routes. ~30 minutes each. Twelve endings.<br>Mature themes, tasteful intimacy. 18+.</span>
+    </p>
+  </div>
+
+  <!-- Arrival scene -->
+  <div class="scene" id="scene-arrival">
+    <div class="speaker narrator">VELVET HOUR — 11:47 PM</div>
+    <div id="arrival-illus" class="illus"></div>
+    <div class="dialog">
+      The room is gold-lit and small. A disco ball turns slow. Two-thirds full — friends in clusters, a couple in a corner booth holding hands like they invented it.
+      <br><br>
+      Three people don't quite belong to a group. They each catch your eye for different reasons.
+      <br><br>
+      <span class="em">Who do you walk over to?</span>
+    </div>
+    <div class="characters">
+      <div class="char-card" data-go="river_1">
+        <div class="char-portrait river" id="port-river"></div>
+        <div class="char-name">River</div>
+        <div class="char-pron">SHE / HER (TONIGHT)</div>
+        <div class="char-hint">"Mid-set on the stage. Sequins, sharp wit, and a tiredness around the eyes you only see if you're looking."</div>
+      </div>
+      <div class="char-card" data-go="sam_1">
+        <div class="char-portrait sam" id="port-sam"></div>
+        <div class="char-name">Sam</div>
+        <div class="char-pron">THEY / THEM</div>
+        <div class="char-hint">"Booth in the back. Tuning a battered guitar. They keep almost starting to play and stopping."</div>
+      </div>
+      <div class="char-card" data-go="iris_1">
+        <div class="char-portrait iris" id="port-iris"></div>
+        <div class="char-name">Iris</div>
+        <div class="char-pron">SHE / HER</div>
+        <div class="char-hint">"At the bar alone with a paperback. The drink in front of her hasn't moved in an hour."</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button id="audio-toggle">♪ AMBIENT: OFF</button>
+<div id="donate">
+  <a href="https://www.paypal.me/vikas117/3" target="_blank" rel="noopener" data-omenly-cta>SUPPORT THE STORY</a>
+</div>
+
+<script>
+(() => {
+  const stage = document.getElementById('stage');
+  const bg = document.getElementById('bg');
+  const disco = document.getElementById('disco');
+  const spotlight = document.getElementById('spotlight');
+  const rainEl = document.getElementById('rain');
+  const meter = document.getElementById('meter');
+  let warmth = 0;
+  let route = null;
+  const MAX_WARMTH = 25;
+
+  // Build drifting bokeh particles (once)
+  (function buildBokeh() {
+    const box = document.getElementById('bokeh');
+    const colors = ['rgba(255,95,162,0.5)', 'rgba(255,209,102,0.4)', 'rgba(179,157,219,0.45)', 'rgba(255,255,255,0.35)'];
+    for (let i = 0; i < 28; i++) {
+      const b = document.createElement('div');
+      b.className = 'bk';
+      const size = 3 + Math.random() * 7;
+      b.style.width = size + 'px';
+      b.style.height = size + 'px';
+      b.style.left = (Math.random() * 100) + '%';
+      b.style.background = colors[Math.floor(Math.random() * colors.length)];
+      b.style.animationDuration = (14 + Math.random() * 22) + 's';
+      b.style.animationDelay = (-Math.random() * 30) + 's';
+      box.appendChild(b);
+    }
+  })();
+
+  // Build raindrops (once, hidden by default)
+  (function buildRain() {
+    for (let i = 0; i < 80; i++) {
+      const d = document.createElement('div');
+      d.className = 'drop';
+      d.style.left = (Math.random() * 100) + '%';
+      d.style.animationDuration = (0.6 + Math.random() * 0.9) + 's';
+      d.style.animationDelay = (-Math.random() * 2) + 's';
+      d.style.opacity = 0.3 + Math.random() * 0.5;
+      rainEl.appendChild(d);
+    }
+  })();
+
+  function updateMeter() {
+    meter.classList.add('on');
+    const pips = meter.querySelectorAll('.pip');
+    const lit = Math.min(5, Math.round((warmth / MAX_WARMTH) * 5));
+    pips.forEach((p, i) => p.classList.toggle('lit', i < lit));
+  }
+
+  function setOverlays(scene) {
+    const flags = scene.fx || {};
+    disco.classList.toggle('on', !!flags.disco);
+    spotlight.classList.toggle('on', !!flags.spotlight);
+    rainEl.classList.toggle('on', !!flags.rain);
+  }
+
+  // Color themes per scene
+  const themes = {
+    title:    ['#1a0826', '#2b0a3d', '#ff5fa2'],
+    arrival:  ['#1a0826', '#2b0a3d', '#ff5fa2'],
+    river:    ['#3a0a2a', '#5e0a3d', '#ff5fa2'],
+    sam:      ['#0f1538', '#1e1a5c', '#7d80ff'],
+    iris:     ['#1e1238', '#3a2a5e', '#b39ddb'],
+    end_stay: ['#2a1a3a', '#4a2a55', '#ffb59a'],
+    end_go:   ['#1a1a30', '#2a2a4a', '#ffcfa0'],
+    dawn:     ['#2a1538', '#5a2a55', '#ffb59a']
+  };
+  function setTheme(name) {
+    const [a, b, accent] = themes[name] || themes.arrival;
+    bg.style.background = `linear-gradient(135deg, ${a}, ${b})`;
+    document.documentElement.style.setProperty('--accent', accent);
+  }
+
+  // Audio: gentle ambient drone
+  let audioCtx = null, ambientNodes = [], ambientOn = false;
+  function startAmbient() {
+    if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { return; } }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    if (ambientOn) return;
+    ambientOn = true;
+    const t = audioCtx.currentTime;
+    // soft pad: two detuned sines + sub
+    const master = audioCtx.createGain();
+    master.gain.setValueAtTime(0, t);
+    master.gain.linearRampToValueAtTime(0.08, t + 2.5);
+    master.connect(audioCtx.destination);
+
+    const freqs = [110, 164.81, 220, 246.94]; // A minor-ish
+    for (const f of freqs) {
+      const o = audioCtx.createOscillator();
+      o.type = 'sine';
+      o.frequency.value = f;
+      const g = audioCtx.createGain();
+      g.gain.value = 0.18;
+      // slow tremolo
+      const lfo = audioCtx.createOscillator();
+      lfo.frequency.value = 0.08 + Math.random() * 0.07;
+      const lfoGain = audioCtx.createGain();
+      lfoGain.gain.value = 0.05;
+      lfo.connect(lfoGain); lfoGain.connect(g.gain);
+      o.connect(g); g.connect(master);
+      o.start(t); lfo.start(t);
+      ambientNodes.push(o, lfo, g, lfoGain);
+    }
+    ambientNodes.push(master);
+    document.getElementById('audio-toggle').textContent = '♪ AMBIENT: ON';
+  }
+  function stopAmbient() {
+    if (!ambientOn || !audioCtx) return;
+    ambientOn = false;
+    const t = audioCtx.currentTime;
+    const master = ambientNodes[ambientNodes.length - 1];
+    if (master) master.gain.linearRampToValueAtTime(0, t + 1);
+    setTimeout(() => {
+      ambientNodes.forEach(n => { try { n.stop && n.stop(); n.disconnect && n.disconnect(); } catch(e){} });
+      ambientNodes = [];
+    }, 1200);
+    document.getElementById('audio-toggle').textContent = '♪ AMBIENT: OFF';
+  }
+  document.getElementById('audio-toggle').addEventListener('click', () => {
+    if (ambientOn) stopAmbient(); else startAmbient();
+  });
+
+  // ───────────────────────────────────────────────────────────────
+  //  SVG ILLUSTRATION LIBRARY
+  //  Stylized, atmospheric vector art for each scene + portraits.
+  //  Designed to feel like a hand-painted graphic novel panel.
+  // ───────────────────────────────────────────────────────────────
+  const art = {
+    // Reusable defs block
+    _defs: () => `
+      <defs>
+        <radialGradient id="g-pink" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ff8fc6"/><stop offset="100%" stop-color="#8a1a5a"/></radialGradient>
+        <radialGradient id="g-gold" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffe9a8"/><stop offset="100%" stop-color="#b88732"/></radialGradient>
+        <radialGradient id="g-purple" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#d4c5f9"/><stop offset="100%" stop-color="#5e4b8b"/></radialGradient>
+        <radialGradient id="g-blue" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#a3a5ff"/><stop offset="100%" stop-color="#2e2c8d"/></radialGradient>
+        <linearGradient id="sky-dusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1a0826"/><stop offset="100%" stop-color="#3a0a3d"/></linearGradient>
+        <linearGradient id="sky-dawn" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3a1538"/><stop offset="60%" stop-color="#ff8fa3"/><stop offset="100%" stop-color="#ffd166"/></linearGradient>
+        <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2a0a3a"/><stop offset="100%" stop-color="#0a0410"/></linearGradient>
+        <radialGradient id="lamp" cx="50%" cy="20%" r="60%"><stop offset="0%" stop-color="#ffd166" stop-opacity="0.9"/><stop offset="60%" stop-color="#ff8fc6" stop-opacity="0.3"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+        <filter id="soft"><feGaussianBlur stdDeviation="2"/></filter>
+        <filter id="glow"><feGaussianBlur stdDeviation="4"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>`,
+
+    // PORTRAITS for character cards (110×130)
+    portrait_river: () => `
+      <svg viewBox="0 0 110 130" xmlns="http://www.w3.org/2000/svg">
+        ${art._defs()}
+        <ellipse cx="55" cy="60" rx="50" ry="55" fill="url(#g-pink)" opacity="0.25"/>
+        <!-- hair big curls -->
+        <path d="M20 50 Q12 30 30 18 Q55 5 80 18 Q98 30 90 50 Q92 68 85 78 L80 70 Q78 55 70 50 Q55 48 40 50 Q32 55 30 70 L25 78 Q18 68 20 50 Z" fill="#3a0a2a"/>
+        <!-- face -->
+        <ellipse cx="55" cy="60" rx="22" ry="26" fill="#f4d4c0"/>
+        <!-- cheek blush -->
+        <ellipse cx="42" cy="68" rx="5" ry="3" fill="#ff5fa2" opacity="0.4"/>
+        <ellipse cx="68" cy="68" rx="5" ry="3" fill="#ff5fa2" opacity="0.4"/>
+        <!-- eyes with winged liner -->
+        <path d="M44 58 Q47 55 52 57 L50 60 Q47 61 44 60 Z" fill="#1a0826"/>
+        <path d="M58 57 Q63 55 66 58 L64 60 Q61 61 58 60 Z" fill="#1a0826"/>
+        <line x1="51" y1="56" x2="55" y2="54" stroke="#1a0826" stroke-width="1" stroke-linecap="round"/>
+        <line x1="65" y1="56" x2="69" y2="54" stroke="#1a0826" stroke-width="1" stroke-linecap="round"/>
+        <!-- red lips -->
+        <path d="M48 75 Q55 78 62 75 Q60 80 55 80 Q50 80 48 75 Z" fill="#c91a3e"/>
+        <!-- earring -->
+        <circle cx="33" cy="68" r="2" fill="#ffd166"/>
+        <!-- sequins on collarbone -->
+        <circle cx="40" cy="98" r="1.5" fill="#ffd166" opacity="0.9"/>
+        <circle cx="48" cy="102" r="1" fill="#ff8fc6"/>
+        <circle cx="60" cy="100" r="1.5" fill="#fff"/>
+        <circle cx="68" cy="105" r="1" fill="#ffd166"/>
+        <!-- shoulders -->
+        <path d="M15 130 Q20 100 40 92 Q55 90 70 92 Q90 100 95 130 Z" fill="#c91a3e"/>
+      </svg>`,
+    portrait_sam: () => `
+      <svg viewBox="0 0 110 130" xmlns="http://www.w3.org/2000/svg">
+        ${art._defs()}
+        <ellipse cx="55" cy="60" rx="50" ry="55" fill="url(#g-blue)" opacity="0.25"/>
+        <!-- penny-colored undercut hair, half grown out -->
+        <path d="M30 30 Q28 22 38 18 Q55 12 72 18 Q82 22 80 32 Q82 45 78 55 L72 50 Q70 40 65 38 L60 36 Q55 36 50 38 L45 40 Q40 45 38 55 L32 55 Q28 45 30 30 Z" fill="#b6541d"/>
+        <!-- face -->
+        <ellipse cx="55" cy="60" rx="20" ry="24" fill="#e8d0b8"/>
+        <!-- soft brows -->
+        <path d="M44 54 Q48 52 52 54" stroke="#6a3318" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        <path d="M58 54 Q62 52 66 54" stroke="#6a3318" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        <!-- eyes (looking down/aside) -->
+        <ellipse cx="48" cy="59" rx="2" ry="1.5" fill="#3a2a1a"/>
+        <ellipse cx="62" cy="59" rx="2" ry="1.5" fill="#3a2a1a"/>
+        <!-- small mouth -->
+        <path d="M50 72 Q55 74 60 72" stroke="#a05540" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        <!-- big flannel collar -->
+        <path d="M10 130 Q20 95 40 90 L48 100 L55 92 L62 100 L70 90 Q90 95 100 130 Z" fill="#7a3a3a"/>
+        <line x1="20" y1="105" x2="95" y2="115" stroke="#3a1a1a" stroke-width="0.6" opacity="0.6"/>
+        <line x1="20" y1="118" x2="95" y2="125" stroke="#3a1a1a" stroke-width="0.6" opacity="0.6"/>
+        <line x1="40" y1="92" x2="45" y2="128" stroke="#3a1a1a" stroke-width="0.6" opacity="0.6"/>
+        <line x1="70" y1="92" x2="65" y2="128" stroke="#3a1a1a" stroke-width="0.6" opacity="0.6"/>
+      </svg>`,
+    portrait_iris: () => `
+      <svg viewBox="0 0 110 130" xmlns="http://www.w3.org/2000/svg">
+        ${art._defs()}
+        <ellipse cx="55" cy="60" rx="50" ry="55" fill="url(#g-purple)" opacity="0.25"/>
+        <!-- long loose hair -->
+        <path d="M25 50 Q20 25 40 18 Q55 14 70 18 Q90 25 85 50 Q90 80 88 110 L78 105 Q80 75 75 55 Q70 50 65 50 L55 52 L45 50 Q40 50 35 55 Q30 75 32 105 L22 110 Q20 80 25 50 Z" fill="#5e4b8b"/>
+        <!-- face -->
+        <ellipse cx="55" cy="60" rx="20" ry="25" fill="#f0d4c0"/>
+        <!-- soft brows -->
+        <path d="M44 54 Q48 53 52 55" stroke="#3a2855" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+        <path d="M58 55 Q62 53 66 54" stroke="#3a2855" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+        <!-- gentle eyes (downcast, reading) -->
+        <path d="M44 60 Q48 62 52 60" stroke="#1a0826" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+        <path d="M58 60 Q62 62 66 60" stroke="#1a0826" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+        <!-- small lips -->
+        <path d="M50 73 Q55 75 60 73" stroke="#b04060" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        <!-- long cardigan -->
+        <path d="M15 130 Q22 100 38 92 L42 130 Z" fill="#9b87cf"/>
+        <path d="M95 130 Q88 100 72 92 L68 130 Z" fill="#9b87cf"/>
+        <!-- dress under -->
+        <path d="M42 130 Q40 105 45 95 L55 92 L65 95 Q70 105 68 130 Z" fill="#c9b8e8"/>
+        <!-- book in hand -->
+        <rect x="42" y="110" width="26" height="16" rx="1" fill="#3a2855"/>
+        <rect x="44" y="112" width="22" height="12" fill="#5e4b8b"/>
+      </svg>`,
+
+    // ─── SCENE ILLUSTRATIONS (520×293 / 16:9 panels) ───
+
+    // The exterior door — title scene
+    door: () => `
+      <svg viewBox="0 0 520 293" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+        ${art._defs()}
+        <rect width="520" height="293" fill="#0a0410"/>
+        <!-- night sky gradient -->
+        <rect width="520" height="180" fill="url(#sky-dusk)"/>
+        <!-- street -->
+        <rect y="240" width="520" height="53" fill="#1a0a20"/>
+        <!-- distant building silhouettes -->
+        <rect x="0" y="120" width="120" height="120" fill="#1a0a20"/>
+        <rect x="400" y="100" width="120" height="140" fill="#1a0a20"/>
+        <!-- little lit windows -->
+        <rect x="20" y="150" width="6" height="8" fill="#ffd166" opacity="0.6"/>
+        <rect x="40" y="170" width="6" height="8" fill="#ffd166" opacity="0.4"/>
+        <rect x="430" y="140" width="6" height="8" fill="#ffd166" opacity="0.5"/>
+        <rect x="450" y="170" width="6" height="8" fill="#ffd166" opacity="0.6"/>
+        <rect x="490" y="190" width="6" height="8" fill="#ffd166" opacity="0.4"/>
+        <!-- bar facade -->
+        <rect x="130" y="100" width="260" height="140" fill="#2a0a30"/>
+        <rect x="130" y="100" width="260" height="6" fill="#3a1538"/>
+        <!-- neon glow halo -->
+        <ellipse cx="260" cy="135" rx="180" ry="50" fill="#ff5fa2" opacity="0.18" filter="url(#glow)"/>
+        <!-- neon sign -->
+        <text x="260" y="140" font-family="Georgia, serif" font-style="italic" font-size="28" letter-spacing="3" text-anchor="middle" fill="#ff5fa2" filter="url(#glow)">Velvet Hour</text>
+        <text x="260" y="140" font-family="Georgia, serif" font-style="italic" font-size="28" letter-spacing="3" text-anchor="middle" fill="#ffb4d6" opacity="0.9">Velvet Hour</text>
+        <!-- warm wood door -->
+        <rect x="220" y="160" width="80" height="80" fill="#6a3318" stroke="#3a1a08" stroke-width="2"/>
+        <rect x="220" y="160" width="80" height="80" fill="url(#lamp)" opacity="0.4"/>
+        <!-- door panels -->
+        <rect x="228" y="170" width="28" height="30" fill="none" stroke="#3a1a08" stroke-width="1"/>
+        <rect x="264" y="170" width="28" height="30" fill="none" stroke="#3a1a08" stroke-width="1"/>
+        <rect x="228" y="205" width="28" height="30" fill="none" stroke="#3a1a08" stroke-width="1"/>
+        <rect x="264" y="205" width="28" height="30" fill="none" stroke="#3a1a08" stroke-width="1"/>
+        <!-- knob -->
+        <circle cx="290" cy="205" r="2" fill="#ffd166"/>
+        <!-- light spill from below door -->
+        <rect x="220" y="238" width="80" height="3" fill="#ffd166" opacity="0.7" filter="url(#soft)"/>
+        <!-- subtle pavement reflection -->
+        <ellipse cx="260" cy="270" rx="120" ry="6" fill="#ff5fa2" opacity="0.15" filter="url(#soft)"/>
+      </svg>`,
+
+    // Bar interior — arrival
+    bar_interior: () => `
+      <svg viewBox="0 0 520 293" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+        ${art._defs()}
+        <rect width="520" height="293" fill="url(#sky-dusk)"/>
+        <!-- floor -->
+        <rect y="220" width="520" height="73" fill="url(#floor)"/>
+        <!-- back wall haze -->
+        <rect width="520" height="220" fill="url(#lamp)" opacity="0.3"/>
+        <!-- disco ball -->
+        <circle cx="260" cy="50" r="22" fill="#d9d9e8"/>
+        <circle cx="260" cy="50" r="22" fill="url(#g-pink)" opacity="0.4"/>
+        <g opacity="0.5">
+          <line x1="240" y1="50" x2="280" y2="50" stroke="#1a0826" stroke-width="0.5"/>
+          <line x1="260" y1="28" x2="260" y2="72" stroke="#1a0826" stroke-width="0.5"/>
+          <ellipse cx="260" cy="50" rx="22" ry="6" fill="none" stroke="#1a0826" stroke-width="0.4"/>
+          <ellipse cx="260" cy="50" rx="6" ry="22" fill="none" stroke="#1a0826" stroke-width="0.4"/>
+        </g>
+        <line x1="260" y1="0" x2="260" y2="28" stroke="#fff" stroke-width="0.5" opacity="0.3"/>
+        <!-- light rays from disco -->
+        <g opacity="0.3">
+          <line x1="260" y1="50" x2="60" y2="200" stroke="#ff5fa2" stroke-width="1"/>
+          <line x1="260" y1="50" x2="460" y2="200" stroke="#ffd166" stroke-width="1"/>
+          <line x1="260" y1="50" x2="120" y2="240" stroke="#fff" stroke-width="1"/>
+          <line x1="260" y1="50" x2="400" y2="240" stroke="#ff5fa2" stroke-width="1"/>
+        </g>
+        <!-- bar counter -->
+        <rect x="40" y="200" width="440" height="40" fill="#3a1a08"/>
+        <rect x="40" y="200" width="440" height="4" fill="#6a3318"/>
+        <!-- bottles back-bar -->
+        <g transform="translate(40,150)">
+          <rect x="20" y="0" width="8" height="50" fill="#ff5fa2" opacity="0.6"/>
+          <rect x="38" y="-6" width="8" height="56" fill="#ffd166" opacity="0.6"/>
+          <rect x="58" y="-2" width="8" height="52" fill="#b39ddb" opacity="0.6"/>
+          <rect x="80" y="0" width="8" height="50" fill="#5e60ce" opacity="0.6"/>
+          <rect x="100" y="-4" width="8" height="54" fill="#ffd166" opacity="0.6"/>
+          <rect x="380" y="0" width="8" height="50" fill="#ff5fa2" opacity="0.6"/>
+          <rect x="398" y="-6" width="8" height="56" fill="#ffd166" opacity="0.6"/>
+          <rect x="418" y="0" width="8" height="50" fill="#b39ddb" opacity="0.6"/>
+        </g>
+        <!-- silhouettes of crowd -->
+        <ellipse cx="160" cy="200" rx="14" ry="20" fill="#1a0826" opacity="0.8"/>
+        <ellipse cx="160" cy="178" rx="6" ry="6" fill="#1a0826" opacity="0.8"/>
+        <ellipse cx="200" cy="200" rx="14" ry="20" fill="#1a0826" opacity="0.7"/>
+        <ellipse cx="200" cy="178" rx="6" ry="6" fill="#1a0826" opacity="0.7"/>
+        <ellipse cx="340" cy="200" rx="14" ry="20" fill="#1a0826" opacity="0.7"/>
+        <ellipse cx="340" cy="178" rx="6" ry="6" fill="#1a0826" opacity="0.7"/>
+        <ellipse cx="380" cy="200" rx="14" ry="20" fill="#1a0826" opacity="0.8"/>
+        <ellipse cx="380" cy="178" rx="6" ry="6" fill="#1a0826" opacity="0.8"/>
+        <!-- stage left -->
+        <rect x="20" y="180" width="80" height="20" fill="#2a0a3a"/>
+        <!-- booth right (sam) -->
+        <rect x="430" y="170" width="70" height="50" fill="#3a1a3a"/>
+        <!-- bar stool (iris) -->
+        <rect x="250" y="200" width="3" height="40" fill="#3a1a08"/>
+        <circle cx="252" cy="200" r="6" fill="#6a3318"/>
+      </svg>`,
+
+    // Stage with River performing
+    stage_river: () => `
+      <svg viewBox="0 0 520 293" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+        ${art._defs()}
+        <rect width="520" height="293" fill="#1a0612"/>
+        <!-- back curtain -->
+        <rect width="520" height="293" fill="#5a0a2e" opacity="0.6"/>
+        <g opacity="0.5">
+          <path d="M0 0 Q40 30 0 60 Q40 90 0 120 Q40 150 0 180 Q40 210 0 240 Q40 270 0 293" stroke="#3a0a1e" stroke-width="2" fill="none"/>
+          <path d="M40 0 Q80 30 40 60 Q80 90 40 120 Q80 150 40 180 Q80 210 40 240 Q80 270 40 293" stroke="#3a0a1e" stroke-width="2" fill="none"/>
+          <path d="M480 0 Q440 30 480 60 Q440 90 480 120 Q440 150 480 180 Q440 210 480 240 Q440 270 480 293" stroke="#3a0a1e" stroke-width="2" fill="none"/>
+          <path d="M520 0 Q480 30 520 60 Q480 90 520 120 Q480 150 520 180 Q480 210 520 240 Q480 270 520 293" stroke="#3a0a1e" stroke-width="2" fill="none"/>
+        </g>
+        <!-- spotlight -->
+        <ellipse cx="260" cy="60" rx="180" ry="120" fill="#ffd166" opacity="0.25" filter="url(#glow)"/>
+        <ellipse cx="260" cy="140" rx="100" ry="100" fill="#ffd166" opacity="0.15"/>
+        <!-- floor -->
+        <rect y="240" width="520" height="53" fill="#0a0410"/>
+        <!-- mic stand -->
+        <line x1="220" y1="200" x2="220" y2="240" stroke="#888" stroke-width="2"/>
+        <ellipse cx="220" cy="198" rx="6" ry="4" fill="#222"/>
+        <!-- River silhouette in red dress -->
+        <g transform="translate(260,90)">
+          <!-- big hair -->
+          <ellipse cx="0" cy="0" rx="22" ry="20" fill="#3a0a2a"/>
+          <path d="M-22 -5 Q-25 -25 0 -28 Q25 -25 22 -5 Q24 8 18 15 Q15 8 12 5 L0 4 L-12 5 Q-15 8 -18 15 Q-24 8 -22 -5 Z" fill="#3a0a2a"/>
+          <!-- face -->
+          <ellipse cx="0" cy="3" rx="14" ry="16" fill="#f4d4c0"/>
+          <!-- eyes -->
+          <path d="M-6 0 Q-3 -2 0 0" stroke="#1a0826" stroke-width="1.2" fill="none"/>
+          <path d="M0 0 Q3 -2 6 0" stroke="#1a0826" stroke-width="1.2" fill="none"/>
+          <!-- red lips -->
+          <path d="M-4 12 Q0 14 4 12 Q3 16 0 16 Q-3 16 -4 12 Z" fill="#c91a3e"/>
+          <!-- shoulders + red dress -->
+          <path d="M-25 20 Q-30 25 -28 60 L-40 150 Q0 170 40 150 L28 60 Q30 25 25 20 L18 25 Q0 22 -18 25 Z" fill="#c91a1e"/>
+          <!-- sequin sparkles -->
+          <circle cx="-15" cy="40" r="1" fill="#ffd166"/>
+          <circle cx="10" cy="50" r="1" fill="#fff"/>
+          <circle cx="-5" cy="70" r="1" fill="#ffd166"/>
+          <circle cx="18" cy="80" r="1" fill="#fff"/>
+          <circle cx="-20" cy="100" r="1" fill="#ffd166"/>
+          <circle cx="15" cy="110" r="1" fill="#ff8fc6"/>
+          <!-- mic in hand -->
+          <line x1="-22" y1="40" x2="-30" y2="38" stroke="#222" stroke-width="2"/>
+          <ellipse cx="-32" cy="37" rx="3" ry="2" fill="#222"/>
+        </g>
+        <!-- stage edge -->
+        <line x1="0" y1="240" x2="520" y2="240" stroke="#ff5fa2" stroke-width="1" opacity="0.5"/>
+      </svg>`,
+
+    // Dressing room — single bulb closet
+    dressing: () => `
+      <svg viewBox="0 0 520 293" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+        ${art._defs()}
+        <rect width="520" height="293" fill="#1a0612"/>
+        <!-- bulb halo -->
+        <ellipse cx="260" cy="80" rx="280" ry="180" fill="#ffd166" opacity="0.18" filter="url(#glow)"/>
+        <ellipse cx="260" cy="80" rx="140" ry="100" fill="#ffd166" opacity="0.18"/>
+        <!-- wall texture -->
+        <rect width="520" height="293" fill="#2a0a30" opacity="0.4"/>
+        <!-- mirror with vanity bulbs -->
+        <rect x="160" y="50" width="200" height="160" fill="#1a0826" stroke="#ffd166" stroke-width="1"/>
+        <g fill="#ffd166" filter="url(#soft)">
+          <circle cx="170" cy="50" r="4"/><circle cx="200" cy="50" r="4"/><circle cx="230" cy="50" r="4"/><circle cx="260" cy="50" r="4"/><circle cx="290" cy="50" r="4"/><circle cx="320" cy="50" r="4"/><circle cx="350" cy="50" r="4"/>
+          <circle cx="160" cy="80" r="4"/><circle cx="160" cy="110" r="4"/><circle cx="160" cy="140" r="4"/><circle cx="160" cy="170" r="4"/>
+          <circle cx="360" cy="80" r="4"/><circle cx="360" cy="110" r="4"/><circle cx="360" cy="140" r="4"/><circle cx="360" cy="170" r="4"/>
+        </g>
+        <!-- reflection of River head -->
+        <g transform="translate(260,130)" opacity="0.9">
+          <ellipse cx="0" cy="0" rx="28" ry="32" fill="#3a0a2a"/>
+          <ellipse cx="0" cy="5" rx="20" ry="22" fill="#f4d4c0"/>
+          <path d="M-8 2 Q-5 0 -2 2" stroke="#1a0826" stroke-width="1.4" fill="none"/>
+          <path d="M2 2 Q5 0 8 2" stroke="#1a0826" stroke-width="1.4" fill="none"/>
+          <path d="M-6 16 Q0 18 6 16 Q4 22 0 22 Q-4 22 -6 16 Z" fill="#c91a3e"/>
+          <!-- bare shoulder strap down -->
+          <path d="M-30 35 Q-25 28 -10 30 L-12 50 L-30 50 Z" fill="#c91a1e"/>
+          <path d="M30 35 Q25 28 10 30 L12 50 L30 50 Z" fill="#c91a1e"/>
+          <line x1="-18" y1="35" x2="-22" y2="50" stroke="#3a0a08" stroke-width="0.8"/>
+        </g>
+        <!-- dress rack on right -->
+        <line x1="430" y1="80" x2="510" y2="80" stroke="#888" stroke-width="2"/>
+        <path d="M440 80 L435 130 L455 130 Z" fill="#ff5fa2" opacity="0.6"/>
+        <path d="M465 80 L460 140 L490 140 Z" fill="#ffd166" opacity="0.6"/>
+        <path d="M495 80 L490 130 L510 130 Z" fill="#b39ddb" opacity="0.6"/>
+        <!-- lipstick on counter -->
+        <rect x="200" y="240" width="6" height="20" fill="#c91a3e"/>
+        <rect x="200" y="234" width="6" height="8" fill="#222"/>
+        <!-- lashes on tissue -->
+        <ellipse cx="240" cy="252" rx="14" ry="6" fill="#fff" opacity="0.2"/>
+        <path d="M230 250 Q240 245 250 250" stroke="#1a0826" stroke-width="1"/>
+        <!-- phone screen-down -->
+        <rect x="290" y="245" width="40" height="20" rx="3" fill="#1a0826" stroke="#888"/>
+      </svg>`,
+
+    // Sam in booth, guitar
+    booth_sam: () => `
+      <svg viewBox="0 0 520 293" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+        ${art._defs()}
+        <rect width="520" height="293" fill="#0f1538"/>
+        <!-- booth back -->
+        <rect x="80" y="40" width="360" height="180" rx="8" fill="#1e1a5c"/>
+        <!-- tufted button pattern -->
+        <g fill="#3a3a8a" opacity="0.5">
+          <circle cx="130" cy="80" r="2"/><circle cx="180" cy="80" r="2"/><circle cx="230" cy="80" r="2"/><circle cx="280" cy="80" r="2"/><circle cx="330" cy="80" r="2"/><circle cx="380" cy="80" r="2"/>
+          <circle cx="130" cy="130" r="2"/><circle cx="180" cy="130" r="2"/><circle cx="230" cy="130" r="2"/><circle cx="280" cy="130" r="2"/><circle cx="330" cy="130" r="2"/><circle cx="380" cy="130" r="2"/>
+          <circle cx="130" cy="180" r="2"/><circle cx="180" cy="180" r="2"/><circle cx="230" cy="180" r="2"/><circle cx="280" cy="180" r="2"/><circle cx="330" cy="180" r="2"/><circle cx="380" cy="180" r="2"/>
+        </g>
+        <!-- soft warm lamp glow -->
+        <ellipse cx="380" cy="50" rx="100" ry="60" fill="#ffd166" opacity="0.2" filter="url(#glow)"/>
+        <!-- table front -->
+        <rect x="20" y="230" width="480" height="63" fill="#3a1a3a"/>
+        <ellipse cx="260" cy="230" rx="240" ry="10" fill="#5a2a4a"/>
+        <!-- Sam silhouette cross-legged -->
+        <g transform="translate(260,180)">
+          <!-- legs crossed -->
+          <ellipse cx="0" cy="50" rx="80" ry="20" fill="#1a0826" opacity="0.5"/>
+          <!-- body -->
+          <path d="M-40 0 Q-50 -50 -20 -70 L20 -70 Q50 -50 40 0 L30 30 L-30 30 Z" fill="#5a2828"/>
+          <!-- flannel lines -->
+          <line x1="-35" y1="-30" x2="35" y2="-30" stroke="#3a1a1a" stroke-width="0.6" opacity="0.8"/>
+          <line x1="-35" y1="-10" x2="35" y2="-10" stroke="#3a1a1a" stroke-width="0.6" opacity="0.8"/>
+          <line x1="-35" y1="10" x2="35" y2="10" stroke="#3a1a1a" stroke-width="0.6" opacity="0.8"/>
+          <line x1="-20" y1="-65" x2="-20" y2="30" stroke="#3a1a1a" stroke-width="0.6" opacity="0.8"/>
+          <line x1="0" y1="-65" x2="0" y2="30" stroke="#3a1a1a" stroke-width="0.6" opacity="0.8"/>
+          <line x1="20" y1="-65" x2="20" y2="30" stroke="#3a1a1a" stroke-width="0.6" opacity="0.8"/>
+          <!-- head -->
+          <ellipse cx="0" cy="-95" rx="20" ry="22" fill="#e8d0b8"/>
+          <!-- penny hair -->
+          <path d="M-20 -100 Q-22 -118 0 -120 Q22 -118 20 -100 Q22 -90 18 -85 Q12 -90 8 -95 L-8 -95 Q-12 -90 -18 -85 Q-22 -90 -20 -100 Z" fill="#b6541d"/>
+          <!-- eyes downcast -->
+          <ellipse cx="-6" cy="-93" rx="1.5" ry="1" fill="#1a0826"/>
+          <ellipse cx="6" cy="-93" rx="1.5" ry="1" fill="#1a0826"/>
+        </g>
+        <!-- guitar -->
+        <g transform="translate(190,210) rotate(-25)">
+          <ellipse cx="40" cy="20" rx="36" ry="28" fill="#8a4a1a"/>
+          <ellipse cx="40" cy="20" rx="36" ry="28" fill="none" stroke="#3a1a08" stroke-width="1"/>
+          <circle cx="40" cy="20" r="6" fill="#1a0612"/>
+          <rect x="70" y="16" width="60" height="8" fill="#3a1a08"/>
+          <rect x="130" y="14" width="14" height="12" fill="#1a0612"/>
+          <line x1="6" y1="18" x2="130" y2="18" stroke="#ccc" stroke-width="0.4"/>
+          <line x1="6" y1="20" x2="130" y2="20" stroke="#ccc" stroke-width="0.4"/>
+          <line x1="6" y1="22" x2="130" y2="22" stroke="#ccc" stroke-width="0.4"/>
+          <!-- sticker -->
+          <rect x="20" y="35" width="22" height="6" fill="#fff" opacity="0.9"/>
+        </g>
+        <!-- notebook on table corner -->
+        <rect x="350" y="240" width="60" height="40" rx="2" fill="#3a1a3a" stroke="#888"/>
+        <rect x="356" y="248" width="48" height="2" fill="#fff" opacity="0.4"/>
+        <rect x="356" y="256" width="40" height="2" fill="#fff" opacity="0.3"/>
+        <rect x="356" y="264" width="44" height="2" fill="#fff" opacity="0.3"/>
+      </svg>`,
+
+    // Iris at bar with book
+    iris_bar: () => `
+      <svg viewBox="0 0 520 293" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+        ${art._defs()}
+        <rect width="520" height="293" fill="#1e1238"/>
+        <!-- back-bar warm haze -->
+        <ellipse cx="260" cy="100" rx="280" ry="100" fill="#b39ddb" opacity="0.18" filter="url(#glow)"/>
+        <!-- bar counter -->
+        <rect y="200" width="520" height="93" fill="#3a1a08"/>
+        <rect y="200" width="520" height="4" fill="#6a3318"/>
+        <!-- backlit bottles -->
+        <g transform="translate(0,80)">
+          <rect x="30" y="0" width="6" height="60" fill="#ff5fa2" opacity="0.5"/>
+          <rect x="50" y="-6" width="6" height="66" fill="#ffd166" opacity="0.5"/>
+          <rect x="70" y="0" width="6" height="60" fill="#b39ddb" opacity="0.5"/>
+          <rect x="430" y="0" width="6" height="60" fill="#ffd166" opacity="0.5"/>
+          <rect x="450" y="-6" width="6" height="66" fill="#ff5fa2" opacity="0.5"/>
+          <rect x="470" y="0" width="6" height="60" fill="#b39ddb" opacity="0.5"/>
+        </g>
+        <!-- Iris seated -->
+        <g transform="translate(260,140)">
+          <!-- long hair -->
+          <path d="M-20 -10 Q-25 -40 0 -45 Q25 -40 20 -10 Q22 30 18 60 L-18 60 Q-22 30 -20 -10 Z" fill="#5e4b8b"/>
+          <!-- face -->
+          <ellipse cx="0" cy="-15" rx="16" ry="18" fill="#f0d4c0"/>
+          <!-- downcast eyes -->
+          <path d="M-7 -14 Q-4 -12 -1 -14" stroke="#1a0826" stroke-width="1.2" fill="none"/>
+          <path d="M1 -14 Q4 -12 7 -14" stroke="#1a0826" stroke-width="1.2" fill="none"/>
+          <path d="M-3 -4 Q0 -2 3 -4" stroke="#b04060" stroke-width="1.2" fill="none"/>
+          <!-- cardigan -->
+          <path d="M-30 5 Q-35 30 -28 80 L-20 80 L-18 30 Z" fill="#9b87cf"/>
+          <path d="M30 5 Q35 30 28 80 L20 80 L18 30 Z" fill="#9b87cf"/>
+          <path d="M-18 5 L-18 80 L18 80 L18 5 L0 0 Z" fill="#c9b8e8"/>
+        </g>
+        <!-- book in front -->
+        <rect x="230" y="220" width="60" height="6" fill="#3a2855"/>
+        <rect x="230" y="216" width="60" height="4" fill="#1a0826"/>
+        <text x="260" y="221" font-family="Georgia, serif" font-size="3" text-anchor="middle" fill="#ffd166" opacity="0.7">GIOVANNI'S ROOM</text>
+        <!-- untouched drink -->
+        <g transform="translate(310,200)">
+          <path d="M-12 0 L-8 30 L8 30 L12 0 Z" fill="#ff8fa3" opacity="0.7"/>
+          <line x1="0" y1="-5" x2="0" y2="0" stroke="#fff" stroke-width="0.5"/>
+          <ellipse cx="0" cy="0" rx="12" ry="2" fill="#fff" opacity="0.3"/>
+        </g>
+        <!-- coaster -->
+        <ellipse cx="316" cy="232" rx="14" ry="3" fill="#1a0826" opacity="0.6"/>
+      </svg>`,
+
+    // River walk by the water
+    river_walk: () => `
+      <svg viewBox="0 0 520 293" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+        ${art._defs()}
+        <!-- night sky -->
+        <rect width="520" height="180" fill="url(#sky-dusk)"/>
+        <!-- stars -->
+        <g fill="#fff" opacity="0.6">
+          <circle cx="40" cy="30" r="0.8"/><circle cx="100" cy="50" r="0.6"/><circle cx="180" cy="20" r="1"/><circle cx="260" cy="40" r="0.8"/><circle cx="350" cy="25" r="0.6"/><circle cx="420" cy="50" r="0.8"/><circle cx="480" cy="30" r="0.6"/>
+        </g>
+        <!-- distant skyline -->
+        <g fill="#0a0410">
+          <rect x="0" y="130" width="40" height="50"/>
+          <rect x="45" y="110" width="30" height="70"/>
+          <rect x="80" y="120" width="40" height="60"/>
+          <rect x="125" y="100" width="30" height="80"/>
+          <rect x="380" y="115" width="40" height="65"/>
+          <rect x="425" y="105" width="30" height="75"/>
+          <rect x="460" y="120" width="40" height="60"/>
+          <rect x="505" y="110" width="15" height="70"/>
+        </g>
+        <!-- lit windows -->
+        <g fill="#ffd166" opacity="0.7">
+          <rect x="50" y="125" width="3" height="4"/><rect x="60" y="135" width="3" height="4"/><rect x="90" y="140" width="3" height="4"/><rect x="135" y="120" width="3" height="4"/><rect x="395" y="130" width="3" height="4"/><rect x="430" y="125" width="3" height="4"/><rect x="465" y="140" width="3" height="4"/>
+        </g>
+        <!-- water -->
+        <rect y="180" width="520" height="113" fill="#0a0826"/>
+        <!-- water reflections -->
+        <g opacity="0.4">
+          <line x1="0" y1="200" x2="520" y2="200" stroke="#ffd166" stroke-width="0.3"/>
+          <line x1="0" y1="215" x2="520" y2="215" stroke="#ff5fa2" stroke-width="0.3"/>
+          <line x1="0" y1="235" x2="520" y2="235" stroke="#fff" stroke-width="0.2"/>
+          <line x1="0" y1="255" x2="520" y2="255" stroke="#ffd166" stroke-width="0.3"/>
+          <line x1="0" y1="275" x2="520" y2="275" stroke="#ff5fa2" stroke-width="0.2"/>
+        </g>
+        <!-- distant barge -->
+        <rect x="200" y="195" width="40" height="6" fill="#1a0826"/>
+        <rect x="230" y="190" width="6" height="5" fill="#1a0826"/>
+        <circle cx="220" cy="194" r="1" fill="#ffd166"/>
+        <!-- railing -->
+        <line x1="0" y1="195" x2="520" y2="195" stroke="#3a1a3a" stroke-width="2"/>
+        <g stroke="#3a1a3a" stroke-width="1.5">
+          <line x1="30" y1="195" x2="30" y2="180"/>
+          <line x1="100" y1="195" x2="100" y2="180"/>
+          <line x1="170" y1="195" x2="170" y2="180"/>
+          <line x1="350" y1="195" x2="350" y2="180"/>
+          <line x1="420" y1="195" x2="420" y2="180"/>
+          <line x1="490" y1="195" x2="490" y2="180"/>
+        </g>
+        <!-- two figures from behind, holding hands -->
+        <g transform="translate(240,150)">
+          <ellipse cx="0" cy="40" rx="16" ry="28" fill="#1a0826"/>
+          <ellipse cx="0" cy="10" rx="8" ry="9" fill="#1a0826"/>
+          <ellipse cx="40" cy="40" rx="16" ry="28" fill="#2a0a2a"/>
+          <ellipse cx="40" cy="10" rx="9" ry="10" fill="#2a0a2a"/>
+          <!-- linked hands -->
+          <ellipse cx="20" cy="40" rx="6" ry="3" fill="#1a0826"/>
+        </g>
+        <!-- streetlamp halo -->
+        <ellipse cx="400" cy="150" rx="60" ry="40" fill="#ffd166" opacity="0.2" filter="url(#glow)"/>
+        <line x1="400" y1="180" x2="400" y2="120" stroke="#1a0826" stroke-width="2"/>
+        <circle cx="400" cy="118" r="4" fill="#ffd166" filter="url(#soft)"/>
+      </svg>`,
+
+    // Diner late night
+    diner: () => `
+      <svg viewBox="0 0 520 293" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+        ${art._defs()}
+        <rect width="520" height="293" fill="#1a0612"/>
+        <!-- big window behind -->
+        <rect x="20" y="20" width="480" height="160" fill="#0a0410" stroke="#3a1a08" stroke-width="3"/>
+        <rect x="20" y="20" width="480" height="160" fill="url(#sky-dusk)" opacity="0.6"/>
+        <!-- neon "DINER" backwards -->
+        <text x="260" y="80" font-family="Helvetica, sans-serif" font-style="italic" font-size="36" letter-spacing="8" text-anchor="middle" fill="#ff5fa2" opacity="0.5" filter="url(#glow)">DINER</text>
+        <!-- street lights through window -->
+        <circle cx="80" cy="130" r="2" fill="#ffd166" opacity="0.7"/>
+        <circle cx="140" cy="120" r="2" fill="#ffd166" opacity="0.6"/>
+        <circle cx="380" cy="125" r="2" fill="#ffd166" opacity="0.7"/>
+        <circle cx="450" cy="135" r="2" fill="#ffd166" opacity="0.6"/>
+        <!-- booth backs -->
+        <rect x="20" y="180" width="480" height="50" fill="#7a3a3a"/>
+        <rect x="20" y="180" width="480" height="6" fill="#a05050"/>
+        <!-- table -->
+        <rect x="60" y="220" width="400" height="50" fill="#d4c5a8"/>
+        <rect x="60" y="218" width="400" height="4" fill="#8a7848"/>
+        <!-- two coffee mugs -->
+        <g transform="translate(160,230)">
+          <rect x="0" y="0" width="22" height="22" rx="2" fill="#fff"/>
+          <ellipse cx="11" cy="0" rx="11" ry="3" fill="#3a1a08"/>
+          <path d="M22 8 Q28 8 28 14 Q28 20 22 20" stroke="#fff" stroke-width="2" fill="none"/>
+          <!-- steam -->
+          <path d="M5 -5 Q7 -10 5 -15" stroke="#fff" stroke-width="0.8" opacity="0.6" fill="none"/>
+          <path d="M11 -5 Q13 -10 11 -15" stroke="#fff" stroke-width="0.8" opacity="0.6" fill="none"/>
+          <path d="M17 -5 Q19 -10 17 -15" stroke="#fff" stroke-width="0.8" opacity="0.6" fill="none"/>
+        </g>
+        <g transform="translate(320,230)">
+          <rect x="0" y="0" width="22" height="22" rx="2" fill="#fff"/>
+          <ellipse cx="11" cy="0" rx="11" ry="3" fill="#3a1a08"/>
+          <path d="M22 8 Q28 8 28 14 Q28 20 22 20" stroke="#fff" stroke-width="2" fill="none"/>
+        </g>
+        <!-- pancake plate -->
+        <ellipse cx="260" cy="240" rx="40" ry="10" fill="#fff"/>
+        <ellipse cx="260" cy="234" rx="34" ry="6" fill="#d49850"/>
+        <ellipse cx="260" cy="230" rx="32" ry="5" fill="#e8a860"/>
+        <ellipse cx="260" cy="226" rx="30" ry="4" fill="#f4c070"/>
+        <!-- syrup drip -->
+        <path d="M232 228 Q230 240 240 244" fill="#8a4810"/>
+        <!-- pat of butter -->
+        <rect x="252" y="224" width="14" height="6" fill="#ffe9a8"/>
+        <!-- two figures at booth -->
+        <g transform="translate(180,140)">
+          <ellipse cx="0" cy="30" rx="22" ry="20" fill="#5a2828"/>
+          <ellipse cx="0" cy="0" rx="13" ry="15" fill="#e8d0b8"/>
+          <path d="M-12 -6 Q-15 -22 0 -25 Q15 -22 12 -6 Q14 0 10 4 L-10 4 Q-14 0 -12 -6 Z" fill="#b6541d"/>
+        </g>
+        <g transform="translate(340,140)">
+          <ellipse cx="0" cy="30" rx="22" ry="20" fill="#2a1538"/>
+          <ellipse cx="0" cy="0" rx="13" ry="15" fill="#f4d4c0"/>
+          <path d="M-12 -6 Q-15 -22 0 -25 Q15 -22 12 -6 Q14 0 10 4 L-10 4 Q-14 0 -12 -6 Z" fill="#3a1a3a"/>
+        </g>
+      </svg>`,
+
+    // Bookstore couch with lamp + rain on window
+    bookstore: () => `
+      <svg viewBox="0 0 520 293" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+        ${art._defs()}
+        <rect width="520" height="293" fill="#1e1238"/>
+        <!-- rainy window -->
+        <rect x="20" y="20" width="200" height="180" fill="#0a0612" stroke="#3a2855" stroke-width="3"/>
+        <rect x="20" y="20" width="200" height="180" fill="url(#sky-dusk)" opacity="0.7"/>
+        <!-- rain streaks on window -->
+        <g stroke="#b39ddb" stroke-width="0.6" opacity="0.6">
+          <line x1="40" y1="30" x2="35" y2="50"/>
+          <line x1="60" y1="40" x2="55" y2="70"/>
+          <line x1="90" y1="30" x2="85" y2="60"/>
+          <line x1="120" y1="50" x2="115" y2="80"/>
+          <line x1="150" y1="30" x2="145" y2="70"/>
+          <line x1="180" y1="40" x2="175" y2="80"/>
+          <line x1="200" y1="60" x2="195" y2="100"/>
+          <line x1="50" y1="80" x2="45" y2="110"/>
+          <line x1="100" y1="100" x2="95" y2="130"/>
+          <line x1="160" y1="110" x2="155" y2="140"/>
+        </g>
+        <!-- streetlight outside -->
+        <circle cx="180" cy="80" r="14" fill="#ffd166" opacity="0.3" filter="url(#glow)"/>
+        <circle cx="180" cy="80" r="4" fill="#ffd166" filter="url(#soft)"/>
+        <!-- bookshelves right -->
+        <rect x="260" y="20" width="240" height="180" fill="#2a1538"/>
+        <g>
+          <rect x="270" y="30" width="8" height="36" fill="#c91a3e"/>
+          <rect x="282" y="28" width="6" height="38" fill="#5e4b8b"/>
+          <rect x="292" y="32" width="10" height="34" fill="#ffd166"/>
+          <rect x="306" y="30" width="6" height="36" fill="#9b87cf"/>
+          <rect x="316" y="28" width="8" height="38" fill="#3a2855"/>
+          <rect x="328" y="30" width="6" height="36" fill="#c91a3e"/>
+          <rect x="338" y="32" width="10" height="34" fill="#5e60ce"/>
+          <rect x="352" y="30" width="8" height="36" fill="#ffd166"/>
+          <rect x="364" y="28" width="6" height="38" fill="#9b87cf"/>
+          <rect x="374" y="30" width="8" height="36" fill="#c91a3e"/>
+          <rect x="386" y="32" width="6" height="34" fill="#3a2855"/>
+          <rect x="396" y="30" width="10" height="36" fill="#5e60ce"/>
+          <rect x="410" y="28" width="6" height="38" fill="#ffd166"/>
+          <rect x="420" y="30" width="8" height="36" fill="#9b87cf"/>
+          <rect x="432" y="32" width="6" height="34" fill="#c91a3e"/>
+          <rect x="442" y="30" width="10" height="36" fill="#5e4b8b"/>
+          <rect x="456" y="28" width="8" height="38" fill="#ffd166"/>
+          <rect x="468" y="30" width="6" height="36" fill="#3a2855"/>
+          <rect x="478" y="32" width="8" height="34" fill="#9b87cf"/>
+          <rect x="490" y="30" width="6" height="36" fill="#c91a3e"/>
+        </g>
+        <line x1="260" y1="70" x2="500" y2="70" stroke="#1a0826" stroke-width="2"/>
+        <g>
+          <rect x="270" y="80" width="6" height="36" fill="#5e4b8b"/>
+          <rect x="282" y="78" width="8" height="38" fill="#ffd166"/>
+          <rect x="294" y="82" width="6" height="34" fill="#c91a3e"/>
+          <rect x="304" y="80" width="10" height="36" fill="#3a2855"/>
+          <rect x="318" y="78" width="6" height="38" fill="#9b87cf"/>
+          <rect x="328" y="82" width="8" height="34" fill="#5e60ce"/>
+          <rect x="340" y="80" width="6" height="36" fill="#ffd166"/>
+          <rect x="350" y="78" width="8" height="38" fill="#c91a3e"/>
+          <rect x="362" y="82" width="6" height="34" fill="#3a2855"/>
+          <rect x="372" y="80" width="10" height="36" fill="#9b87cf"/>
+          <rect x="386" y="78" width="6" height="38" fill="#ffd166"/>
+          <rect x="396" y="82" width="8" height="34" fill="#5e60ce"/>
+          <rect x="408" y="80" width="6" height="36" fill="#c91a3e"/>
+          <rect x="418" y="78" width="8" height="38" fill="#3a2855"/>
+          <rect x="430" y="82" width="6" height="34" fill="#ffd166"/>
+          <rect x="440" y="80" width="10" height="36" fill="#9b87cf"/>
+          <rect x="454" y="78" width="6" height="38" fill="#5e60ce"/>
+          <rect x="464" y="82" width="8" height="34" fill="#c91a3e"/>
+          <rect x="476" y="80" width="6" height="36" fill="#3a2855"/>
+          <rect x="486" y="78" width="8" height="38" fill="#ffd166"/>
+        </g>
+        <line x1="260" y1="120" x2="500" y2="120" stroke="#1a0826" stroke-width="2"/>
+        <!-- floor -->
+        <rect y="240" width="520" height="53" fill="#3a1a08"/>
+        <!-- couch (front) -->
+        <rect x="40" y="200" width="440" height="60" rx="8" fill="#7a3a4a"/>
+        <rect x="40" y="190" width="440" height="20" rx="8" fill="#9a4a5a"/>
+        <!-- couch arm rests -->
+        <rect x="30" y="195" width="20" height="65" rx="6" fill="#5a2a3a"/>
+        <rect x="470" y="195" width="20" height="65" rx="6" fill="#5a2a3a"/>
+        <!-- lamp -->
+        <line x1="490" y1="200" x2="490" y2="120" stroke="#3a1a08" stroke-width="2"/>
+        <path d="M475 110 L505 110 L495 130 L485 130 Z" fill="#ffd166" filter="url(#soft)"/>
+        <ellipse cx="490" cy="120" rx="50" ry="40" fill="#ffd166" opacity="0.2" filter="url(#glow)"/>
+        <!-- cat on couch -->
+        <g transform="translate(380,205)">
+          <ellipse cx="0" cy="0" rx="18" ry="8" fill="#2a1538"/>
+          <circle cx="-14" cy="-3" r="5" fill="#2a1538"/>
+          <path d="M-18 -8 L-15 -5 Z" fill="#2a1538"/>
+          <path d="M-10 -8 L-12 -5 Z" fill="#2a1538"/>
+          <line x1="-12" y1="-4" x2="-9" y2="-4" stroke="#ffd166" stroke-width="0.5"/>
+        </g>
+        <!-- open book on couch -->
+        <g transform="translate(140,200)">
+          <path d="M-22 0 L0 -4 L22 0 L22 12 L0 8 L-22 12 Z" fill="#fff"/>
+          <line x1="0" y1="-4" x2="0" y2="8" stroke="#1a0826" stroke-width="0.4"/>
+          <line x1="-18" y1="2" x2="-4" y2="0" stroke="#1a0826" stroke-width="0.3"/>
+          <line x1="-18" y1="6" x2="-4" y2="4" stroke="#1a0826" stroke-width="0.3"/>
+          <line x1="4" y1="0" x2="18" y2="2" stroke="#1a0826" stroke-width="0.3"/>
+          <line x1="4" y1="4" x2="18" y2="6" stroke="#1a0826" stroke-width="0.3"/>
+        </g>
+      </svg>`,
+
+    // Sidewalk under an awning, late night
+    awning: () => `
+      <svg viewBox="0 0 520 293" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+        ${art._defs()}
+        <rect width="520" height="293" fill="#0f1538"/>
+        <!-- street -->
+        <rect y="240" width="520" height="53" fill="#1a0a20"/>
+        <line x1="0" y1="270" x2="520" y2="270" stroke="#3a3a4a" stroke-width="0.5" stroke-dasharray="10 8" opacity="0.5"/>
+        <!-- building -->
+        <rect x="0" y="60" width="520" height="180" fill="#1e1a3c"/>
+        <rect x="40" y="100" width="50" height="80" fill="#0a0612" stroke="#3a3a5a" stroke-width="1"/>
+        <rect x="430" y="100" width="50" height="80" fill="#0a0612" stroke="#3a3a5a" stroke-width="1"/>
+        <!-- door -->
+        <rect x="240" y="120" width="40" height="120" fill="#6a3318"/>
+        <!-- awning (striped) -->
+        <path d="M120 80 L400 80 L380 130 L140 130 Z" fill="#5e60ce"/>
+        <g fill="#7d80ff">
+          <path d="M150 80 L155 80 L140 130 L135 130 Z"/>
+          <path d="M180 80 L185 80 L170 130 L165 130 Z"/>
+          <path d="M210 80 L215 80 L200 130 L195 130 Z"/>
+          <path d="M240 80 L245 80 L230 130 L225 130 Z"/>
+          <path d="M270 80 L275 80 L260 130 L255 130 Z"/>
+          <path d="M300 80 L305 80 L290 130 L285 130 Z"/>
+          <path d="M330 80 L335 80 L320 130 L315 130 Z"/>
+          <path d="M360 80 L365 80 L350 130 L345 130 Z"/>
+        </g>
+        <line x1="140" y1="130" x2="380" y2="130" stroke="#3a3a8a" stroke-width="1.5"/>
+        <!-- awning poles -->
+        <line x1="120" y1="80" x2="140" y2="130" stroke="#3a3a8a" stroke-width="2"/>
+        <line x1="400" y1="80" x2="380" y2="130" stroke="#3a3a8a" stroke-width="2"/>
+        <!-- glow under awning -->
+        <ellipse cx="260" cy="160" rx="120" ry="40" fill="#ffd166" opacity="0.15" filter="url(#glow)"/>
+        <!-- streetlamp glow far right -->
+        <circle cx="480" cy="60" r="30" fill="#ffd166" opacity="0.2" filter="url(#glow)"/>
+        <!-- two figures close under awning -->
+        <g transform="translate(240,150)">
+          <!-- you -->
+          <ellipse cx="0" cy="55" rx="18" ry="35" fill="#2a1538"/>
+          <ellipse cx="0" cy="18" rx="11" ry="13" fill="#f4d4c0"/>
+          <!-- sam facing you -->
+          <ellipse cx="40" cy="55" rx="18" ry="35" fill="#5a2828"/>
+          <ellipse cx="40" cy="18" rx="11" ry="13" fill="#e8d0b8"/>
+          <path d="M30 12 Q28 0 40 -3 Q52 0 50 12 Q52 18 48 22 L32 22 Q28 18 30 12 Z" fill="#b6541d"/>
+        </g>
+      </svg>`,
+
+    // Sam playing on stool with mic
+    sam_stage: () => `
+      <svg viewBox="0 0 520 293" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+        ${art._defs()}
+        <rect width="520" height="293" fill="#0f1538"/>
+        <!-- moody backwash -->
+        <ellipse cx="260" cy="120" rx="280" ry="160" fill="#5e60ce" opacity="0.25" filter="url(#glow)"/>
+        <!-- spotlight -->
+        <ellipse cx="260" cy="80" rx="120" ry="180" fill="#ffd166" opacity="0.2" filter="url(#glow)"/>
+        <!-- floor -->
+        <rect y="240" width="520" height="53" fill="#0a0410"/>
+        <!-- stool -->
+        <line x1="230" y1="240" x2="226" y2="195" stroke="#3a1a08" stroke-width="2"/>
+        <line x1="290" y1="240" x2="294" y2="195" stroke="#3a1a08" stroke-width="2"/>
+        <line x1="240" y1="240" x2="244" y2="200" stroke="#3a1a08" stroke-width="2"/>
+        <line x1="280" y1="240" x2="276" y2="200" stroke="#3a1a08" stroke-width="2"/>
+        <rect x="222" y="190" width="76" height="8" rx="2" fill="#6a3318"/>
+        <!-- mic stand -->
+        <line x1="200" y1="240" x2="200" y2="120" stroke="#888" stroke-width="2"/>
+        <path d="M200 120 Q210 110 220 125" stroke="#888" stroke-width="2" fill="none"/>
+        <ellipse cx="220" cy="125" rx="6" ry="4" fill="#222"/>
+        <!-- Sam seated playing -->
+        <g transform="translate(260,150)">
+          <!-- body -->
+          <path d="M-35 0 Q-40 -40 -15 -55 L15 -55 Q40 -40 35 0 L30 40 L-30 40 Z" fill="#7a3a3a"/>
+          <!-- flannel pattern -->
+          <line x1="-32" y1="-30" x2="32" y2="-30" stroke="#3a1a1a" stroke-width="0.6"/>
+          <line x1="-32" y1="-10" x2="32" y2="-10" stroke="#3a1a1a" stroke-width="0.6"/>
+          <line x1="-32" y1="10" x2="32" y2="10" stroke="#3a1a1a" stroke-width="0.6"/>
+          <line x1="-32" y1="30" x2="32" y2="30" stroke="#3a1a1a" stroke-width="0.6"/>
+          <line x1="-15" y1="-50" x2="-15" y2="40" stroke="#3a1a1a" stroke-width="0.6"/>
+          <line x1="0" y1="-50" x2="0" y2="40" stroke="#3a1a1a" stroke-width="0.6"/>
+          <line x1="15" y1="-50" x2="15" y2="40" stroke="#3a1a1a" stroke-width="0.6"/>
+          <!-- head -->
+          <ellipse cx="0" cy="-75" rx="16" ry="18" fill="#e8d0b8"/>
+          <path d="M-14 -82 Q-16 -98 0 -100 Q16 -98 14 -82 Q16 -75 12 -72 L-12 -72 Q-16 -75 -14 -82 Z" fill="#b6541d"/>
+          <!-- eyes closed singing -->
+          <path d="M-6 -75 Q-3 -73 0 -75" stroke="#1a0826" stroke-width="1" fill="none"/>
+          <path d="M0 -75 Q3 -73 6 -75" stroke="#1a0826" stroke-width="1" fill="none"/>
+          <!-- mouth singing -->
+          <ellipse cx="0" cy="-65" rx="3" ry="2" fill="#3a1a1a"/>
+        </g>
+        <!-- guitar on lap -->
+        <g transform="translate(260,170) rotate(-10)">
+          <ellipse cx="40" cy="20" rx="40" ry="30" fill="#8a4a1a"/>
+          <ellipse cx="40" cy="20" rx="40" ry="30" fill="none" stroke="#3a1a08" stroke-width="1"/>
+          <circle cx="40" cy="20" r="7" fill="#1a0612"/>
+          <rect x="80" y="16" width="80" height="8" fill="#3a1a08"/>
+          <rect x="160" y="14" width="14" height="12" fill="#1a0612"/>
+          <line x1="6" y1="18" x2="160" y2="18" stroke="#ccc" stroke-width="0.4"/>
+          <line x1="6" y1="20" x2="160" y2="20" stroke="#ccc" stroke-width="0.4"/>
+          <line x1="6" y1="22" x2="160" y2="22" stroke="#ccc" stroke-width="0.4"/>
+        </g>
+        <!-- crowd silhouettes (heads only, far) -->
+        <g fill="#1a0826" opacity="0.7">
+          <ellipse cx="50" cy="250" rx="10" ry="14"/>
+          <ellipse cx="80" cy="252" rx="10" ry="14"/>
+          <ellipse cx="120" cy="248" rx="10" ry="14"/>
+          <ellipse cx="400" cy="250" rx="10" ry="14"/>
+          <ellipse cx="440" cy="252" rx="10" ry="14"/>
+          <ellipse cx="470" cy="248" rx="10" ry="14"/>
+        </g>
+      </svg>`,
+
+    // Mason — out of drag, jeans + cardigan
+    mason_after: () => `
+      <svg viewBox="0 0 520 293" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+        ${art._defs()}
+        <rect width="520" height="293" fill="#2a0a30"/>
+        <!-- side stage door context -->
+        <rect x="0" y="0" width="200" height="293" fill="#1a0612"/>
+        <rect x="40" y="80" width="120" height="200" fill="#6a3318"/>
+        <rect x="40" y="80" width="120" height="4" fill="#8a4a1a"/>
+        <circle cx="148" cy="180" r="2" fill="#ffd166"/>
+        <!-- warm rim of light from open door -->
+        <path d="M160 80 L220 80 L220 280 L160 280 Z" fill="#ffd166" opacity="0.2" filter="url(#glow)"/>
+        <!-- Mason figure -->
+        <g transform="translate(330,130)">
+          <!-- baseball cap -->
+          <path d="M-25 -10 Q-30 -25 0 -28 Q30 -25 25 -10 Z" fill="#2a1538"/>
+          <path d="M25 -10 L45 -8 L45 -4 L25 -6 Z" fill="#2a1538"/>
+          <!-- face (makeup smudged) -->
+          <ellipse cx="0" cy="0" rx="22" ry="26" fill="#f4d4c0"/>
+          <!-- soft brows -->
+          <path d="M-12 -8 Q-8 -10 -4 -8" stroke="#3a1a1a" stroke-width="1.2" fill="none"/>
+          <path d="M4 -8 Q8 -10 12 -8" stroke="#3a1a1a" stroke-width="1.2" fill="none"/>
+          <!-- eyes -->
+          <ellipse cx="-7" cy="-2" rx="2" ry="1.5" fill="#1a0826"/>
+          <ellipse cx="7" cy="-2" rx="2" ry="1.5" fill="#1a0826"/>
+          <!-- traces of liner -->
+          <line x1="-3" y1="-4" x2="0" y2="-6" stroke="#1a0826" stroke-width="0.6" opacity="0.7"/>
+          <!-- soft smudged lipstick -->
+          <path d="M-6 14 Q0 17 6 14 Q4 19 0 19 Q-4 19 -6 14 Z" fill="#a04050" opacity="0.6"/>
+          <!-- cardigan -->
+          <path d="M-30 25 Q-40 60 -50 130 L-15 130 L-15 30 Z" fill="#a8884a"/>
+          <path d="M30 25 Q40 60 50 130 L15 130 L15 30 Z" fill="#a8884a"/>
+          <path d="M-15 25 L-15 130 L15 130 L15 25 Z" fill="#3a2828"/>
+          <!-- wig in hand -->
+          <g transform="translate(-50,90)"><ellipse cx="0" cy="0" rx="15" ry="14" fill="#3a0a2a"/><path d="M-12 -3 Q-14 -15 0 -16 Q14 -15 12 -3 Q14 5 10 8 Q4 0 0 0 Q-4 0 -10 8 Q-14 5 -12 -3 Z" fill="#3a0a2a"/></g>
+        </g>
+        <!-- glitter on collarbone (residual) -->
+        <circle cx="325" cy="158" r="1" fill="#ffd166"/>
+        <circle cx="338" cy="155" r="0.8" fill="#fff"/>
+        <circle cx="320" cy="162" r="0.6" fill="#ff8fc6"/>
+      </svg>`,
+
+    // Dawn / pink sky finale
+    dawn: () => `
+      <svg viewBox="0 0 520 293" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+        ${art._defs()}
+        <!-- dawn gradient -->
+        <rect width="520" height="293" fill="url(#sky-dawn)"/>
+        <!-- soft sun -->
+        <circle cx="380" cy="200" r="50" fill="#ffe9a8" opacity="0.7" filter="url(#glow)"/>
+        <circle cx="380" cy="200" r="30" fill="#ffd166"/>
+        <!-- distant clouds -->
+        <ellipse cx="120" cy="80" rx="60" ry="10" fill="#fff" opacity="0.4"/>
+        <ellipse cx="260" cy="60" rx="80" ry="8" fill="#fff" opacity="0.3"/>
+        <ellipse cx="440" cy="100" rx="50" ry="8" fill="#fff" opacity="0.3"/>
+        <!-- city silhouette -->
+        <g fill="#3a0a2a">
+          <rect x="0" y="180" width="40" height="80"/>
+          <rect x="42" y="160" width="30" height="100"/>
+          <rect x="74" y="170" width="40" height="90"/>
+          <rect x="116" y="140" width="30" height="120"/>
+          <rect x="148" y="170" width="40" height="90"/>
+          <rect x="190" y="160" width="40" height="100"/>
+          <rect x="232" y="180" width="30" height="80"/>
+          <rect x="290" y="180" width="40" height="80"/>
+          <rect x="332" y="150" width="30" height="110"/>
+          <rect x="364" y="170" width="40" height="90"/>
+          <rect x="406" y="180" width="30" height="80"/>
+          <rect x="438" y="160" width="40" height="100"/>
+          <rect x="480" y="170" width="40" height="90"/>
+        </g>
+        <!-- water -->
+        <rect y="260" width="520" height="33" fill="#3a1538"/>
+        <line x1="0" y1="270" x2="520" y2="270" stroke="#ffd166" stroke-width="0.5" opacity="0.5"/>
+        <line x1="0" y1="280" x2="520" y2="280" stroke="#ff8fc6" stroke-width="0.5" opacity="0.5"/>
+      </svg>`,
+
+    // Apartment morning (warm, kitchen)
+    apartment_morning: () => `
+      <svg viewBox="0 0 520 293" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+        ${art._defs()}
+        <rect width="520" height="293" fill="#3a1a3a"/>
+        <!-- window with dawn light -->
+        <rect x="280" y="20" width="200" height="180" fill="url(#sky-dawn)" stroke="#5a2a3a" stroke-width="4"/>
+        <line x1="380" y1="20" x2="380" y2="200" stroke="#5a2a3a" stroke-width="3"/>
+        <line x1="280" y1="110" x2="480" y2="110" stroke="#5a2a3a" stroke-width="3"/>
+        <!-- light spill into room -->
+        <path d="M280 20 L20 230 L20 60 L280 20 Z" fill="#ffd166" opacity="0.15" filter="url(#glow)"/>
+        <!-- floor -->
+        <rect y="220" width="520" height="73" fill="#3a1a08"/>
+        <!-- kitchen counter -->
+        <rect x="0" y="180" width="240" height="60" fill="#6a3318"/>
+        <rect x="0" y="180" width="240" height="4" fill="#8a4a1a"/>
+        <!-- kettle -->
+        <g transform="translate(80,160)">
+          <path d="M-20 20 Q-22 0 0 -3 Q22 0 20 20 Z" fill="#888"/>
+          <path d="M14 -3 Q22 -10 26 -3" stroke="#888" stroke-width="2" fill="none"/>
+          <ellipse cx="0" cy="-3" rx="14" ry="3" fill="#aaa"/>
+          <rect x="-3" y="-10" width="6" height="4" fill="#3a1a08"/>
+          <!-- steam -->
+          <path d="M-5 -15 Q-3 -22 -5 -28" stroke="#fff" stroke-width="1" opacity="0.6" fill="none"/>
+          <path d="M0 -15 Q2 -22 0 -28" stroke="#fff" stroke-width="1" opacity="0.6" fill="none"/>
+          <path d="M5 -15 Q7 -22 5 -28" stroke="#fff" stroke-width="1" opacity="0.6" fill="none"/>
+        </g>
+        <!-- two mugs -->
+        <g transform="translate(150,200)">
+          <rect x="0" y="0" width="18" height="20" rx="2" fill="#fff"/>
+          <ellipse cx="9" cy="0" rx="9" ry="2.5" fill="#3a1a08"/>
+        </g>
+        <g transform="translate(180,200)">
+          <rect x="0" y="0" width="18" height="20" rx="2" fill="#ffd166"/>
+          <ellipse cx="9" cy="0" rx="9" ry="2.5" fill="#3a1a08"/>
+        </g>
+        <!-- couch with blanket and two figures -->
+        <rect x="260" y="220" width="240" height="50" rx="6" fill="#7a3a4a"/>
+        <rect x="260" y="210" width="240" height="20" rx="6" fill="#9a4a5a"/>
+        <path d="M260 215 Q300 200 360 210 L500 215 L500 240 L260 240 Z" fill="#c9b8e8" opacity="0.7"/>
+        <!-- two heads peeking -->
+        <ellipse cx="350" cy="205" rx="14" ry="16" fill="#f4d4c0"/>
+        <path d="M338 198 Q336 184 350 182 Q364 184 362 198 Q364 204 360 208 L340 208 Q336 204 338 198 Z" fill="#3a0a2a"/>
+        <ellipse cx="395" cy="208" rx="13" ry="15" fill="#f0d4c0"/>
+        <path d="M384 202 Q382 188 395 186 Q408 188 406 202 Q408 208 404 212 L386 212 Q382 208 384 202 Z" fill="#5e4b8b"/>
+        <!-- plants -->
+        <rect x="240" y="80" width="20" height="20" fill="#3a1a3a"/>
+        <path d="M250 80 Q245 60 240 70 M250 80 Q255 65 260 75 M250 80 Q250 55 250 70" stroke="#4a8a4a" stroke-width="2" fill="none"/>
+      </svg>`,
+
+    // Phone glow at night (decision scenes)
+    phone_glow: () => `
+      <svg viewBox="0 0 520 293" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+        ${art._defs()}
+        <rect width="520" height="293" fill="#0a0612"/>
+        <ellipse cx="260" cy="160" rx="280" ry="160" fill="#5e4b8b" opacity="0.18" filter="url(#glow)"/>
+        <!-- table -->
+        <rect y="200" width="520" height="93" fill="#1a0612"/>
+        <ellipse cx="260" cy="200" rx="240" ry="8" fill="#2a0a30"/>
+        <!-- phone -->
+        <g transform="translate(220,80)">
+          <rect x="0" y="0" width="80" height="160" rx="10" fill="#1a0826" stroke="#3a2855" stroke-width="2"/>
+          <rect x="6" y="10" width="68" height="140" rx="6" fill="#2a1538"/>
+          <!-- screen content: notes app -->
+          <rect x="6" y="10" width="68" height="14" fill="#5e4b8b"/>
+          <text x="40" y="20" font-family="Helvetica,sans-serif" font-size="6" text-anchor="middle" fill="#fff">For Dad</text>
+          <!-- text lines -->
+          <line x1="12" y1="30" x2="68" y2="30" stroke="#fff" stroke-width="0.5" opacity="0.7"/>
+          <line x1="12" y1="36" x2="62" y2="36" stroke="#fff" stroke-width="0.5" opacity="0.5"/>
+          <line x1="12" y1="42" x2="68" y2="42" stroke="#fff" stroke-width="0.5" opacity="0.6"/>
+          <line x1="12" y1="48" x2="58" y2="48" stroke="#fff" stroke-width="0.5" opacity="0.5"/>
+          <line x1="12" y1="58" x2="68" y2="58" stroke="#fff" stroke-width="0.5" opacity="0.6"/>
+          <line x1="12" y1="64" x2="64" y2="64" stroke="#fff" stroke-width="0.5" opacity="0.5"/>
+          <line x1="12" y1="70" x2="68" y2="70" stroke="#fff" stroke-width="0.5" opacity="0.7"/>
+          <line x1="12" y1="76" x2="60" y2="76" stroke="#fff" stroke-width="0.5" opacity="0.5"/>
+          <line x1="12" y1="86" x2="68" y2="86" stroke="#fff" stroke-width="0.5" opacity="0.5"/>
+          <line x1="12" y1="92" x2="62" y2="92" stroke="#fff" stroke-width="0.5" opacity="0.6"/>
+          <line x1="12" y1="98" x2="68" y2="98" stroke="#fff" stroke-width="0.5" opacity="0.5"/>
+          <line x1="12" y1="108" x2="68" y2="108" stroke="#fff" stroke-width="0.5" opacity="0.6"/>
+          <line x1="12" y1="114" x2="56" y2="114" stroke="#fff" stroke-width="0.5" opacity="0.5"/>
+          <line x1="12" y1="120" x2="68" y2="120" stroke="#fff" stroke-width="0.5" opacity="0.5"/>
+          <line x1="12" y1="130" x2="42" y2="130" stroke="#fff" stroke-width="0.5" opacity="0.7"/>
+          <!-- send button -->
+          <rect x="20" y="138" width="40" height="10" rx="2" fill="#5e4b8b"/>
+          <text x="40" y="145" font-family="Helvetica,sans-serif" font-size="5" text-anchor="middle" fill="#fff">SEND</text>
+        </g>
+        <!-- screen glow on hand -->
+        <ellipse cx="260" cy="240" rx="120" ry="20" fill="#9b87cf" opacity="0.3" filter="url(#glow)"/>
+        <!-- hand silhouette holding phone -->
+        <path d="M180 240 Q200 220 220 240 L300 240 Q320 220 340 240 L340 293 L180 293 Z" fill="#1a0826"/>
+      </svg>`,
+
+    // Park bench moment (sam route 4th ending)
+    park_bench: () => `
+      <svg viewBox="0 0 520 293" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+        ${art._defs()}
+        <rect width="520" height="293" fill="url(#sky-dusk)"/>
+        <!-- moon -->
+        <circle cx="420" cy="60" r="22" fill="#fff" opacity="0.85"/>
+        <circle cx="416" cy="56" r="3" fill="#1a0612" opacity="0.15"/>
+        <circle cx="426" cy="64" r="2" fill="#1a0612" opacity="0.1"/>
+        <!-- moon glow -->
+        <circle cx="420" cy="60" r="40" fill="#fff" opacity="0.15" filter="url(#glow)"/>
+        <!-- stars -->
+        <g fill="#fff" opacity="0.7">
+          <circle cx="60" cy="40" r="0.6"/><circle cx="120" cy="60" r="0.8"/><circle cx="200" cy="30" r="0.6"/><circle cx="280" cy="50" r="1"/><circle cx="340" cy="35" r="0.6"/>
+        </g>
+        <!-- trees silhouette -->
+        <g fill="#0a0410">
+          <ellipse cx="60" cy="180" rx="50" ry="60"/>
+          <rect x="55" y="180" width="10" height="60"/>
+          <ellipse cx="480" cy="170" rx="60" ry="65"/>
+          <rect x="475" y="170" width="10" height="70"/>
+        </g>
+        <!-- path -->
+        <path d="M0 240 Q260 220 520 240 L520 293 L0 293 Z" fill="#1a0612"/>
+        <!-- bench -->
+        <rect x="180" y="200" width="160" height="6" fill="#3a1a08"/>
+        <rect x="180" y="210" width="160" height="6" fill="#3a1a08"/>
+        <rect x="185" y="206" width="4" height="40" fill="#3a1a08"/>
+        <rect x="331" y="206" width="4" height="40" fill="#3a1a08"/>
+        <rect x="195" y="216" width="130" height="6" fill="#3a1a08"/>
+        <!-- two figures, one with guitar -->
+        <g transform="translate(240,160)">
+          <!-- you -->
+          <ellipse cx="0" cy="40" rx="15" ry="22" fill="#2a1538"/>
+          <ellipse cx="0" cy="10" rx="9" ry="11" fill="#f4d4c0"/>
+        </g>
+        <g transform="translate(280,160)">
+          <!-- sam -->
+          <ellipse cx="0" cy="40" rx="15" ry="22" fill="#5a2828"/>
+          <ellipse cx="0" cy="10" rx="9" ry="11" fill="#e8d0b8"/>
+          <path d="M-8 4 Q-10 -8 0 -11 Q10 -8 8 4 Q10 8 7 11 L-7 11 Q-10 8 -8 4 Z" fill="#b6541d"/>
+        </g>
+        <!-- guitar leaning -->
+        <g transform="translate(310,200) rotate(20)">
+          <ellipse cx="0" cy="0" rx="14" ry="18" fill="#8a4a1a"/>
+          <circle cx="0" cy="-2" r="3" fill="#1a0612"/>
+          <rect x="-2" y="-40" width="4" height="35" fill="#3a1a08"/>
+        </g>
+      </svg>`,
+
+    // Church / candle vigil — sam farewell 4th ending
+    chapel: () => `
+      <svg viewBox="0 0 520 293" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+        ${art._defs()}
+        <rect width="520" height="293" fill="#0a0410"/>
+        <!-- arched window -->
+        <path d="M200 30 Q260 -10 320 30 L320 180 L200 180 Z" fill="url(#sky-dusk)" stroke="#5a2a3a" stroke-width="2"/>
+        <line x1="260" y1="0" x2="260" y2="180" stroke="#5a2a3a" stroke-width="1.5"/>
+        <line x1="200" y1="100" x2="320" y2="100" stroke="#5a2a3a" stroke-width="1.5"/>
+        <!-- stained glass tint -->
+        <path d="M200 30 Q260 -10 320 30 L320 100 L200 100 Z" fill="#5e60ce" opacity="0.3"/>
+        <path d="M260 100 L320 100 L320 180 L260 180 Z" fill="#c91a3e" opacity="0.2"/>
+        <path d="M200 100 L260 100 L260 180 L200 180 Z" fill="#ffd166" opacity="0.2"/>
+        <!-- candle table -->
+        <rect y="200" width="520" height="93" fill="#1a0612"/>
+        <rect y="200" width="520" height="4" fill="#3a1a08"/>
+        <!-- row of candles -->
+        <g>
+          <rect x="40" y="180" width="4" height="20" fill="#fff"/>
+          <ellipse cx="42" cy="175" rx="3" ry="6" fill="#ffd166" filter="url(#glow)"/>
+          <ellipse cx="42" cy="175" rx="1.5" ry="3" fill="#ff8fc6"/>
+        </g>
+        <g>
+          <rect x="80" y="184" width="4" height="16" fill="#fff"/>
+          <ellipse cx="82" cy="180" rx="3" ry="6" fill="#ffd166" filter="url(#glow)"/>
+          <ellipse cx="82" cy="180" rx="1.5" ry="3" fill="#ff8fc6"/>
+        </g>
+        <g>
+          <rect x="120" y="178" width="4" height="22" fill="#fff"/>
+          <ellipse cx="122" cy="173" rx="3" ry="6" fill="#ffd166" filter="url(#glow)"/>
+          <ellipse cx="122" cy="173" rx="1.5" ry="3" fill="#ff8fc6"/>
+        </g>
+        <g>
+          <rect x="160" y="182" width="4" height="18" fill="#fff"/>
+          <ellipse cx="162" cy="178" rx="3" ry="6" fill="#ffd166" filter="url(#glow)"/>
+        </g>
+        <g>
+          <rect x="200" y="180" width="4" height="20" fill="#fff"/>
+          <ellipse cx="202" cy="175" rx="3" ry="6" fill="#ffd166" filter="url(#glow)"/>
+          <ellipse cx="202" cy="175" rx="1.5" ry="3" fill="#ff8fc6"/>
+        </g>
+        <g>
+          <rect x="360" y="180" width="4" height="20" fill="#fff"/>
+          <ellipse cx="362" cy="175" rx="3" ry="6" fill="#ffd166" filter="url(#glow)"/>
+        </g>
+        <g>
+          <rect x="400" y="184" width="4" height="16" fill="#fff"/>
+          <ellipse cx="402" cy="180" rx="3" ry="6" fill="#ffd166" filter="url(#glow)"/>
+          <ellipse cx="402" cy="180" rx="1.5" ry="3" fill="#ff8fc6"/>
+        </g>
+        <g>
+          <rect x="440" y="178" width="4" height="22" fill="#fff"/>
+          <ellipse cx="442" cy="173" rx="3" ry="6" fill="#ffd166" filter="url(#glow)"/>
+        </g>
+        <g>
+          <rect x="480" y="182" width="4" height="18" fill="#fff"/>
+          <ellipse cx="482" cy="178" rx="3" ry="6" fill="#ffd166" filter="url(#glow)"/>
+          <ellipse cx="482" cy="178" rx="1.5" ry="3" fill="#ff8fc6"/>
+        </g>
+        <!-- candle warmth -->
+        <ellipse cx="260" cy="190" rx="280" ry="40" fill="#ffd166" opacity="0.15" filter="url(#glow)"/>
+        <!-- figure singing -->
+        <g transform="translate(260,140)">
+          <path d="M-25 0 Q-30 -30 -10 -45 L10 -45 Q30 -30 25 0 L20 30 L-20 30 Z" fill="#5a2828"/>
+          <ellipse cx="0" cy="-60" rx="13" ry="15" fill="#e8d0b8"/>
+          <path d="M-11 -66 Q-13 -78 0 -80 Q13 -78 11 -66 Q13 -60 9 -57 L-9 -57 Q-13 -60 -11 -66 Z" fill="#b6541d"/>
+          <path d="M-3 -55 Q0 -52 3 -55" stroke="#1a0826" stroke-width="1" fill="none"/>
+        </g>
+      </svg>`,
+
+    // Dad's hands at the dinner table — iris 4th ending
+    family_table: () => `
+      <svg viewBox="0 0 520 293" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+        ${art._defs()}
+        <rect width="520" height="293" fill="#3a1a3a"/>
+        <!-- warm overhead pendant light -->
+        <ellipse cx="260" cy="0" rx="260" ry="80" fill="#ffd166" opacity="0.25" filter="url(#glow)"/>
+        <line x1="260" y1="0" x2="260" y2="40" stroke="#3a1a08" stroke-width="2"/>
+        <path d="M230 40 L290 40 L280 60 L240 60 Z" fill="#3a1a08"/>
+        <ellipse cx="260" cy="55" rx="25" ry="6" fill="#ffd166" opacity="0.8" filter="url(#glow)"/>
+        <!-- table -->
+        <rect y="160" width="520" height="133" fill="#6a3318"/>
+        <rect y="160" width="520" height="6" fill="#8a4a1a"/>
+        <!-- table runner -->
+        <rect x="60" y="170" width="400" height="20" fill="#c9b8e8"/>
+        <!-- dishes -->
+        <ellipse cx="150" cy="200" rx="40" ry="10" fill="#fff"/>
+        <ellipse cx="150" cy="198" rx="32" ry="6" fill="#ffe9a8"/>
+        <ellipse cx="260" cy="210" rx="50" ry="12" fill="#fff"/>
+        <ellipse cx="260" cy="208" rx="40" ry="8" fill="#b6541d" opacity="0.6"/>
+        <ellipse cx="370" cy="200" rx="40" ry="10" fill="#fff"/>
+        <ellipse cx="370" cy="198" rx="32" ry="6" fill="#7a8a4a" opacity="0.7"/>
+        <!-- wine glasses -->
+        <g transform="translate(110,160)">
+          <path d="M-8 0 Q-8 -20 0 -22 Q8 -20 8 0 Z" fill="#c91a3e" opacity="0.5"/>
+          <line x1="0" y1="0" x2="0" y2="14" stroke="#fff" stroke-width="0.5"/>
+          <ellipse cx="0" cy="16" rx="6" ry="2" fill="#fff" opacity="0.4"/>
+        </g>
+        <g transform="translate(220,160)">
+          <path d="M-8 0 Q-8 -20 0 -22 Q8 -20 8 0 Z" fill="#c91a3e" opacity="0.5"/>
+          <line x1="0" y1="0" x2="0" y2="14" stroke="#fff" stroke-width="0.5"/>
+          <ellipse cx="0" cy="16" rx="6" ry="2" fill="#fff" opacity="0.4"/>
+        </g>
+        <g transform="translate(330,160)">
+          <path d="M-8 0 Q-8 -20 0 -22 Q8 -20 8 0 Z" fill="#c91a3e" opacity="0.5"/>
+          <line x1="0" y1="0" x2="0" y2="14" stroke="#fff" stroke-width="0.5"/>
+        </g>
+        <g transform="translate(420,160)">
+          <path d="M-8 0 Q-8 -20 0 -22 Q8 -20 8 0 Z" fill="#c91a3e" opacity="0.5"/>
+          <line x1="0" y1="0" x2="0" y2="14" stroke="#fff" stroke-width="0.5"/>
+          <ellipse cx="0" cy="16" rx="6" ry="2" fill="#fff" opacity="0.4"/>
+        </g>
+        <!-- two hands clasped in middle -->
+        <g transform="translate(260,240)">
+          <ellipse cx="-15" cy="0" rx="20" ry="14" fill="#f0d4c0"/>
+          <ellipse cx="15" cy="0" rx="20" ry="14" fill="#e0bea8"/>
+          <ellipse cx="0" cy="-3" rx="18" ry="10" fill="#d4a890"/>
+        </g>
+      </svg>`,
+
+    // Tea/coffee shop window — promise endings
+    cafe: () => `
+      <svg viewBox="0 0 520 293" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+        ${art._defs()}
+        <rect width="520" height="293" fill="#3a1a3a"/>
+        <!-- street through window -->
+        <rect x="20" y="20" width="480" height="170" fill="url(#sky-dawn)" stroke="#6a3318" stroke-width="4"/>
+        <!-- buildings -->
+        <g fill="#3a0a2a" opacity="0.8">
+          <rect x="30" y="90" width="60" height="100"/>
+          <rect x="95" y="70" width="50" height="120"/>
+          <rect x="150" y="100" width="60" height="90"/>
+          <rect x="350" y="80" width="60" height="110"/>
+          <rect x="415" y="100" width="70" height="90"/>
+        </g>
+        <!-- window pane lines -->
+        <line x1="260" y1="20" x2="260" y2="190" stroke="#6a3318" stroke-width="3"/>
+        <line x1="20" y1="105" x2="500" y2="105" stroke="#6a3318" stroke-width="3"/>
+        <!-- table -->
+        <rect x="0" y="210" width="520" height="83" fill="#6a3318"/>
+        <ellipse cx="260" cy="210" rx="240" ry="6" fill="#8a4a1a"/>
+        <!-- two coffee cups -->
+        <g transform="translate(160,220)">
+          <rect x="0" y="0" width="22" height="22" rx="3" fill="#fff"/>
+          <ellipse cx="11" cy="0" rx="11" ry="3" fill="#3a1a08"/>
+          <path d="M22 8 Q28 8 28 14 Q28 20 22 20" stroke="#fff" stroke-width="2" fill="none"/>
+          <path d="M5 -4 Q7 -10 5 -16" stroke="#fff" stroke-width="0.8" opacity="0.5" fill="none"/>
+          <path d="M11 -4 Q13 -10 11 -16" stroke="#fff" stroke-width="0.8" opacity="0.5" fill="none"/>
+        </g>
+        <g transform="translate(320,220)">
+          <rect x="0" y="0" width="22" height="22" rx="3" fill="#c9b8e8"/>
+          <ellipse cx="11" cy="0" rx="11" ry="3" fill="#3a1a08"/>
+          <path d="M22 8 Q28 8 28 14 Q28 20 22 20" stroke="#c9b8e8" stroke-width="2" fill="none"/>
+        </g>
+        <!-- two hands meeting -->
+        <g transform="translate(260,250)">
+          <ellipse cx="-30" cy="0" rx="22" ry="14" fill="#f0d4c0"/>
+          <ellipse cx="30" cy="0" rx="22" ry="14" fill="#e0bea8"/>
+          <ellipse cx="0" cy="-3" rx="20" ry="8" fill="#d4a890"/>
+        </g>
+        <!-- phone screen on table -->
+        <rect x="350" y="248" width="50" height="30" rx="3" fill="#1a0826"/>
+        <rect x="354" y="252" width="42" height="22" rx="1" fill="#5e4b8b"/>
+        <line x1="358" y1="258" x2="392" y2="258" stroke="#fff" stroke-width="0.5"/>
+        <line x1="358" y1="262" x2="388" y2="262" stroke="#fff" stroke-width="0.5"/>
+        <line x1="358" y1="266" x2="392" y2="266" stroke="#fff" stroke-width="0.5"/>
+        <line x1="358" y1="270" x2="380" y2="270" stroke="#fff" stroke-width="0.5"/>
+      </svg>`
+  };
+  // Convenience wrapper
+  const ill = (key) => `<div class="illus">${(art[key] || (()=>''))()}</div>`;
+
+  // Scenes data — three full routes, 13+ beats each, multiple endings
+  const scenes = {
+    // ═══════════════════════════════════════════════════════════════════
+    //  R I V E R   /   M A S O N
+    // ═══════════════════════════════════════════════════════════════════
+    river_1: {
+      theme: 'river', vibe: 'river', speaker: 'RIVER', speakerClass: 'river', illus: 'stage_river', fx: { disco: true, spotlight: true },
+      text: `She steps off the stage as you approach, sequins catching gold light, lipstick a precise red, heels traded for sneakers because she has been dancing for three hours and she's not a saint.<br><br>Up close she's younger than the songs are. Maybe twenty-eight. There's a small constellation of glitter on her collarbone she missed in the dressing room mirror.<br><br><span class="em">"You're new here."</span> She tilts her head. <span class="em">"Or maybe just new to me. Both are fine."</span><br><br>She picks up a half-finished drink from behind the bar — the bartender's mocked her about it twice already — and waits to see what you'll say.`,
+      choices: [
+        { tag: 'WARM', cls: 'warm', text: 'I came because I heard the place is closing.', w: 0, next: 'river_2' },
+        { tag: 'FLIRTY', cls: 'flirty', text: 'I came because someone told me you do the best "I Will Survive" on this coast.', w: 1, next: 'river_2' },
+        { tag: 'OPEN', cls: 'curious', text: 'I came because I needed somewhere I could just... be.', w: 1, next: 'river_2' }
+      ]
+    },
+    river_2: {
+      theme: 'river', vibe: 'river', speaker: 'RIVER', speakerClass: 'river', illus: 'bar_interior', fx: { disco: true },
+      text: `She laughs — low, real, not the stage one. The performance dims for a second and a person looks out from behind it.<br><br><span class="em">"Real answer? My family thinks I'm out of town this weekend. Teacher's conference in Albany."</span> She turns the cocktail glass between her fingers. <span class="em">"I've been off the booking circuit two years. This bar is the only place I get to be her."</span><br><br>The disco ball makes a slow rotation. Pink across her cheekbone, gold across her mouth.<br><br><span class="em">"I'm scared of what I am when it closes. Like I made her up and the room was the only proof."</span>`,
+      choices: [
+        { tag: 'FLIRTY', cls: 'flirty', text: '"Then let me be your second proof."', w: 2, next: 'river_3' },
+        { tag: 'WARM', cls: 'warm', text: '"She doesn\'t disappear when the lights do."', w: 1, next: 'river_3' },
+        { tag: 'CURIOUS', cls: 'curious', text: '"What\'s her name? When she\'s offstage."', w: 0, next: 'river_3' }
+      ]
+    },
+    river_3: {
+      theme: 'river', vibe: 'river', speaker: 'RIVER', speakerClass: 'river', illus: 'bar_interior', fx: { disco: true },
+      text: `She studies you a beat too long. Whatever the right answer was, you got close enough.<br><br><span class="em">"I have one number left in the set. Twenty minutes, then I'm done."</span><br><br>She tips her chin toward the small stage, then toward a curtain behind it. <span class="em">"You can watch from out here with everyone else — front row's open, the lighting hits weird but it's the best seat."</span><br><br><span class="em">"Or."</span> Pause. <span class="em">"You can come backstage with me while I touch up. It's a closet with a chair and one bulb. The view is terrible. The company is, allegedly, better."</span>`,
+      choices: [
+        { tag: 'WATCH', cls: 'warm', text: '"Front row. I want to see what she does."', w: 1, next: 'river_4a' },
+        { tag: 'JOIN', cls: 'flirty', text: '"Closet. One bulb. I\'m in."', w: 2, next: 'river_4b' },
+        { tag: 'BOTH', cls: 'curious', text: '"Both? Backstage first, then I run out for the song?"', w: 1, next: 'river_4b' }
+      ]
+    },
+    river_4a: {
+      theme: 'river', vibe: 'river', speaker: 'NARRATOR', speakerClass: 'narrator', illus: 'stage_river', fx: { disco: true, spotlight: true },
+      text: `You take the front row stool. She vanishes for ninety seconds and comes back as someone else — different wig, a dress so red it looks audible. She does not look at the room.<br><br>She looks at you.<br><br>The song is "I'm Still Here." She knows every breath of it. Halfway through she crosses to your side of the stage, kneels at the edge, sings the chorus three feet from your face. <span class="em">"I'm here / I'm still here."</span><br><br>The room is dead silent. The bartender forgets to make a drink. You forget to breathe.<br><br>When she stands up and walks away, the applause is the loudest you have ever heard a small room make.<br><br><span class="em">She bows once. Then she points to the curtain. To you.</span>`,
+      choices: [
+        { tag: 'GO', cls: 'flirty', text: 'You go backstage.', w: 2, next: 'river_5' }
+      ]
+    },
+    river_4b: {
+      theme: 'river', vibe: 'river', speaker: 'RIVER', speakerClass: 'river', illus: 'dressing',
+      text: `The backstage is, as advertised, a closet. A single chair, a mirror with two bulbs (one dying), a rack of dresses crammed against a hot water pipe.<br><br>She sits, peels false lashes off, sets them on a tissue like they're alive. The room smells like setting spray and old wood.<br><br><span class="em">"Pass me the red — no, the matte one. Thanks."</span> She leans into the mirror. The dress strap slides off one shoulder, and she does not put it back. <span class="em">"I always do the last number in this dress. It's bad luck to change it."</span><br><br>Her eyes flick to you in the mirror. <span class="em">"You're staring."</span><br><br>She is smiling.`,
+      choices: [
+        { tag: 'STARE', cls: 'flirty', text: '"You\'re doing the staring thing too."', w: 2, next: 'river_5' },
+        { tag: 'COMPLIMENT', cls: 'warm', text: '"Sorry. You\'re — a lot to look at."', w: 2, next: 'river_5' },
+        { tag: 'DEFLECT', cls: 'curious', text: '"Tell me what the song is."', w: 0, next: 'river_5' }
+      ]
+    },
+    river_5: {
+      theme: 'river', vibe: 'river', speaker: 'RIVER', speakerClass: 'river', illus: 'dressing',
+      text: `Her phone buzzes against the dresser. She glances at the screen. The professional smile slides into place automatically — a reflex.<br><br><span class="em">"My sister. One second."</span> She picks up. <span class="em">"Hey — yeah, the panel ran long. I'm good. Hotel's fine. Tell mom I'll call her tomorrow."</span><br><br>A pause. She closes her eyes. <span class="em">"I know. I'll call. I love you too."</span><br><br>She sets the phone down. Doesn't speak for a second.<br><br><span class="em">"She knows. My sister. She's known for six years. She's the only one. Every time she calls I think this is going to be the time she just tells mom for me."</span><br><br>She looks at you. <span class="em">"I think I want her to."</span>`,
+      choices: [
+        { tag: 'GENTLE', cls: 'warm', text: '"Wanting someone else to do it isn\'t cowardice. It\'s exhaustion."', w: 1, next: 'river_6' },
+        { tag: 'HONEST', cls: 'curious', text: '"What\'s the worst that happens if she does?"', w: 1, next: 'river_6' },
+        { tag: 'CLOSER', cls: 'flirty', text: 'You step closer, take the phone gently out of her hand, set it screen-down.', w: 2, next: 'river_6' }
+      ]
+    },
+    river_6: {
+      theme: 'river', vibe: 'river', speaker: 'RIVER', speakerClass: 'river', illus: 'dressing',
+      text: `She finishes her face slowly. The hands shake a little, but the line of the lipstick is perfect anyway — muscle memory of a woman who has done this in worse light than this.<br><br><span class="em">"Okay. Your turn."</span> She caps the lipstick. <span class="em">"You walked into a closing queer bar alone at midnight. There's a reason. What is it?"</span><br><br>She turns the chair so she's facing you. The dress strap is still off the shoulder. The bulb hums. From the bar you can hear someone start a karaoke version of "Take Me Home, Country Roads" and abandon it after eight bars.<br><br><span class="em">"And don't say 'the drinks.' The drinks are terrible."</span>`,
+      choices: [
+        { tag: 'TRUTH', cls: 'warm', text: '"I haven\'t been kissed by someone who knew my real name in two years."', w: 2, next: 'river_7' },
+        { tag: 'TRUTH', cls: 'curious', text: '"I came out to my parents and they were quiet. They\'ve been quiet ever since."', w: 1, next: 'river_7' },
+        { tag: 'FLIRT', cls: 'flirty', text: '"I came in for the bar. I\'m staying for you."', w: 2, next: 'river_7' }
+      ]
+    },
+    river_7: {
+      theme: 'river', vibe: 'river', speaker: 'RIVER', speakerClass: 'river', illus: 'dressing',
+      text: `She listens — fully, not in that way people do when they're just waiting for their turn to talk. When you finish she's quiet for a beat that goes from comfortable to too long to comfortable again.<br><br><span class="em">"Okay."</span> She stands, smooths the dress. <span class="em">"Here's what we're doing. I go out, I do the song, you sit at the bar. After the song the place clears out fast. I'll meet you at the door."</span><br><br>She presses her palms flat against the mirror, leans toward her own reflection, says something silently to the woman in the glass.<br><br>Then she turns. <span class="em">"Don't leave."</span><br><br>She walks out. You hear the cheer when she hits the stage. The bass starts. You sit at the bar. You order something you don't drink. Your hands are shaking too.`,
+      choices: [
+        { tag: 'STAY', cls: 'warm', text: '— You stay. —', w: 0, next: 'river_8' }
+      ]
+    },
+    river_8: {
+      theme: 'river', vibe: 'river', speaker: 'NARRATOR', speakerClass: 'narrator', illus: 'mason_after',
+      text: `The song is "Maybe This Time." She sings it like she's been waiting for it her whole life, and possibly she has. Halfway through she catches your eye and almost smiles, and then she remembers she is on stage, and then she sings the next line directly at the ceiling.<br><br>When the song ends the bar gives her the kind of applause that costs the room something. Two strangers wipe their eyes. The bartender, who has seen everything, gives a small private nod.<br><br>The lights come up. People filter out. River disappears for nine minutes and forty seconds. You count.<br><br>The door at the side of the stage swings open. She is in jeans, a teacher cardigan, a baseball cap, the wig in her hand. The makeup is mostly off; what's left is smudged in a way that looks better than it should.<br><br><span class="em">"Hi,"</span> she says, almost shy. <span class="em">"It's Mason."</span> A beat. <span class="em">"Outside?"</span>`,
+      choices: [
+        { tag: 'DINER', cls: 'warm', text: '"Pancakes. You promised."', w: 1, next: 'river_9a' },
+        { tag: 'WALK', cls: 'flirty', text: '"Walk. The river. I want air with you in it."', w: 2, next: 'river_9b' }
+      ]
+    },
+    river_9a: {
+      theme: 'river', vibe: 'river', speaker: 'NARRATOR', speakerClass: 'narrator', illus: 'diner',
+      text: `Seventh Street is half-asleep. The diner is the kind of place that has been open since 1971 and will be open after the sun goes out.<br><br>You take the back booth. The vinyl is patched in three places. He orders pancakes and coffee with the easy confidence of a regular; the waitress calls him hon. He does not flinch.<br><br>Under the table his knee finds yours. Stays.<br><br><span class="em">"Okay,"</span> he says. <span class="em">"Things I'm willing to tell a stranger at three a.m. Hit me."</span><br><br>You can ask anything. He'll answer.`,
+      choices: [
+        { tag: 'PERSONAL', cls: 'curious', text: '"Your sister. Tell me about her."', w: 1, next: 'river_10' },
+        { tag: 'WORK', cls: 'warm', text: '"What\'s it like teaching while being — this?"', w: 1, next: 'river_10' },
+        { tag: 'CLOSER', cls: 'flirty', text: '"Why is your knee touching mine?"', w: 2, next: 'river_10' }
+      ]
+    },
+    river_9b: {
+      theme: 'river', vibe: 'river', speaker: 'NARRATOR', speakerClass: 'narrator', illus: 'river_walk',
+      text: `The river is six blocks away and the wind off it is colder than either of you dressed for. He gives you his cardigan without making a thing of it.<br><br>You walk along the rail. Below, the water is black and gold from the streetlamps. A barge moves through the dark, far out, with the slowness of something with nowhere urgent to be.<br><br>His shoulder is against yours. Then his hand is in yours. He didn't ask. You didn't pull away.<br><br><span class="em">"This is the first time I've held someone's hand in a place where someone could see and I didn't reflexively check who."</span><br><br>He doesn't look at you when he says it. He looks at the water.<br><br><span class="em">"Ask me anything. I'll give you a real answer."</span>`,
+      choices: [
+        { tag: 'PERSONAL', cls: 'curious', text: '"Your sister. Tell me about her."', w: 1, next: 'river_10' },
+        { tag: 'CLOSER', cls: 'flirty', text: 'You squeeze his hand. "Why now? Why tonight?"', w: 2, next: 'river_10' },
+        { tag: 'DEEP', cls: 'warm', text: '"What scares you most about Mason?"', w: 2, next: 'river_10' }
+      ]
+    },
+    river_10: {
+      theme: 'river', vibe: 'river', speaker: 'MASON', speakerClass: 'river', illus: 'mason_after',
+      text: `<span class="em">"My sister knew before I did. She handed me the eyeliner the first time. I was nineteen. She said, 'Stop staring at it, just put it on, I'm not your therapist.'"</span><br><br>He laughs — a real one, surprised by itself.<br><br><span class="em">"Mom doesn't know. Dad — dad is a kind man, who is also a man who would be sad in a way I can't undo. I teach 11th grade English. The kids would know in a week. Some of them already half-know."</span><br><br>He turns to you. Whatever's coming next, he's been deciding whether to say it for the last ten minutes.<br><br><span class="em">"I'm going to call my mother tomorrow. I made the appointment with myself before I came here. I needed to do one show as her, one last time in a room that loved her, before I tell my mother her name."</span><br><br><span class="em">"You — you walking in tonight. I don't know what to do with that. Except keep walking next to you."</span>`,
+      choices: [
+        { tag: 'STEADY', cls: 'warm', text: '"I\'ll wait by the phone tomorrow. If you want."', w: 2, next: 'river_11' },
+        { tag: 'FLIRT', cls: 'flirty', text: '"Then keep walking. Or stop. Either way."', w: 2, next: 'river_11' },
+        { tag: 'REAL', cls: 'curious', text: '"What do you need from me right now?"', w: 1, next: 'river_11' }
+      ]
+    },
+    river_11: {
+      theme: 'river', vibe: 'river', speaker: 'NARRATOR', speakerClass: 'narrator', illus: 'river_walk',
+      text: `A car rolls past. The window comes down. A drunk voice yells something neither of you catches and probably doesn't want to. The car keeps going.<br><br>Mason doesn't flinch. He used to. He's been practicing not to.<br><br><span class="em">"I used to apologize for that,"</span> he says, calm. <span class="em">"Like I'd put it there. Like I asked for the window to come down."</span><br><br>He turns to face you. The cardigan, the smudged-corner-of-mouth red, the constellation of glitter he still hasn't gotten off his collarbone. The teacher and the woman in one body, finally not arguing.<br><br><span class="em">"I'm not apologizing tonight."</span><br><br>He steps closer. Close enough that you have to look up.<br><br><span class="em">"Can I — "</span>`,
+      choices: [
+        { tag: 'YES', cls: 'flirty', text: 'You don\'t let him finish the sentence.', w: 3, next: 'river_12' },
+        { tag: 'WAIT', cls: 'warm', text: '"Yes. But slow. I want to remember it."', w: 2, next: 'river_12' },
+        { tag: 'TALK', cls: 'curious', text: '"Not yet. Talk to me first."', w: 1, next: 'river_12_talk' }
+      ]
+    },
+    river_12: {
+      theme: 'river', vibe: 'river', speaker: 'NARRATOR', speakerClass: 'narrator', illus: 'river_walk',
+      text: `The first kiss is careful, like he's checking with you. The second is not.<br><br>Somewhere a streetlamp flickers off. You feel his hand on the back of your neck, hesitant and then sure. He tastes like coffee and the cheap cherry of stage lipstick. Glitter transfers to your cheek and you don't notice for three days.<br><br>When you finally pull apart you are both laughing for no reason you could name.<br><br><span class="em">"Okay,"</span> he says. <span class="em">"Okay."</span> Then: <span class="em">"My apartment is fourteen blocks from here. I have terrible coffee and a couch that pulls out. I would like you to come."</span><br><br>His thumb traces the corner of your mouth where the lipstick went.<br><br><span class="em">"And I would also like you to say no, if that's what you want, and let me walk you home anyway."</span>`,
+      choices: [
+        { tag: 'STAY', cls: 'flirty', text: '"Fourteen blocks. Let\'s go."', w: 2, next: 'river_end_stay' },
+        { tag: 'WALK', cls: 'warm', text: '"Walk me home. Slow. Stay for breakfast."', w: 2, next: 'river_end_walk' },
+        { tag: 'PART', cls: 'curious', text: '"Tonight was already a gift. Call me after you call your mom."', w: 1, next: 'river_end_part' },
+        { tag: 'STAGE', cls: 'warm', text: '"What if we go back? One last walk through the Velvet Hour while it\'s still standing."', w: 2, next: 'river_end_lastdance' }
+      ]
+    },
+    river_12_talk: {
+      theme: 'river', vibe: 'river', speaker: 'MASON', speakerClass: 'river', illus: 'river_walk',
+      text: `He nods, half-smiling. He steps back to a normal distance. Doesn't take it personally — actually looks relieved that you asked for it.<br><br><span class="em">"Good. Good. I was about ten seconds away from kissing you. That's the kind of thing I do once a year. I would rather mean it."</span><br><br>He sits down on the low rail of the river walk. Pats the spot next to him. You sit.<br><br><span class="em">"Ask me something hard."</span><br><br>So you do. For an hour. The horizon starts to pale. He answers every question you give him. He asks some of his own.<br><br>By the time the first joggers come out, you both know more about each other than most people learn in a year of dating.<br><br><span class="em">"Okay,"</span> he says, when the sky is properly pink. <span class="em">"Decision time. What's it going to be?"</span>`,
+      choices: [
+        { tag: 'KISS', cls: 'flirty', text: 'You kiss him now, in the daylight. "Now I mean it too."', w: 3, next: 'river_end_stay' },
+        { tag: 'WALK', cls: 'warm', text: '"Walk me to breakfast. Then your mother\'s call."', w: 2, next: 'river_end_walk' },
+        { tag: 'WAIT', cls: 'curious', text: '"Call me tomorrow night. After."', w: 1, next: 'river_end_part' },
+        { tag: 'STAGE', cls: 'warm', text: '"Last walk through the Velvet Hour. Together. Before it\'s gone."', w: 2, next: 'river_end_lastdance' }
+      ]
+    },
+
+    river_end_stay: {
+      theme: 'end_stay', speaker: 'MORNING', speakerClass: 'narrator', illus: 'apartment_morning',
+      text: `His apartment is small, neat, full of books. There is a framed playbill from a high school production of <span class="em">Cabaret</span> he directed, signed in eleventh-grader handwriting: <span class="em">"Mr. M — you are the reason I have a heart."</span><br><br>You don't make it past the couch. The pullout never gets pulled out.<br><br>What happens, happens slowly. He takes off the cardigan, the glittered collarbone catches the kitchen light. He apologizes for being out of practice. You tell him out of practice is a way of saying full of feeling.<br><br>Some time before dawn you are both lying tangled on a couch too small for two people, listening to a kettle he forgot to put on actually whistle anyway because he had set the gas low.<br><br>At seven in the morning the phone rings. It's his mother. He had not, in fact, scheduled the call — she has been awake worrying since yesterday.<br><br>He picks up. He says, <span class="em">"Hi mom. I need to tell you something. Are you sitting down?"</span><br><br>His hand finds yours under the blanket.<br><br>You do not let go.`,
+      isEnding: true
+    },
+    river_end_walk: {
+      theme: 'end_stay', speaker: 'MORNING', speakerClass: 'narrator', illus: 'apartment_morning',
+      text: `He walks you the whole way home. Twenty-eight blocks. He insists, calls it the gentleman thing, and you let him because the truth is you don't want it to end.<br><br>On the way you talk about everything and nothing. His favorite poem to teach (Frank O'Hara, "Having a Coke With You"). The first time you knew. The worst thing anyone has said to you and the kindest. By the time you reach your door the sun is up and the day is starting around you, full of dog walkers and joggers and a man unlocking a coffee shop.<br><br>At your stoop he kisses you once, soft, careful. Asks if he can come in for coffee even though he doesn't drink yours brand.<br><br>You make him coffee. He calls his mother from your kitchen because, he says, he needs witnesses today, and he is choosing you.<br><br>The call goes badly at first. Then less badly. Then she says she needs a week and she'll call him back, and that <span class="em">she loves him</span>, and he sets the phone down and breathes out for what feels like the first time all year.<br><br>You hold him while the kettle does what kettles do.`,
+      isEnding: true
+    },
+    river_end_part: {
+      theme: 'end_go', speaker: 'MORNING', speakerClass: 'narrator', illus: 'dawn',
+      text: `At the river you hug him for a long time. Long enough that two joggers go by and you both pretend not to notice.<br><br><span class="em">"Call me tomorrow,"</span> you say. <span class="em">"After. Either way. Even if it's bad."</span><br><br><span class="em">"Especially if it's bad,"</span> he says.<br><br>You walk home. Different directions. The sun comes up over your shoulder like it's seeing you out.<br><br>The next evening your phone rings at 7:42 p.m. You answer on the first ring.<br><br>He is crying. Not the sad kind. The other kind.<br><br><span class="em">"She said she's known since I was fourteen,"</span> he tells you. <span class="em">"She said she's been waiting. She said — she said come home for dinner Sunday. Bring whoever you want."</span><br><br>A beat.<br><br><span class="em">"Can I bring you?"</span><br><br>You say yes before he finishes the question.`,
+      isEnding: true
+    },
+    river_end_lastdance: {
+      theme: 'end_stay', speaker: 'MORNING', speakerClass: 'narrator', illus: 'stage_river', fx: { disco: true, spotlight: true },
+      text: `You walk back. The neon is dimmer now; the bouncer has gone home; the bartender is wiping down for real this time. He looks up, sees who it is, and just shakes his head with a slow smile. He plugs the jukebox in for one more song.<br><br>The room is half-empty. The disco ball turns. Mason — still in his teacher cardigan and a smudge of red — leads you to the small square of dance floor by the stage.<br><br>The song he picks is an old one. Etta James. <span class="em">"At Last."</span><br><br>You dance close. His hand at the small of your back, yours at the back of his neck. He hums against your ear because he can't help it. The bartender pretends not to watch and watches anyway.<br><br>The song ends. The jukebox makes its little click. Mason whispers, <span class="em">"Thank you for closing this room with me."</span><br><br>The next morning he calls his mother from a diner two blocks over. You sit across from him. He holds your hand under the table with one hand and the phone with the other. He does not let go of either.<br><br>The Velvet Hour shuts for the last time at 4 a.m. The two of you were the last ones inside.`,
+      isEnding: true
+    },
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  S A M
+    // ═══════════════════════════════════════════════════════════════════
+    sam_1: {
+      theme: 'sam', vibe: 'sam', speaker: 'SAM', speakerClass: 'sam', illus: 'booth_sam',
+      text: `They're cross-legged in the back booth, tuning by ear. The guitar has a sticker on it: <span class="em">THIS MACHINE PROBABLY DOES NOTHING</span>. Their hair is half-grown-out, dyed something the color of an old penny. They are wearing a flannel that is two sizes too big and is, you suspect, not theirs.<br><br>They look up. Brown eyes, the kind that don't quite hold yours and don't quite look away.<br><br><span class="em">"You can sit. I don't bite. Mostly because I'd lose my deposit on the booth."</span>`,
+      choices: [
+        { tag: 'CURIOUS', cls: 'curious', text: '"What are you playing tonight?"', w: 0, next: 'sam_2' },
+        { tag: 'WARM', cls: 'warm', text: '"Mind if I just sit and listen?"', w: 1, next: 'sam_2' },
+        { tag: 'FLIRTY', cls: 'flirty', text: '"That sticker is the most honest thing I\'ve read all year."', w: 1, next: 'sam_2' }
+      ]
+    },
+    sam_2: {
+      theme: 'sam', vibe: 'sam', speaker: 'SAM', speakerClass: 'sam', illus: 'booth_sam',
+      text: `They play a quiet chord. Then nothing. Then start to play and stop again.<br><br><span class="em">"I wrote a song this year. Haven't played it for anyone. It's — "</span> They breathe out. <span class="em">"It's a love song. To a boy. From me."</span><br><br><span class="em">"I haven't said that out loud before. Not at the kitchen table. Not in any room with windows."</span> A small, embarrassed laugh. <span class="em">"And now I've said it to you."</span><br><br>The booth is pressed against the back wall and you are sitting close enough that when they breathe in you can feel the table move.`,
+      choices: [
+        { tag: 'FLIRTY', cls: 'flirty', text: '"Lucky boy."', w: 1, next: 'sam_3' },
+        { tag: 'WARM', cls: 'warm', text: '"You just said it. Out loud. In a room with windows."', w: 1, next: 'sam_3' },
+        { tag: 'CURIOUS', cls: 'curious', text: '"What\'s the song called?"', w: 1, next: 'sam_3' }
+      ]
+    },
+    sam_3: {
+      theme: 'sam', vibe: 'sam', speaker: 'SAM', speakerClass: 'sam', illus: 'booth_sam',
+      text: `They reach into a beat-up canvas bag and pull out a notebook. The cover has been stickered over so many times that the original is invisible. They open it to a dog-eared page and turn it so you can read.<br><br>The page is in pencil, half-erased, rewritten three times. At the top, in capital letters: <span class="em">"BOY ON THE 86 BUS."</span><br><br>The first verse begins: <span class="em">"You sat across from me / kept reading the same page / and I learned the shape of your hand / before I learned your name."</span><br><br><span class="em">"Don't read past the chorus,"</span> Sam says. <span class="em">"The bridge is embarrassing."</span><br><br>You read past the chorus.`,
+      choices: [
+        { tag: 'GENTLE', cls: 'warm', text: '"The bridge isn\'t embarrassing. It\'s the truest part."', w: 1, next: 'sam_4' },
+        { tag: 'FLIRT', cls: 'flirty', text: '"He learned the shape of yours too, I bet."', w: 2, next: 'sam_4' },
+        { tag: 'PRESS', cls: 'curious', text: '"Did he ever know? About the song?"', w: 0, next: 'sam_4' }
+      ]
+    },
+    sam_4: {
+      theme: 'sam', vibe: 'sam', speaker: 'SAM', speakerClass: 'sam', illus: 'bar_interior',
+      text: `Two guys at the bar are getting loud. One of them — the bigger one — keeps glancing this way. The kind of glance that's a question with bad intent behind it. Sam's shoulders go up half an inch and stay there.<br><br>The bigger guy starts to walk over. The bartender notices, says something low, and the guy turns around like he was always heading for the door.<br><br>Sam exhales. The shoulders come down.<br><br><span class="em">"Sorry. That. That happens."</span> A faint, exhausted smile. <span class="em">"This is the only room where someone else watches the door for me."</span><br><br>They look at the notebook. <span class="em">"His name was Eli. He got off at Park Slope. I rode the bus three stops past mine because I wasn't ready for him to be gone yet."</span>`,
+      choices: [
+        { tag: 'PROTECT', cls: 'warm', text: '"Tonight I\'m watching the door too."', w: 2, next: 'sam_5' },
+        { tag: 'CURIOUS', cls: 'curious', text: '"Did you ever talk to him?"', w: 0, next: 'sam_5' },
+        { tag: 'CLOSER', cls: 'flirty', text: 'You slide a little closer in the booth.', w: 2, next: 'sam_5' }
+      ]
+    },
+    sam_5: {
+      theme: 'sam', vibe: 'sam', speaker: 'SAM', speakerClass: 'sam', illus: 'booth_sam',
+      text: `<span class="em">"Once. He dropped a book. <em>The Argonauts.</em> Maggie Nelson. I picked it up. Said I'd read it. He said, 'Did you cry?' I said yeah. He said, 'Good.'"</span><br><br>They are quiet for a second.<br><br><span class="em">"Then his stop came up. He smiled. He left. I never saw him on the 86 again. I wrote this song the same week."</span><br><br>They close the notebook gently, like it's a sleeping pet.<br><br><span class="em">"The song isn't about him. Not really. It's about — the version of me that was about to be allowed to want him. The version that was almost ready to say something. I'm writing love songs to my own future self."</span><br><br>They look at you. There is something tilting in their expression. A wall coming down inch by inch.<br><br><span class="em">"What is wrong with me. I'm telling you this. Why am I telling you this."</span>`,
+      choices: [
+        { tag: 'GENTLE', cls: 'warm', text: '"Because I asked. And because tonight you decided to."', w: 1, next: 'sam_6' },
+        { tag: 'FLIRT', cls: 'flirty', text: '"Because some part of you is rehearsing telling someone else, and I\'m the dress rehearsal."', w: 2, next: 'sam_6' },
+        { tag: 'DEEP', cls: 'curious', text: '"Maybe you\'re writing love songs to the boy on the 86 to find out if you can mean them when you say them out loud."', w: 2, next: 'sam_6' }
+      ]
+    },
+    sam_6: {
+      theme: 'sam', vibe: 'sam', speaker: 'SAM', speakerClass: 'sam', illus: 'booth_sam',
+      text: `Whatever you said, they stare at you for too long after. The kind of stare where someone is trying to memorize you for later.<br><br>Then their phone vibrates. They check it. The color drains.<br><br><span class="em">"Bar owner's calling me up. Five minutes."</span> They start to gather their things and stop halfway. They look at the door. They look at the stage.<br><br><span class="em">"I can leave. I can just — I can leave right now. They won't kick me out for chickening out. They'll just play recorded music. Nobody will know."</span><br><br>They turn to you, eyes wide. <span class="em">"I'm asking you to tell me to leave."</span><br><br><span class="em">"Or — "</span>`,
+      choices: [
+        { tag: 'PUSH', cls: 'warm', text: '"You\'re asking because you don\'t want me to. Go play it."', w: 2, next: 'sam_7' },
+        { tag: 'CHOICE', cls: 'curious', text: '"What do you want, Sam? Honestly. Not what you\'re afraid of."', w: 1, next: 'sam_7' },
+        { tag: 'KISS', cls: 'flirty', text: 'You take their hand. "Play it. I\'m here. Whatever happens, I\'m here after."', w: 2, next: 'sam_7' }
+      ]
+    },
+    sam_7: {
+      theme: 'sam', vibe: 'sam', speaker: 'NARRATOR', speakerClass: 'narrator', illus: 'sam_stage', fx: { spotlight: true },
+      text: `They get up. They smooth the flannel. They cross to the bar to pick up a stool. They sit. They adjust the mic with the wrong end of a thumb pick because their hands are shaking.<br><br>The room is half full. The bartender turns the music down. The disco ball spins to nothing in particular.<br><br>Sam clears their throat into the mic. <span class="em">"Uh. Hi. This is the only place I've ever felt like nothing was wrong with me. Tonight is its last night. So I'm gonna play one that I wrote and never played for anyone before."</span><br><br>A small, scattered cheer from the regulars. A whoop from someone you can't see. Someone else taps a glass with a spoon.<br><br>Sam looks at the back booth. At you.<br><br>You give them the smallest nod. They nod back.<br><br>They play the first chord.`,
+      choices: [
+        { tag: 'NEXT', cls: 'warm', text: '— Listen. —', w: 0, next: 'sam_8' }
+      ]
+    },
+    sam_8: {
+      theme: 'sam', vibe: 'sam', speaker: 'SAM', speakerClass: 'sam', illus: 'sam_stage', fx: { spotlight: true },
+      text: `<span class="em">"You sat across from me<br>kept reading the same page<br>and I learned the shape of your hand<br>before I learned your name."</span><br><br>The room goes still in the specific way that rooms go still when something true is being said.<br><br><span class="em">"You got off at Park Slope<br>and the city stayed alive<br>but my chest hadn't started yet<br>I was waiting on a sign."</span><br><br>The chorus comes. They sing it with their eyes closed.<br><br><span class="em">"Tell me I'm allowed to want you<br>tell me the wanting was real<br>tell me you saw me too<br>and I'll learn how to feel."</span><br><br>The bridge — the one they told you was embarrassing — is just three lines, almost spoken:<br><br><span class="em">"I never knew your name.<br>I have written a love song every year of my life.<br>This is the first one I have ever meant."</span>`,
+      choices: [
+        { tag: 'NEXT', cls: 'warm', text: '— The song ends. —', w: 0, next: 'sam_9' }
+      ]
+    },
+    sam_9: {
+      theme: 'sam', vibe: 'sam', speaker: 'NARRATOR', speakerClass: 'narrator', illus: 'booth_sam',
+      text: `There is a single, perfect second of silence. The kind that happens in good rooms when everyone agrees that they have just witnessed something.<br><br>Then the room comes apart in the best way. People clap. Someone shouts. The bartender drops a glass and doesn't apologize. Two strangers at the bar are crying without performance.<br><br>Sam puts the guitar down. Bows once, quick, awkward, then they walk toward you so fast it's almost a stumble. They sit down across from you and put their face in their hands and they are laughing or crying or both.<br><br><span class="em">"I did it. I did it. Was that — okay? Was — I can't tell. Was it okay."</span><br><br>You take their hand off their face so they have to look at you.`,
+      choices: [
+        { tag: 'TRUTH', cls: 'warm', text: '"It was the best thing this room has ever heard."', w: 2, next: 'sam_10' },
+        { tag: 'CLOSER', cls: 'flirty', text: '"Sam. Look at me."', w: 2, next: 'sam_10' },
+        { tag: 'CALM', cls: 'curious', text: '"Breathe. You did it. Just breathe."', w: 1, next: 'sam_10' }
+      ]
+    },
+    sam_10: {
+      theme: 'sam', vibe: 'sam', speaker: 'SAM', speakerClass: 'sam', illus: 'awning',
+      text: `They breathe. They look at you. They breathe again. The shaking starts to even out.<br><br><span class="em">"I need air. I need to walk. I — can I — would you — "</span><br><br>They give up on the sentence. You stand up. They follow.<br><br>Outside the bar the air is October-cold and the sidewalk is empty and the neon sign behind you reads <span class="em">VELVET HOUR</span> in pink that hums.<br><br>Sam stops on the sidewalk, hands in pockets, looking at the streetlight like it's going to give them a script.<br><br><span class="em">"Okay. Okay. I am alive. I am alive and I just did the thing. And I'm with — "</span> They look at you. <span class="em">" — someone who watched the door for me."</span><br><br>Their hand comes out of the pocket. They don't know what to do with it. They settle for offering it to you, palm-up, half a joke and half not.`,
+      choices: [
+        { tag: 'TAKE', cls: 'flirty', text: 'You take their hand and don\'t let go.', w: 2, next: 'sam_11' },
+        { tag: 'WALK', cls: 'warm', text: '"Where are we walking?"', w: 1, next: 'sam_11' },
+        { tag: 'JOKE', cls: 'curious', text: '"Is this a handshake or a date?"', w: 1, next: 'sam_11' }
+      ]
+    },
+    sam_11: {
+      theme: 'sam', vibe: 'sam', speaker: 'SAM', speakerClass: 'sam', illus: 'park_bench',
+      text: `<span class="em">"Both,"</span> they say, when you ask, and you walk.<br><br>You don't have a destination. You go the long way past the park. Sam tells you about their mom (knows, mostly fine, occasionally weird), their dad (does not know, also does not seem to want to), the boy on the 86 (still no name, still no real face anymore, just a feeling shaped like a chest unlocking).<br><br>They tell you about high school. About the church choir they were in until they were sixteen. About the song they sang at their grandmother's funeral that turned out to be the first time anyone in their family heard them sing alone, and the silence after it.<br><br><span class="em">"You're easy to talk to,"</span> they say, at one point. <span class="em">"I haven't been easy to be around for a while. It's nice. The reverse."</span><br><br>Three blocks later they stop walking. They pull you under an awning to get out of someone's wind. They stand very close.<br><br><span class="em">"Is this — is this where I — "</span>`,
+      choices: [
+        { tag: 'YES', cls: 'flirty', text: 'You answer with the kiss they were asking permission for.', w: 3, next: 'sam_12' },
+        { tag: 'SLOW', cls: 'warm', text: '"Slow. Are you sure? You just did a hard thing. You don\'t owe me anything for showing up."', w: 2, next: 'sam_12' },
+        { tag: 'NOT YET', cls: 'curious', text: '"Walk me to my door first. We\'ll see what we both still want there."', w: 1, next: 'sam_12' }
+      ]
+    },
+    sam_12: {
+      theme: 'sam', vibe: 'sam', speaker: 'NARRATOR', speakerClass: 'narrator', illus: 'awning',
+      text: () => {
+        if (warmth >= 6) return `The kiss is the slow kind. Surprised. A little wet. They make a small sound when you pull them closer that you will think about for a long time.<br><br>They laugh against your mouth. <span class="em">"Sorry. Sorry, I — I haven't — "</span><br><br>You kiss them again to interrupt the apology.<br><br>You stand there under the awning a long time. Cars pass. A man walking a dog gives you a look that is just looking, no malice in it. The wind keeps trying to undo your coat.<br><br>Eventually Sam pulls back, eyes wet, smiling like they have been let out of something.<br><br><span class="em">"Okay,"</span> they whisper. <span class="em">"Okay. So I have an apartment six blocks from here. I have a roommate who is, blessedly, in Toronto. I have a coffee maker that works."</span><br><br>Beat.<br><br><span class="em">"I'd like to take you home. And I'd like to learn the shape of your hand before I learn your name."</span>`;
+        return `They nod, almost relieved. They step back to a friend-distance, kindly.<br><br><span class="em">"Yeah. Yeah. I — I was about to ask for something I'm not sure I'd survive if you said no to. I'm glad you slowed me down."</span><br><br>They walk you home. The long way. You talk the whole time about nothing important.<br><br>At your door they fish a folded square of notebook paper from their pocket and hand it to you.<br><br><span class="em">"The song. Written out. Don't read it tonight. Read it tomorrow when you're alone."</span><br><br>They hesitate. Then they hug you. Hard. The kind of hug that says <em>thank you for staying</em> in every language at once.`;
+      },
+      choices: [
+        { tag: 'NEXT', cls: 'warm', text: '— Choose how the night ends. —', w: 0, next: 'sam_13' }
+      ]
+    },
+    sam_13: {
+      theme: 'sam', vibe: 'sam', speaker: 'NARRATOR', speakerClass: 'narrator', illus: 'awning',
+      text: `The night has narrowed to this corner, this awning, this person. Whatever happens next is yours to decide.`,
+      choices: [
+        { tag: 'STAY', cls: 'flirty', text: '"Six blocks. Let\'s go."', w: 2, next: 'sam_end_home' },
+        { tag: 'WALK', cls: 'warm', text: '"Walk me home. Stay if you want.”', w: 2, next: 'sam_end_walk' },
+        { tag: 'PROMISE', cls: 'curious', text: '"Not tonight. But next Tuesday. Coffee. Same booth."', w: 1, next: 'sam_end_promise' },
+        { tag: 'PARK', cls: 'warm', text: '"Take me to the park. I want to hear another song. The boy on the 86 deserves a sequel."', w: 2, next: 'sam_end_park' }
+      ]
+    },
+
+    sam_end_home: {
+      theme: 'end_stay', speaker: 'MORNING', speakerClass: 'narrator', illus: 'apartment_morning',
+      text: `Sam's apartment is three small rooms full of plants, books, a record player, and one absurdly large beanbag chair that they apologize for the entire walk over.<br><br>You don't make it to the beanbag.<br><br>What happens between you is not the kind of thing that ought to be described in a story; not the most important part anyway. It is hands and mouths and laughter, and a moment where Sam stops, sits back, and says, quietly, <span class="em">"I have wanted to be doing this for so long I forgot it was a real thing people did."</span><br><br>They show you, in the dark, every place on their body that ever felt wrong, and you treat each one like a holy thing. They cry, a little, twice. Both times happily.<br><br>In the morning they make you eggs that are slightly burned. The boy on the 86 bus does not get mentioned. He doesn't need to. He was a doorway.<br><br>You hold the door open. Sam walks through.`,
+      isEnding: true
+    },
+    sam_end_walk: {
+      theme: 'end_stay', speaker: 'MORNING', speakerClass: 'narrator', illus: 'apartment_morning',
+      text: `They walk you all the way to your door. They keep talking. You answer.<br><br>At your stoop they kiss you once, deliberately, like they have been deciding how to do it for the last twelve blocks.<br><br><span class="em">"Was that the kind of thing I'm allowed to do?"</span><br><br>You say yes. They smile so wide it almost hurts to look at.<br><br>You make them tea. They fall asleep on your couch, fully clothed, halfway through a story about their grandmother's hymnal. You drape a blanket over them. You don't sleep yourself. You sit on the floor and watch them, the way they watched you watch them tonight.<br><br>Around dawn they wake up disoriented, panic for a second, and then they see you and laugh, embarrassed.<br><br><span class="em">"I don't normally — this is wildly out of character — "</span><br><br>You kiss them. They stop apologizing. You make them eggs. You will see them again.`,
+      isEnding: true
+    },
+    sam_end_promise: {
+      theme: 'end_go', speaker: 'MORNING', speakerClass: 'narrator', illus: 'cafe',
+      text: `You hug them goodbye. The hug lasts long enough that a stranger walking past smiles at you both.<br><br>They walk one direction. You walk the other.<br><br>Tuesday at seven you're back at a different bar — Velvet Hour is closed now, the windows papered over, but they've picked a coffee place around the corner. They are already there, in the same flannel, the notebook on the table.<br><br>They look up. They light up.<br><br><span class="em">"You came,"</span> they say, like they weren't sure you would.<br><br>You sit down across from them. Not next to. Across. There is time for next to.<br><br><span class="em">"I came,"</span> you say.<br><br>It will be a year before either of you says <em>I love you</em>. You will both have meant it from this Tuesday.`,
+      isEnding: true
+    },
+    sam_end_park: {
+      theme: 'end_stay', speaker: 'MORNING', speakerClass: 'narrator', illus: 'park_bench',
+      text: `The park is shut, technically. The chain across the entrance is at knee-height and Sam, in their flannel, climbs over it with the dignity of someone who has done worse things to fewer good reasons.<br><br>You find a bench under a streetlamp. They take the guitar out of its case for the third time tonight. The air smells like wet leaves and the iron underside of October.<br><br><span class="em">"I lied earlier,"</span> they say, tuning. <span class="em">"I have written a second song this year. I haven't told anyone. It's a — it's a sequel to the first one. The boy on the 86 has a name in this one. The name is just a placeholder. I call him <em>You</em>."</span><br><br>They look at you. <span class="em">"Tonight I figured out who the placeholder was for."</span><br><br>They play the song. It is two and a half minutes long. It is about a person who walks into a closing bar at midnight and sits down in a booth and listens to a song they had not been promised. It is about being witnessed, and witnessing back.<br><br>When they finish, they put the guitar down. They sit closer. They lean their head on your shoulder.<br><br>You both fall asleep on that bench for thirty-seven minutes, until a kindly cop wakes you up and tells you the park is closed and could you please go home, in the tone of a man who would also very much like to be in bed.<br><br>You walk Sam home. They walk you home. You walk each other in circles until 5 a.m.<br><br>You will be the placeholder a long time.`,
+      isEnding: true
+    },
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  I R I S
+    // ═══════════════════════════════════════════════════════════════════
+    iris_1: {
+      theme: 'iris', vibe: 'iris', speaker: 'IRIS', speakerClass: 'iris', illus: 'iris_bar',
+      text: `She has a paperback open in front of her. <span class="em">Giovanni's Room.</span> The cover is creased like she's read it before but is reading it again. There is a coaster under a drink that has not moved in an hour.<br><br>She is wearing a long cardigan over a plain dress and her hair is loose. She looks like she has wandered into the wrong room — and is determined to stay anyway.<br><br>She startles when you sit.<br><br><span class="em">"Oh — sorry. I'm reading. Well. Pretending to. I haven't gotten through a single page."</span><br><br>She closes the book carefully, keeping her finger between pages she hasn't read.`,
+      choices: [
+        { tag: 'CURIOUS', cls: 'curious', text: '"First time here?"', w: 0, next: 'iris_2' },
+        { tag: 'WARM', cls: 'warm', text: '"That\'s the kind of book you reread. It\'s okay if today isn\'t the day."', w: 1, next: 'iris_2' },
+        { tag: 'FLIRTY', cls: 'flirty', text: '"What page have you been on for an hour?"', w: 1, next: 'iris_2' }
+      ]
+    },
+    iris_2: {
+      theme: 'iris', vibe: 'iris', speaker: 'IRIS', speakerClass: 'iris', illus: 'iris_bar',
+      text: `<span class="em">"I told my mother last week. About me."</span> She says it to the bar, not to you. <span class="em">"She said she still loves me but needs time. I keep replaying it. Whether 'still' means what I think it means."</span><br><br>She looks up. <span class="em">"I came here because the internet said it was a safe place. I've been at this bar two hours and I haven't spoken to anyone."</span><br><br>A small, surprised smile. <span class="em">"Until now."</span><br><br>She turns toward you a little. Her knee comes off the bar's foot rail and finds the side of your stool. She doesn't notice. Or notices and doesn't move.`,
+      choices: [
+        { tag: 'FLIRTY', cls: 'flirty', text: '"I\'m glad I was your first."', w: 1, next: 'iris_3' },
+        { tag: 'WARM', cls: 'warm', text: '"First time alone in a queer bar is its own kind of brave."', w: 1, next: 'iris_3' },
+        { tag: 'CURIOUS', cls: 'curious', text: '"What did you hope would happen tonight?"', w: 1, next: 'iris_3' }
+      ]
+    },
+    iris_3: {
+      theme: 'iris', vibe: 'iris', speaker: 'IRIS', speakerClass: 'iris', illus: 'iris_bar',
+      text: `She glances at the book. Then at you. There is the particular hesitation of someone about to do a small brave thing in private.<br><br><span class="em">"Can I read you a sentence? I keep stopping on it. It might fix something to say it out loud."</span><br><br>She opens to the page. Her finger traces under the line so she doesn't lose it. She reads quietly, just to you, like the bar isn't there:<br><br><span class="em">"And no matter what I do, I cannot make of him a stranger again."</span><br><br>She closes the book. She does not look up.<br><br><span class="em">"I think about my mother saying that to me one day. About me. I think it's the version of forgiveness I'm waiting for."</span>`,
+      choices: [
+        { tag: 'GENTLE', cls: 'warm', text: '"She\'ll get there. Even if it takes longer than you want."', w: 1, next: 'iris_4' },
+        { tag: 'TRUTH', cls: 'curious', text: '"Or you become someone she can\'t make a stranger of even if she tries."', w: 2, next: 'iris_4' },
+        { tag: 'CLOSER', cls: 'flirty', text: 'You reach over and rest your hand on her wrist. Briefly.', w: 2, next: 'iris_4' }
+      ]
+    },
+    iris_4: {
+      theme: 'iris', vibe: 'iris', speaker: 'IRIS', speakerClass: 'iris', illus: 'phone_glow',
+      text: `Her phone, screen-down on the bar, vibrates. She doesn't look at it. It vibrates twice more, then stops.<br><br>Two beats of silence. Then she sighs, picks it up, flips it.<br><br><span class="em">"It's my dad. He's been calling all week. I haven't been picking up. I haven't been able to."</span><br><br>She sets the phone back down, screen-up this time. The lock screen is a photo of a small dog with one ear that doesn't stand up.<br><br><span class="em">"He doesn't know yet. My mother promised she wouldn't tell him until I was ready. Which means he's been calling for one of two reasons. To check on me, or to tell me she did."</span><br><br>She lets the phone go dark.<br><br><span class="em">"I don't know which option I'm more afraid of."</span>`,
+      choices: [
+        { tag: 'PRESS', cls: 'curious', text: '"What are you afraid of, exactly? Try to name it."', w: 1, next: 'iris_5' },
+        { tag: 'COMFORT', cls: 'warm', text: '"Whichever one it is, you don\'t have to find out tonight."', w: 1, next: 'iris_5' },
+        { tag: 'BRAVE', cls: 'flirty', text: '"You don\'t have to do anything alone tonight. I\'m here. The phone can wait."', w: 2, next: 'iris_5' }
+      ]
+    },
+    iris_5: {
+      theme: 'iris', vibe: 'iris', speaker: 'IRIS', speakerClass: 'iris', illus: 'iris_bar',
+      text: `<span class="em">"My dad taught me how to ride a bike. I was six. I fell, I cried, he sat in the grass with me and said: 'Iris, getting up is the only part that counts. The falling doesn't.'"</span><br><br>She smiles, faintly, at the bar.<br><br><span class="em">"I think about that sentence every day. I think about whether he meant it. I think about whether he'll mean it for this. He's a kind man. I don't know if kind survives surprise."</span><br><br>She picks up the drink she has not touched, finally takes a sip, and makes a small face — it has been watered down by ice for an hour.<br><br><span class="em">"You're the first person I've said any of this to who isn't a therapist."</span><br><br>She laughs at her own pronouncement. <span class="em">"And I haven't even told you my name."</span><br><br><span class="em">"It's Iris."</span><br><br>She offers her hand. Formally. With the slightest tremble.`,
+      choices: [
+        { tag: 'HOLD', cls: 'flirty', text: 'You take her hand. You don\'t let go after the handshake ends.', w: 2, next: 'iris_6' },
+        { tag: 'SHAKE', cls: 'warm', text: 'You shake it gently. Hold the eye contact.', w: 1, next: 'iris_6' },
+        { tag: 'INTRODUCE', cls: 'curious', text: 'You tell her your name. Both of yours. The one you were given and the one you chose, if they\'re different.', w: 2, next: 'iris_6' }
+      ]
+    },
+    iris_6: {
+      theme: 'iris', vibe: 'iris', speaker: 'IRIS', speakerClass: 'iris', illus: 'iris_bar',
+      text: `A woman at the other end of the bar — sharp jacket, sharper haircut — sends over a glass of wine. The bartender brings it. <span class="em">"From the lady at table four,"</span> she says, and rolls her eyes at her own line.<br><br>Iris looks at the wine like it's a small animal she doesn't know how to hold. She looks at you. She looks at the woman down the bar — who lifts a glass in a polite toast, no expectations in it, just a kindness.<br><br>Iris turns back. <span class="em">"This is — this is a thing that happens in this kind of bar? People send you drinks?"</span><br><br>The wonder in her voice is genuine.<br><br><span class="em">"What's the protocol? Do I thank her? Do I take it? Do I — "</span> She looks at you. <span class="em">"Is it rude to like that I'm sitting with you and want to keep sitting with you?"</span>`,
+      choices: [
+        { tag: 'STAY', cls: 'flirty', text: '"You smile at her, raise the glass once. Then you turn back to me. That\'s the protocol."', w: 2, next: 'iris_7' },
+        { tag: 'KIND', cls: 'warm', text: '"Take it as a hello to a stranger. We can stay in our little world."', w: 1, next: 'iris_7' },
+        { tag: 'HONEST', cls: 'curious', text: '"It\'s not rude. It\'s how people say I like this person, please respect that. Send one of your own to her sometime."', w: 1, next: 'iris_7' }
+      ]
+    },
+    iris_7: {
+      theme: 'iris', vibe: 'iris', speaker: 'IRIS', speakerClass: 'iris', illus: 'iris_bar',
+      text: `She does as you suggested. Smiles. Lifts the glass. Turns back to you, cheeks pink.<br><br><span class="em">"Okay. Okay. I'm — I'm doing things I haven't done before. Tonight is — "</span> She presses her palm flat against the bar like she's grounding herself.<br><br><span class="em">"Listen. I have to tell you why I'm really here. Not the bookstore. Not the safe place internet thing."</span><br><br>She looks at you with the steady eyes of someone who has practiced this part.<br><br><span class="em">"My ex outed me. To my mother. Eight days ago. I had been planning to tell my mother for two years. I had a script. I had the holidays planned around it. And then she — Mara — she sent my mother an email."</span><br><br><span class="em">"I came here tonight because I needed to do one thing on my own terms. Just one. I needed to be in a queer space because I chose to, not because someone made me."</span><br><br><span class="em">"That's the why."</span>`,
+      choices: [
+        { tag: 'FURY', cls: 'curious', text: '"That\'s — there\'s no word for that. That\'s a violence."', w: 1, next: 'iris_8' },
+        { tag: 'WITNESS', cls: 'warm', text: '"Then I am honored to be a witness to your own-terms night."', w: 2, next: 'iris_8' },
+        { tag: 'CLOSER', cls: 'flirty', text: 'You move your stool a quarter inch closer. "And what else do you choose tonight?"', w: 2, next: 'iris_8' }
+      ]
+    },
+    iris_8: {
+      theme: 'iris', vibe: 'iris', speaker: 'IRIS', speakerClass: 'iris', illus: 'phone_glow',
+      text: `She picks up her phone again. This time she's not looking at her father's call. She opens the notes app. Turns it to you.<br><br>The note is titled <span class="em">"For Dad."</span> It is six paragraphs long. She has been writing it for a week.<br><br><span class="em">"I have been carrying this around. I rewrite it on the train. I rewrite it in the bath. I almost sent it three days ago and then I made my hand put the phone down."</span><br><br>She turns the phone screen down again.<br><br><span class="em">"I want to send it. Tonight. Now. I want my father to hear it from me before anyone else gets to take it from me too."</span><br><br>She is shaking. The smallest amount. The shaking of someone deciding.<br><br><span class="em">"If I send it tonight he reads it tomorrow. There's nothing I can do for hours. I'll be alone with the waiting."</span><br><br>She looks at you, and the question is unasked but very clear.`,
+      choices: [
+        { tag: 'WITH HER', cls: 'flirty', text: '"You won\'t be alone. Send it. I\'ll stay with you."', w: 3, next: 'iris_9' },
+        { tag: 'WAIT', cls: 'warm', text: '"Don\'t send it tonight. Send it tomorrow with sleep behind you. I\'ll come with you to send it."', w: 2, next: 'iris_9' },
+        { tag: 'HONEST', cls: 'curious', text: '"Read it to me first. Out loud. We\'ll know after if it\'s ready."', w: 2, next: 'iris_9' }
+      ]
+    },
+    iris_9: {
+      theme: 'iris', vibe: 'iris', speaker: 'NARRATOR', speakerClass: 'narrator', illus: 'phone_glow',
+      text: () => {
+        if (warmth >= 6) return `She sends it.<br><br>Her thumb hovers. She closes her eyes. She presses send. She sets the phone screen-down on the bar. She exhales for what looks like the first time tonight.<br><br>For a second she does not move. Then she covers her face with her hands and laughs into them, the kind of laugh that has a sob nested inside it.<br><br><span class="em">"I did it. I did it. He's going to read it tomorrow. That's — that's not for me to control anymore."</span><br><br>She looks at you. Her eyes are wet but there's something blazing behind it.<br><br><span class="em">"Get me out of here. Take me to the bookstore. I don't want to sit at this bar one second longer than I have to. I just want to be somewhere quiet with the person who watched me press send."</span>`;
+        return `She reads it to you. Quietly. The room around you fades. The letter is gentle. It is not a confession. It is a story. It is a thank-you to the man who taught her how to fall off bicycles, and a request that he extend the lesson to this.<br><br>When she finishes she looks up. Eyes wet. Not crying, just full.<br><br><span class="em">"It's ready. I'm not ready. But it's ready."</span><br><br>She sets the phone down. Schedule for tomorrow at noon, when he'll be home from his Sunday walk.<br><br><span class="em">"There. Done. Future-me's problem."</span><br><br>She breathes out for what looks like the first time tonight.<br><br><span class="em">"Take me somewhere quiet. The bookstore. Just — somewhere that isn't this bar where I made the decision."</span>`;
+      },
+      choices: [
+        { tag: 'NEXT', cls: 'warm', text: '— You leave together. —', w: 0, next: 'iris_10' }
+      ]
+    },
+    iris_10: {
+      theme: 'iris', vibe: 'iris', speaker: 'NARRATOR', speakerClass: 'narrator', illus: 'bookstore', fx: { rain: true },
+      text: `Outside it is starting to rain — the soft slow kind, the kind that doesn't make you run. You share an umbrella that someone left at the bar, half-collapsed and slightly broken. It only really covers one of you. You pretend it covers both.<br><br>The walk is two blocks. You don't talk much. Iris keeps her hand in the crook of your elbow. At one point a car passes through a puddle and douses your ankles and you both laugh, surprised by the absurdity of being soaked while doing this brave thing.<br><br>The bookstore is exactly as she described. A lamp-lit storefront on a quiet street. A bell rings when you push the door open. The clerk — a tired-looking older woman with a cat sleeping on the register — gives you a nod that means <em>welcome, take as long as you need</em>.<br><br>The couch is in the back. It is old, deep, ridiculous. Iris steers you toward it with the confidence of someone coming home.`,
+      choices: [
+        { tag: 'NEXT', cls: 'warm', text: '— Sit with her. —', w: 0, next: 'iris_11' }
+      ]
+    },
+    iris_11: {
+      theme: 'iris', vibe: 'iris', speaker: 'IRIS', speakerClass: 'iris', illus: 'bookstore', fx: { rain: true },
+      text: `You sit on opposite ends at first. She kicks her shoes off and tucks her feet under her. She is small on the couch, and warm. The rain is louder on the window now.<br><br><span class="em">"I used to come here in college. I'd sit here for hours pretending to read. I'd pretend I was just here for the books. Half of me was hoping a girl would sit on the other end and read the same one."</span><br><br>She laughs at herself, quietly.<br><br><span class="em">"And now one has."</span><br><br>She slides over an inch. Then another. Then she is leaning against your shoulder. You can smell the rain in her hair.<br><br><span class="em">"Read to me. Anywhere. Any page. I want to remember the sound of someone reading to me on the night I sent it."</span>`,
+      choices: [
+        { tag: 'READ', cls: 'warm', text: 'You open the book to a random page and begin to read aloud, softly.', w: 1, next: 'iris_12' },
+        { tag: 'KISS', cls: 'flirty', text: 'You set the book down. "In a minute. First — "', w: 3, next: 'iris_12_kiss' },
+        { tag: 'TURN', cls: 'curious', text: '"You read. I want to hear you read it."', w: 2, next: 'iris_12' }
+      ]
+    },
+    iris_12: {
+      theme: 'iris', vibe: 'iris', speaker: 'NARRATOR', speakerClass: 'narrator', illus: 'bookstore', fx: { rain: true },
+      text: `Reading is the easy part. Whoever reads — you, or her, or both of you trading — the book opens to a passage about Paris and longing and being known.<br><br>The clerk at the front turns the radio down. Outside the rain quiets. The cat on the register sneezes once, daintily.<br><br>At some point she takes her hand and threads it into yours. Casually, the way someone does when they have made the decision an hour ago and are only now finding the moment.<br><br>The reading slows. Eventually it stops. The book closes and stays closed.<br><br>She is looking at you in the lamp-light, hair damp at the edges, cheeks still flushed from the cold walk. Whatever she is about to do, she has been considering since the second drink of wine.<br><br><span class="em">"Hi,"</span> she whispers.<br><br><span class="em">"Hi,"</span> you whisper back.`,
+      choices: [
+        { tag: 'NEXT', cls: 'warm', text: '— End the night. —', w: 0, next: 'iris_13' }
+      ]
+    },
+    iris_12_kiss: {
+      theme: 'iris', vibe: 'iris', speaker: 'NARRATOR', speakerClass: 'narrator', illus: 'bookstore', fx: { rain: true },
+      text: `She blinks once, very fast. Then she nods, the smallest amount. You kiss her on the couch in the back of the bookstore at 1:14 in the morning while the rain works on the window.<br><br>It is soft. It is so soft. She tastes faintly of the wine she was sent and the chapstick she put on twice while you walked.<br><br>She makes a small sound — half-laugh, half-relief — when you pull back.<br><br><span class="em">"That was — okay,"</span> she says. <span class="em">"More than okay. I — I have been thinking about whether to ask for that for an hour."</span><br><br>She closes her eyes. She leans her forehead against yours.<br><br><span class="em">"Don't let me forget tonight. Whatever else happens with my dad. Don't let me forget that I chose this couch, with you, in this bookstore, in the rain."</span>`,
+      choices: [
+        { tag: 'NEXT', cls: 'warm', text: '— End the night. —', w: 1, next: 'iris_13' }
+      ]
+    },
+    iris_13: {
+      theme: 'iris', vibe: 'iris', speaker: 'IRIS', speakerClass: 'iris', illus: 'bookstore',
+      text: `She sits up. Pulls her cardigan closer. She is steadier now than she was at the bar. Whatever the next hours hold for her, this one is hers.<br><br><span class="em">"Okay. Decision time."</span> She gives you a small, tired, true smile. <span class="em">"What do we do with what's left of tonight?"</span><br><br>Outside the rain has stopped. The streetlight makes a pale square on the floor between you. The cat at the register is dreaming.`,
+      choices: [
+        { tag: 'STAY', cls: 'flirty', text: '"Stay here till sunrise. We read. We sleep. The clerk won\'t kick us out."', w: 2, next: 'iris_end_dawn' },
+        { tag: 'HOME', cls: 'warm', text: '"My place. I have tea, a couch that\'s wider, and I want to be next to you when your phone rings tomorrow."', w: 3, next: 'iris_end_home' },
+        { tag: 'PROMISE', cls: 'curious', text: '"Walk you home. Coffee on Sunday at noon. The morning after he reads it. I\'ll be there."', w: 2, next: 'iris_end_promise' },
+        { tag: 'FAMILY', cls: 'warm', text: '"Come with me to my parents\' on Sunday. Mine know. They\'ll love you. We\'ll come at this from both sides."', w: 2, next: 'iris_end_family' }
+      ]
+    },
+
+    iris_end_dawn: {
+      theme: 'end_stay', speaker: 'MORNING', speakerClass: 'narrator', illus: 'bookstore',
+      text: `The clerk does not kick you out. She brings you a blanket at three a.m. She does not say anything, just sets it on the couch and leaves. You suspect she has done this before.<br><br>Iris falls asleep against your shoulder around four. You stay awake for a while, watching her — the way her face goes from braced to soft to peaceful as the hours pass, like the letter she sent is being absolved out of her one breath at a time.<br><br>The cat eventually wakes up and walks the length of the couch, decides you are acceptable, and falls asleep against Iris's hip.<br><br>You sleep, finally, at maybe five.<br><br>At seven you wake to her sitting up, phone in her hand, eyes wet.<br><br><span class="em">"He read it,"</span> she whispers. <span class="em">"He texted back. He's coming over today. He said — he said 'I love you and I always have and I always will.' Word for word."</span><br><br>She is laughing and crying. You hold her. The cat does not move.`,
+      isEnding: true
+    },
+    iris_end_home: {
+      theme: 'end_stay', speaker: 'MORNING', speakerClass: 'narrator', illus: 'apartment_morning',
+      text: `Your apartment is smaller than you remembered. You apologize for it. She tells you to stop apologizing for things you don't need to apologize for.<br><br>You make her tea. She drinks it slowly, on the couch, knees pulled up. You sit close enough that your shoulders touch.<br><br>What happens isn't dramatic. She kisses you again, soft, on the couch, twice. She asks if it's okay if she just sleeps next to you tonight — fully clothed, just held. You say of course.<br><br>You sleep with her head on your chest. You don't sleep much. You spend most of the night listening to her breathe and thinking about the strange unannounced miracle of someone trusting you with the most fragile night of their life.<br><br>In the morning her dad calls. She picks up on the second ring. She listens, says yes, says I love you, hangs up.<br><br>She turns to you. <span class="em">"He said 'come home for breakfast.' He said 'bring whoever you want.' He said — "</span> She laughs, with her hand over her mouth. <span class="em">"He said, 'I knew when you were nine.'"</span><br><br>You make eggs together. Then she asks if you'll come with her. You say yes.`,
+      isEnding: true
+    },
+    iris_end_promise: {
+      theme: 'end_go', speaker: 'MORNING', speakerClass: 'narrator', illus: 'cafe',
+      text: `You walk her home in the dark. She lives on a quiet street, a third-floor walk-up with a green door. At the curb she takes both your hands in both of hers and looks at you with the gravity of someone who is keeping a small fire alive between two cupped palms.<br><br><span class="em">"Sunday. Noon. Promise."</span><br><br><span class="em">"Promise."</span><br><br>She kisses you, once, on the cheek. Then she goes up the stoop and through the green door and is gone.<br><br>Sunday at noon you are at the coffee shop she named. She is already there. She is pale, tired, but smiling — the careful smile of someone who has survived a thing.<br><br>She slides her phone across the table. It is open to a text from her father. A long one. You read it. It is, in essence: <em>I love you. I have always loved you. I am driving up next weekend. Please tell me about her.</em><br><br>Iris is watching your face when you finish reading.<br><br><span class="em">"He said 'her,'"</span> she whispers. <span class="em">"He assumed. I — I didn't have to explain that part."</span><br><br>She takes your hand across the table. <span class="em">"Want to be the her?"</span><br><br>You say yes.`,
+      isEnding: true
+    },
+    iris_end_family: {
+      theme: 'end_stay', speaker: 'SUNDAY', speakerClass: 'narrator', illus: 'family_table',
+      text: `It takes you a week to convince her. Your mother has been waiting since Tuesday with a roast in the freezer and a smaller-than-usual bottle of wine, because, she said, <em>"I don't want anyone overserved on a feelings night."</em> Your dad has been polishing the good wine glasses.<br><br>You drive Iris there on Sunday. Her dad has by now called five times — gently, every time. Last night they spoke for forty minutes. He cried twice. He asked her her favorite color, and laughed when she said the same one she had at six.<br><br>Your parents open the door. Your mom hugs Iris before she's said hello, the way she hugs all the people she has been waiting to love. Your dad puts a hand on her shoulder and says, <span class="em">"We're glad you came. Both of you."</span><br><br>Dinner is unspectacular. The roast is dry. The conversation is everything.<br><br>Halfway through Iris's phone buzzes. She glances at it, then she shows you the screen. It's a photo from her dad — him standing in front of her childhood house, holding a bouquet. The text reads: <em>Whenever she's ready, I'm ready. No rush. Tell her her old man is okay.</em><br><br>She blinks at the screen for a long second. Then she puts the phone down. She takes your mother's hand on one side and yours on the other. She squeezes both.<br><br>The roast does not get any less dry. None of you care.`,
+      isEnding: true
+    }
+  };
+
+  // Inject static SVGs into the title and arrival scenes once
+  (function injectStatic() {
+    const ti = document.getElementById('title-illus');
+    if (ti) ti.innerHTML = art.door();
+    const ai = document.getElementById('arrival-illus');
+    if (ai) ai.innerHTML = art.bar_interior();
+    const pr = document.getElementById('port-river');
+    if (pr) pr.innerHTML = art.portrait_river();
+    const ps = document.getElementById('port-sam');
+    if (ps) ps.innerHTML = art.portrait_sam();
+    const pi = document.getElementById('port-iris');
+    if (pi) pi.innerHTML = art.portrait_iris();
+  })();
+
+  // Track current scene's choices so the delegated handler can read them.
+  let currentChoices = null;
+
+  function go(id) {
+    document.querySelectorAll('.scene').forEach(s => s.remove());
+    const sc = scenes[id];
+    if (!sc) { console.error('Unknown scene:', id); return; }
+    currentChoices = sc.choices || null;
+    setTheme(sc.theme);
+    setOverlays(sc);
+    updateMeter();
+    const el = document.createElement('div');
+    el.className = 'scene active';
+    let html = '';
+    if (sc.vibe) html += `<div class="vibe-orb ${sc.vibe}"></div>`;
+    if (sc.illus && art[sc.illus]) html += ill(sc.illus);
+    html += `<div class="speaker ${sc.speakerClass || ''}">${sc.speaker}</div>`;
+    const txt = typeof sc.text === 'function' ? sc.text() : sc.text;
+    html += `<div class="dialog">${txt}</div>`;
+    if (sc.choices) {
+      html += `<div class="choices">`;
+      sc.choices.forEach((c, i) => {
+        html += `<button class="choice ${c.cls}" data-choice="${i}"><span class="tag">${c.tag}</span>${c.text}</button>`;
+      });
+      html += `</div>`;
+    } else if (sc.isEnding) {
+      html += `<div style="text-align: center; margin-top: 40px;"><button class="restart" data-action="to-final">— THE SUN COMES UP —</button></div>`;
+    }
+    el.innerHTML = html;
+    stage.appendChild(el);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function showFinal() {
+    document.querySelectorAll('.scene').forEach(s => s.remove());
+    setTheme('dawn');
+    const el = document.createElement('div');
+    el.className = 'scene active ending';
+    const closeLine = warmth >= 6
+      ? `You walk away knowing one more person who knows your real name. And one more person knows yours.`
+      : `You walk home a little less alone than you came in.`;
+    el.innerHTML = `
+      <h2>— DAWN —</h2>
+      <div class="dialog" style="text-align: center; max-width: 540px; margin: 0 auto;">
+        Outside, the sky is the color of new bruises beginning to heal.
+        <br><br>
+        The Velvet Hour will be a parking lot by Friday. The neon sign is already half-dimmed; the bartender is wiping down the same patch of bar for the third time. Someone, somewhere, is playing the song that closed the night, again, on their phone, alone.
+        <br><br>
+        <span class="em">${closeLine}</span>
+        <br><br>
+        What happens in walls like this one doesn't have walls.
+      </div>
+      <div style="text-align: center; margin-top: 30px;">
+        <div class="credit">
+          <p>Thank you for visiting Velvet Hour.</p>
+          <p>Three routes. Four endings each. Try another.</p>
+          <p style="margin-top: 18px; opacity: 0.5;">— Made with love. Tip the dev if it stayed with you. —</p>
+        </div>
+        <button class="restart" data-action="restart" style="margin-top: 24px;">— ANOTHER NIGHT —</button>
+      </div>
+    `;
+    stage.appendChild(el);
+  }
+
+  // ONE delegated click handler for the whole app.
+  document.addEventListener('click', (e) => {
+    const t = e.target;
+
+    // STEP INSIDE button on title screen
+    if (t.closest('#to-arrival')) {
+      startAmbient();
+      const title = document.getElementById('scene-title');
+      const arrival = document.getElementById('scene-arrival');
+      if (title) { title.classList.remove('active'); title.remove(); }
+      if (arrival) arrival.classList.add('active');
+      setTheme('arrival');
+      disco.classList.add('on');
+      return;
+    }
+
+    // Character card on arrival
+    const card = t.closest('.char-card');
+    if (card && card.dataset.go) {
+      const id = card.dataset.go;
+      if (id.startsWith('river_1')) route = 'river';
+      if (id.startsWith('sam_1')) route = 'sam';
+      if (id.startsWith('iris_1')) route = 'iris';
+      go(id);
+      return;
+    }
+
+    // Choice button inside a scene
+    const choiceBtn = t.closest('.choice');
+    if (choiceBtn && currentChoices) {
+      const i = parseInt(choiceBtn.dataset.choice, 10);
+      const c = currentChoices[i];
+      if (!c) return;
+      warmth += c.w || 0;
+      go(c.next);
+      return;
+    }
+
+    // "THE SUN COMES UP" → final
+    const action = t.closest('[data-action]');
+    if (action) {
+      const a = action.dataset.action;
+      if (a === 'to-final') { showFinal(); return; }
+      if (a === 'restart') { warmth = 0; route = null; location.reload(); return; }
+    }
+  });
+})();
+</script>
+</body>
+</html>

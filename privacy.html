@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0410">
+<title>Privacy · Omenly</title>
+<script defer src="/_vercel/insights/script.js"></script>
+<style>
+  :root { --ink: #f4ecf7; --dim: rgba(244,236,247,0.55); --line: rgba(244,236,247,0.12); --accent: #ff5fa2; --warm: #ffd166; --bg-a: #0a0410; --bg-b: #1a0826; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { min-height: 100%; background: var(--bg-a); color: var(--ink); font-family: 'Georgia', 'Times New Roman', serif; -webkit-tap-highlight-color: transparent; }
+  body { padding: max(28px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(60px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left)); display: flex; flex-direction: column; align-items: center; position: relative; overflow-x: hidden; }
+  #bg { position: fixed; inset: 0; z-index: 0; background: radial-gradient(ellipse at 20% 10%, rgba(255,95,162,0.16), transparent 60%), radial-gradient(ellipse at 80% 90%, rgba(127,255,212,0.10), transparent 60%), linear-gradient(160deg, #0a0410, #1a0826 60%, #0a0410); pointer-events: none; }
+  main { position: relative; z-index: 2; max-width: 720px; width: 100%; padding: 60px 0; }
+  .crown { font-size: 11px; letter-spacing: 6px; opacity: 0.6; text-transform: uppercase; font-family: 'Helvetica', sans-serif; color: var(--warm); text-align: center; }
+  h1 { font-style: italic; font-weight: normal; font-size: clamp(32px, 5vw, 48px); letter-spacing: 1px; line-height: 1.1; text-align: center; margin: 18px 0 8px; }
+  .updated { text-align: center; font-size: 11px; letter-spacing: 3px; color: var(--dim); text-transform: uppercase; font-family: 'Helvetica', sans-serif; margin-bottom: 50px; }
+  h2 { font-style: italic; font-weight: normal; font-size: 22px; margin: 36px 0 14px; color: var(--warm); }
+  p, li { font-size: 15px; line-height: 1.75; opacity: 0.85; margin-bottom: 12px; }
+  ul { padding-left: 22px; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .back { display: inline-block; margin-top: 50px; font-size: 11px; letter-spacing: 4px; text-transform: uppercase; font-family: 'Helvetica', sans-serif; padding: 10px 18px; border: 1px solid var(--line); border-radius: 2px; transition: all 0.25s; }
+  .back:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<main>
+  <div class="crown">— OMENLY —</div>
+  <h1>Privacy, plainly</h1>
+  <div class="updated">— Last updated 2026-06-09 —</div>
+
+  <p>Short version: Omenly is a small handmade arcade. It collects the bare minimum to keep working, and never sells anything about you.</p>
+
+  <h2>What gets stored on your device</h2>
+  <ul>
+    <li><strong>Honor passes.</strong> When you click "I donated — turn off ads," a token like <code>omenly.pass.echo</code> or <code>omenly.pass.all</code> is saved in your browser's <code>localStorage</code>. That token never leaves your device. Clearing your browser data removes it.</li>
+  </ul>
+
+  <h2>What we measure</h2>
+  <ul>
+    <li><strong>Anonymous visit counts</strong> via Vercel Web Analytics — pageviews, country, device type. No IP addresses, no cookies, no fingerprinting. You can read Vercel's policy <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener">here</a>.</li>
+  </ul>
+
+  <h2>Third parties</h2>
+  <ul>
+    <li><strong>PayPal</strong> — only invoked when you click a donate link. PayPal handles its own data per its <a href="https://www.paypal.com/privacy" target="_blank" rel="noopener">privacy policy</a>. Omenly never sees your payment details.</li>
+    <li><strong>Google AdSense</strong> — when ads are enabled, AdSense may use cookies to serve ads. You can opt out at <a href="https://adssettings.google.com" target="_blank" rel="noopener">Google Ads Settings</a>. Clicking "I donated" hides ads on this device, which also stops AdSense from loading.</li>
+  </ul>
+
+  <h2>What we don't do</h2>
+  <ul>
+    <li>No accounts. No email collection. No newsletters.</li>
+    <li>No selling, sharing, or licensing your data to anyone.</li>
+    <li>No tracking across other sites.</li>
+  </ul>
+
+  <h2>Children</h2>
+  <p>Some games on Omenly are 18+ (clearly marked). The site is not directed at children under 13 and we do not knowingly collect data from them.</p>
+
+  <h2>Contact</h2>
+  <p>Reach out via the link on the <a href="/about.html">about page</a>. Take-down requests, privacy questions, or general notes — all welcome.</p>
+
+  <a class="back" href="/">← back to omenly</a>
+</main>
+</body>
+</html>
