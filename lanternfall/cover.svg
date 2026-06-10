@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#06091a"/>
+      <stop offset="60%" stop-color="#0d1430"/>
+      <stop offset="100%" stop-color="#161028"/>
+    </linearGradient>
+    <radialGradient id="lantglow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#ffd089" stop-opacity="0.95"/>
+      <stop offset="40%" stop-color="#ffb95c" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#ff8c42" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="stoneglow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#9fd9ff" stop-opacity="0.65"/>
+      <stop offset="100%" stop-color="#9fd9ff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="fog" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0d1430" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#9fd9ff" stop-opacity="0.18"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="400" height="300" fill="url(#sky)"/>
+
+  <!-- stars -->
+  <g fill="#cfe6ff" opacity="0.7">
+    <circle cx="32" cy="28" r="0.7"/>
+    <circle cx="76" cy="50" r="1"/>
+    <circle cx="118" cy="20" r="0.6"/>
+    <circle cx="160" cy="42" r="0.8"/>
+    <circle cx="208" cy="16" r="0.6"/>
+    <circle cx="252" cy="36" r="0.7"/>
+    <circle cx="298" cy="58" r="0.5"/>
+    <circle cx="338" cy="24" r="0.9"/>
+    <circle cx="370" cy="50" r="0.6"/>
+    <circle cx="22" cy="74" r="0.5"/>
+    <circle cx="64" cy="92" r="0.6"/>
+    <circle cx="142" cy="78" r="0.5"/>
+    <circle cx="194" cy="88" r="0.7"/>
+    <circle cx="278" cy="78" r="0.5"/>
+    <circle cx="356" cy="98" r="0.7"/>
+  </g>
+
+  <!-- distant tree silhouettes -->
+  <g fill="#06091a" opacity="0.95">
+    <polygon points="0,200 14,170 22,182 34,150 46,178 58,160 72,184 86,158 98,182 108,168 120,196 0,200"/>
+    <polygon points="120,196 134,172 148,190 162,160 178,184 196,166 214,192 232,170 250,196 120,196"/>
+    <polygon points="250,196 268,168 286,188 304,156 322,184 340,164 360,188 380,170 400,196 400,210 250,210"/>
+  </g>
+
+  <!-- mid fog band -->
+  <rect x="0" y="160" width="400" height="80" fill="url(#fog)" opacity="0.55"/>
+
+  <!-- waystone (background, distant) -->
+  <g transform="translate(308, 198)">
+    <ellipse cx="0" cy="22" rx="14" ry="3" fill="#06091a" opacity="0.6"/>
+    <path d="M -8 18 L -10 0 L -6 -14 L 6 -16 L 10 -2 L 9 18 Z" fill="#1a2240"/>
+    <path d="M -8 18 L -10 0 L -6 -14 L 6 -16 L 10 -2 L 9 18 Z" fill="none" stroke="#2a3458" stroke-width="0.6"/>
+    <circle cx="0" cy="-2" r="14" fill="url(#stoneglow)"/>
+    <circle cx="0" cy="-2" r="2" fill="#cfe6ff" opacity="0.9"/>
+  </g>
+
+  <!-- foreground trees (taller, closer) -->
+  <g fill="#06091a">
+    <polygon points="0,210 8,140 14,165 22,130 30,160 36,148 44,170 50,156 56,178 0,210"/>
+    <polygon points="350,210 358,150 366,172 376,138 384,168 392,154 400,178 400,210"/>
+  </g>
+
+  <!-- ground -->
+  <rect x="0" y="208" width="400" height="92" fill="#0a0e22"/>
+  <path d="M 0 208 Q 200 218 400 208 L 400 232 Q 200 240 0 232 Z" fill="#101a36" opacity="0.7"/>
+
+  <!-- path -->
+  <path d="M 80 300 Q 160 250 220 230 Q 280 215 320 208" fill="none" stroke="#1a2240" stroke-width="14" stroke-linecap="round" opacity="0.7"/>
+  <path d="M 80 300 Q 160 250 220 230 Q 280 215 320 208" fill="none" stroke="#2a3458" stroke-width="6" stroke-linecap="round" opacity="0.5"/>
+
+  <!-- scattered leaves on ground -->
+  <g fill="#c8743a" opacity="0.7">
+    <ellipse cx="58" cy="276" rx="3" ry="1.4" transform="rotate(20 58 276)"/>
+    <ellipse cx="98" cy="282" rx="2.4" ry="1.2" transform="rotate(-15 98 282)"/>
+    <ellipse cx="138" cy="270" rx="3" ry="1.5" transform="rotate(30 138 270)"/>
+    <ellipse cx="248" cy="264" rx="2.6" ry="1.3" transform="rotate(-25 248 264)"/>
+    <ellipse cx="298" cy="248" rx="2.4" ry="1.2" transform="rotate(10 298 248)"/>
+    <ellipse cx="340" cy="240" rx="2.8" ry="1.4" transform="rotate(-35 340 240)"/>
+  </g>
+
+  <!-- player + lantern (foreground, lower-left of path) -->
+  <g transform="translate(150, 248)">
+    <!-- big lantern halo -->
+    <circle cx="6" cy="-2" r="78" fill="url(#lantglow)"/>
+    <!-- silhouette: child -->
+    <ellipse cx="-2" cy="22" rx="10" ry="2" fill="#06091a" opacity="0.7"/>
+    <path d="M -8 20 L -6 -2 L -2 -10 L 4 -10 L 6 -2 L 4 20 Z" fill="#1a1428"/>
+    <circle cx="-1" cy="-14" r="6" fill="#1a1428"/>
+    <!-- arm reaching with lantern -->
+    <path d="M 4 -4 L 12 0 L 16 4" stroke="#1a1428" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <!-- lantern body -->
+    <g transform="translate(16, 6)">
+      <line x1="0" y1="-4" x2="0" y2="-8" stroke="#3a2a1a" stroke-width="1"/>
+      <rect x="-4" y="-4" width="8" height="9" fill="#3a2a1a" stroke="#2a1a0a" stroke-width="0.5"/>
+      <rect x="-3" y="-3" width="6" height="7" fill="#ffd089"/>
+      <circle cx="0" cy="0" r="2" fill="#fff5d9"/>
+    </g>
+  </g>
+
+  <!-- soft mist front -->
+  <rect x="0" y="220" width="400" height="80" fill="url(#fog)" opacity="0.35"/>
+
+  <!-- title -->
+  <text x="200" y="46" font-family="Georgia, serif" font-style="italic" font-size="28" fill="#ffe7a0" text-anchor="middle" letter-spacing="2" opacity="0.95">Lantern<tspan fill="#ffb95c">fall</tspan></text>
+  <text x="200" y="64" font-family="Helvetica, sans-serif" font-size="8" fill="#9fd9ff" text-anchor="middle" letter-spacing="4" opacity="0.7">— SIX STONES. ONE FLAME. —</text>
+</svg>

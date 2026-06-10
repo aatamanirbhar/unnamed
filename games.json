@@ -37,6 +37,18 @@
       "cover": "porchlight/cover.svg",
       "href": "porchlight/",
       "controls": "click / tap"
+    },
+    {
+      "id": "lanternfall",
+      "title": "Lanternfall",
+      "blurb": "A foggy grove. Six waystones. Four wicks of oil. Walk the dark with a lantern and decide what gets lit.",
+      "tags": ["adventure", "2d", "exploration", "atmospheric"],
+      "minutes": 10,
+      "accent": "#ffb95c",
+      "background": "linear-gradient(135deg, #06091a, #161028)",
+      "cover": "lanternfall/cover.svg",
+      "href": "lanternfall/",
+      "controls": "WASD / arrows + E (desktop) · joystick + button (mobile)"
     }
   ]
 }
