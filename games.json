@@ -49,6 +49,18 @@
       "cover": "lanternfall/cover.svg",
       "href": "lanternfall/",
       "controls": "WASD / arrows + E (desktop) · joystick + button (mobile)"
+    },
+    {
+      "id": "ashenreach",
+      "title": "Ashenreach",
+      "blurb": "Twenty-three years after the fire, you walk back into the valley. Five names to find. One altar. Things in the dark that did not leave.",
+      "tags": ["adventure", "action", "exploration", "combat", "atmospheric"],
+      "minutes": 35,
+      "accent": "#ff7a2e",
+      "background": "linear-gradient(135deg, #15101e, #3a1a14)",
+      "cover": "ashenreach/cover.svg",
+      "href": "ashenreach/",
+      "controls": "WASD + J/K/E (desktop) · joystick + buttons (mobile)"
     }
   ]
 }

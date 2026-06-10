@@ -381,15 +381,20 @@
 
   // Cell key for memory map
   function ckey(gx, gy) { return gy * 10000 + gx; }
+  // In-place update so we don't allocate a new object per cell per frame —
+  // ping spam used to balloon the Map with garbage and stall both update + render.
   function rememberCellsAt(wx, wy, intensity) {
     const gx = Math.floor(wx / CELL), gy = Math.floor(wy / CELL);
     for (let oy = -1; oy <= 1; oy++) for (let ox = -1; ox <= 1; ox++) {
       const cx = gx + ox, cy = gy + oy;
       if (cx < 0 || cy < 0 || cx >= gw || cy >= gh) continue;
       const k = ckey(cx, cy);
-      const prev = cells.get(k) || { alpha: 0 };
-      const newAlpha = Math.min(1, prev.alpha + intensity * 0.7);
-      cells.set(k, { alpha: newAlpha, gx: cx, gy: cy, wall: grid[cy][cx] === 1 });
+      let prev = cells.get(k);
+      if (prev) {
+        prev.alpha = Math.min(1, prev.alpha + intensity * 0.7);
+      } else {
+        cells.set(k, { alpha: Math.min(1, intensity * 0.7), gx: cx, gy: cy, wall: grid[cy][cx] === 1 });
+      }
     }
   }
 
@@ -428,13 +433,13 @@
       const age = (now - p.born) / 1000;
       p.r = age * 380;
       p.intensity = Math.max(0, 1 - age / 1.6);
-      // Reveal cells along the wavefront
-      const steps = Math.floor(p.r / 12) + 16;
+      // Reveal cells along the wavefront — cap sample count to keep cost bounded
+      // even when several pings overlap, otherwise rapid clicks froze the loop.
+      const steps = Math.min(128, Math.floor(p.r / 12) + 16);
+      const TWO_PI = Math.PI * 2;
       for (let s = 0; s < steps; s++) {
-        const a = (s / steps) * Math.PI * 2;
-        const wx = p.x + Math.cos(a) * p.r;
-        const wy = p.y + Math.sin(a) * p.r;
-        rememberCellsAt(wx, wy, p.intensity * 0.18);
+        const a = (s / steps) * TWO_PI;
+        rememberCellsAt(p.x + Math.cos(a) * p.r, p.y + Math.sin(a) * p.r, p.intensity * 0.18);
       }
       if (p.r > p.maxR || p.intensity <= 0.01) pings.splice(i, 1);
     }
@@ -602,22 +607,6 @@
       ctx.restore();
     }
 
-    // Player — always faintly visible
-    ctx.save();
-    ctx.shadowColor = '#7fffd4';
-    ctx.shadowBlur = 20;
-    ctx.fillStyle = '#e0fff6';
-    ctx.beginPath();
-    ctx.arc(player.x, player.y, player.r, 0, Math.PI * 2);
-    ctx.fill();
-    // breathing ring around player to remind it's you
-    ctx.strokeStyle = `rgba(127,255,212,${0.3 + Math.sin(now * 0.003) * 0.15})`;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.arc(player.x, player.y, player.r + 6 + Math.sin(now * 0.003) * 2, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.restore();
-
     ctx.restore();
 
     // Vignette
@@ -626,6 +615,45 @@
     vg.addColorStop(1, 'rgba(0,0,0,0.85)');
     ctx.fillStyle = vg;
     ctx.fillRect(0, 0, W, H);
+
+    // ── Player — drawn LAST so it sits on top of cells, exit, and vignette.
+    // Drawn in screen-space (player always at viewport center) so the layers
+    // guarantee visibility against ANY background:
+    //   1) dark contrast halo → opaque ring so the core never blends into lit cells
+    //   2) bright opaque core → always the clearest dot on screen
+    //   3) additive aura      → soft glow on dark backgrounds
+    //   4) breathing ring     → "this is you" cue
+    const psx = player.x - camX;
+    const psy = player.y - camY;
+    const pulse = 1 + Math.sin(now * 0.003) * 0.06;
+    // 1) Dark contrast halo
+    ctx.fillStyle = 'rgba(0,18,14,0.9)';
+    ctx.beginPath();
+    ctx.arc(psx, psy, player.r + 6, 0, Math.PI * 2);
+    ctx.fill();
+    // 2) Bright opaque core
+    ctx.fillStyle = '#e0fff6';
+    ctx.beginPath();
+    ctx.arc(psx, psy, player.r + 1, 0, Math.PI * 2);
+    ctx.fill();
+    // 3) Additive aura
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    const aura = ctx.createRadialGradient(psx, psy, 0, psx, psy, 38 * pulse);
+    aura.addColorStop(0,   'rgba(224,255,246,0.55)');
+    aura.addColorStop(0.45,'rgba(127,255,212,0.22)');
+    aura.addColorStop(1,   'rgba(127,255,212,0)');
+    ctx.fillStyle = aura;
+    ctx.beginPath();
+    ctx.arc(psx, psy, 38 * pulse, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    // 4) Breathing ring
+    ctx.strokeStyle = `rgba(127,255,212,${0.55 + Math.sin(now * 0.003) * 0.2})`;
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.arc(psx, psy, player.r + 10 + Math.sin(now * 0.003) * 2, 0, Math.PI * 2);
+    ctx.stroke();
   }
 
   requestAnimationFrame(loop);
