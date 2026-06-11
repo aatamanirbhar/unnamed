@@ -617,43 +617,48 @@
     ctx.fillRect(0, 0, W, H);
 
     // ── Player — drawn LAST so it sits on top of cells, exit, and vignette.
-    // Drawn in screen-space (player always at viewport center) so the layers
-    // guarantee visibility against ANY background:
-    //   1) dark contrast halo → opaque ring so the core never blends into lit cells
-    //   2) bright opaque core → always the clearest dot on screen
-    //   3) additive aura      → soft glow on dark backgrounds
-    //   4) breathing ring     → "this is you" cue
+    // Drawn in screen-space (player always at viewport center). Sizes/colors
+    // chosen so the visible "ball" stays the same diameter against ANY
+    // background — previously the cyan aura+ring blended into freshly-pinged
+    // cyan cells, making the ball appear to shrink right after a ping.
     const psx = player.x - camX;
     const psy = player.y - camY;
     const pulse = 1 + Math.sin(now * 0.003) * 0.06;
-    // 1) Dark contrast halo
-    ctx.fillStyle = 'rgba(0,18,14,0.9)';
+    const breathR = player.r + 12 + Math.sin(now * 0.003) * 2;
+    // 1) Wide dark contrast halo — opaque against bright cyan cells
+    ctx.fillStyle = 'rgba(0,12,9,0.92)';
     ctx.beginPath();
-    ctx.arc(psx, psy, player.r + 6, 0, Math.PI * 2);
+    ctx.arc(psx, psy, player.r + 10, 0, Math.PI * 2);
     ctx.fill();
-    // 2) Bright opaque core
-    ctx.fillStyle = '#e0fff6';
-    ctx.beginPath();
-    ctx.arc(psx, psy, player.r + 1, 0, Math.PI * 2);
-    ctx.fill();
-    // 3) Additive aura
+    // 2) Additive aura — glow on dark backgrounds (harmless on bright)
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
-    const aura = ctx.createRadialGradient(psx, psy, 0, psx, psy, 38 * pulse);
+    const aura = ctx.createRadialGradient(psx, psy, 0, psx, psy, 42 * pulse);
     aura.addColorStop(0,   'rgba(224,255,246,0.55)');
     aura.addColorStop(0.45,'rgba(127,255,212,0.22)');
     aura.addColorStop(1,   'rgba(127,255,212,0)');
     ctx.fillStyle = aura;
     ctx.beginPath();
-    ctx.arc(psx, psy, 38 * pulse, 0, Math.PI * 2);
+    ctx.arc(psx, psy, 42 * pulse, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
-    // 4) Breathing ring
-    ctx.strokeStyle = `rgba(127,255,212,${0.55 + Math.sin(now * 0.003) * 0.2})`;
-    ctx.lineWidth = 1.8;
+    // 3) Breathing ring — dark backing stroke + cyan stroke, so the ring
+    //    contrasts with BOTH dark walls and bright lit cells.
+    ctx.strokeStyle = 'rgba(0,14,10,0.85)';
+    ctx.lineWidth = 4;
     ctx.beginPath();
-    ctx.arc(psx, psy, player.r + 10 + Math.sin(now * 0.003) * 2, 0, Math.PI * 2);
+    ctx.arc(psx, psy, breathR, 0, Math.PI * 2);
     ctx.stroke();
+    ctx.strokeStyle = `rgba(180,255,230,${0.85 + Math.sin(now * 0.003) * 0.15})`;
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.arc(psx, psy, breathR, 0, Math.PI * 2);
+    ctx.stroke();
+    // 4) Bright opaque core — always the clearest dot on screen
+    ctx.fillStyle = '#e0fff6';
+    ctx.beginPath();
+    ctx.arc(psx, psy, player.r + 2, 0, Math.PI * 2);
+    ctx.fill();
   }
 
   requestAnimationFrame(loop);

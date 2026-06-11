@@ -9,9 +9,6 @@ A tiny browser arcade. Deploys to Vercel as static files.
 ├── index.html        ← hub: renders tiles from games.json
 ├── games.json        ← manifest of games (add a new entry to add a tile)
 ├── vercel.json       ← clean URLs + caching
-├── velvet-hour/      ← interactive narrative
-│   ├── index.html
-│   └── cover.svg
 └── echo/             ← sonar survival arcade
     ├── index.html
     └── cover.svg
@@ -44,7 +41,6 @@ shows a two-letter placeholder in the game's accent color.
 
 ## Mobile
 
-- `velvet-hour` is fully touch-friendly (tap to choose).
 - `echo` ships with an on-screen joystick + PING button on touch devices.
 - The hub uses safe-area insets so it lays out cleanly on notched phones.
 
@@ -61,15 +57,14 @@ game's folder. No build command, no framework — it's just static files.
 | Game          | Root Directory  | Result                          |
 |---------------|-----------------|---------------------------------|
 | Echo          | `echo/`         | game lives at `/`               |
-| Velvet Hour   | `velvet-hour/`  | game lives at `/`               |
 
-This is the right setup if you want `echo.example.com` and
-`velvet-hour.example.com` (or two unrelated `*.vercel.app` URLs).
+This is the right setup if you want `echo.example.com` (or an unrelated
+`*.vercel.app` URL).
 
 ### B. Deploy the whole arcade as one site
 
 Create one Vercel project with the **repo root** as Root Directory.
-You get the hub at `/`, with each game at `/echo/`, `/velvet-hour/`, etc.
+You get the hub at `/`, with each game at `/echo/`, `/porchlight/`, etc.
 
 ### C. Mix and match
 

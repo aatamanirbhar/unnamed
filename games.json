@@ -3,18 +3,6 @@
   "tagline": "A small arcade. Made by hand. Play in a browser.",
   "games": [
     {
-      "id": "velvet-hour",
-      "title": "Last Call at the Velvet Hour",
-      "blurb": "Three strangers. One closing queer bar. One night left. An interactive story with twelve endings.",
-      "tags": ["narrative", "queer", "story", "18+"],
-      "minutes": 30,
-      "accent": "#ff5fa2",
-      "background": "linear-gradient(135deg, #1a0826, #2b0a3d)",
-      "cover": "velvet-hour/cover.svg",
-      "href": "velvet-hour/",
-      "controls": "touch / mouse"
-    },
-    {
       "id": "echo",
       "title": "ECHO",
       "blurb": "You cannot see. Click to listen. A sonar survival game in pitch dark.",
@@ -39,18 +27,6 @@
       "controls": "click / tap"
     },
     {
-      "id": "lanternfall",
-      "title": "Lanternfall",
-      "blurb": "A foggy grove. Six waystones. Four wicks of oil. Walk the dark with a lantern and decide what gets lit.",
-      "tags": ["adventure", "2d", "exploration", "atmospheric"],
-      "minutes": 10,
-      "accent": "#ffb95c",
-      "background": "linear-gradient(135deg, #06091a, #161028)",
-      "cover": "lanternfall/cover.svg",
-      "href": "lanternfall/",
-      "controls": "WASD / arrows + E (desktop) · joystick + button (mobile)"
-    },
-    {
       "id": "ashenreach",
       "title": "Ashenreach",
       "blurb": "Twenty-three years after the fire, you walk back into the valley. Five names to find. One altar. Things in the dark that did not leave.",
@@ -61,6 +37,18 @@
       "cover": "ashenreach/cover.svg",
       "href": "ashenreach/",
       "controls": "WASD + J/K/E (desktop) · joystick + buttons (mobile)"
+    },
+    {
+      "id": "stillhunt",
+      "title": "Stillhunt",
+      "blurb": "Dawn on the ridge. Mist in the hollows. Six shells in your pocket. A bolt-action hunting shooter in pseudo-3D.",
+      "tags": ["arcade", "shooter", "3d", "hunting", "atmospheric"],
+      "minutes": 5,
+      "accent": "#ffc878",
+      "background": "linear-gradient(135deg, #0a0d18, #2b2418)",
+      "cover": "stillhunt/cover.svg",
+      "href": "stillhunt/",
+      "controls": "mouse + click / SPACE (desktop) · drag + FIRE button (mobile)"
     }
   ]
 }

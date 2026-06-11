@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<title>STILLHUNT — Dawn on the Ridge</title>
+<link rel="stylesheet" href="omenly.css">
+<script>
+  window.OMENLY_CONFIG = {
+    game: 'stillhunt',
+    gameTitle: 'Stillhunt',
+    price: 3,
+    isHub: false,
+    donateUrl: 'https://www.paypal.me/vikas117/3',
+    allAccessDonateUrl: 'https://www.paypal.me/vikas117/10',
+    theme: { accent: '#ffc878' }
+  };
+</script>
+<script src="omenly.js" defer></script>
+<script defer src="/_vercel/insights/script.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0d18; font-family: 'Georgia','Times New Roman',serif; color: #f0e6d4; user-select: none; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: none; }
+  #game { display: block; width: 100vw; height: 100dvh; cursor: none; background: #0a0d18; }
+
+  #hud { position: fixed; top: 14px; left: 14px; right: 14px; z-index: 10; pointer-events: none; display: flex; justify-content: space-between; font-family: 'Helvetica',sans-serif; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; color: #f0e6d4; text-shadow: 0 2px 8px #000; }
+  #hud .col { display: flex; flex-direction: column; gap: 4px; }
+  #hud .col.right { text-align: right; align-items: flex-end; }
+  #hud .label { font-size: 9px; opacity: 0.55; letter-spacing: 4px; }
+  #hud .val { font-size: 18px; color: #ffc878; letter-spacing: 2px; }
+
+  #title { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 28px; text-align: center; background: radial-gradient(ellipse at 50% 35%, rgba(255,200,120,0.10), transparent 60%), linear-gradient(180deg, #0a0d18 0%, #1a1a18 60%, #0a0d18 100%); }
+  #title .crown { font-family: 'Helvetica',sans-serif; font-size: 11px; letter-spacing: 6px; opacity: 0.55; color: #ffc878; margin-bottom: 18px; }
+  #title h1 { font-style: italic; font-weight: normal; font-size: clamp(48px, 9vw, 88px); letter-spacing: 4px; line-height: 1; text-shadow: 0 4px 30px rgba(255,200,120,0.3); }
+  #title h1 span { color: #ffc878; }
+  #title .sub { font-family: 'Helvetica',sans-serif; font-size: 11px; letter-spacing: 5px; opacity: 0.6; margin: 12px 0 28px; color: #f0e6d4; }
+  #title .opener { max-width: 560px; font-style: italic; opacity: 0.78; font-size: 15px; line-height: 1.6; margin-bottom: 24px; }
+  #title .controls { font-family: 'Helvetica',sans-serif; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.6; line-height: 1.9; margin-bottom: 26px; }
+  #title .controls strong { color: #ffc878; font-weight: 600; }
+  #title button { background: transparent; border: 1px solid #ffc878; color: #ffc878; padding: 14px 28px; font-family: 'Georgia',serif; font-size: 15px; font-style: italic; letter-spacing: 4px; cursor: pointer; transition: all 0.25s; }
+  #title button:hover { background: #ffc878; color: #0a0d18; box-shadow: 0 0 30px rgba(255,200,120,0.5); }
+  #title .credit { margin-top: 22px; font-size: 12px; opacity: 0.45; max-width: 520px; line-height: 1.6; font-style: italic; }
+
+  #gameover { position: fixed; inset: 0; z-index: 25; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 28px; text-align: center; background: radial-gradient(ellipse at 50% 40%, rgba(255,200,120,0.08), transparent 60%), rgba(10,13,24,0.94); }
+  #gameover h2 { font-family: 'Georgia',serif; font-style: italic; font-size: clamp(36px, 6vw, 56px); letter-spacing: 6px; margin-bottom: 14px; color: #ffc878; }
+  #gameover .stat-row { display: flex; gap: 36px; margin: 24px 0 30px; font-family: 'Helvetica',sans-serif; }
+  #gameover .stat-row .stat { display: flex; flex-direction: column; gap: 4px; }
+  #gameover .stat .k { font-size: 9px; letter-spacing: 4px; opacity: 0.55; text-transform: uppercase; }
+  #gameover .stat .v { font-size: 28px; color: #ffc878; font-family: 'Georgia',serif; font-style: italic; }
+  #gameover p { max-width: 500px; font-style: italic; opacity: 0.75; font-size: 14px; line-height: 1.6; margin-bottom: 22px; }
+  #gameover button { background: transparent; border: 1px solid #ffc878; color: #ffc878; padding: 12px 24px; font-family: 'Georgia',serif; font-size: 14px; font-style: italic; letter-spacing: 3px; cursor: pointer; transition: all 0.25s; }
+  #gameover button:hover { background: #ffc878; color: #0a0d18; }
+
+  #crosshair { position: fixed; width: 38px; height: 38px; pointer-events: none; z-index: 9; transform: translate(-50%,-50%); transition: transform 0.06s ease-out; }
+  #crosshair svg { width: 100%; height: 100%; display: block; }
+
+  #flash { position: fixed; inset: 0; z-index: 8; pointer-events: none; background: #fff5d8; opacity: 0; }
+
+  #banner { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -120%); z-index: 15; font-family: 'Georgia',serif; font-style: italic; font-size: 18px; letter-spacing: 3px; color: #ffc878; text-shadow: 0 2px 12px #000; opacity: 0; transition: opacity 0.4s, transform 0.4s; pointer-events: none; }
+  #banner.show { opacity: 1; transform: translate(-50%, -50%); }
+
+  #touch-controls { position: fixed; inset: 0; z-index: 12; pointer-events: none; display: none; }
+  #touch-controls.on { display: block; }
+  #fire-btn { position: absolute; bottom: max(30px, env(safe-area-inset-bottom, 0px) + 20px); right: max(24px, env(safe-area-inset-right, 0px) + 16px); width: 110px; height: 110px; border-radius: 50%; background: rgba(255,200,120,0.08); border: 2px solid #ffc878; color: #ffc878; font-family: 'Georgia',serif; font-style: italic; font-size: 15px; letter-spacing: 4px; text-shadow: 0 0 10px #ffc878; box-shadow: 0 0 24px rgba(255,200,120,0.18); pointer-events: auto; touch-action: manipulation; }
+  #fire-btn:active { background: rgba(255,200,120,0.18); transform: scale(0.96); }
+  #reload-btn { position: absolute; bottom: max(150px, env(safe-area-inset-bottom, 0px) + 140px); right: max(50px, env(safe-area-inset-right, 0px) + 42px); width: 64px; height: 64px; border-radius: 50%; background: rgba(255,200,120,0.06); border: 1px solid rgba(255,200,120,0.5); color: #ffc878; font-family: 'Helvetica',sans-serif; font-size: 10px; letter-spacing: 2px; pointer-events: auto; touch-action: manipulation; }
+  #reload-btn:active { background: rgba(255,200,120,0.16); }
+
+  #donate { position: fixed; bottom: 14px; left: 14px; z-index: 30; }
+  #donate a { display: inline-block; padding: 8px 14px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,200,120,0.5); color: #ffc878; text-decoration: none; font-family: 'Helvetica',sans-serif; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; transition: all 0.2s; backdrop-filter: blur(6px); }
+  #donate a:hover { background: #ffc878; color: #0a0d18; }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div id="crosshair" class="hidden">
+  <svg viewBox="0 0 38 38" stroke="#ffc878" stroke-width="1.2" fill="none">
+    <circle cx="19" cy="19" r="13" opacity="0.75"/>
+    <line x1="19" y1="3" x2="19" y2="11"/>
+    <line x1="19" y1="27" x2="19" y2="35"/>
+    <line x1="3" y1="19" x2="11" y2="19"/>
+    <line x1="27" y1="19" x2="35" y2="19"/>
+    <circle cx="19" cy="19" r="1.4" fill="#ffc878" stroke="none"/>
+  </svg>
+</div>
+
+<div id="hud" class="hidden">
+  <div class="col">
+    <div class="label">Quarry</div>
+    <div class="val" id="score">0</div>
+  </div>
+  <div class="col" style="text-align:center; align-items:center;">
+    <div class="label">Time</div>
+    <div class="val" id="time">90</div>
+  </div>
+  <div class="col right">
+    <div class="label">Shells</div>
+    <div class="val" id="ammo">6 / 6</div>
+  </div>
+</div>
+
+<div id="title">
+  <div class="crown">— OMENLY ARCADE —</div>
+  <h1>Still<span>hunt</span></h1>
+  <div class="sub">— DAWN ON THE RIDGE —</div>
+  <div class="opener">
+    First light, the ridge above the old logging road. Mist sits in the hollows. The deer come down through the larches to drink and they will not know you are here unless the rifle says so.
+    <br><br>
+    A bolt-action. Six shells in your pocket. Ninety quiet minutes before the valley wakes.
+  </div>
+  <div class="controls">
+    Aim: <strong>mouse</strong> · Fire: <strong>click</strong> or <strong>SPACEBAR</strong><br>
+    Reload: <strong>R</strong> · Pause: <strong>Esc</strong><br>
+    On a phone: <strong>drag to aim · tap FIRE</strong>
+  </div>
+  <button id="start">— Settle into the blind —</button>
+  <div data-omenly-ad style="margin-top: 36px; max-width: 600px;"></div>
+  <p class="credit">Ninety seconds on the ridge. Score by the size and stillness of what you take. Birds count for the eye. Rabbits for the hand. The deer are why you came up here.</p>
+</div>
+
+<div id="gameover">
+  <h2 id="go-title">— THE SUN IS UP —</h2>
+  <div class="stat-row">
+    <div class="stat"><div class="k">Quarry</div><div class="v" id="go-score">0</div></div>
+    <div class="stat"><div class="k">Hits</div><div class="v" id="go-hits">0</div></div>
+    <div class="stat"><div class="k">Missed</div><div class="v" id="go-misses">0</div></div>
+  </div>
+  <p id="go-prose">— the ridge is bright now and the deer have moved on —</p>
+  <button id="restart">— Walk back up at dusk —</button>
+  <div data-omenly-ad style="margin-top: 24px; max-width: 500px;"></div>
+</div>
+
+<div id="banner"></div>
+
+<div id="touch-controls">
+  <button id="reload-btn" type="button">RELOAD</button>
+  <button id="fire-btn" type="button">FIRE</button>
+</div>
+
+<div id="flash"></div>
+
+<div id="donate">
+  <a href="https://www.paypal.me/vikas117/3" target="_blank" rel="noopener" data-omenly-cta>SUPPORT THE DEV</a>
+</div>
+
+<script>
+(() => {
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const hud = document.getElementById('hud');
+  const scoreEl = document.getElementById('score');
+  const ammoEl = document.getElementById('ammo');
+  const timeEl = document.getElementById('time');
+  const titleEl = document.getElementById('title');
+  const gameoverEl = document.getElementById('gameover');
+  const goScore = document.getElementById('go-score');
+  const goHits = document.getElementById('go-hits');
+  const goMisses = document.getElementById('go-misses');
+  const goProse = document.getElementById('go-prose');
+  const startBtn = document.getElementById('start');
+  const restartBtn = document.getElementById('restart');
+  const crosshair = document.getElementById('crosshair');
+  const flash = document.getElementById('flash');
+  const banner = document.getElementById('banner');
+  const fireBtn = document.getElementById('fire-btn');
+  const reloadBtn = document.getElementById('reload-btn');
+  const touchControls = document.getElementById('touch-controls');
+
+  let W = 0, H = 0, DPR = Math.min(window.devicePixelRatio || 1, 2);
+  function resize() {
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = W * DPR; canvas.height = H * DPR;
+    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || matchMedia('(pointer: coarse)').matches;
+
+  // ─── Audio ────────────────────────────────────────────────────
+  let audioCtx = null;
+  function ensureAudio() {
+    if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} }
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  }
+  function tone(freq, dur, type='sine', vol=0.15, attack=0.005, release=0.1) {
+    if (!audioCtx) return;
+    const t = audioCtx.currentTime;
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t);
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(vol, t + attack);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(t); o.stop(t + dur + release);
+  }
+  function noiseBurst(dur, vol=0.2, hp=2000) {
+    if (!audioCtx) return;
+    const t = audioCtx.currentTime;
+    const n = audioCtx.createBufferSource();
+    const buf = audioCtx.createBuffer(1, audioCtx.sampleRate * dur, audioCtx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+    n.buffer = buf;
+    const f = audioCtx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = hp;
+    const g = audioCtx.createGain(); g.gain.value = vol;
+    n.connect(f); f.connect(g); g.connect(audioCtx.destination);
+    n.start(t);
+  }
+  const SFX = {
+    shot:   () => { noiseBurst(0.18, 0.35, 800); tone(180, 0.25, 'square', 0.18); tone(60, 0.4, 'sine', 0.12); },
+    bolt:   () => { tone(900, 0.05, 'square', 0.08); setTimeout(() => tone(700, 0.06, 'square', 0.07), 90); },
+    hit:    () => { tone(240, 0.12, 'sine', 0.12); noiseBurst(0.08, 0.12, 600); },
+    miss:   () => { noiseBurst(0.18, 0.06, 4000); },
+    empty:  () => { tone(2200, 0.03, 'square', 0.06); setTimeout(() => tone(1600, 0.03, 'square', 0.05), 50); },
+    reload: () => { tone(420, 0.05, 'square', 0.08); setTimeout(() => tone(380, 0.06, 'square', 0.07), 120); setTimeout(() => tone(560, 0.05, 'square', 0.07), 260); },
+    bird:   () => { tone(2400, 0.08, 'sine', 0.05); setTimeout(()=>tone(2800, 0.1, 'sine', 0.04), 80); }
+  };
+
+  // ─── Game state ───────────────────────────────────────────────
+  const DUR = 90;
+  const MAG = 6;
+  let alive = false, started = false;
+  let score = 0, hits = 0, misses = 0;
+  let ammo = MAG, reloading = false;
+  let timeLeft = DUR;
+  let aimX, aimY;
+  let shakeT = 0;
+  let lastTickMs = 0;
+  let animals = [];
+  let particles = [];
+  let nextSpawnT = 0;
+  let ambientBirdT = 0;
+  let cooldown = 0;
+
+  // ─── Animal types ─────────────────────────────────────────────
+  // worldY: vertical offset above horizon-base (0 = on ground)
+  // hit radius is multiplied by scale at draw time.
+  const TYPES = {
+    deer:   { points: 50, hr: 36, speed: 18, worldY: 0,    color: '#3a2a1c', mass: 'big',  rarity: 1.0 },
+    boar:   { points: 35, hr: 32, speed: 22, worldY: 0,    color: '#251a14', mass: 'big',  rarity: 0.7 },
+    rabbit: { points: 75, hr: 14, speed: 60, worldY: 0,    color: '#3a3026', mass: 'small',rarity: 1.0 },
+    bird:   { points: 100, hr: 16, speed: 90, worldY: 90,  color: '#1a1410', mass: 'flying', rarity: 1.1 }
+  };
+  const TYPE_KEYS = Object.keys(TYPES);
+
+  function spawnAnimal() {
+    const r = Math.random();
+    let weights = TYPE_KEYS.map(k => TYPES[k].rarity);
+    let total = weights.reduce((s, w) => s + w, 0);
+    let pick = Math.random() * total;
+    let type = TYPE_KEYS[0];
+    for (let i = 0; i < TYPE_KEYS.length; i++) {
+      pick -= weights[i];
+      if (pick <= 0) { type = TYPE_KEYS[i]; break; }
+    }
+    const def = TYPES[type];
+    const dir = Math.random() < 0.5 ? -1 : 1;
+    const z = 180 + Math.random() * 160; // depth (smaller = closer; we set far so they appear small at first)
+    const startX = dir === 1 ? -260 : 260;
+    animals.push({
+      type, def,
+      x: startX,
+      y: def.worldY + (def.mass === 'flying' ? Math.random() * 30 : 0),
+      z,
+      vx: def.speed * dir * (0.85 + Math.random() * 0.4),
+      vy: def.mass === 'flying' ? (Math.random() - 0.5) * 8 : 0,
+      vz: -2 - Math.random() * 4, // slowly approaches camera
+      dir,
+      alive: true,
+      bob: Math.random() * Math.PI * 2,
+      lifeT: 0,
+      hitFlash: 0
+    });
+  }
+
+  // World→screen projection
+  // Horizon line on screen
+  function horizonY() { return H * 0.58; }
+  function project(x, y, z) {
+    // Perspective: scale ~ FOCAL / z
+    const FOCAL = 220;
+    const scale = FOCAL / Math.max(40, z);
+    const sx = W / 2 + x * scale;
+    const sy = horizonY() - y * scale * 0.6;
+    return { sx, sy, scale };
+  }
+
+  function start() {
+    titleEl.classList.add('hidden');
+    gameoverEl.style.display = 'none';
+    hud.classList.remove('hidden');
+    crosshair.classList.remove('hidden');
+    if (isTouch) touchControls.classList.add('on');
+    alive = true; started = true;
+    score = 0; hits = 0; misses = 0;
+    ammo = MAG; reloading = false; cooldown = 0;
+    timeLeft = DUR;
+    animals = []; particles = [];
+    nextSpawnT = 0.5;
+    ambientBirdT = 2;
+    aimX = W / 2; aimY = H / 2;
+    crosshair.style.left = aimX + 'px';
+    crosshair.style.top = aimY + 'px';
+    updateHUD();
+    ensureAudio();
+  }
+
+  function end() {
+    if (!alive) return;
+    alive = false;
+    crosshair.classList.add('hidden');
+    touchControls.classList.remove('on');
+    goScore.textContent = score;
+    goHits.textContent = hits;
+    goMisses.textContent = misses;
+    if (score === 0)         goProse.textContent = '— you sat still and watched. some hunters do that until they stop coming back at all. —';
+    else if (score < 100)    goProse.textContent = '— a quiet morning. you brought home one good story and that was enough. —';
+    else if (score < 300)    goProse.textContent = '— the truck rides lower on the way down. you did not flinch on a single shot. —';
+    else                     goProse.textContent = '— the ridge will remember you for a season. take it as praise or warning. —';
+    setTimeout(() => { gameoverEl.style.display = 'flex'; }, 600);
+  }
+
+  function updateHUD() {
+    scoreEl.textContent = score;
+    timeEl.textContent = Math.max(0, Math.ceil(timeLeft));
+    ammoEl.textContent = reloading ? '—  /  ' + MAG : ammo + ' / ' + MAG;
+  }
+
+  function showBanner(text) {
+    banner.textContent = text;
+    banner.classList.add('show');
+    setTimeout(() => banner.classList.remove('show'), 900);
+  }
+
+  function fire() {
+    if (!alive || cooldown > 0) return;
+    if (reloading) return;
+    if (ammo <= 0) {
+      SFX.empty();
+      showBanner('— EMPTY · press R —');
+      return;
+    }
+    ammo--;
+    cooldown = 0.45;
+    shakeT = 0.28;
+    SFX.shot();
+    flash.style.transition = 'none';
+    flash.style.opacity = '0.7';
+    requestAnimationFrame(() => {
+      flash.style.transition = 'opacity 0.18s';
+      flash.style.opacity = '0';
+    });
+    setTimeout(() => SFX.bolt(), 280);
+
+    // raycast against animals — pick the closest hit
+    let bestHit = null;
+    for (const a of animals) {
+      if (!a.alive) continue;
+      const p = project(a.x, a.y, a.z);
+      const dx = aimX - p.sx, dy = aimY - p.sy;
+      const dist = Math.hypot(dx, dy);
+      const hr = a.def.hr * p.scale;
+      if (dist < hr) {
+        if (!bestHit || a.z < bestHit.a.z) bestHit = { a, p, dist };
+      }
+    }
+    if (bestHit) {
+      const { a, p } = bestHit;
+      a.alive = false;
+      a.hitFlash = 0.4;
+      a.deathT = 0;
+      hits++;
+      score += a.def.points;
+      SFX.hit();
+      // particles
+      for (let i = 0; i < 14; i++) {
+        particles.push({
+          x: p.sx, y: p.sy,
+          vx: (Math.random() - 0.5) * 220,
+          vy: (Math.random() - 0.5) * 220 - 60,
+          life: 0.6 + Math.random() * 0.4,
+          maxLife: 1.0,
+          col: a.def.color,
+          size: 2 + Math.random() * 2
+        });
+      }
+      const label = a.type === 'deer' ? 'DEER' : a.type === 'boar' ? 'BOAR' : a.type === 'rabbit' ? 'HARE' : 'BIRD';
+      showBanner(`— ${label} · +${a.def.points} —`);
+    } else {
+      misses++;
+      SFX.miss();
+      // dust puff at aim (ground only)
+      if (aimY > horizonY()) {
+        for (let i = 0; i < 6; i++) {
+          particles.push({
+            x: aimX, y: aimY,
+            vx: (Math.random() - 0.5) * 80,
+            vy: -Math.random() * 100,
+            life: 0.5,
+            maxLife: 0.6,
+            col: '#6b5d4a',
+            size: 2 + Math.random() * 2
+          });
+        }
+      }
+    }
+    updateHUD();
+  }
+
+  function reload() {
+    if (!alive || reloading || ammo === MAG) return;
+    reloading = true;
+    SFX.reload();
+    updateHUD();
+    setTimeout(() => {
+      ammo = MAG;
+      reloading = false;
+      updateHUD();
+    }, 1200);
+  }
+
+  // ─── Input ────────────────────────────────────────────────────
+  function setAim(x, y) {
+    aimX = Math.max(0, Math.min(W, x));
+    aimY = Math.max(0, Math.min(H, y));
+    crosshair.style.left = aimX + 'px';
+    crosshair.style.top = aimY + 'px';
+  }
+
+  window.addEventListener('mousemove', e => {
+    if (!started || !alive) return;
+    if (isTouch) return; // touch uses drag aim
+    setAim(e.clientX, e.clientY);
+  });
+  canvas.addEventListener('mousedown', e => {
+    ensureAudio();
+    if (!started) { start(); return; }
+    if (!alive) return;
+    if (isTouch) return;
+    setAim(e.clientX, e.clientY);
+    fire();
+  });
+
+  // touch: drag to aim, tap FIRE
+  let touchAimId = null;
+  canvas.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'mouse') return;
+    ensureAudio();
+    if (!started) { start(); return; }
+    if (!alive) return;
+    touchAimId = e.pointerId;
+    setAim(e.clientX, e.clientY);
+  });
+  canvas.addEventListener('pointermove', e => {
+    if (e.pointerType === 'mouse') return;
+    if (touchAimId !== e.pointerId) return;
+    setAim(e.clientX, e.clientY);
+  });
+  canvas.addEventListener('pointerup', e => {
+    if (touchAimId === e.pointerId) touchAimId = null;
+  });
+
+  fireBtn.addEventListener('pointerdown', e => { e.preventDefault(); ensureAudio(); if (started && alive) fire(); });
+  reloadBtn.addEventListener('pointerdown', e => { e.preventDefault(); if (started && alive) reload(); });
+  ['touchstart','contextmenu'].forEach(ev => {
+    fireBtn.addEventListener(ev, e => e.preventDefault(), { passive: false });
+    reloadBtn.addEventListener(ev, e => e.preventDefault(), { passive: false });
+  });
+
+  window.addEventListener('keydown', e => {
+    const k = e.key.toLowerCase();
+    if (!started && k !== 'tab') { start(); return; }
+    if (!alive) {
+      if (k === 'enter' || k === ' ') start();
+      return;
+    }
+    if (k === ' ') { e.preventDefault(); fire(); }
+    if (k === 'r') reload();
+    if (k === 'escape') {
+      // pause = back to title
+      alive = false; started = false;
+      hud.classList.add('hidden');
+      crosshair.classList.add('hidden');
+      titleEl.classList.remove('hidden');
+    }
+  });
+
+  startBtn.addEventListener('click', () => { ensureAudio(); start(); });
+  restartBtn.addEventListener('click', () => { ensureAudio(); start(); });
+
+  // ─── Render ───────────────────────────────────────────────────
+  function drawSkyAndGround(now) {
+    const sky = ctx.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, '#1a2030');
+    sky.addColorStop(0.45, '#2c2a2e');
+    sky.addColorStop(0.6, '#3b3024');
+    sky.addColorStop(1, '#241a12');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, W, H);
+
+    // dawn sun glow
+    const cx = W * 0.72, cy = H * 0.42;
+    const sun = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(W, H) * 0.45);
+    sun.addColorStop(0, 'rgba(255,200,120,0.45)');
+    sun.addColorStop(0.25, 'rgba(255,160,90,0.18)');
+    sun.addColorStop(0.55, 'rgba(255,120,70,0.04)');
+    sun.addColorStop(1, 'rgba(255,120,70,0)');
+    ctx.fillStyle = sun;
+    ctx.fillRect(0, 0, W, H);
+
+    // sun disc
+    ctx.fillStyle = 'rgba(255,220,160,0.7)';
+    ctx.beginPath();
+    ctx.arc(cx, cy, 28, 0, Math.PI * 2);
+    ctx.fill();
+
+    // ground
+    const gy = horizonY();
+    const grd = ctx.createLinearGradient(0, gy, 0, H);
+    grd.addColorStop(0, '#1a1812');
+    grd.addColorStop(0.4, '#100c08');
+    grd.addColorStop(1, '#050402');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, gy, W, H - gy);
+
+    // mist band along horizon
+    const mist = ctx.createLinearGradient(0, gy - 50, 0, gy + 60);
+    mist.addColorStop(0, 'rgba(140,150,160,0)');
+    mist.addColorStop(0.4, 'rgba(160,170,180,0.22)');
+    mist.addColorStop(1, 'rgba(140,150,160,0)');
+    ctx.fillStyle = mist;
+    ctx.fillRect(0, gy - 50, W, 110);
+  }
+
+  // parallax tree silhouettes — three depth layers
+  function drawTrees(now) {
+    const gy = horizonY();
+    // far ridge
+    ctx.fillStyle = 'rgba(8,10,18,0.85)';
+    ctx.beginPath();
+    ctx.moveTo(0, gy);
+    const N1 = 14;
+    for (let i = 0; i <= N1; i++) {
+      const x = (i / N1) * W;
+      const h = 22 + Math.sin(i * 1.7) * 12 + Math.sin(i * 3.3) * 6;
+      ctx.lineTo(x, gy - h);
+    }
+    ctx.lineTo(W, gy);
+    ctx.closePath();
+    ctx.fill();
+
+    // mid treeline
+    ctx.fillStyle = 'rgba(4,5,10,0.92)';
+    ctx.beginPath();
+    ctx.moveTo(0, gy + 8);
+    const N2 = 22;
+    for (let i = 0; i <= N2; i++) {
+      const x = (i / N2) * W;
+      const h = 38 + Math.sin(i * 1.3 + 0.5) * 22 + Math.sin(i * 2.7) * 8;
+      ctx.lineTo(x, gy + 8 - h);
+    }
+    ctx.lineTo(W, gy + 8);
+    ctx.closePath();
+    ctx.fill();
+
+    // near trunks scattered
+    ctx.fillStyle = '#02030a';
+    const trunks = [0.04, 0.13, 0.27, 0.41, 0.58, 0.74, 0.88, 0.97];
+    for (let i = 0; i < trunks.length; i++) {
+      const x = trunks[i] * W;
+      const baseY = H + 20;
+      const topY = gy - 60 + Math.sin(i * 1.7) * 18;
+      const w = 6 + (i % 3) * 2;
+      ctx.fillRect(x, topY, w, baseY - topY);
+      // a small branch
+      ctx.save();
+      ctx.translate(x + w / 2, topY + 14);
+      ctx.rotate(((i % 2) ? -0.45 : 0.45));
+      ctx.fillRect(0, 0, 2, 30);
+      ctx.restore();
+    }
+  }
+
+  function drawAnimal(a, now) {
+    const p = project(a.x, a.y, a.z);
+    const s = p.scale;
+    const sx = p.sx, sy = p.sy;
+    const t = a.type;
+    const col = a.def.color;
+    const bob = Math.sin(a.bob + now * 0.005) * 2 * s;
+
+    ctx.save();
+    if (a.hitFlash > 0) {
+      ctx.fillStyle = `rgba(255,80,40,${a.hitFlash})`;
+      ctx.strokeStyle = `rgba(255,80,40,${a.hitFlash})`;
+      ctx.shadowColor = '#ff5028';
+      ctx.shadowBlur = 18;
+    }
+
+    if (t === 'deer') {
+      ctx.fillStyle = ctx.fillStyle === col || a.hitFlash > 0 ? ctx.fillStyle : col;
+      if (a.hitFlash <= 0) ctx.fillStyle = col;
+      const W1 = 60 * s, H1 = 26 * s;
+      ctx.beginPath();
+      ctx.ellipse(sx, sy - H1 / 2 + bob, W1 / 2, H1 / 2, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // head
+      const hx = sx + (a.dir === 1 ? W1 * 0.45 : -W1 * 0.45);
+      const hy = sy - H1 + bob;
+      ctx.beginPath();
+      ctx.ellipse(hx, hy, 11 * s, 9 * s, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // neck
+      ctx.beginPath();
+      ctx.moveTo(sx + (a.dir === 1 ? W1 * 0.3 : -W1 * 0.3), sy - H1 + bob * 0.6);
+      ctx.lineTo(hx, hy + 3 * s);
+      ctx.lineTo(hx - (a.dir === 1 ? 4 : -4) * s, hy + 6 * s);
+      ctx.lineTo(sx + (a.dir === 1 ? W1 * 0.25 : -W1 * 0.25), sy - H1 * 0.5 + bob * 0.6);
+      ctx.closePath();
+      ctx.fill();
+      // antlers
+      ctx.strokeStyle = a.hitFlash > 0 ? ctx.strokeStyle : col;
+      ctx.lineWidth = Math.max(1, 1.6 * s);
+      ctx.beginPath();
+      ctx.moveTo(hx - 2 * s, hy - 6 * s);
+      ctx.lineTo(hx - 6 * s, hy - 16 * s);
+      ctx.moveTo(hx - 4 * s, hy - 12 * s);
+      ctx.lineTo(hx - 9 * s, hy - 12 * s);
+      ctx.moveTo(hx + 2 * s, hy - 6 * s);
+      ctx.lineTo(hx + 5 * s, hy - 14 * s);
+      ctx.stroke();
+      // legs
+      ctx.fillStyle = a.hitFlash > 0 ? ctx.fillStyle : col;
+      for (let i = -1; i <= 1; i += 2) {
+        const lx1 = sx + i * W1 * 0.35;
+        const lx2 = sx + i * W1 * 0.18;
+        const legBob = Math.sin(a.bob * 3 + (i + 1) + now * 0.012) * 1.6 * s;
+        ctx.fillRect(lx1 - 1.4 * s, sy - 2 + bob, 2.8 * s, 18 * s + legBob);
+        ctx.fillRect(lx2 - 1.4 * s, sy - 2 + bob, 2.8 * s, 18 * s - legBob);
+      }
+    } else if (t === 'boar') {
+      ctx.fillStyle = a.hitFlash > 0 ? ctx.fillStyle : col;
+      const W1 = 50 * s, H1 = 26 * s;
+      ctx.beginPath();
+      ctx.ellipse(sx, sy - H1 / 2 + bob, W1 / 2, H1 / 2, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // snout (head merges)
+      const hx = sx + (a.dir === 1 ? W1 * 0.42 : -W1 * 0.42);
+      const hy = sy - H1 * 0.55 + bob;
+      ctx.beginPath();
+      ctx.ellipse(hx, hy, 12 * s, 9 * s, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // tusks
+      ctx.fillStyle = a.hitFlash > 0 ? ctx.fillStyle : '#d8c8b0';
+      ctx.fillRect(hx + (a.dir === 1 ? 6 : -8) * s, hy + 3 * s, 2 * s, 4 * s);
+      // legs
+      ctx.fillStyle = a.hitFlash > 0 ? ctx.fillStyle : col;
+      for (let i = -1; i <= 1; i += 2) {
+        const legBob = Math.sin(a.bob * 4 + (i + 1) + now * 0.015) * 1.4 * s;
+        ctx.fillRect(sx + i * W1 * 0.32 - 1.6 * s, sy - 2 + bob, 3.2 * s, 12 * s + legBob);
+        ctx.fillRect(sx + i * W1 * 0.14 - 1.6 * s, sy - 2 + bob, 3.2 * s, 12 * s - legBob);
+      }
+    } else if (t === 'rabbit') {
+      ctx.fillStyle = a.hitFlash > 0 ? ctx.fillStyle : col;
+      const W1 = 22 * s, H1 = 14 * s;
+      ctx.beginPath();
+      ctx.ellipse(sx, sy - H1 / 2 + bob, W1 / 2, H1 / 2, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // head
+      const hx = sx + (a.dir === 1 ? W1 * 0.4 : -W1 * 0.4);
+      const hy = sy - H1 + bob;
+      ctx.beginPath();
+      ctx.ellipse(hx, hy, 6 * s, 6 * s, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // ears
+      ctx.fillRect(hx - 1 * s, hy - 10 * s, 1.6 * s, 8 * s);
+      ctx.fillRect(hx + 2 * s, hy - 10 * s, 1.6 * s, 8 * s);
+      // legs — exaggerated hop
+      const hop = Math.abs(Math.sin(a.bob * 6 + now * 0.02)) * 4 * s;
+      ctx.fillRect(sx - W1 * 0.3, sy + bob - hop, 4 * s, 6 * s);
+      ctx.fillRect(sx + W1 * 0.18, sy + bob - hop, 4 * s, 6 * s);
+    } else if (t === 'bird') {
+      ctx.fillStyle = a.hitFlash > 0 ? ctx.fillStyle : col;
+      const W1 = 18 * s;
+      const flap = Math.sin(a.bob + now * 0.03) * 0.7;
+      ctx.beginPath();
+      ctx.ellipse(sx, sy + bob, W1 / 2, 5 * s, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // wings
+      ctx.beginPath();
+      ctx.moveTo(sx, sy + bob);
+      ctx.lineTo(sx - W1 * 0.9 * (a.dir === 1 ? 0.8 : 1.0), sy + bob - 10 * s * (0.5 + flap));
+      ctx.lineTo(sx - W1 * 0.2, sy + bob - 2 * s);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(sx, sy + bob);
+      ctx.lineTo(sx + W1 * 0.9 * (a.dir === 1 ? 1.0 : 0.8), sy + bob - 10 * s * (0.5 - flap));
+      ctx.lineTo(sx + W1 * 0.2, sy + bob - 2 * s);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function update(dt, now) {
+    if (!alive) return;
+    timeLeft -= dt;
+    if (timeLeft <= 0) { timeLeft = 0; updateHUD(); end(); return; }
+
+    cooldown = Math.max(0, cooldown - dt);
+    shakeT = Math.max(0, shakeT - dt);
+
+    // spawn animals
+    nextSpawnT -= dt;
+    const targetCount = 3 + Math.floor((DUR - timeLeft) / 25);
+    const alivedCount = animals.filter(a => a.alive).length;
+    if (nextSpawnT <= 0 && alivedCount < targetCount) {
+      spawnAnimal();
+      nextSpawnT = 1.2 + Math.random() * 1.6;
+    } else if (nextSpawnT <= 0) {
+      nextSpawnT = 0.6;
+    }
+
+    // ambient bird
+    ambientBirdT -= dt;
+    if (ambientBirdT <= 0) {
+      ambientBirdT = 4 + Math.random() * 6;
+      if (Math.random() < 0.7) SFX.bird();
+    }
+
+    // animals
+    for (const a of animals) {
+      a.lifeT += dt;
+      a.bob += dt * 3;
+      if (a.hitFlash > 0) a.hitFlash = Math.max(0, a.hitFlash - dt * 1.5);
+      if (a.alive) {
+        a.x += a.vx * dt;
+        a.y += a.vy * dt;
+        a.z += a.vz * dt;
+        // bird vertical drift
+        if (a.type === 'bird') {
+          a.y += Math.sin(a.bob * 0.5) * 0.4;
+          if (a.y < 50) a.y = 50;
+          if (a.y > 140) a.y = 140;
+        }
+        if (a.z < 50) { a.alive = false; } // ran past
+      } else {
+        a.deathT += dt;
+        // falling motion
+        a.y -= 60 * dt;
+        if (a.y < -40) a.y = -40;
+      }
+    }
+    // cull
+    animals = animals.filter(a => a.alive || a.deathT < 2.0);
+    if (animals.length > 14) animals.splice(0, animals.length - 14);
+
+    // particles
+    for (const p of particles) {
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.vy += 240 * dt;
+      p.life -= dt;
+    }
+    particles = particles.filter(p => p.life > 0);
+
+    updateHUD();
+  }
+
+  function render(now) {
+    // screen shake
+    let sx = 0, sy = 0;
+    if (shakeT > 0) {
+      const k = shakeT * 16;
+      sx = (Math.random() - 0.5) * k;
+      sy = (Math.random() - 0.5) * k;
+    }
+    ctx.save();
+    ctx.translate(sx, sy);
+
+    drawSkyAndGround(now);
+    drawTrees(now);
+
+    // sort animals back-to-front
+    const sorted = animals.slice().sort((a, b) => b.z - a.z);
+    for (const a of sorted) drawAnimal(a, now);
+
+    // particles
+    for (const p of particles) {
+      const a = Math.max(0, p.life / p.maxLife);
+      ctx.fillStyle = p.col;
+      ctx.globalAlpha = a;
+      ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+    }
+    ctx.globalAlpha = 1;
+
+    // foreground vignette + scope tunnel
+    const vg = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.3, W / 2, H / 2, Math.max(W, H) * 0.75);
+    vg.addColorStop(0, 'rgba(0,0,0,0)');
+    vg.addColorStop(1, 'rgba(0,0,0,0.6)');
+    ctx.fillStyle = vg;
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.restore();
+  }
+
+  function loop(now) {
+    const dt = Math.min(0.05, (now - lastTickMs) / 1000);
+    lastTickMs = now;
+    if (started) update(dt, now);
+    render(now);
+    requestAnimationFrame(loop);
+  }
+  lastTickMs = performance.now();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

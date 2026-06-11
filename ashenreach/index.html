@@ -244,7 +244,7 @@
     Now you have come back. You carry your grandfather's lantern, a staff with a striking-iron at the tip, and an empty book. <em>Walk every stone</em>, your grandmother had said, when you were small. <em>Walk every stone, and the valley remembers itself.</em>
   </div>
   <div class="controls">
-    Move: <strong>WASD</strong> / arrows · Attack: <strong>J</strong> / space · Dash: <strong>K</strong> / shift<br>
+    Move: <strong>WASD</strong> / arrows · Slash (attack): <strong>SPACEBAR</strong> or <strong>J</strong> · Dash: <strong>K</strong> / shift<br>
     Use: <strong>E</strong> · Satchel: <strong>I</strong> · Pause: <strong>Esc</strong><br>
     On a phone: <strong>joystick + buttons</strong>
   </div>
@@ -2382,20 +2382,28 @@ function drawLighting() {
   const offX = -state.cam.x + vw / 2;
   const offY = -state.cam.y + vh / 2;
 
+  // Subtle ambient flicker so the darkness breathes a little.
+  const ambient = 0.78 + Math.sin(state.flicker * 1.7) * 0.015;
+  const flick7 = Math.sin(state.flicker * 7);
+  const flick11 = Math.sin(state.flicker * 11 + 0.7);
+
   ctx.save();
-  // base darkness
-  ctx.fillStyle = 'rgba(15,10,24,0.74)';
+  // base darkness — a touch deeper, with a faint indigo bias
+  ctx.fillStyle = `rgba(12,8,20,${ambient})`;
   ctx.fillRect(0, 0, vw, vh);
   ctx.globalCompositeOperation = 'destination-out';
 
-  // player lantern
+  // player lantern — bigger, with a near-opaque hot core and a long soft falloff
   const playerSX = state.player.x + offX;
   const playerSY = state.player.y + offY;
-  const pR = state.player.oil > 0 ? 200 + Math.sin(state.flicker * 7) * 10 : 70;
-  const pg = ctx.createRadialGradient(playerSX, playerSY, 8, playerSX, playerSY, pR);
-  pg.addColorStop(0, 'rgba(0,0,0,1)');
-  pg.addColorStop(0.6, 'rgba(0,0,0,0.7)');
-  pg.addColorStop(1, 'rgba(0,0,0,0)');
+  const litR  = 240 + flick7 * 12 + flick11 * 4;
+  const darkR = 90 + flick7 * 4;
+  const pR = state.player.oil > 0 ? litR : darkR;
+  const pg = ctx.createRadialGradient(playerSX, playerSY, 6, playerSX, playerSY, pR);
+  pg.addColorStop(0,    'rgba(0,0,0,1)');
+  pg.addColorStop(0.35, 'rgba(0,0,0,0.92)');
+  pg.addColorStop(0.7,  'rgba(0,0,0,0.55)');
+  pg.addColorStop(1,    'rgba(0,0,0,0)');
   ctx.fillStyle = pg;
   ctx.beginPath();
   ctx.arc(playerSX, playerSY, pR, 0, Math.PI * 2);
@@ -2406,11 +2414,12 @@ function drawLighting() {
     if (!b.lit) continue;
     const sx = b.x + offX, sy = b.y + offY - 14;
     if (sx < -300 || sx > vw + 300 || sy < -300 || sy > vh + 300) continue;
-    const r = 170 + Math.sin(state.flicker * 4 + b.x * 0.01) * 8;
-    const g = ctx.createRadialGradient(sx, sy, 8, sx, sy, r);
-    g.addColorStop(0, 'rgba(0,0,0,1)');
-    g.addColorStop(0.55, 'rgba(0,0,0,0.6)');
-    g.addColorStop(1, 'rgba(0,0,0,0)');
+    const r = 200 + Math.sin(state.flicker * 4 + b.x * 0.01) * 12;
+    const g = ctx.createRadialGradient(sx, sy, 6, sx, sy, r);
+    g.addColorStop(0,    'rgba(0,0,0,1)');
+    g.addColorStop(0.4,  'rgba(0,0,0,0.85)');
+    g.addColorStop(0.75, 'rgba(0,0,0,0.4)');
+    g.addColorStop(1,    'rgba(0,0,0,0)');
     ctx.fillStyle = g;
     ctx.beginPath();
     ctx.arc(sx, sy, r, 0, Math.PI * 2);
@@ -2420,9 +2429,9 @@ function drawLighting() {
   for (const m of MEMORIES) {
     const sx = m.x + offX, sy = m.y + offY - 6;
     if (sx < -200 || sx > vw + 200 || sy < -200 || sy > vh + 200) continue;
-    const r = m.claimed ? 50 : 60;
-    const g = ctx.createRadialGradient(sx, sy, 4, sx, sy, r);
-    g.addColorStop(0, 'rgba(0,0,0,0.6)');
+    const r = m.claimed ? 60 : 75;
+    const g = ctx.createRadialGradient(sx, sy, 3, sx, sy, r);
+    g.addColorStop(0, 'rgba(0,0,0,0.75)');
     g.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = g;
     ctx.beginPath();
@@ -2434,9 +2443,10 @@ function drawLighting() {
     if (e.dead) continue;
     if (e.type === 'ember' || e.type === 'stoker') {
       const sx = e.x + offX, sy = e.y + offY;
-      const r = e.type === 'stoker' ? 200 : 70;
+      const r = e.type === 'stoker' ? 220 : 80;
       const g = ctx.createRadialGradient(sx, sy, 2, sx, sy, r);
-      g.addColorStop(0, 'rgba(0,0,0,0.7)');
+      g.addColorStop(0, 'rgba(0,0,0,0.8)');
+      g.addColorStop(0.6, 'rgba(0,0,0,0.35)');
       g.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = g;
       ctx.beginPath();
@@ -2446,27 +2456,39 @@ function drawLighting() {
   }
   ctx.restore();
 
-  // warm light tint pass (additive)
+  // warm light tint pass (additive) — richer amber near sources
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
   if (state.player.oil > 0) {
-    const pR2 = 140 + Math.sin(state.flicker * 7) * 6;
+    const pR2 = 180 + flick7 * 8;
     const pg2 = ctx.createRadialGradient(playerSX, playerSY, 0, playerSX, playerSY, pR2);
-    pg2.addColorStop(0, 'rgba(255,208,137,0.20)');
-    pg2.addColorStop(0.6, 'rgba(255,122,46,0.08)');
-    pg2.addColorStop(1, 'rgba(255,122,46,0)');
+    pg2.addColorStop(0,    'rgba(255,224,164,0.34)');
+    pg2.addColorStop(0.35, 'rgba(255,178,96,0.18)');
+    pg2.addColorStop(0.7,  'rgba(255,122,46,0.08)');
+    pg2.addColorStop(1,    'rgba(255,122,46,0)');
     ctx.fillStyle = pg2;
     ctx.fillRect(0, 0, vw, vh);
+
+    // tiny bright halo right at the lantern — sells the wick
+    const pCore = 36 + flick7 * 3;
+    const pgC = ctx.createRadialGradient(playerSX, playerSY - 4, 0, playerSX, playerSY - 4, pCore);
+    pgC.addColorStop(0, 'rgba(255,238,196,0.55)');
+    pgC.addColorStop(1, 'rgba(255,178,96,0)');
+    ctx.fillStyle = pgC;
+    ctx.beginPath();
+    ctx.arc(playerSX, playerSY - 4, pCore, 0, Math.PI * 2);
+    ctx.fill();
   }
   for (const b of BRAZIERS) {
     if (!b.lit) continue;
     const sx = b.x + offX, sy = b.y + offY - 14;
     if (sx < -300 || sx > vw + 300 || sy < -300 || sy > vh + 300) continue;
-    const r = 130 + Math.sin(state.flicker * 4 + b.x * 0.01) * 8;
+    const r = 160 + Math.sin(state.flicker * 4 + b.x * 0.01) * 12;
     const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, r);
-    g.addColorStop(0, 'rgba(255,208,137,0.24)');
-    g.addColorStop(0.5, 'rgba(255,122,46,0.10)');
-    g.addColorStop(1, 'rgba(255,122,46,0)');
+    g.addColorStop(0,    'rgba(255,224,164,0.38)');
+    g.addColorStop(0.35, 'rgba(255,178,96,0.18)');
+    g.addColorStop(0.7,  'rgba(255,122,46,0.08)');
+    g.addColorStop(1,    'rgba(255,122,46,0)');
     ctx.fillStyle = g;
     ctx.fillRect(sx - r, sy - r, r * 2, r * 2);
   }
