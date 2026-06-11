@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
 <title>ECHO — A Sonar Survival Game</title>
 <link rel="stylesheet" href="omenly.css">
 <script>
@@ -14,8 +14,6 @@
     donateUrl: 'https://www.paypal.me/vikas117/3',
     allAccessDonateUrl: 'https://www.paypal.me/vikas117/10',
     theme: { accent: '#7fffd4' }
-    // After AdSense approval, add:
-    // , adsense: { client: 'ca-pub-XXXXXXXXXXXXXXXX', slot: 'XXXXXXXXXX' }
   };
 </script>
 <script src="omenly.js" defer></script>
@@ -24,28 +22,32 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Courier New', monospace; color: #7fffd4; user-select: none; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: none; }
   #game { display: block; width: 100vw; height: 100dvh; cursor: crosshair; background: #000; }
-  #hud { position: fixed; top: 12px; left: 12px; font-size: 14px; letter-spacing: 2px; pointer-events: none; text-shadow: 0 0 8px #7fffd4; z-index: 10; }
-  #hud div { margin-bottom: 4px; opacity: 0.85; }
-  #cooldown { width: 120px; height: 4px; background: rgba(127,255,212,0.2); margin-top: 4px; }
-  #cooldown-bar { height: 100%; background: #7fffd4; width: 100%; transition: width 0.05s linear; box-shadow: 0 0 8px #7fffd4; }
-  #title { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; z-index: 20; pointer-events: none; }
-  #title h1 { font-size: 64px; letter-spacing: 16px; text-shadow: 0 0 20px #7fffd4, 0 0 40px #7fffd4; margin-bottom: 20px; animation: pulse 2s ease-in-out infinite; }
-  #title p { font-size: 14px; letter-spacing: 4px; opacity: 0.7; margin-bottom: 8px; }
-  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+  #hud { position: fixed; top: 14px; left: 14px; font-size: 13px; letter-spacing: 3px; pointer-events: none; text-shadow: 0 0 8px #7fffd4; z-index: 10; }
+  #hud .label { opacity: 0.7; }
+  #cooldown { width: 140px; height: 3px; background: rgba(127,255,212,0.18); margin-top: 6px; }
+  #cooldown-bar { height: 100%; background: #7fffd4; width: 100%; transition: width 0.06s linear; box-shadow: 0 0 8px #7fffd4; }
+  #depth { position: fixed; top: 14px; right: 14px; font-size: 13px; letter-spacing: 3px; text-shadow: 0 0 8px #7fffd4; z-index: 10; opacity: 0.85; }
+
+  #title { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; z-index: 20; pointer-events: none; padding: 20px; }
+  #title h1 { font-size: clamp(40px, 8vw, 64px); letter-spacing: 16px; text-shadow: 0 0 20px #7fffd4, 0 0 40px #7fffd4; margin-bottom: 22px; animation: pulse 2s ease-in-out infinite; }
+  #title p { font-size: 13px; letter-spacing: 4px; opacity: 0.75; margin-bottom: 8px; }
+  #title .start { margin-top: 28px; opacity: 0.55; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.45; } }
   .hidden { display: none !important; }
-  #donate { position: fixed; bottom: 16px; right: 16px; z-index: 30; }
-  #donate a { display: inline-block; padding: 10px 18px; background: transparent; border: 1px solid #7fffd4; color: #7fffd4; text-decoration: none; font-family: 'Courier New', monospace; font-size: 12px; letter-spacing: 3px; transition: all 0.2s; text-shadow: 0 0 8px #7fffd4; }
-  #donate a:hover { background: #7fffd4; color: #000; box-shadow: 0 0 20px #7fffd4; text-shadow: none; }
+
+  #gameover { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; z-index: 25; padding: 20px; }
+  #gameover h2 { font-size: clamp(34px, 7vw, 48px); letter-spacing: 12px; color: #ff4d6d; text-shadow: 0 0 20px #ff4d6d; margin-bottom: 18px; }
+  #gameover p { font-size: 15px; letter-spacing: 3px; margin-bottom: 28px; }
+  #gameover button { background: transparent; border: 1px solid #7fffd4; color: #7fffd4; padding: 12px 24px; font-family: 'Courier New', monospace; font-size: 13px; letter-spacing: 4px; cursor: pointer; transition: all 0.2s; }
+  #gameover button:hover { background: #7fffd4; color: #000; box-shadow: 0 0 20px #7fffd4; }
+
   #controls { position: fixed; bottom: 16px; left: 16px; font-size: 11px; letter-spacing: 2px; opacity: 0.5; z-index: 10; pointer-events: none; }
   #controls div { margin-bottom: 2px; }
-  #gameover { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; z-index: 25; }
-  #gameover h2 { font-size: 48px; letter-spacing: 12px; color: #ff4d6d; text-shadow: 0 0 20px #ff4d6d; margin-bottom: 20px; }
-  #gameover p { font-size: 16px; letter-spacing: 3px; margin-bottom: 30px; }
-  #gameover button { background: transparent; border: 1px solid #7fffd4; color: #7fffd4; padding: 12px 24px; font-family: 'Courier New', monospace; font-size: 14px; letter-spacing: 4px; cursor: pointer; transition: all 0.2s; }
-  #gameover button:hover { background: #7fffd4; color: #000; box-shadow: 0 0 20px #7fffd4; }
-  #depth { position: fixed; top: 12px; right: 12px; font-size: 14px; letter-spacing: 2px; text-shadow: 0 0 8px #7fffd4; z-index: 10; opacity: 0.85; }
+  #donate { position: fixed; bottom: 16px; right: 16px; z-index: 30; }
+  #donate a { display: inline-block; padding: 9px 16px; background: transparent; border: 1px solid #7fffd4; color: #7fffd4; text-decoration: none; font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 3px; transition: all 0.2s; text-shadow: 0 0 8px #7fffd4; }
+  #donate a:hover { background: #7fffd4; color: #000; box-shadow: 0 0 20px #7fffd4; text-shadow: none; }
 
-  /* ─── Mobile / touch controls ─── */
+  /* Mobile / touch controls */
   #touch-controls { position: fixed; inset: 0; z-index: 20; pointer-events: none; display: none; }
   #touch-controls.on { display: block; }
   #stick { position: absolute; bottom: max(70px, env(safe-area-inset-bottom, 0px) + 60px); left: max(30px, env(safe-area-inset-left, 0px) + 20px); width: 140px; height: 140px; border-radius: 50%; background: rgba(127,255,212,0.06); border: 2px solid rgba(127,255,212,0.35); box-shadow: 0 0 24px rgba(127,255,212,0.18); pointer-events: auto; touch-action: none; }
@@ -71,7 +73,7 @@
 <canvas id="game"></canvas>
 
 <div id="hud" class="hidden">
-  <div>PINGS LEFT IN ECHO</div>
+  <div class="label">SONAR</div>
   <div id="cooldown"><div id="cooldown-bar"></div></div>
 </div>
 <div id="depth" class="hidden">DEPTH <span id="depth-num">1</span></div>
@@ -81,15 +83,15 @@
   <p>YOU CANNOT SEE.</p>
   <p>CLICK TO LISTEN.</p>
   <p>FIND THE WAY OUT.</p>
-  <p style="margin-top: 30px; opacity: 0.5;">— CLICK ANYWHERE TO BEGIN —</p>
-  <div data-omenly-ad style="margin-top: 40px; pointer-events: auto;"></div>
+  <p class="start">— CLICK ANYWHERE TO BEGIN —</p>
+  <div data-omenly-ad style="margin-top: 36px; pointer-events: auto;"></div>
 </div>
 
 <div id="gameover" class="hidden">
   <h2 id="go-title">CONSUMED</h2>
   <p>YOU REACHED DEPTH <span id="go-depth">1</span></p>
   <button id="restart">TRY AGAIN</button>
-  <div data-omenly-ad style="margin-top: 30px;"></div>
+  <div data-omenly-ad style="margin-top: 28px;"></div>
 </div>
 
 <div id="controls">
@@ -108,157 +110,205 @@
 
 <script>
 (() => {
+  'use strict';
+
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
   const hud = document.getElementById('hud');
   const depthEl = document.getElementById('depth');
   const depthNum = document.getElementById('depth-num');
-  const title = document.getElementById('title');
-  const gameover = document.getElementById('gameover');
+  const titleEl = document.getElementById('title');
+  const gameoverEl = document.getElementById('gameover');
   const goDepth = document.getElementById('go-depth');
   const goTitle = document.getElementById('go-title');
   const restartBtn = document.getElementById('restart');
   const cooldownBar = document.getElementById('cooldown-bar');
-
-  let W = 0, H = 0, DPR = Math.min(window.devicePixelRatio || 1, 2);
-  function resize() {
-    W = window.innerWidth; H = window.innerHeight;
-    canvas.width = W * DPR; canvas.height = H * DPR;
-    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  // Audio
-  let audioCtx = null;
-  function ensureAudio() {
-    if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} }
-    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-  }
-  function tone(freq, dur, type = 'sine', vol = 0.15, attack = 0.005, release = 0.1) {
-    if (!audioCtx) return;
-    const t = audioCtx.currentTime;
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    o.type = type; o.frequency.setValueAtTime(freq, t);
-    g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(vol, t + attack);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start(t); o.stop(t + dur + release);
-  }
-  function pingSound() { tone(440, 0.4, 'sine', 0.12); tone(660, 0.5, 'sine', 0.06); }
-  function hurtSound() { tone(120, 0.3, 'sawtooth', 0.18); tone(80, 0.5, 'sawtooth', 0.12); }
-  function exitSound() { tone(660, 0.15, 'sine', 0.15); setTimeout(()=>tone(880, 0.3, 'sine', 0.15), 120); }
-  function deathSound() {
-    tone(220, 0.4, 'sawtooth', 0.2);
-    setTimeout(()=>tone(110, 0.6, 'sawtooth', 0.2), 200);
-    setTimeout(()=>tone(55, 1.0, 'sawtooth', 0.2), 500);
-  }
-
-  // Maze
-  const CELL = 48;
-  let grid = [], gw = 0, gh = 0;
-  function genMaze(w, h) {
-    gw = w; gh = h;
-    grid = Array.from({length: h}, () => Array(w).fill(1));
-    function carve(x, y) {
-      grid[y][x] = 0;
-      const dirs = [[0,-2],[2,0],[0,2],[-2,0]].sort(() => Math.random()-0.5);
-      for (const [dx, dy] of dirs) {
-        const nx = x + dx, ny = y + dy;
-        if (nx > 0 && ny > 0 && nx < w-1 && ny < h-1 && grid[ny][nx] === 1) {
-          grid[y + dy/2][x + dx/2] = 0;
-          carve(nx, ny);
-        }
-      }
-    }
-    carve(1, 1);
-    // open up some random walls so it's less corridor-y
-    for (let i = 0; i < (w*h)/14; i++) {
-      const rx = 1 + Math.floor(Math.random()*(w-2));
-      const ry = 1 + Math.floor(Math.random()*(h-2));
-      grid[ry][rx] = 0;
-    }
-  }
-
-  // Game state
-  let player, exit, enemies, pings, cells, depth, alive, started, keys, mouseDown, dustParticles;
-  let lastPingTime = 0;
-  const PING_COOLDOWN = 800; // ms
-
-  // Touch/joystick state
   const touchControls = document.getElementById('touch-controls');
   const stickEl = document.getElementById('stick');
   const knob = stickEl.querySelector('.knob');
   const pingBtn = document.getElementById('ping-btn');
-  let stickVec = { x: 0, y: 0 }; // -1..1
+  const controlsEl = document.getElementById('controls');
+
+  // ── viewport ──
+  let W = 0, H = 0;
+  const DPR = Math.min(window.devicePixelRatio || 1, 2);
+  function resize() {
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = Math.floor(W * DPR);
+    canvas.height = Math.floor(H * DPR);
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  window.addEventListener('orientationchange', resize);
+
+  // ── audio ──
+  let audioCtx = null;
+  function ensureAudio() {
+    if (!audioCtx) {
+      try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+      catch (_) { audioCtx = null; }
+    }
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  }
+  function tone(freq, dur, type = 'sine', vol = 0.15, attack = 0.005) {
+    if (!audioCtx) return;
+    const t = audioCtx.currentTime;
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, t);
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(vol, t + attack);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(t); o.stop(t + dur + 0.05);
+  }
+  const SFX = {
+    ping:  () => { tone(440, 0.4, 'sine', 0.12); tone(660, 0.5, 'sine', 0.06); },
+    hurt:  () => { tone(120, 0.3, 'sawtooth', 0.18); tone(80, 0.5, 'sawtooth', 0.12); },
+    exit:  () => { tone(660, 0.15, 'sine', 0.15); setTimeout(() => tone(880, 0.3, 'sine', 0.15), 120); },
+    death: () => {
+      tone(220, 0.4, 'sawtooth', 0.2);
+      setTimeout(() => tone(110, 0.6, 'sawtooth', 0.2), 200);
+      setTimeout(() => tone(55,  1.0, 'sawtooth', 0.2), 500);
+    }
+  };
+
+  // ── maze ──
+  const CELL = 48;
+  let grid = [], gw = 0, gh = 0;
+  function genMaze(w, h) {
+    gw = w; gh = h;
+    grid = Array.from({ length: h }, () => new Array(w).fill(1));
+    // iterative DFS so big mazes can't overflow the stack
+    const stack = [[1, 1]];
+    grid[1][1] = 0;
+    while (stack.length) {
+      const [x, y] = stack[stack.length - 1];
+      const dirs = [[0,-2],[2,0],[0,2],[-2,0]];
+      // shuffle
+      for (let i = dirs.length - 1; i > 0; i--) {
+        const j = (Math.random() * (i + 1)) | 0;
+        const tmp = dirs[i]; dirs[i] = dirs[j]; dirs[j] = tmp;
+      }
+      let moved = false;
+      for (const [dx, dy] of dirs) {
+        const nx = x + dx, ny = y + dy;
+        if (nx > 0 && ny > 0 && nx < w - 1 && ny < h - 1 && grid[ny][nx] === 1) {
+          grid[y + dy / 2][x + dx / 2] = 0;
+          grid[ny][nx] = 0;
+          stack.push([nx, ny]);
+          moved = true;
+          break;
+        }
+      }
+      if (!moved) stack.pop();
+    }
+    // knock out random walls to break up corridors
+    const knock = (w * h) / 14;
+    for (let i = 0; i < knock; i++) {
+      const rx = 1 + ((Math.random() * (w - 2)) | 0);
+      const ry = 1 + ((Math.random() * (h - 2)) | 0);
+      grid[ry][rx] = 0;
+    }
+  }
+
+  // ── state ──
+  let player = null;
+  let exitGate = null;
+  let enemies = [];
+  let pings = [];
+  let cells = new Map();
+  let depth = 1;
+  let alive = false;
+  let started = false;
+  const keys = Object.create(null);
+  let lastPingTime = 0;
+  const PING_COOLDOWN = 800;
+
+  const stickVec = { x: 0, y: 0 };
   let stickPointerId = null;
 
-  const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || matchMedia('(pointer: coarse)').matches;
+  // ── touch detection ──
+  const isTouch =
+    ('ontouchstart' in window) ||
+    (navigator.maxTouchPoints > 0) ||
+    matchMedia('(pointer: coarse)').matches;
   if (isTouch) {
     touchControls.classList.add('on');
-    document.getElementById('controls').style.display = 'none';
+    controlsEl.style.display = 'none';
   }
 
   function newLevel(d) {
     depth = d;
     depthNum.textContent = d;
     const size = Math.min(15 + d * 2, 35);
-    const w = size | 1, h = size | 1; // odd
+    const w = size | 1, h = size | 1;
     genMaze(w, h);
-    // place player at 1,1
-    player = { x: 1.5 * CELL, y: 1.5 * CELL, vx: 0, vy: 0, r: 7 };
-    // exit at farthest open cell
-    let best = {x: w-2, y: h-2, d: 0};
-    for (let y = 1; y < h; y++) for (let x = 1; x < w; x++) {
-      if (grid[y][x] === 0) {
-        const dd = (x-1)*(x-1) + (y-1)*(y-1);
-        if (dd > best.d) best = {x, y, d: dd};
+    player = { x: 1.5 * CELL, y: 1.5 * CELL, r: 7 };
+    // exit = farthest open cell from start
+    let best = { x: w - 2, y: h - 2, d: 0 };
+    for (let y = 1; y < h; y++) {
+      for (let x = 1; x < w; x++) {
+        if (grid[y][x] === 0) {
+          const dd = (x - 1) * (x - 1) + (y - 1) * (y - 1);
+          if (dd > best.d) best = { x, y, d: dd };
+        }
       }
     }
-    exit = { x: (best.x + 0.5) * CELL, y: (best.y + 0.5) * CELL, r: 14 };
-    // enemies
+    exitGate = { x: (best.x + 0.5) * CELL, y: (best.y + 0.5) * CELL, r: 14 };
     enemies = [];
     const enemyCount = Math.min(2 + Math.floor(d * 1.2), 18);
-    for (let i = 0; i < enemyCount; i++) {
-      let ex, ey;
-      do {
-        ex = 1 + Math.floor(Math.random() * (w-2));
-        ey = 1 + Math.floor(Math.random() * (h-2));
-      } while (grid[ey][ex] !== 0 || (Math.abs(ex-1) + Math.abs(ey-1)) < 6);
+    let attempts = 0;
+    while (enemies.length < enemyCount && attempts < enemyCount * 60) {
+      attempts++;
+      const ex = 1 + ((Math.random() * (w - 2)) | 0);
+      const ey = 1 + ((Math.random() * (h - 2)) | 0);
+      if (grid[ey][ex] !== 0) continue;
+      if (Math.abs(ex - 1) + Math.abs(ey - 1) < 6) continue;
       enemies.push({
-        x: (ex + 0.5) * CELL, y: (ey + 0.5) * CELL,
-        vx: 0, vy: 0, r: 8,
-        target: null, wakeUntil: 0,
-        seed: Math.random() * 1000,
+        x: (ex + 0.5) * CELL,
+        y: (ey + 0.5) * CELL,
+        r: 8,
+        target: null,
+        wakeUntil: 0,
         wanderAngle: Math.random() * Math.PI * 2
       });
     }
     pings = [];
-    cells = new Map(); // illuminated cell memory: key -> {alpha, lastSeen}
-    dustParticles = [];
+    cells = new Map();
   }
 
   function start() {
-    title.classList.add('hidden');
-    gameover.classList.add('hidden');
+    titleEl.classList.add('hidden');
+    gameoverEl.classList.add('hidden');
     hud.classList.remove('hidden');
     depthEl.classList.remove('hidden');
-    alive = true; started = true;
-    keys = {}; mouseDown = false;
+    alive = true;
+    started = true;
+    for (const k in keys) keys[k] = false;
+    stickVec.x = 0; stickVec.y = 0;
+    if (stickPointerId !== null) {
+      try { stickEl.releasePointerCapture(stickPointerId); } catch (_) {}
+      stickPointerId = null;
+    }
+    knob.style.transform = 'translate(0, 0)';
+    lastPingTime = performance.now() - PING_COOLDOWN;
     newLevel(1);
     ensureAudio();
   }
 
-  function die(reason) {
+  function die() {
     if (!alive) return;
     alive = false;
-    deathSound();
-    goTitle.textContent = reason === 'caught' ? 'CONSUMED' : 'LOST';
+    SFX.death();
+    goTitle.textContent = 'CONSUMED';
     goDepth.textContent = depth;
-    setTimeout(() => gameover.classList.remove('hidden'), 800);
+    setTimeout(() => { if (!alive) gameoverEl.classList.remove('hidden'); }, 800);
   }
 
   function ping(px, py) {
@@ -266,33 +316,45 @@
     if (now - lastPingTime < PING_COOLDOWN) return;
     lastPingTime = now;
     pings.push({ x: px, y: py, r: 0, maxR: 600, born: now, intensity: 1 });
-    pingSound();
-    // alert nearby enemies
+    SFX.ping();
     for (const e of enemies) {
       const dx = e.x - px, dy = e.y - py;
-      const d = Math.hypot(dx, dy);
-      if (d < 500) {
+      if (Math.hypot(dx, dy) < 500) {
         e.target = { x: px, y: py };
         e.wakeUntil = now + 3500;
       }
     }
   }
 
-  // Input
+  // ── input ──
   window.addEventListener('keydown', e => {
-    keys[e.key.toLowerCase()] = true;
-    if (e.key === ' ') { e.preventDefault(); if (alive && started) ping(player.x, player.y); }
-    if (!started && e.key !== 'Tab') start();
-    if (!alive && (e.key === 'Enter' || e.key === ' ')) start();
+    const k = e.key.toLowerCase();
+    if (e.repeat) return;
+    if (k === ' ') {
+      e.preventDefault();
+      if (!started) { start(); return; }
+      if (!alive) { start(); return; }
+      keys[k] = true;
+      ping(player.x, player.y);
+      return;
+    }
+    if (k === 'enter') {
+      if (!alive && started) { start(); return; }
+    }
+    if (!started && /^[a-z]$/.test(k)) { start(); return; }
+    keys[k] = true;
   });
   window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+  window.addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
+
   canvas.addEventListener('mousedown', e => {
+    if (isTouch) return; // touch devices use joystick + ping button
     ensureAudio();
     if (!started) { start(); return; }
     if (!alive) return;
     ping(player.x, player.y);
   });
-  // Canvas touch: only used as a fallback "start" gesture; in-game touches go through joystick + ping button.
+  // first touch on the canvas starts/restarts only — joystick + button handle in-game
   canvas.addEventListener('touchstart', e => {
     if (!started || !alive) {
       e.preventDefault();
@@ -300,25 +362,24 @@
       start();
     }
   }, { passive: false });
-  restartBtn.addEventListener('click', start);
+  restartBtn.addEventListener('click', () => { ensureAudio(); start(); });
 
-  // ── Virtual joystick ──
-  function stickRect() { return stickEl.getBoundingClientRect(); }
+  // ── virtual joystick ──
   function setStickFromPoint(clientX, clientY) {
-    const r = stickRect();
+    const r = stickEl.getBoundingClientRect();
     const cx = r.left + r.width / 2;
     const cy = r.top + r.height / 2;
     const max = r.width / 2;
     let dx = clientX - cx, dy = clientY - cy;
     const d = Math.hypot(dx, dy);
-    const cap = Math.min(d, max);
-    if (d > 0) { dx = (dx / d) * cap; dy = (dy / d) * cap; }
+    if (d > max) { dx = (dx / d) * max; dy = (dy / d) * max; }
     knob.style.transform = `translate(${dx}px, ${dy}px)`;
     stickVec.x = dx / max;
     stickVec.y = dy / max;
   }
   function releaseStick() {
-    stickVec.x = 0; stickVec.y = 0;
+    stickVec.x = 0;
+    stickVec.y = 0;
     knob.style.transform = 'translate(0, 0)';
     stickPointerId = null;
   }
@@ -328,7 +389,7 @@
     if (!started) { start(); return; }
     if (!alive) return;
     stickPointerId = e.pointerId;
-    try { stickEl.setPointerCapture(e.pointerId); } catch(_) {}
+    try { stickEl.setPointerCapture(e.pointerId); } catch (_) {}
     setStickFromPoint(e.clientX, e.clientY);
   });
   stickEl.addEventListener('pointermove', e => {
@@ -338,103 +399,86 @@
   });
   const endStick = e => {
     if (stickPointerId !== e.pointerId) return;
-    try { stickEl.releasePointerCapture(e.pointerId); } catch(_) {}
+    try { stickEl.releasePointerCapture(e.pointerId); } catch (_) {}
     releaseStick();
   };
   stickEl.addEventListener('pointerup', endStick);
   stickEl.addEventListener('pointercancel', endStick);
   stickEl.addEventListener('lostpointercapture', endStick);
 
-  // ── Ping button ──
+  // ── ping button ──
   pingBtn.addEventListener('pointerdown', e => {
     e.preventDefault();
     ensureAudio();
     if (!started) { start(); return; }
     if (!alive) { start(); return; }
+    if (pingBtn.disabled) return;
     ping(player.x, player.y);
   });
-  // Prevent accidental long-press menus / double-tap zoom
-  ['touchstart','contextmenu'].forEach(ev =>
-    pingBtn.addEventListener(ev, e => { e.preventDefault(); }, { passive: false })
+  ['touchstart', 'contextmenu'].forEach(ev =>
+    pingBtn.addEventListener(ev, e => e.preventDefault(), { passive: false })
   );
 
-  // Collision: returns true if point (x,y) is inside a wall
+  // ── collision ──
   function isWall(x, y) {
     const gx = Math.floor(x / CELL), gy = Math.floor(y / CELL);
     if (gx < 0 || gy < 0 || gx >= gw || gy >= gh) return true;
     return grid[gy][gx] === 1;
   }
-
   function moveEntity(e, dx, dy) {
     const r = e.r;
-    // X
-    let nx = e.x + dx;
-    if (!isWall(nx + Math.sign(dx)*r, e.y - r*0.7) && !isWall(nx + Math.sign(dx)*r, e.y + r*0.7)) {
+    const sx = Math.sign(dx), sy = Math.sign(dy);
+    const nx = e.x + dx;
+    if (sx !== 0 && !isWall(nx + sx * r, e.y - r * 0.7) && !isWall(nx + sx * r, e.y + r * 0.7)) {
       e.x = nx;
     }
-    // Y
-    let ny = e.y + dy;
-    if (!isWall(e.x - r*0.7, ny + Math.sign(dy)*r) && !isWall(e.x + r*0.7, ny + Math.sign(dy)*r)) {
+    const ny = e.y + dy;
+    if (sy !== 0 && !isWall(e.x - r * 0.7, ny + sy * r) && !isWall(e.x + r * 0.7, ny + sy * r)) {
       e.y = ny;
     }
   }
 
-  // Cell key for memory map
+  // ── cell memory ──
   function ckey(gx, gy) { return gy * 10000 + gx; }
-  // In-place update so we don't allocate a new object per cell per frame —
-  // ping spam used to balloon the Map with garbage and stall both update + render.
   function rememberCellsAt(wx, wy, intensity) {
     const gx = Math.floor(wx / CELL), gy = Math.floor(wy / CELL);
-    for (let oy = -1; oy <= 1; oy++) for (let ox = -1; ox <= 1; ox++) {
-      const cx = gx + ox, cy = gy + oy;
-      if (cx < 0 || cy < 0 || cx >= gw || cy >= gh) continue;
-      const k = ckey(cx, cy);
-      let prev = cells.get(k);
-      if (prev) {
-        prev.alpha = Math.min(1, prev.alpha + intensity * 0.7);
-      } else {
-        cells.set(k, { alpha: Math.min(1, intensity * 0.7), gx: cx, gy: cy, wall: grid[cy][cx] === 1 });
+    for (let oy = -1; oy <= 1; oy++) {
+      for (let ox = -1; ox <= 1; ox++) {
+        const cx = gx + ox, cy = gy + oy;
+        if (cx < 0 || cy < 0 || cx >= gw || cy >= gh) continue;
+        const k = ckey(cx, cy);
+        const prev = cells.get(k);
+        const add = intensity * 0.7;
+        if (prev) {
+          if (prev.alpha < 1) prev.alpha = Math.min(1, prev.alpha + add);
+        } else {
+          cells.set(k, { alpha: Math.min(1, add), gx: cx, gy: cy, wall: grid[cy][cx] === 1 });
+        }
       }
     }
   }
 
-  let last = performance.now();
-  function loop(now) {
-    const dt = Math.min(50, now - last) / 1000;
-    last = now;
-
-    if (started && alive) update(dt, now);
-    render(now);
-    requestAnimationFrame(loop);
-  }
-
+  // ── update / render ──
   function update(dt, now) {
-    // Player input
+    // input → movement
     let ix = 0, iy = 0;
-    if (keys['w'] || keys['arrowup']) iy -= 1;
-    if (keys['s'] || keys['arrowdown']) iy += 1;
-    if (keys['a'] || keys['arrowleft']) ix -= 1;
+    if (keys['w'] || keys['arrowup'])    iy -= 1;
+    if (keys['s'] || keys['arrowdown'])  iy += 1;
+    if (keys['a'] || keys['arrowleft'])  ix -= 1;
     if (keys['d'] || keys['arrowright']) ix += 1;
-    // Joystick contribution (analog)
     if (stickVec.x || stickVec.y) { ix += stickVec.x; iy += stickVec.y; }
     const len = Math.hypot(ix, iy);
     if (len > 1) { ix /= len; iy /= len; }
     const speed = 140;
     moveEntity(player, ix * speed * dt, iy * speed * dt);
+    if (len > 0 && Math.random() < 0.4) rememberCellsAt(player.x, player.y, 0.04);
 
-    // Footstep dust (player makes faint sound that minor-radius reveals)
-    if (len > 0 && Math.random() < 0.4) {
-      rememberCellsAt(player.x, player.y, 0.04);
-    }
-
-    // Pings: expand
+    // pings expand
     for (let i = pings.length - 1; i >= 0; i--) {
       const p = pings[i];
       const age = (now - p.born) / 1000;
       p.r = age * 380;
       p.intensity = Math.max(0, 1 - age / 1.6);
-      // Reveal cells along the wavefront — cap sample count to keep cost bounded
-      // even when several pings overlap, otherwise rapid clicks froze the loop.
       const steps = Math.min(128, Math.floor(p.r / 12) + 16);
       const TWO_PI = Math.PI * 2;
       for (let s = 0; s < steps; s++) {
@@ -444,49 +488,50 @@
       if (p.r > p.maxR || p.intensity <= 0.01) pings.splice(i, 1);
     }
 
-    // Cells decay over time so memory fades
+    // memory fade
     for (const [k, c] of cells) {
       c.alpha -= dt * 0.12;
       if (c.alpha <= 0) cells.delete(k);
     }
 
-    // Enemies
+    // enemies
     for (const e of enemies) {
-      let tx = null, ty = null;
-      // chase player if recently pinged or if very close
       const distToPlayer = Math.hypot(player.x - e.x, player.y - e.y);
-      if (distToPlayer < 80) { tx = player.x; ty = player.y; e.wakeUntil = now + 2500; }
-      else if (now < e.wakeUntil && e.target) { tx = e.target.x; ty = e.target.y; }
-
+      let tx = null, ty = null;
+      if (distToPlayer < 80) {
+        tx = player.x; ty = player.y;
+        e.wakeUntil = now + 2500;
+      } else if (now < e.wakeUntil && e.target) {
+        tx = e.target.x; ty = e.target.y;
+      }
       if (tx !== null) {
         const dx = tx - e.x, dy = ty - e.y;
         const d = Math.hypot(dx, dy) || 1;
         const espeed = 75 + Math.min(depth * 4, 40);
-        moveEntity(e, (dx/d) * espeed * dt, (dy/d) * espeed * dt);
+        moveEntity(e, (dx / d) * espeed * dt, (dy / d) * espeed * dt);
       } else {
-        // wander
         e.wanderAngle += (Math.random() - 0.5) * 0.3;
         const espeed = 22;
         moveEntity(e, Math.cos(e.wanderAngle) * espeed * dt, Math.sin(e.wanderAngle) * espeed * dt);
       }
-
-      // collide with player
       if (distToPlayer < player.r + e.r) {
-        hurtSound();
-        die('caught');
+        SFX.hurt();
+        die();
+        return;
       }
     }
 
-    // exit?
-    const dex = exit.x - player.x, dey = exit.y - player.y;
-    if (Math.hypot(dex, dey) < exit.r + player.r) {
-      exitSound();
+    // exit
+    const dex = exitGate.x - player.x, dey = exitGate.y - player.y;
+    if (Math.hypot(dex, dey) < exitGate.r + player.r) {
+      SFX.exit();
       newLevel(depth + 1);
+      return;
     }
 
     // cooldown bar
     const elapsed = now - lastPingTime;
-    const ratio = Math.min(1, elapsed / PING_COOLDOWN);
+    const ratio = Math.max(0, Math.min(1, elapsed / PING_COOLDOWN));
     cooldownBar.style.width = (ratio * 100) + '%';
     if (isTouch) {
       const ready = ratio >= 1;
@@ -496,40 +541,32 @@
   }
 
   function render(now) {
-    // Camera follows player
-    const camX = player ? player.x - W/2 : 0;
-    const camY = player ? player.y - H/2 : 0;
-
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, W, H);
+    if (!started || !player) return;
 
-    if (!started || !player) {
-      // ambient idle background
-      return;
-    }
-
+    const camX = player.x - W / 2;
+    const camY = player.y - H / 2;
     ctx.save();
     ctx.translate(-camX, -camY);
 
-    // Draw remembered cells
-    for (const [k, c] of cells) {
+    // remembered cells
+    for (const [, c] of cells) {
       const x = c.gx * CELL, y = c.gy * CELL;
       if (x + CELL < camX || y + CELL < camY || x > camX + W || y > camY + H) continue;
       if (c.wall) {
-        // walls glow cyan
         ctx.fillStyle = `rgba(127,255,212,${c.alpha * 0.5})`;
         ctx.fillRect(x, y, CELL, CELL);
         ctx.strokeStyle = `rgba(180,255,230,${c.alpha * 0.9})`;
         ctx.lineWidth = 1;
         ctx.strokeRect(x + 0.5, y + 0.5, CELL - 1, CELL - 1);
       } else {
-        // floor faint dots
         ctx.fillStyle = `rgba(127,255,212,${c.alpha * 0.08})`;
         ctx.fillRect(x, y, CELL, CELL);
       }
     }
 
-    // Draw ping rings
+    // pings
     for (const p of pings) {
       const grad = ctx.createRadialGradient(p.x, p.y, Math.max(0, p.r - 30), p.x, p.y, p.r + 5);
       grad.addColorStop(0, 'rgba(127,255,212,0)');
@@ -546,7 +583,7 @@
       ctx.stroke();
     }
 
-    // Enemies: only visible when within a recent ping or close to player
+    // enemies (visible on wavefront / when very close)
     for (const e of enemies) {
       let visibility = 0;
       for (const p of pings) {
@@ -555,40 +592,36 @@
       }
       const distP = Math.hypot(e.x - player.x, e.y - player.y);
       if (distP < 60) visibility = Math.max(visibility, (60 - distP) / 60 * 0.8);
-      if (visibility > 0) {
-        // red ominous
-        ctx.save();
-        ctx.shadowColor = '#ff4d6d';
-        ctx.shadowBlur = 18 * visibility;
-        ctx.fillStyle = `rgba(255,77,109,${Math.min(1, visibility * 1.4)})`;
-        ctx.beginPath();
-        ctx.arc(e.x, e.y, e.r, 0, Math.PI * 2);
-        ctx.fill();
-        // jagged inner
-        ctx.strokeStyle = `rgba(255,180,200,${visibility})`;
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        for (let i = 0; i < 6; i++) {
-          const a = (i / 6) * Math.PI * 2 + now * 0.001;
-          const rr = e.r * 0.5 + Math.sin(now * 0.005 + i) * 2;
-          const xx = e.x + Math.cos(a) * rr;
-          const yy = e.y + Math.sin(a) * rr;
-          if (i === 0) ctx.moveTo(xx, yy); else ctx.lineTo(xx, yy);
-        }
-        ctx.closePath();
-        ctx.stroke();
-        ctx.restore();
+      if (visibility <= 0) continue;
+      ctx.save();
+      ctx.shadowColor = '#ff4d6d';
+      ctx.shadowBlur = 18 * visibility;
+      ctx.fillStyle = `rgba(255,77,109,${Math.min(1, visibility * 1.4)})`;
+      ctx.beginPath();
+      ctx.arc(e.x, e.y, e.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = `rgba(255,180,200,${visibility})`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const a = (i / 6) * Math.PI * 2 + now * 0.001;
+        const rr = e.r * 0.5 + Math.sin(now * 0.005 + i) * 2;
+        const xx = e.x + Math.cos(a) * rr;
+        const yy = e.y + Math.sin(a) * rr;
+        if (i === 0) ctx.moveTo(xx, yy); else ctx.lineTo(xx, yy);
       }
+      ctx.closePath();
+      ctx.stroke();
+      ctx.restore();
     }
 
-    // Exit (gold) — only visible if recently pinged
+    // exit
     let exitVis = 0;
     for (const p of pings) {
-      const d = Math.hypot(exit.x - p.x, exit.y - p.y);
+      const d = Math.hypot(exitGate.x - p.x, exitGate.y - p.y);
       if (Math.abs(d - p.r) < 40) exitVis = Math.max(exitVis, p.intensity);
     }
-    // Also faint persistent glow if player is close
-    const distExit = Math.hypot(exit.x - player.x, exit.y - player.y);
+    const distExit = Math.hypot(exitGate.x - player.x, exitGate.y - player.y);
     if (distExit < 90) exitVis = Math.max(exitVis, (90 - distExit) / 90 * 0.6);
     if (exitVis > 0) {
       ctx.save();
@@ -598,10 +631,10 @@
       ctx.lineWidth = 2;
       const pulse = 1 + Math.sin(now * 0.005) * 0.15;
       ctx.beginPath();
-      ctx.arc(exit.x, exit.y, exit.r * pulse, 0, Math.PI * 2);
+      ctx.arc(exitGate.x, exitGate.y, exitGate.r * pulse, 0, Math.PI * 2);
       ctx.stroke();
       ctx.beginPath();
-      ctx.arc(exit.x, exit.y, exit.r * 0.4, 0, Math.PI * 2);
+      ctx.arc(exitGate.x, exitGate.y, exitGate.r * 0.4, 0, Math.PI * 2);
       ctx.fillStyle = `rgba(255,209,102,${exitVis * 0.6})`;
       ctx.fill();
       ctx.restore();
@@ -609,28 +642,22 @@
 
     ctx.restore();
 
-    // Vignette
-    const vg = ctx.createRadialGradient(W/2, H/2, Math.min(W,H)*0.3, W/2, H/2, Math.max(W,H)*0.7);
+    // vignette
+    const vg = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.3, W / 2, H / 2, Math.max(W, H) * 0.7);
     vg.addColorStop(0, 'rgba(0,0,0,0)');
     vg.addColorStop(1, 'rgba(0,0,0,0.85)');
     ctx.fillStyle = vg;
     ctx.fillRect(0, 0, W, H);
 
-    // ── Player — drawn LAST so it sits on top of cells, exit, and vignette.
-    // Drawn in screen-space (player always at viewport center). Sizes/colors
-    // chosen so the visible "ball" stays the same diameter against ANY
-    // background — previously the cyan aura+ring blended into freshly-pinged
-    // cyan cells, making the ball appear to shrink right after a ping.
+    // player (screen-space)
     const psx = player.x - camX;
     const psy = player.y - camY;
     const pulse = 1 + Math.sin(now * 0.003) * 0.06;
     const breathR = player.r + 12 + Math.sin(now * 0.003) * 2;
-    // 1) Wide dark contrast halo — opaque against bright cyan cells
     ctx.fillStyle = 'rgba(0,12,9,0.92)';
     ctx.beginPath();
     ctx.arc(psx, psy, player.r + 10, 0, Math.PI * 2);
     ctx.fill();
-    // 2) Additive aura — glow on dark backgrounds (harmless on bright)
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
     const aura = ctx.createRadialGradient(psx, psy, 0, psx, psy, 42 * pulse);
@@ -642,8 +669,6 @@
     ctx.arc(psx, psy, 42 * pulse, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
-    // 3) Breathing ring — dark backing stroke + cyan stroke, so the ring
-    //    contrasts with BOTH dark walls and bright lit cells.
     ctx.strokeStyle = 'rgba(0,14,10,0.85)';
     ctx.lineWidth = 4;
     ctx.beginPath();
@@ -654,13 +679,21 @@
     ctx.beginPath();
     ctx.arc(psx, psy, breathR, 0, Math.PI * 2);
     ctx.stroke();
-    // 4) Bright opaque core — always the clearest dot on screen
     ctx.fillStyle = '#e0fff6';
     ctx.beginPath();
     ctx.arc(psx, psy, player.r + 2, 0, Math.PI * 2);
     ctx.fill();
   }
 
+  // ── main loop ──
+  let lastFrame = performance.now();
+  function loop(now) {
+    const dt = Math.min(0.05, (now - lastFrame) / 1000);
+    lastFrame = now;
+    if (started && alive) update(dt, now);
+    render(now);
+    requestAnimationFrame(loop);
+  }
   requestAnimationFrame(loop);
 })();
 </script>

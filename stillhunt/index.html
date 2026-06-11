@@ -23,11 +23,12 @@
   html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0d18; font-family: 'Georgia','Times New Roman',serif; color: #f0e6d4; user-select: none; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: none; }
   #game { display: block; width: 100vw; height: 100dvh; cursor: none; background: #0a0d18; }
 
-  #hud { position: fixed; top: 14px; left: 14px; right: 14px; z-index: 10; pointer-events: none; display: flex; justify-content: space-between; font-family: 'Helvetica',sans-serif; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; color: #f0e6d4; text-shadow: 0 2px 8px #000; }
+  #hud { position: fixed; top: 14px; left: 14px; right: 14px; z-index: 10; pointer-events: none; display: flex; justify-content: space-between; gap: 12px; font-family: 'Helvetica',sans-serif; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; color: #f0e6d4; text-shadow: 0 2px 8px #000; }
   #hud .col { display: flex; flex-direction: column; gap: 4px; }
   #hud .col.right { text-align: right; align-items: flex-end; }
   #hud .label { font-size: 9px; opacity: 0.55; letter-spacing: 4px; }
   #hud .val { font-size: 18px; color: #ffc878; letter-spacing: 2px; }
+
 
   #title { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 28px; text-align: center; background: radial-gradient(ellipse at 50% 35%, rgba(255,200,120,0.10), transparent 60%), linear-gradient(180deg, #0a0d18 0%, #1a1a18 60%, #0a0d18 100%); }
   #title .crown { font-family: 'Helvetica',sans-serif; font-size: 11px; letter-spacing: 6px; opacity: 0.55; color: #ffc878; margin-bottom: 18px; }
@@ -61,10 +62,19 @@
 
   #touch-controls { position: fixed; inset: 0; z-index: 12; pointer-events: none; display: none; }
   #touch-controls.on { display: block; }
+  #aim-stick { position: absolute; bottom: max(40px, env(safe-area-inset-bottom, 0px) + 24px); left: max(24px, env(safe-area-inset-left, 0px) + 16px); width: 140px; height: 140px; border-radius: 50%; background: rgba(255,200,120,0.05); border: 2px solid rgba(255,200,120,0.4); box-shadow: 0 0 24px rgba(255,200,120,0.12); pointer-events: auto; touch-action: none; }
+  #aim-stick::after { content: 'AIM'; position: absolute; top: -22px; left: 50%; transform: translateX(-50%); font-family: 'Helvetica',sans-serif; font-size: 10px; letter-spacing: 4px; color: #ffc878; opacity: 0.7; text-shadow: 0 0 6px #ffc878; }
+  #aim-stick .knob { position: absolute; top: 50%; left: 50%; width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%; background: rgba(255,200,120,0.22); border: 2px solid #ffc878; box-shadow: 0 0 14px #ffc878; transition: transform 0.08s ease-out; pointer-events: none; }
   #fire-btn { position: absolute; bottom: max(30px, env(safe-area-inset-bottom, 0px) + 20px); right: max(24px, env(safe-area-inset-right, 0px) + 16px); width: 110px; height: 110px; border-radius: 50%; background: rgba(255,200,120,0.08); border: 2px solid #ffc878; color: #ffc878; font-family: 'Georgia',serif; font-style: italic; font-size: 15px; letter-spacing: 4px; text-shadow: 0 0 10px #ffc878; box-shadow: 0 0 24px rgba(255,200,120,0.18); pointer-events: auto; touch-action: manipulation; }
   #fire-btn:active { background: rgba(255,200,120,0.18); transform: scale(0.96); }
+  #fire-btn:disabled { opacity: 0.4; }
   #reload-btn { position: absolute; bottom: max(150px, env(safe-area-inset-bottom, 0px) + 140px); right: max(50px, env(safe-area-inset-right, 0px) + 42px); width: 64px; height: 64px; border-radius: 50%; background: rgba(255,200,120,0.06); border: 1px solid rgba(255,200,120,0.5); color: #ffc878; font-family: 'Helvetica',sans-serif; font-size: 10px; letter-spacing: 2px; pointer-events: auto; touch-action: manipulation; }
   #reload-btn:active { background: rgba(255,200,120,0.16); }
+  @media (max-width: 480px) {
+    #aim-stick { width: 120px; height: 120px; }
+    #aim-stick .knob { width: 48px; height: 48px; margin: -24px 0 0 -24px; }
+    #fire-btn { width: 96px; height: 96px; font-size: 14px; }
+  }
 
   #donate { position: fixed; bottom: 14px; left: 14px; z-index: 30; }
   #donate a { display: inline-block; padding: 8px 14px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,200,120,0.5); color: #ffc878; text-decoration: none; font-family: 'Helvetica',sans-serif; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; transition: all 0.2s; backdrop-filter: blur(6px); }
@@ -111,10 +121,14 @@
     <br><br>
     A bolt-action. Six shells in your pocket. Ninety quiet minutes before the valley wakes.
   </div>
-  <div class="controls">
+  <div class="controls" id="controls-desktop">
     Aim: <strong>mouse</strong> · Fire: <strong>click</strong> or <strong>SPACEBAR</strong><br>
-    Reload: <strong>R</strong> · Pause: <strong>Esc</strong><br>
-    On a phone: <strong>drag to aim · tap FIRE</strong>
+    Reload: <strong>R</strong> · Pause: <strong>Esc</strong>
+  </div>
+  <div class="controls" id="controls-mobile" style="display:none;">
+    Aim: <strong>left joystick</strong><br>
+    Fire: <strong>tap FIRE</strong> · Reload: <strong>tap RELOAD</strong><br>
+    Pause: <strong>tap the sky</strong>
   </div>
   <button id="start">— Settle into the blind —</button>
   <div data-omenly-ad style="margin-top: 36px; max-width: 600px;"></div>
@@ -136,6 +150,7 @@
 <div id="banner"></div>
 
 <div id="touch-controls">
+  <div id="aim-stick"><div class="knob"></div></div>
   <button id="reload-btn" type="button">RELOAD</button>
   <button id="fire-btn" type="button">FIRE</button>
 </div>
@@ -168,6 +183,10 @@
   const fireBtn = document.getElementById('fire-btn');
   const reloadBtn = document.getElementById('reload-btn');
   const touchControls = document.getElementById('touch-controls');
+  const aimStick = document.getElementById('aim-stick');
+  const aimKnob = aimStick.querySelector('.knob');
+  const ctlDesktop = document.getElementById('controls-desktop');
+  const ctlMobile = document.getElementById('controls-mobile');
 
   let W = 0, H = 0, DPR = Math.min(window.devicePixelRatio || 1, 2);
   function resize() {
@@ -180,6 +199,12 @@
   window.addEventListener('resize', resize);
 
   const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || matchMedia('(pointer: coarse)').matches;
+  if (isTouch) {
+    ctlDesktop.style.display = 'none';
+    ctlMobile.style.display = 'block';
+    // hide the crosshair cursor request on touch — finger taps direct
+    canvas.style.cursor = 'default';
+  }
 
   // ─── Audio ────────────────────────────────────────────────────
   let audioCtx = null;
@@ -307,6 +332,8 @@
     aimX = W / 2; aimY = H / 2;
     crosshair.style.left = aimX + 'px';
     crosshair.style.top = aimY + 'px';
+    aimVec.x = 0; aimVec.y = 0;
+    aimKnob.style.transform = 'translate(0, 0)';
     updateHUD();
     ensureAudio();
   }
@@ -433,9 +460,10 @@
     crosshair.style.top = aimY + 'px';
   }
 
+  // mouse aim (desktop)
   window.addEventListener('mousemove', e => {
     if (!started || !alive) return;
-    if (isTouch) return; // touch uses drag aim
+    if (isTouch) return;
     setAim(e.clientX, e.clientY);
   });
   canvas.addEventListener('mousedown', e => {
@@ -447,23 +475,56 @@
     fire();
   });
 
-  // touch: drag to aim, tap FIRE
-  let touchAimId = null;
-  canvas.addEventListener('pointerdown', e => {
-    if (e.pointerType === 'mouse') return;
+  // ── virtual aim joystick (mobile) ──
+  const aimVec = { x: 0, y: 0 };
+  let stickPointerId = null;
+  function setStickFromPoint(clientX, clientY) {
+    const r = aimStick.getBoundingClientRect();
+    const cx = r.left + r.width / 2;
+    const cy = r.top + r.height / 2;
+    const max = r.width / 2;
+    let dx = clientX - cx, dy = clientY - cy;
+    const d = Math.hypot(dx, dy);
+    if (d > max) { dx = (dx / d) * max; dy = (dy / d) * max; }
+    aimKnob.style.transform = `translate(${dx}px, ${dy}px)`;
+    const nx = dx / max, ny = dy / max;
+    const mag = Math.hypot(nx, ny);
+    if (mag < 0.12) { aimVec.x = 0; aimVec.y = 0; }
+    else { aimVec.x = nx; aimVec.y = ny; }
+  }
+  function releaseStick() {
+    aimVec.x = 0; aimVec.y = 0;
+    aimKnob.style.transform = 'translate(0, 0)';
+    stickPointerId = null;
+  }
+  aimStick.addEventListener('pointerdown', e => {
+    e.preventDefault();
     ensureAudio();
     if (!started) { start(); return; }
     if (!alive) return;
-    touchAimId = e.pointerId;
-    setAim(e.clientX, e.clientY);
+    stickPointerId = e.pointerId;
+    try { aimStick.setPointerCapture(e.pointerId); } catch (_) {}
+    setStickFromPoint(e.clientX, e.clientY);
   });
-  canvas.addEventListener('pointermove', e => {
+  aimStick.addEventListener('pointermove', e => {
+    if (stickPointerId !== e.pointerId) return;
+    e.preventDefault();
+    setStickFromPoint(e.clientX, e.clientY);
+  });
+  const endStickAim = e => {
+    if (stickPointerId !== e.pointerId) return;
+    try { aimStick.releasePointerCapture(e.pointerId); } catch (_) {}
+    releaseStick();
+  };
+  aimStick.addEventListener('pointerup', endStickAim);
+  aimStick.addEventListener('pointercancel', endStickAim);
+  aimStick.addEventListener('lostpointercapture', endStickAim);
+
+  // tap the canvas to start (mobile); during play, it does nothing — joystick handles aim
+  canvas.addEventListener('pointerdown', e => {
     if (e.pointerType === 'mouse') return;
-    if (touchAimId !== e.pointerId) return;
-    setAim(e.clientX, e.clientY);
-  });
-  canvas.addEventListener('pointerup', e => {
-    if (touchAimId === e.pointerId) touchAimId = null;
+    ensureAudio();
+    if (!started || !alive) { start(); return; }
   });
 
   fireBtn.addEventListener('pointerdown', e => { e.preventDefault(); ensureAudio(); if (started && alive) fire(); });
@@ -713,6 +774,12 @@
     if (!alive) return;
     timeLeft -= dt;
     if (timeLeft <= 0) { timeLeft = 0; updateHUD(); end(); return; }
+
+    // joystick aim — speed in px/sec, scaled by stick magnitude
+    if (isTouch && (aimVec.x || aimVec.y)) {
+      const speed = Math.min(W, H) * 0.85;
+      setAim(aimX + aimVec.x * speed * dt, aimY + aimVec.y * speed * dt);
+    }
 
     cooldown = Math.max(0, cooldown - dt);
     shakeT = Math.max(0, shakeT - dt);

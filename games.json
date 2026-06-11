@@ -48,7 +48,19 @@
       "background": "linear-gradient(135deg, #0a0d18, #2b2418)",
       "cover": "stillhunt/cover.svg",
       "href": "stillhunt/",
-      "controls": "mouse + click / SPACE (desktop) · drag + FIRE button (mobile)"
+      "controls": "mouse + click / SPACE (desktop) · joystick + FIRE button (mobile)"
+    },
+    {
+      "id": "carve",
+      "title": "Carve",
+      "blurb": "One blade. One road. They come up the road and they do not stop. A short, hot, pseudo-3D arcade slash.",
+      "tags": ["arcade", "action", "3d", "combat", "endless"],
+      "minutes": 3,
+      "accent": "#ff7a2e",
+      "background": "linear-gradient(135deg, #06030a, #3a0e1a)",
+      "cover": "carve/cover.svg",
+      "href": "carve/",
+      "controls": "click + A/D (desktop) · tap to slash, tap edges to step (mobile)"
     }
   ]
 }

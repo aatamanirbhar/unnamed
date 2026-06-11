@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0a0510">
+<title>CARVE — One Blade. One Road.</title>
+<link rel="stylesheet" href="omenly.css">
+<script>
+  window.OMENLY_CONFIG = {
+    game: 'carve',
+    gameTitle: 'Carve',
+    price: 3,
+    isHub: false,
+    donateUrl: 'https://www.paypal.me/vikas117/3',
+    allAccessDonateUrl: 'https://www.paypal.me/vikas117/10',
+    theme: { accent: '#ff7a2e' }
+  };
+</script>
+<script src="omenly.js" defer></script>
+<script defer src="/_vercel/insights/script.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #06030a; font-family: 'Georgia','Times New Roman',serif; color: #fff5d9; user-select: none; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: none; }
+  #game { display: block; width: 100vw; height: 100dvh; background: #06030a; cursor: crosshair; }
+
+  /* HUD */
+  #hud { position: fixed; top: 14px; left: 14px; right: 14px; z-index: 10; pointer-events: none; display: flex; justify-content: space-between; gap: 12px; font-family: 'Helvetica',sans-serif; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; text-shadow: 0 2px 10px #000; }
+  #hud .col { display: flex; flex-direction: column; gap: 3px; }
+  #hud .col.center { text-align: center; align-items: center; }
+  #hud .col.right { text-align: right; align-items: flex-end; }
+  #hud .label { font-size: 9px; opacity: 0.55; letter-spacing: 4px; }
+  #hud .val { font-size: 22px; color: #ffd089; font-family: 'Georgia',serif; font-style: italic; letter-spacing: 2px; }
+  #hud .combo { font-size: 28px; color: #ff7a2e; text-shadow: 0 0 14px #ff4d2e, 0 2px 10px #000; }
+  #hud .combo.hot { font-size: 32px; color: #fff5d9; text-shadow: 0 0 20px #ff7a2e; }
+  #hp-pips { display: flex; gap: 4px; margin-top: 2px; justify-content: flex-end; }
+  #hp-pips .pip { width: 14px; height: 8px; background: #ff4d6d; box-shadow: 0 0 6px rgba(255,77,109,0.5); border-radius: 1px; }
+  #hp-pips .pip.empty { background: rgba(255,77,109,0.15); box-shadow: none; }
+
+  /* title */
+  #title { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 28px; text-align: center; background: radial-gradient(ellipse at 50% 40%, rgba(255,122,46,0.10), transparent 60%), linear-gradient(180deg, #06030a 0%, #1a0810 60%, #06030a 100%); overflow-y: auto; }
+  #title .crown { font-size: 11px; letter-spacing: 6px; opacity: 0.6; text-transform: uppercase; font-family: 'Helvetica',sans-serif; color: #ff7a2e; margin-bottom: 18px; }
+  #title h1 { font-style: italic; font-weight: normal; font-size: clamp(56px, 11vw, 110px); letter-spacing: 10px; line-height: 1; text-shadow: 0 0 22px rgba(255,122,46,0.6), 0 4px 30px rgba(255,77,46,0.45); margin-bottom: 14px; }
+  #title h1 span { color: #ff7a2e; }
+  #title .sub { font-size: 12px; letter-spacing: 6px; text-transform: uppercase; opacity: 0.75; font-family: 'Helvetica',sans-serif; color: #ffd089; margin-bottom: 32px; }
+  #title .opener { font-style: italic; font-size: 17px; line-height: 1.7; max-width: 520px; opacity: 0.88; margin-bottom: 30px; }
+  #title .opener em { color: #ff7a2e; font-style: normal; }
+  #title .controls { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.65; font-family: 'Helvetica',sans-serif; margin-bottom: 28px; line-height: 1.9; }
+  #title .controls strong { color: #ffd089; font-weight: 600; }
+  #title button { background: transparent; border: 1px solid #ff7a2e; color: #ff7a2e; padding: 14px 32px; font-family: 'Georgia',serif; font-size: 15px; font-style: italic; letter-spacing: 4px; cursor: pointer; transition: all 0.25s; }
+  #title button:hover { background: #ff7a2e; color: #06030a; box-shadow: 0 0 30px rgba(255,122,46,0.6); }
+  #title .credit { margin-top: 36px; font-size: 12px; letter-spacing: 2px; opacity: 0.55; max-width: 460px; line-height: 1.7; font-style: italic; font-family: 'Georgia',serif; }
+  #title .best { margin-top: 14px; font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: #ffd089; opacity: 0.85; }
+
+  #gameover { position: fixed; inset: 0; z-index: 25; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 28px; text-align: center; background: rgba(8,3,16,0.94); }
+  #gameover.show { display: flex; }
+  #gameover h2 { font-style: italic; font-weight: normal; font-size: clamp(38px, 7vw, 60px); letter-spacing: 8px; color: #ff4d6d; text-shadow: 0 0 22px rgba(255,77,109,0.6); margin-bottom: 8px; }
+  #gameover .place { font-size: 11px; letter-spacing: 5px; color: #ff7a2e; font-family: 'Helvetica',sans-serif; opacity: 0.75; margin-bottom: 22px; }
+  #gameover .stats-row { display: flex; gap: 40px; margin-bottom: 26px; }
+  #gameover .stat { display: flex; flex-direction: column; gap: 4px; }
+  #gameover .stat .k { font-size: 9px; letter-spacing: 4px; opacity: 0.55; text-transform: uppercase; font-family: 'Helvetica',sans-serif; }
+  #gameover .stat .v { font-size: 28px; color: #ffd089; font-family: 'Georgia',serif; font-style: italic; }
+  #gameover p { font-style: italic; font-size: 14px; line-height: 1.7; opacity: 0.78; max-width: 460px; margin-bottom: 22px; }
+  #gameover button { background: transparent; border: 1px solid #ff7a2e; color: #ff7a2e; padding: 12px 26px; font-family: 'Georgia',serif; font-size: 14px; font-style: italic; letter-spacing: 4px; cursor: pointer; transition: all 0.25s; }
+  #gameover button:hover { background: #ff7a2e; color: #06030a; }
+
+  /* slash hint */
+  #slash-hint { position: fixed; bottom: 38px; left: 50%; transform: translateX(-50%); font-family: 'Helvetica',sans-serif; font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: #ffd089; opacity: 0.55; z-index: 9; pointer-events: none; text-shadow: 0 0 10px #ff7a2e, 0 2px 10px #000; }
+
+  /* damage vignette */
+  #vignette { position: fixed; inset: 0; z-index: 8; pointer-events: none; background: radial-gradient(ellipse at center, transparent 50%, rgba(255,77,109,0.6) 100%); opacity: 0; transition: opacity 0.4s; }
+  #vignette.on { opacity: 1; transition: opacity 0.1s; }
+
+  /* combo toast */
+  #combo-toast { position: fixed; top: 30%; left: 50%; transform: translate(-50%, -10px); font-family: 'Georgia',serif; font-style: italic; font-size: 32px; color: #ffd089; letter-spacing: 6px; text-shadow: 0 0 22px #ff7a2e, 0 2px 12px #000; opacity: 0; transition: opacity 0.35s, transform 0.35s; pointer-events: none; z-index: 14; text-align: center; }
+  #combo-toast.show { opacity: 1; transform: translate(-50%, 0); }
+  #combo-toast small { display: block; font-size: 11px; letter-spacing: 5px; color: #ff7a2e; font-family: 'Helvetica',sans-serif; font-style: normal; margin-top: 6px; text-transform: uppercase; opacity: 0.85; }
+
+  /* donate */
+  #donate { position: fixed; bottom: 14px; right: 14px; z-index: 30; }
+  #donate a { display: inline-block; padding: 8px 14px; background: rgba(255,122,46,0.08); border: 1px solid #ff7a2e; color: #ff7a2e; text-decoration: none; font-family: 'Helvetica',sans-serif; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; font-weight: 600; transition: all 0.2s; backdrop-filter: blur(6px); }
+  #donate a:hover { background: #ff7a2e; color: #06030a; box-shadow: 0 0 22px #ff7a2e; }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div id="hud" class="hidden">
+  <div class="col">
+    <div class="label">Score</div>
+    <div class="val" id="score">0</div>
+  </div>
+  <div class="col center">
+    <div class="label">Combo</div>
+    <div class="val combo" id="combo">×1</div>
+  </div>
+  <div class="col right">
+    <div class="label">Life</div>
+    <div id="hp-pips"></div>
+  </div>
+</div>
+
+<div id="vignette"></div>
+<div id="combo-toast"></div>
+
+<div id="title">
+  <div class="crown">— OMENLY ARCADE —</div>
+  <h1>CAR<span>VE</span></h1>
+  <div class="sub">— ONE BLADE · ONE ROAD —</div>
+  <div class="opener">
+    They come up the road and they do not stop.
+    <br><br>
+    The blade is in your hand and the road is in front of you. Cut what comes. <em>Don't break the combo.</em>
+  </div>
+  <div class="controls" id="ctl-desktop">
+    Slash: <strong>click</strong> · <strong>A</strong>/<strong>D</strong> or <strong>←</strong>/<strong>→</strong> to step left/right<br>
+    Pause: <strong>Esc</strong>
+  </div>
+  <div class="controls" id="ctl-mobile" style="display:none;">
+    Slash: <strong>tap anywhere</strong><br>
+    Step: <strong>tap the left or right edge</strong>
+  </div>
+  <div class="best" id="best-line">Best: <span id="best-score">0</span></div>
+  <button id="start">— Take up the blade —</button>
+  <div data-omenly-ad style="margin-top: 36px; max-width: 560px;"></div>
+  <p class="credit">A short, hot fight. Two to three minutes. Long enough to ruin you. Short enough to play again.</p>
+</div>
+
+<div id="gameover">
+  <h2 id="go-title">— CUT DOWN —</h2>
+  <div class="place" id="go-sub">— the road kept coming —</div>
+  <div class="stats-row">
+    <div class="stat"><div class="k">Score</div><div class="v" id="go-score">0</div></div>
+    <div class="stat"><div class="k">Kills</div><div class="v" id="go-kills">0</div></div>
+    <div class="stat"><div class="k">Best Combo</div><div class="v" id="go-combo">0</div></div>
+  </div>
+  <p id="go-prose">— a clean death at least —</p>
+  <button id="restart">— Sharpen and try again —</button>
+  <div data-omenly-ad style="margin-top: 26px; max-width: 460px;"></div>
+</div>
+
+<div id="slash-hint" class="hidden">TAP TO SLASH</div>
+
+<div id="donate">
+  <a href="https://www.paypal.me/vikas117/3" target="_blank" rel="noopener" data-omenly-cta>SUPPORT THE DEV</a>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const hud = document.getElementById('hud');
+  const scoreEl = document.getElementById('score');
+  const comboEl = document.getElementById('combo');
+  const hpPips = document.getElementById('hp-pips');
+  const titleEl = document.getElementById('title');
+  const gameoverEl = document.getElementById('gameover');
+  const goScore = document.getElementById('go-score');
+  const goKills = document.getElementById('go-kills');
+  const goCombo = document.getElementById('go-combo');
+  const goProse = document.getElementById('go-prose');
+  const startBtn = document.getElementById('start');
+  const restartBtn = document.getElementById('restart');
+  const vignetteEl = document.getElementById('vignette');
+  const comboToast = document.getElementById('combo-toast');
+  const slashHint = document.getElementById('slash-hint');
+  const bestScoreEl = document.getElementById('best-score');
+  const ctlDesktop = document.getElementById('ctl-desktop');
+  const ctlMobile = document.getElementById('ctl-mobile');
+
+  // ── viewport ──
+  let W = 0, H = 0;
+  const DPR = Math.min(window.devicePixelRatio || 1, 2);
+  function resize() {
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = Math.floor(W * DPR);
+    canvas.height = Math.floor(H * DPR);
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  window.addEventListener('orientationchange', resize);
+
+  const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || matchMedia('(pointer: coarse)').matches;
+  if (isTouch) {
+    ctlDesktop.style.display = 'none';
+    ctlMobile.style.display = 'block';
+  }
+
+  // ── audio ──
+  let audioCtx = null;
+  function ensureAudio() {
+    if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (_) {} }
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  }
+  function tone(freq, dur, type='sine', vol=0.15, attack=0.005) {
+    if (!audioCtx) return;
+    const t = audioCtx.currentTime;
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t);
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(vol, t + attack);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(t); o.stop(t + dur + 0.05);
+  }
+  function noiseBurst(dur, vol=0.2, hp=1200) {
+    if (!audioCtx) return;
+    const t = audioCtx.currentTime;
+    const n = audioCtx.createBufferSource();
+    const buf = audioCtx.createBuffer(1, audioCtx.sampleRate * dur, audioCtx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+    n.buffer = buf;
+    const f = audioCtx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = hp;
+    const g = audioCtx.createGain(); g.gain.value = vol;
+    n.connect(f); f.connect(g); g.connect(audioCtx.destination);
+    n.start(t);
+  }
+  const SFX = {
+    slash: () => { noiseBurst(0.10, 0.16, 2200); tone(620, 0.08, 'triangle', 0.06); },
+    kill:  () => { noiseBurst(0.14, 0.22, 500); tone(160, 0.16, 'sawtooth', 0.18); tone(220, 0.10, 'square', 0.08); },
+    hurt:  () => { tone(150, 0.22, 'sawtooth', 0.20); tone(90, 0.32, 'sawtooth', 0.14); },
+    miss:  () => { noiseBurst(0.06, 0.06, 3000); },
+    combo: () => { tone(880, 0.06, 'triangle', 0.10); setTimeout(() => tone(1320, 0.10, 'triangle', 0.10), 60); },
+    die:   () => { tone(220, 0.3, 'sawtooth', 0.18); setTimeout(() => tone(110, 0.5, 'sawtooth', 0.18), 200); setTimeout(() => tone(55, 0.8, 'sawtooth', 0.16), 500); },
+    step:  () => { noiseBurst(0.04, 0.05, 600); }
+  };
+
+  // ── game ──
+  // Pseudo-3D corridor. The player stands at the bottom, looking down the road.
+  // Enemies spawn at the vanishing point and rush forward by decreasing z.
+  // 3 lanes: -1 (left), 0 (center), 1 (right). Player picks a lane to occupy.
+  const LANES = [-1, 0, 1];
+  const LANE_W = 0.7; // world-x spacing per lane (in player units)
+
+  const TYPES = {
+    runner: { hp: 1, points: 10, color: '#a82038', speed: 1.0, hr: 1.0 },  // dies in 1 slash, fast
+    bruiser: { hp: 2, points: 18, color: '#3a1a14', speed: 0.78, hr: 1.2 }, // slower, 2 slashes
+    ember:  { hp: 1, points: 14, color: '#ff7a2e', speed: 1.25, hr: 0.9, glows: true } // fast, glows, harder to time
+  };
+
+  let alive = false, started = false;
+  let score = 0, kills = 0, bestCombo = 0, combo = 0, comboTimer = 0;
+  let playerLane = 0;
+  let playerTargetLane = 0;
+  let playerLaneAnim = 0;
+  let hp = 3, maxHp = 3;
+  let iframes = 0;
+  let shakeT = 0;
+  let enemies = [];
+  let particles = [];
+  let bloodSplats = [];
+  let nextSpawnT = 0;
+  let spawnPressure = 1.0; // ramps up
+  let elapsedT = 0;
+  let slashAnim = 0;
+  let slashDir = 0; // -1 swept left, 1 swept right
+  let bestScore = 0;
+  try { bestScore = parseInt(localStorage.getItem('carve_best') || '0', 10) || 0; } catch(_) {}
+  bestScoreEl.textContent = bestScore;
+
+  function horizonY() { return H * 0.40; }
+  // project lane + z to screen
+  // z = 1 (far) → at horizon; z = 0 (near) → at player; we clamp z ∈ [0, 1.05]
+  function project(lane, z) {
+    const hy = horizonY();
+    const screenBottomY = H * 0.92;
+    const screenY = hy + (screenBottomY - hy) * (1 - z);
+    const scale = 0.35 + (1 - z) * 1.4;          // closer = bigger
+    const laneOffset = lane * LANE_W * scale;    // lanes spread as they approach
+    const screenX = W / 2 + laneOffset * 220;    // lane scale on screen
+    return { sx: screenX, sy: screenY, scale };
+  }
+
+  function spawnEnemy() {
+    const r = Math.random();
+    let type = 'runner';
+    const t = elapsedT;
+    if (t > 40 && r < 0.18) type = 'bruiser';
+    else if (t > 15 && r < 0.45) type = 'ember';
+    else if (r < 0.65) type = 'runner';
+    else if (r < 0.85) type = 'ember';
+    else type = 'bruiser';
+    const def = TYPES[type];
+    const lane = LANES[(Math.random() * 3) | 0];
+    enemies.push({
+      type, def,
+      lane,
+      z: 1.0,
+      vz: -0.18 * def.speed * (1 + Math.min(0.85, t / 60)) * spawnPressure,
+      hp: def.hp,
+      hitFlash: 0,
+      dead: false,
+      bob: Math.random() * Math.PI * 2,
+      lifeT: 0
+    });
+  }
+
+  function hpRefresh() {
+    hpPips.innerHTML = '';
+    for (let i = 0; i < maxHp; i++) {
+      const d = document.createElement('div');
+      d.className = 'pip' + (i >= hp ? ' empty' : '');
+      hpPips.appendChild(d);
+    }
+  }
+
+  function setCombo(n) {
+    combo = n;
+    if (combo > bestCombo) bestCombo = combo;
+    comboEl.textContent = '×' + (1 + Math.floor(combo / 3));
+    if (combo >= 12) comboEl.classList.add('hot'); else comboEl.classList.remove('hot');
+    if (combo > 0 && combo % 6 === 0) {
+      comboToast.innerHTML = '— ' + combo + ' IN A ROW —<small>×' + (1 + Math.floor(combo / 3)) + ' SCORE</small>';
+      comboToast.classList.add('show');
+      clearTimeout(setCombo._tt);
+      setCombo._tt = setTimeout(() => comboToast.classList.remove('show'), 900);
+      SFX.combo();
+    }
+  }
+
+  function start() {
+    titleEl.classList.add('hidden');
+    gameoverEl.classList.remove('show');
+    hud.classList.remove('hidden');
+    slashHint.classList.remove('hidden');
+    setTimeout(() => slashHint.classList.add('hidden'), 2400);
+    alive = true; started = true;
+    score = 0; kills = 0; bestCombo = 0; comboTimer = 0;
+    setCombo(0);
+    hp = maxHp; iframes = 0;
+    enemies = []; particles = []; bloodSplats = [];
+    playerLane = 0; playerTargetLane = 0; playerLaneAnim = 0;
+    nextSpawnT = 0.4;
+    spawnPressure = 1.0;
+    elapsedT = 0;
+    slashAnim = 0;
+    scoreEl.textContent = 0;
+    hpRefresh();
+    ensureAudio();
+  }
+
+  function die() {
+    if (!alive) return;
+    alive = false;
+    SFX.die();
+    shakeT = 0.6;
+    try { bestScore = Math.max(bestScore, score); localStorage.setItem('carve_best', bestScore); } catch(_) {}
+    bestScoreEl.textContent = bestScore;
+    goScore.textContent = score;
+    goKills.textContent = kills;
+    goCombo.textContent = bestCombo;
+    let prose = '— a clean death at least —';
+    if (score < 80)        prose = '— you barely got the blade up. the road keeps coming. —';
+    else if (score < 400)  prose = '— a fair fight. the road wins fair fights. —';
+    else if (score < 1200) prose = '— the road slowed for a second, then kept coming. —';
+    else                   prose = '— they will tell stories about that combo. they will not tell stories about how it ended. —';
+    goProse.textContent = prose;
+    setTimeout(() => gameoverEl.classList.add('show'), 700);
+  }
+
+  function step(dir) {
+    if (!alive) return;
+    const newLane = Math.max(-1, Math.min(1, playerLane + dir));
+    if (newLane === playerLane) return;
+    playerTargetLane = newLane;
+    playerLane = newLane;
+    playerLaneAnim = 1.0;
+    SFX.step();
+  }
+
+  function slash() {
+    if (!alive) return;
+    if (slashAnim > 0.18) return; // small spam guard
+    slashAnim = 0.28;
+    slashDir = (Math.random() < 0.5 ? -1 : 1);
+    SFX.slash();
+    // hit window: enemies in player's lane with z in the "strike zone"
+    let hitSomething = false;
+    for (const e of enemies) {
+      if (e.dead) continue;
+      if (e.lane !== playerLane) continue;
+      // strike zone: z between 0.0 and 0.28 (right in front of player)
+      if (e.z > 0.0 && e.z < 0.28) {
+        e.hp -= 1;
+        e.hitFlash = 0.18;
+        hitSomething = true;
+        // particles
+        const p = project(e.lane, e.z);
+        for (let i = 0; i < 14; i++) {
+          particles.push({
+            kind: 'blood',
+            x: p.sx, y: p.sy - 12 * p.scale,
+            vx: (Math.random() - 0.5) * 340,
+            vy: (Math.random() - 0.5) * 240 - 120,
+            life: 0.5 + Math.random() * 0.4,
+            sz: 1.6 + Math.random() * 2.4,
+            col: e.def.color,
+            landAt: p.sy + 6,
+            landed: false
+          });
+        }
+        // small splash decal
+        bloodSplats.push({ x: p.sx, y: p.sy + 6, r: 14 + Math.random() * 8, col: 'rgba(120,18,22,0.55)', age: 0, max: 7 });
+        if (e.hp <= 0) {
+          e.dead = true;
+          kills++;
+          const mult = 1 + Math.floor(combo / 3);
+          score += e.def.points * mult;
+          SFX.kill();
+          setCombo(combo + 1);
+          comboTimer = 2.0;
+          shakeT = Math.max(shakeT, 0.16);
+          // bigger blood burst on kill
+          for (let i = 0; i < 22; i++) {
+            particles.push({
+              kind: 'blood',
+              x: p.sx, y: p.sy - 12 * p.scale,
+              vx: Math.cos(i / 22 * Math.PI * 2) * (140 + Math.random() * 180),
+              vy: Math.sin(i / 22 * Math.PI * 2) * (140 + Math.random() * 180) - 80,
+              life: 0.7 + Math.random() * 0.5,
+              sz: 2 + Math.random() * 2.6,
+              col: e.def.color,
+              landAt: p.sy + 8 + Math.random() * 6,
+              landed: false
+            });
+          }
+          bloodSplats.push({ x: p.sx, y: p.sy + 8, r: 26 + Math.random() * 10, col: 'rgba(130,20,24,0.6)', age: 0, max: 10 });
+        }
+      }
+    }
+    if (!hitSomething) {
+      // break combo only if the player whiffed badly (no enemies in lane near zone)
+      let anyClose = false;
+      for (const e of enemies) {
+        if (!e.dead && e.lane === playerLane && e.z < 0.55) { anyClose = true; break; }
+      }
+      if (anyClose) setCombo(0);
+      SFX.miss();
+    }
+    scoreEl.textContent = score;
+  }
+
+  function takeHit() {
+    if (iframes > 0) return;
+    hp--;
+    iframes = 1.2;
+    setCombo(0);
+    SFX.hurt();
+    shakeT = Math.max(shakeT, 0.45);
+    vignetteEl.classList.add('on');
+    setTimeout(() => vignetteEl.classList.remove('on'), 240);
+    hpRefresh();
+    if (hp <= 0) die();
+  }
+
+  // ── input ──
+  window.addEventListener('keydown', e => {
+    const k = e.key.toLowerCase();
+    if (e.repeat) return;
+    if (!started) {
+      if (k === 'enter' || k === ' ') { e.preventDefault(); start(); }
+      return;
+    }
+    if (!alive) {
+      if (k === 'enter' || k === ' ') { e.preventDefault(); start(); }
+      return;
+    }
+    if (k === 'a' || k === 'arrowleft') { e.preventDefault(); step(-1); }
+    else if (k === 'd' || k === 'arrowright') { e.preventDefault(); step(1); }
+    else if (k === ' ' || k === 'j') { e.preventDefault(); slash(); }
+    else if (k === 'escape') {
+      // pause-to-title
+      alive = false; started = false;
+      hud.classList.add('hidden');
+      titleEl.classList.remove('hidden');
+    }
+  });
+
+  // mouse: click to slash; mouse position controls lane choice
+  canvas.addEventListener('mousedown', e => {
+    ensureAudio();
+    if (!started) { start(); return; }
+    if (!alive) return;
+    if (isTouch) return;
+    // lane based on x
+    const lane = e.clientX < W * 0.34 ? -1 : e.clientX > W * 0.66 ? 1 : 0;
+    if (lane !== playerLane) {
+      step(lane - playerLane);
+    }
+    slash();
+  });
+
+  // touch: tap to slash; edges to step
+  canvas.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'mouse') return;
+    ensureAudio();
+    if (!started) { start(); return; }
+    if (!alive) return;
+    // edge tap = step, center = slash; or any tap in a lane that isn't yours = jump to lane and slash
+    const lane = e.clientX < W * 0.30 ? -1 : e.clientX > W * 0.70 ? 1 : 0;
+    if (lane !== playerLane) {
+      // jump to that lane and slash
+      const before = playerLane;
+      playerLane = lane;
+      playerLaneAnim = 1.0;
+      SFX.step();
+    }
+    slash();
+  });
+
+  startBtn.addEventListener('click', () => { ensureAudio(); start(); });
+  restartBtn.addEventListener('click', () => { ensureAudio(); start(); });
+
+  // ── update / render ──
+  function update(dt) {
+    elapsedT += dt;
+    // ramp difficulty
+    spawnPressure = 1.0 + Math.min(2.0, elapsedT / 45);
+
+    if (iframes > 0) iframes -= dt;
+    if (slashAnim > 0) slashAnim -= dt;
+    if (shakeT > 0) shakeT -= dt;
+    if (playerLaneAnim > 0) playerLaneAnim -= dt * 4;
+    if (comboTimer > 0) {
+      comboTimer -= dt;
+      if (comboTimer <= 0 && combo > 0) setCombo(0);
+    }
+
+    // spawn
+    nextSpawnT -= dt;
+    if (nextSpawnT <= 0) {
+      spawnEnemy();
+      // spawn rate increases with elapsed time
+      const base = 1.4 / spawnPressure;
+      nextSpawnT = base * (0.55 + Math.random() * 0.7);
+    }
+
+    // enemies
+    for (const e of enemies) {
+      if (e.dead) continue;
+      e.lifeT += dt;
+      e.bob += dt * 4;
+      e.z += e.vz * dt;
+      if (e.hitFlash > 0) e.hitFlash -= dt;
+      // contact damage when enemy reaches player (z < -0.05)
+      if (e.z < -0.05) {
+        if (e.lane === playerLane) {
+          takeHit();
+        }
+        e.dead = true;
+      }
+    }
+    // cull
+    enemies = enemies.filter(e => !e.dead || (e.hitFlash > -0.5));
+    if (enemies.length > 40) enemies.splice(0, enemies.length - 40);
+
+    // particles
+    for (const p of particles) {
+      if (!p.landed) {
+        p.vy += 1200 * dt;
+        p.vx *= (1 - 1.2 * dt);
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        if (p.y >= p.landAt) {
+          p.landed = true;
+          bloodSplats.push({ x: p.x, y: p.landAt, r: p.sz * 1.6, col: 'rgba(120,18,22,0.45)', age: 0, max: 6 });
+          p.life = 0;
+        }
+      }
+      p.life -= dt;
+    }
+    particles = particles.filter(p => p.life > 0);
+
+    // splats fade
+    for (let i = bloodSplats.length - 1; i >= 0; i--) {
+      const s = bloodSplats[i];
+      s.age += dt;
+      if (s.age >= s.max) bloodSplats.splice(i, 1);
+    }
+  }
+
+  function render(now) {
+    // shake
+    let shx = 0, shy = 0;
+    if (shakeT > 0) {
+      shx = (Math.random() - 0.5) * shakeT * 28;
+      shy = (Math.random() - 0.5) * shakeT * 28;
+    }
+    ctx.save();
+    ctx.translate(shx, shy);
+
+    // sky
+    const sky = ctx.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, '#1a0a18');
+    sky.addColorStop(0.5, '#3a0e1a');
+    sky.addColorStop(0.6, '#1a0510');
+    sky.addColorStop(1, '#06030a');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, W, H);
+
+    // glowing vanishing point
+    const hy = horizonY();
+    const cx = W / 2;
+    const sunR = Math.max(W, H) * 0.35;
+    const sun = ctx.createRadialGradient(cx, hy, 0, cx, hy, sunR);
+    sun.addColorStop(0, 'rgba(255,122,46,0.30)');
+    sun.addColorStop(0.4, 'rgba(255,77,46,0.08)');
+    sun.addColorStop(1, 'rgba(255,77,46,0)');
+    ctx.fillStyle = sun;
+    ctx.fillRect(0, 0, W, H);
+
+    // small ember disc at vanishing point
+    ctx.fillStyle = 'rgba(255,180,90,0.6)';
+    ctx.beginPath();
+    ctx.arc(cx, hy, 12 + Math.sin(now * 0.005) * 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // ground
+    const grd = ctx.createLinearGradient(0, hy, 0, H);
+    grd.addColorStop(0, '#1a0510');
+    grd.addColorStop(0.5, '#0a0208');
+    grd.addColorStop(1, '#000');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, hy, W, H - hy);
+
+    // perspective road lines (animated)
+    ctx.save();
+    const offsetT = (now * 0.0006) % 1;
+    for (let i = 0; i < 14; i++) {
+      const t = ((i / 14) + offsetT) % 1;
+      const z = 1 - t;
+      const screenBottomY = H * 0.92;
+      const yy = hy + (screenBottomY - hy) * (1 - z);
+      const widen = (1 - z) * 1.4 + 0.35;
+      const halfW = widen * LANE_W * 220 * 1.6;
+      // dim line
+      ctx.strokeStyle = `rgba(255,122,46,${0.05 + (1 - z) * 0.18})`;
+      ctx.lineWidth = 1 + (1 - z) * 2;
+      ctx.beginPath();
+      ctx.moveTo(W / 2 - halfW, yy);
+      ctx.lineTo(W / 2 + halfW, yy);
+      ctx.stroke();
+    }
+    // 4 perspective rails (lane edges) from horizon to ground
+    for (let lane of [-1.5, -0.5, 0.5, 1.5]) {
+      ctx.strokeStyle = lane === -1.5 || lane === 1.5 ? 'rgba(255,122,46,0.5)' : 'rgba(255,122,46,0.18)';
+      ctx.lineWidth = lane === -1.5 || lane === 1.5 ? 2 : 1;
+      ctx.beginPath();
+      ctx.moveTo(cx + lane * LANE_W * 0, hy);
+      const screenBottomY = H * 0.92;
+      const ground = hy + (screenBottomY - hy);
+      ctx.lineTo(cx + lane * LANE_W * 220 * 1.75, ground);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // blood splats — drawn on ground first (so enemies overlap)
+    for (const s of bloodSplats) {
+      const fade = Math.max(0, 1 - s.age / s.max);
+      ctx.save();
+      ctx.globalAlpha = fade;
+      ctx.fillStyle = s.col;
+      ctx.beginPath();
+      ctx.ellipse(s.x, s.y, s.r, s.r * 0.45, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // sort enemies back to front by z (larger z first)
+    const sorted = enemies.slice().sort((a, b) => b.z - a.z);
+    for (const e of sorted) {
+      if (e.dead) continue;
+      const p = project(e.lane, e.z);
+      drawEnemy(e, p.sx, p.sy, p.scale, now);
+    }
+
+    // player blade + body (foreground)
+    drawPlayer(now);
+
+    // airborne blood particles
+    for (const p of particles) {
+      if (p.landed) continue;
+      ctx.save();
+      ctx.fillStyle = p.col;
+      ctx.globalAlpha = Math.max(0, Math.min(1, p.life * 1.5));
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.sz, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // vignette
+    const vg = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.3, W / 2, H / 2, Math.max(W, H) * 0.7);
+    vg.addColorStop(0, 'rgba(0,0,0,0)');
+    vg.addColorStop(1, 'rgba(0,0,0,0.7)');
+    ctx.fillStyle = vg;
+    ctx.fillRect(0, 0, W, H);
+
+    // lane indicator at bottom
+    drawLaneIndicator();
+
+    ctx.restore();
+  }
+
+  function drawEnemy(e, sx, sy, s, now) {
+    const flash = e.hitFlash > 0;
+    const t = e.type;
+    const col = e.def.color;
+    const bob = Math.sin(e.bob) * 3 * s;
+    // shadow
+    ctx.fillStyle = `rgba(0,0,0,${0.6 * Math.min(1, s)})`;
+    ctx.beginPath();
+    ctx.ellipse(sx, sy + 10 * s, 22 * s, 6 * s, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (t === 'runner' || t === 'bruiser') {
+      // crouched humanoid silhouette
+      ctx.fillStyle = flash ? '#fff' : col;
+      const w = (t === 'bruiser' ? 26 : 18) * s;
+      const h = (t === 'bruiser' ? 50 : 40) * s;
+      ctx.beginPath();
+      ctx.ellipse(sx, sy - h * 0.4 + bob, w * 0.5, h * 0.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // head
+      ctx.beginPath();
+      ctx.arc(sx, sy - h + bob, w * 0.32, 0, Math.PI * 2);
+      ctx.fill();
+      // legs
+      ctx.fillRect(sx - w * 0.25, sy - 4 + bob, w * 0.2, h * 0.4);
+      ctx.fillRect(sx + w * 0.05, sy - 4 + bob, w * 0.2, h * 0.4);
+      // eyes
+      if (!flash) {
+        ctx.fillStyle = '#ff4d2e';
+        ctx.beginPath();
+        ctx.arc(sx - w * 0.12, sy - h + bob, 1.4 * s, 0, Math.PI * 2);
+        ctx.arc(sx + w * 0.12, sy - h + bob, 1.4 * s, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // health pips above for bruiser
+      if (e.def.hp > 1 && e.hp < e.def.hp) {
+        ctx.fillStyle = 'rgba(0,0,0,0.7)';
+        ctx.fillRect(sx - w * 0.5, sy - h - 8 * s, w, 3 * s);
+        ctx.fillStyle = '#ff4d6d';
+        ctx.fillRect(sx - w * 0.5, sy - h - 8 * s, w * (e.hp / e.def.hp), 3 * s);
+      }
+    } else if (t === 'ember') {
+      // glowing orb
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      const flick = 1 + Math.sin(now * 0.012 + e.bob) * 0.16;
+      const halo = 36 * s * flick;
+      const g = ctx.createRadialGradient(sx, sy - 16 * s + bob, 0, sx, sy - 16 * s + bob, halo);
+      g.addColorStop(0, flash ? 'rgba(255,255,255,0.95)' : 'rgba(255,122,46,0.85)');
+      g.addColorStop(0.4, 'rgba(255,90,46,0.45)');
+      g.addColorStop(1, 'rgba(255,77,46,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(sx, sy - 16 * s + bob, halo, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      ctx.fillStyle = flash ? '#fff' : '#ffd089';
+      ctx.beginPath();
+      ctx.arc(sx, sy - 16 * s + bob, 10 * s * flick, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#fff5d9';
+      ctx.beginPath();
+      ctx.arc(sx, sy - 16 * s + bob, 4 * s, 0, Math.PI * 2);
+      ctx.fill();
+      // sparks
+      if (Math.random() < 0.4) {
+        particles.push({
+          kind: 'blood',
+          x: sx + (Math.random() - 0.5) * 8 * s,
+          y: sy - 16 * s + bob,
+          vx: (Math.random() - 0.5) * 30,
+          vy: -50 - Math.random() * 30,
+          life: 0.5, sz: 1.6, col: '#ff7a2e',
+          landAt: sy + 4, landed: false
+        });
+      }
+    }
+  }
+
+  function drawPlayer(now) {
+    // player rendered at bottom of screen with the blade arcing across
+    const py = H * 0.92;
+    const px = W / 2 + playerLane * LANE_W * 220 * 1.75 * 0.55; // a bit narrower at the bottom
+    // animated lane motion
+    const animOffset = playerLaneAnim > 0 ? Math.sin(playerLaneAnim * Math.PI) * 6 : 0;
+    // gloved hand
+    ctx.fillStyle = '#1a0810';
+    ctx.beginPath();
+    ctx.ellipse(px, py + 8, 38, 14, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // arm
+    ctx.fillStyle = '#3a1418';
+    ctx.fillRect(px - 14, py - 6, 28, 18);
+    // hand
+    ctx.fillStyle = '#e8c8a6';
+    ctx.beginPath();
+    ctx.arc(px, py - 10, 10, 0, Math.PI * 2);
+    ctx.fill();
+
+    // blade — a long sweeping katana, always visible
+    const baseAng = -1.0 + animOffset * 0.02;
+    let bladeAng = baseAng;
+    if (slashAnim > 0) {
+      const tt = 1 - (slashAnim / 0.28);
+      bladeAng = baseAng + (slashDir > 0 ? 1 : -1) * (tt - 0.5) * 2.6;
+    } else {
+      bladeAng = baseAng + Math.sin(now * 0.003) * 0.05;
+    }
+    ctx.save();
+    ctx.translate(px, py - 14);
+    ctx.rotate(bladeAng);
+    // big additive aura for "shiny"
+    ctx.globalCompositeOperation = 'lighter';
+    const aura = ctx.createLinearGradient(0, -14, 0, 14);
+    aura.addColorStop(0, 'rgba(255,160,80,0)');
+    aura.addColorStop(0.5, 'rgba(255,208,137,0.6)');
+    aura.addColorStop(1, 'rgba(255,160,80,0)');
+    ctx.fillStyle = aura;
+    ctx.fillRect(-10, -16, 240, 32);
+    ctx.globalCompositeOperation = 'source-over';
+    // blade body
+    ctx.fillStyle = '#fff5d9';
+    ctx.fillRect(0, -4, 230, 8);
+    // edge highlight
+    ctx.fillStyle = '#ffe8b0';
+    ctx.fillRect(0, -2, 230, 3);
+    // hot tip
+    ctx.fillStyle = '#ffd089';
+    ctx.beginPath();
+    ctx.moveTo(230, -5);
+    ctx.lineTo(244, 0);
+    ctx.lineTo(230, 5);
+    ctx.closePath();
+    ctx.fill();
+    // crossguard
+    ctx.fillStyle = '#3a1818';
+    ctx.fillRect(-4, -10, 6, 20);
+    ctx.restore();
+
+    // slash motion arc (visible during slash)
+    if (slashAnim > 0) {
+      const tt = 1 - (slashAnim / 0.28);
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.strokeStyle = 'rgba(255,208,137,' + (0.6 * (1 - tt)) + ')';
+      ctx.lineWidth = 14;
+      ctx.beginPath();
+      const startA = slashDir > 0 ? Math.PI + 0.6 : -0.6;
+      const endA   = slashDir > 0 ? Math.PI + 0.6 - tt * 2.2 : -0.6 + tt * 2.2;
+      ctx.arc(px, py - 14, 200, Math.min(startA, endA), Math.max(startA, endA));
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,255,255,' + (0.8 * (1 - tt)) + ')';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // iframe blink overlay
+    if (iframes > 0 && Math.floor(now * 0.024) % 2 === 0) {
+      ctx.fillStyle = 'rgba(255,77,109,0.18)';
+      ctx.fillRect(0, 0, W, H);
+    }
+  }
+
+  function drawLaneIndicator() {
+    const yy = H * 0.965;
+    for (const lane of LANES) {
+      const x = W / 2 + lane * 56;
+      const active = lane === playerLane;
+      ctx.fillStyle = active ? '#ffd089' : 'rgba(255,208,137,0.2)';
+      ctx.beginPath();
+      ctx.arc(x, yy, active ? 6 : 3.5, 0, Math.PI * 2);
+      ctx.fill();
+      if (active) {
+        ctx.strokeStyle = '#ff7a2e';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(x, yy, 10, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    }
+  }
+
+  // ── main loop ──
+  let lastFrame = performance.now();
+  function loop(now) {
+    const dt = Math.min(0.05, (now - lastFrame) / 1000);
+    lastFrame = now;
+    if (started && alive) update(dt);
+    render(now);
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
