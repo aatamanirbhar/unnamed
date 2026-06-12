@@ -1,55 +1,125 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice">
   <defs>
-    <radialGradient id="sky" cx="50%" cy="40%" r="80%">
-      <stop offset="0%" stop-color="#3a0e1a"/>
-      <stop offset="40%" stop-color="#1a0810"/>
+    <radialGradient id="sky" cx="50%" cy="38%" r="85%">
+      <stop offset="0%" stop-color="#ff4d2e" stop-opacity="0.35"/>
+      <stop offset="35%" stop-color="#3a0e1a"/>
       <stop offset="100%" stop-color="#06030a"/>
     </radialGradient>
-    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#1a0510"/>
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2a0812"/>
+      <stop offset="55%" stop-color="#100308"/>
       <stop offset="100%" stop-color="#000"/>
     </linearGradient>
     <linearGradient id="blade" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0%" stop-color="#fff5d9" stop-opacity="0"/>
-      <stop offset="50%" stop-color="#ffd089"/>
+      <stop offset="45%" stop-color="#ffd089"/>
+      <stop offset="55%" stop-color="#fff"/>
       <stop offset="100%" stop-color="#fff5d9" stop-opacity="0"/>
     </linearGradient>
+    <linearGradient id="blood" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff2a3a"/>
+      <stop offset="100%" stop-color="#7a0a14" stop-opacity="0"/>
+    </linearGradient>
     <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="4"/>
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+    <filter id="softglow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2.5"/>
     </filter>
   </defs>
+
+  <!-- sky -->
   <rect width="600" height="400" fill="url(#sky)"/>
-  <!-- horizon corridor -->
-  <polygon points="0,400 300,240 600,400" fill="url(#floor)"/>
-  <!-- vanishing point glow -->
-  <circle cx="300" cy="240" r="120" fill="#ff4d2e" opacity="0.18" filter="url(#glow)"/>
-  <!-- perspective lines -->
-  <g stroke="#ff7a2e" stroke-width="1.2" opacity="0.35">
-    <line x1="0" y1="400" x2="300" y2="240"/>
-    <line x1="120" y1="400" x2="300" y2="240"/>
-    <line x1="240" y1="400" x2="300" y2="240"/>
-    <line x1="360" y1="400" x2="300" y2="240"/>
-    <line x1="480" y1="400" x2="300" y2="240"/>
-    <line x1="600" y1="400" x2="300" y2="240"/>
+
+  <!-- distant moon / sun haze -->
+  <circle cx="300" cy="170" r="80" fill="#ff7a2e" opacity="0.18" filter="url(#glow)"/>
+  <circle cx="300" cy="170" r="38" fill="#ffd089" opacity="0.5" filter="url(#softglow)"/>
+
+  <!-- floor / road -->
+  <polygon points="0,400 280,210 320,210 600,400" fill="url(#ground)"/>
+
+  <!-- perspective rails -->
+  <g stroke="#ff7a2e" stroke-width="1.2" opacity="0.5">
+    <line x1="0" y1="400" x2="282" y2="212"/>
+    <line x1="100" y1="400" x2="289" y2="212"/>
+    <line x1="220" y1="400" x2="296" y2="212"/>
+    <line x1="380" y1="400" x2="304" y2="212"/>
+    <line x1="500" y1="400" x2="311" y2="212"/>
+    <line x1="600" y1="400" x2="318" y2="212"/>
   </g>
-  <!-- approaching enemies (silhouettes) -->
-  <g fill="#1a0a14">
-    <ellipse cx="220" cy="300" rx="18" ry="22"/>
-    <ellipse cx="380" cy="310" rx="22" ry="28"/>
-    <ellipse cx="310" cy="270" rx="10" ry="14"/>
-    <ellipse cx="270" cy="260" rx="6" ry="9"/>
-    <ellipse cx="340" cy="258" rx="7" ry="10"/>
+
+  <!-- horizon ridge -->
+  <path d="M0 210 L120 200 L200 215 L280 205 L320 205 L400 217 L520 200 L600 212 L600 220 L0 220 Z" fill="#0c0308" opacity="0.85"/>
+
+  <!-- enemy horde -->
+  <g fill="#0a0307">
+    <ellipse cx="170" cy="320" rx="28" ry="38"/>
+    <ellipse cx="430" cy="330" rx="32" ry="42"/>
+    <ellipse cx="240" cy="285" rx="18" ry="26"/>
+    <ellipse cx="370" cy="280" rx="20" ry="28"/>
+    <ellipse cx="300" cy="252" rx="11" ry="16"/>
+    <ellipse cx="275" cy="245" rx="7" ry="11"/>
+    <ellipse cx="330" cy="243" rx="8" ry="12"/>
+    <ellipse cx="295" cy="232" rx="5" ry="8"/>
   </g>
+  <!-- eyes on enemies -->
+  <g fill="#ff2a3a" opacity="0.9">
+    <circle cx="163" cy="298" r="2"/>
+    <circle cx="177" cy="298" r="2"/>
+    <circle cx="422" cy="308" r="2.2"/>
+    <circle cx="438" cy="308" r="2.2"/>
+    <circle cx="235" cy="272" r="1.5"/>
+    <circle cx="245" cy="272" r="1.5"/>
+    <circle cx="365" cy="267" r="1.6"/>
+    <circle cx="375" cy="267" r="1.6"/>
+  </g>
+
+  <!-- blood spray under blade -->
+  <g filter="url(#softglow)" opacity="0.85">
+    <path d="M120 300 Q200 280 280 290 Q360 300 480 295" stroke="url(#blood)" stroke-width="3" fill="none"/>
+    <circle cx="250" cy="295" r="3" fill="#ff2a3a"/>
+    <circle cx="350" cy="298" r="2.5" fill="#ff2a3a"/>
+    <circle cx="410" cy="302" r="2" fill="#ff2a3a"/>
+    <circle cx="180" cy="296" r="2" fill="#ff2a3a"/>
+  </g>
+
   <!-- blade slash, foreground -->
-  <g transform="translate(300 360) rotate(-25)" filter="url(#glow)">
-    <rect x="-180" y="-6" width="360" height="12" fill="url(#blade)" rx="6"/>
+  <g transform="translate(300 350) rotate(-22)" filter="url(#glow)">
+    <rect x="-220" y="-7" width="440" height="14" fill="url(#blade)" rx="7"/>
   </g>
-  <g transform="translate(300 360) rotate(-25)">
-    <rect x="-160" y="-2" width="320" height="4" fill="#fff5d9" rx="2"/>
+  <g transform="translate(300 350) rotate(-22)">
+    <rect x="-200" y="-2" width="400" height="4" fill="#fff" rx="2"/>
+    <rect x="-200" y="-1" width="400" height="2" fill="#fff5d9" opacity="0.8" rx="1"/>
   </g>
+  <!-- hilt -->
+  <g transform="translate(300 350) rotate(-22)">
+    <rect x="195" y="-9" width="36" height="18" fill="#2a1408" rx="3"/>
+    <rect x="225" y="-12" width="8" height="24" fill="#ffd089"/>
+  </g>
+
+  <!-- ember sparks -->
+  <g fill="#ffd089" opacity="0.85">
+    <circle cx="120" cy="180" r="1.2"/>
+    <circle cx="480" cy="190" r="1"/>
+    <circle cx="200" cy="160" r="0.9"/>
+    <circle cx="410" cy="155" r="1.1"/>
+    <circle cx="350" cy="190" r="0.8"/>
+    <circle cx="250" cy="200" r="1"/>
+    <circle cx="90" cy="250" r="0.9"/>
+    <circle cx="510" cy="245" r="0.9"/>
+  </g>
+
   <!-- title -->
   <g font-family="Georgia, serif" fill="#fff5d9">
-    <text x="300" y="78" text-anchor="middle" font-style="italic" font-size="62" letter-spacing="6" style="text-shadow: 0 0 20px #ff4d2e;">CARVE</text>
-    <text x="300" y="108" text-anchor="middle" font-size="11" letter-spacing="6" fill="#ff7a2e" font-family="Helvetica,sans-serif" font-weight="bold">— ONE BLADE · ONE ROAD —</text>
+    <text x="300" y="82" text-anchor="middle" font-style="italic" font-size="68" letter-spacing="8" style="text-shadow: 0 0 24px #ff4d2e;">CARVE</text>
+    <text x="300" y="112" text-anchor="middle" font-size="11" letter-spacing="6" fill="#ff7a2e" font-family="Helvetica,sans-serif" font-weight="bold">— ONE BLADE · ONE ROAD —</text>
   </g>
+
+  <!-- vignette -->
+  <rect width="600" height="400" fill="url(#sky)" opacity="0" />
+  <radialGradient id="vig" cx="50%" cy="60%" r="80%">
+    <stop offset="60%" stop-color="#000" stop-opacity="0"/>
+    <stop offset="100%" stop-color="#000" stop-opacity="0.7"/>
+  </radialGradient>
+  <rect width="600" height="400" fill="url(#vig)"/>
 </svg>

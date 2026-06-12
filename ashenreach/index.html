@@ -4,7 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#15101e">
-<title>Ashenreach — The Last Cartographer</title>
+<title>Ashenreach — A burned valley, five names, one altar · Omenly</title>
+<meta name="description" content="Twenty-three years after the fire, you walk back into the valley. Five names to find, one altar, and things in the dark that did not leave. An atmospheric adventure.">
+<link rel="canonical" href="https://omenly.vercel.app/ashenreach/">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Ashenreach — A burned valley, five names, one altar">
+<meta property="og:description" content="Twenty-three years after the fire, you walk back into the valley. Things in the dark did not leave.">
+<meta property="og:url" content="https://omenly.vercel.app/ashenreach/">
+<meta property="og:image" content="https://omenly.vercel.app/ashenreach/cover.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Ashenreach — A burned-valley adventure">
+<meta name="twitter:description" content="Five names to find, one altar, and things in the dark that did not leave.">
+<meta name="twitter:image" content="https://omenly.vercel.app/ashenreach/cover.svg">
+<script type="application/ld+json">
+{ "@context":"https://schema.org","@type":"VideoGame","name":"Ashenreach","url":"https://omenly.vercel.app/ashenreach/","description":"An atmospheric adventure-action game set in a burned valley. Five names. One altar.","genre":["adventure","action","exploration"],"playMode":"SinglePlayer","gamePlatform":["Web browser"],"applicationCategory":"Game","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@type":"Organization","name":"Omenly"} }
+</script>
 <link rel="stylesheet" href="omenly.css">
 <script>
   window.OMENLY_CONFIG = {
@@ -94,6 +109,16 @@
   #title .opener em { color: var(--accent); font-style: normal; }
   #title .controls { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.6; font-family: 'Helvetica',sans-serif; color: var(--dim); margin-bottom: 28px; line-height: 1.9; }
   #title .controls strong { color: var(--warm); font-weight: 600; }
+  #title .opt { display: inline-flex; align-items: center; gap: 12px; cursor: pointer; padding: 10px 18px; border: 1px solid rgba(255,122,46,0.35); border-radius: 30px; font-family: 'Helvetica',sans-serif; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); user-select: none; transition: all 0.2s; margin: 4px 0 24px; }
+  #title .opt:hover { background: rgba(255,122,46,0.08); }
+  #title .opt input { appearance: none; -webkit-appearance: none; width: 16px; height: 16px; border: 1px solid var(--accent); border-radius: 3px; margin: 0; position: relative; cursor: pointer; flex-shrink: 0; }
+  #title .opt input:checked { background: var(--accent); }
+  #title .opt input:checked::after { content: '✓'; position: absolute; top: -3px; left: 2px; color: var(--bg-a); font-size: 14px; font-weight: bold; }
+
+  /* blade level toast */
+  #blade-toast { position: fixed; top: 30%; left: 50%; transform: translate(-50%,-20px); z-index: 14; font-family: 'Georgia',serif; font-style: italic; font-size: 24px; color: var(--gold); letter-spacing: 4px; text-shadow: 0 0 22px var(--gold), 0 2px 12px #000; opacity: 0; transition: opacity 0.45s, transform 0.45s; pointer-events: none; text-align: center; }
+  #blade-toast.show { opacity: 1; transform: translate(-50%, 0); }
+  #blade-toast small { display: block; font-size: 11px; letter-spacing: 5px; opacity: 0.75; font-style: normal; font-family: 'Helvetica',sans-serif; margin-top: 6px; color: var(--accent); text-transform: uppercase; }
   .next { display: inline-block; padding: 14px 30px; background: transparent; border: 1px solid var(--accent); color: var(--accent); font-family: 'Helvetica',sans-serif; font-size: 11px; letter-spacing: 4px; text-transform: uppercase; cursor: pointer; transition: all 0.25s; }
   .next:hover, .next:focus-visible { background: var(--accent); color: var(--bg-a); box-shadow: 0 0 30px rgba(255,122,46,0.5); outline: none; }
   #title .credit { margin-top: 38px; font-size: 11px; letter-spacing: 2px; color: var(--dim); font-family: 'Helvetica',sans-serif; }
@@ -244,14 +269,21 @@
     Now you have come back. You carry your grandfather's lantern, a staff with a striking-iron at the tip, and an empty book. <em>Walk every stone</em>, your grandmother had said, when you were small. <em>Walk every stone, and the valley remembers itself.</em>
   </div>
   <div class="controls">
-    Move: <strong>WASD</strong> / arrows · Attack: <strong>J</strong> / space · Dash: <strong>K</strong> / shift<br>
+    Move: <strong>WASD</strong> / arrows · Slash (attack): <strong>SPACEBAR</strong> or <strong>J</strong> · Dash: <strong>K</strong> / shift<br>
     Use: <strong>E</strong> · Satchel: <strong>I</strong> · Pause: <strong>Esc</strong><br>
     On a phone: <strong>joystick + buttons</strong>
   </div>
+  <label class="opt" for="opt-bladeup">
+    <input type="checkbox" id="opt-bladeup" checked>
+    <span>Blade tempers with every kindled put down</span>
+  </label>
+  <br>
   <button class="next" id="start">— Step into the valley —</button>
   <div data-omenly-ad style="margin-top: 36px; max-width: 600px;"></div>
-  <p class="credit">A walk of about thirty minutes. Five names to find. The dark up there is older than the fire.</p>
+  <p class="credit">A walk of about forty minutes. Five names to find. The dark up there is older than the fire.</p>
 </div>
+
+<div id="blade-toast"></div>
 
 <div id="ending">
   <div class="wrap">
@@ -395,33 +427,55 @@ const NPCS = [
   }
 ];
 
-// Enemy spawn definitions
+// Enemy spawn definitions — denser valley, more to put down
 const ENEMY_SPAWNS = [
-  // VALE — embers near spawn
+  // VALE — embers near spawn (was 5, now 10)
   { type: 'ember', x: 1280, y: 1900 },
   { type: 'ember', x: 1880, y: 1960 },
   { type: 'ember', x: 1480, y: 2020 },
   { type: 'ember', x: 2050, y: 1880 },
   { type: 'ember', x: 1100, y: 2030 },
-  // HOLLOW — wraiths
+  { type: 'ember', x: 900,  y: 1880 },
+  { type: 'ember', x: 2280, y: 2000 },
+  { type: 'ember', x: 1980, y: 2110 },
+  { type: 'ember', x: 760,  y: 2080 },
+  { type: 'ember', x: 2440, y: 2150 },
+  // HOLLOW — wraiths + embers (was 5, now 10)
   { type: 'wraith', x: 700, y: 1180 },
   { type: 'wraith', x: 400, y: 1240 },
   { type: 'wraith', x: 850, y: 1000 },
+  { type: 'wraith', x: 560, y: 880 },
+  { type: 'wraith', x: 920, y: 1340 },
   { type: 'ember', x: 320, y: 1320 },
   { type: 'ember', x: 1000, y: 1280 },
-  // STONEFORD/LIGHT
+  { type: 'ember', x: 440, y: 1100 },
+  { type: 'ember', x: 780, y: 760 },
+  { type: 'hound',  x: 280, y: 980 },
+  // STONEFORD / LIGHT (was 4, now 9)
   { type: 'wraith', x: 1750, y: 1450 },
   { type: 'wraith', x: 2300, y: 1480 },
+  { type: 'wraith', x: 1450, y: 1500 },
   { type: 'ember', x: 2100, y: 1380 },
   { type: 'ember', x: 1300, y: 1480 },
-  // BETWEEN — cinderhounds
+  { type: 'ember', x: 2400, y: 1280 },
+  { type: 'ember', x: 2620, y: 1430 },
+  { type: 'hound', x: 2680, y: 1120 },
+  { type: 'hound', x: 2200, y: 1320 },
+  // BETWEEN — cinderhounds (was 2, now 5)
   { type: 'hound', x: 1400, y: 1100 },
   { type: 'hound', x: 1750, y: 1180 },
-  // PEAK — cinderhounds + boss
+  { type: 'hound', x: 1500, y: 1280 },
+  { type: 'ember', x: 1380, y: 980 },
+  { type: 'ember', x: 1820, y: 1000 },
+  // PEAK — cinderhounds + boss (was 5, now 9)
   { type: 'hound', x: 1300, y: 800 },
   { type: 'hound', x: 1800, y: 720 },
   { type: 'hound', x: 1500, y: 580 },
   { type: 'hound', x: 1850, y: 480 },
+  { type: 'hound', x: 1240, y: 540 },
+  { type: 'ember', x: 1380, y: 380 },
+  { type: 'ember', x: 1820, y: 360 },
+  { type: 'ember', x: 1700, y: 540 },
   { type: 'stoker', x: 1600, y: 420 }
 ];
 
@@ -454,7 +508,7 @@ const BUSHES = [];
   };
 
   // BORDER trees — heavy ring at world edges
-  for (let i = 0; i < 220; i++) {
+  for (let i = 0; i < 320; i++) {
     let x, y, edge = i % 4;
     if (edge === 0)      { x = 40 + rnd() * (W - 80); y = 30 + rnd() * 80; }
     else if (edge === 1) { x = 40 + rnd() * (W - 80); y = H - 110 + rnd() * 80; }
@@ -464,7 +518,7 @@ const BUSHES = [];
     TREES.push({ x, y, r: 28 + rnd() * 18, k: rnd(), zone: zoneAt(x, y).id, dead: zoneAt(x, y).id === 'vale' || zoneAt(x, y).id === 'peak' });
   }
   // INTERIOR scatter
-  for (let i = 0; i < 380; i++) {
+  for (let i = 0; i < 560; i++) {
     const x = 80 + rnd() * (W - 160);
     const y = 80 + rnd() * (H - 160);
     if (onPath(x, y)) continue;
@@ -473,7 +527,7 @@ const BUSHES = [];
     TREES.push({ x, y, r: 22 + rnd() * 22, k: rnd(), zone: z, dead: z === 'vale' || z === 'peak' || (z === 'hollow' && rnd() < 0.5) });
   }
   // ROCKS (esp. peak)
-  for (let i = 0; i < 120; i++) {
+  for (let i = 0; i < 200; i++) {
     const x = 60 + rnd() * (W - 120);
     const y = 60 + rnd() * (H - 120);
     if (onPath(x, y)) continue;
@@ -585,6 +639,7 @@ const state = {
   globalT: 0,
   enemies: [],
   particles: [],
+  bloodSplats: [],
   damageNums: [],
   cam: { x: SPAWN.x, y: SPAWN.y, shake: 0 },
   nearProp: null,        // {type, payload}
@@ -594,8 +649,47 @@ const state = {
   bossWoken: false,
   keys: {},
   stick: { active: false, dx: 0, dy: 0 },
-  touch: false
+  touch: false,
+  blade: { level: 0, xp: 0, enabled: true }
 };
+
+// Blade progression — each kindled put down stokes the iron a little.
+// Reach, dmg, color, glow all scale.
+const BLADE_LEVELS = [
+  { name: 'A striking-iron at the tip', reach: 56,  dmg: 1, swing: 0.32, w: 8,  glow: 'rgba(255,245,217,0.85)',  hot: 'rgba(255,208,137,0.6)',  core: '#fff5d9' },
+  { name: 'The iron remembers',          reach: 64,  dmg: 1, swing: 0.30, w: 10, glow: 'rgba(255,232,180,0.92)',  hot: 'rgba(255,178,96,0.75)',   core: '#fff8dd' },
+  { name: 'A whetted edge',              reach: 72,  dmg: 2, swing: 0.28, w: 12, glow: 'rgba(255,224,164,0.96)',  hot: 'rgba(255,160,80,0.85)',   core: '#fff5cf' },
+  { name: 'A burning brand',             reach: 82,  dmg: 2, swing: 0.26, w: 14, glow: 'rgba(255,208,137,1.0)',   hot: 'rgba(255,122,46,0.95)',   core: '#ffe8b0' },
+  { name: 'The valley-iron',             reach: 92,  dmg: 3, swing: 0.24, w: 16, glow: 'rgba(255,200,120,1.0)',   hot: 'rgba(255,90,30,1.0)',     core: '#ffdb88' },
+  { name: 'Ashbreaker',                  reach: 110, dmg: 4, swing: 0.22, w: 19, glow: 'rgba(255,245,217,1.0)',   hot: 'rgba(255,60,30,1.0)',     core: '#fff5d9' }
+];
+const BLADE_XP = [3, 6, 10, 16, 24];
+function currentBlade() { return BLADE_LEVELS[state.blade.level]; }
+function awardBladeXP() {
+  if (!state.blade.enabled) return;
+  state.blade.xp++;
+  const need = BLADE_XP[state.blade.level];
+  if (need !== undefined && state.blade.xp >= need && state.blade.level < BLADE_LEVELS.length - 1) {
+    state.blade.xp -= need;
+    state.blade.level++;
+    const b = currentBlade();
+    showBladeToast(b.name);
+    // brief flare on the player
+    for (let i = 0; i < 28; i++) {
+      state.particles.push({ kind: 'spark', x: state.player.x, y: state.player.y - 8, vx: Math.cos(i / 28 * Math.PI * 2) * 140, vy: Math.sin(i / 28 * Math.PI * 2) * 140 - 30, life: 1.1, col: '#ffd089' });
+    }
+    state.cam.shake = Math.max(state.cam.shake, 0.5);
+    SFX.light();
+  }
+}
+function showBladeToast(name) {
+  const el = document.getElementById('blade-toast');
+  if (!el) return;
+  el.innerHTML = '— The iron is tempered —<small>' + name + '</small>';
+  el.classList.add('show');
+  clearTimeout(showBladeToast._t);
+  showBladeToast._t = setTimeout(() => el.classList.remove('show'), 1700);
+}
 
 // Init enemies
 function spawnEnemies() {
@@ -729,6 +823,10 @@ btnInteract.addEventListener('click', () => { if (state.screen === 'playing') tr
 // Start / pause / inv buttons
 $('start').addEventListener('click', () => {
   ensureAudio();
+  const opt = document.getElementById('opt-bladeup');
+  state.blade.enabled = opt ? !!opt.checked : true;
+  state.blade.level = 0;
+  state.blade.xp = 0;
   titleEl.style.display = 'none';
   state.screen = 'playing';
   last = performance.now();
@@ -1087,7 +1185,9 @@ function togglePause() {
 function tryAttack() {
   const p = state.player;
   if (p.swing > 0) return;
-  p.swing = 0.32;
+  const bl = currentBlade();
+  p.swing = bl.swing;
+  p.swingMax = bl.swing;
   // swing direction follows last movement, or facing
   p.swingDir = p.dir; // -1 or 1; 0 = down (we'll arc downward)
   SFX.swing();
@@ -1119,15 +1219,15 @@ function tryDash() {
 
 function checkSwingHits() {
   const p = state.player;
-  // sword reach circle: a 50px arc in front of player
-  const reach = 56;
+  const bl = currentBlade();
+  const reach = bl.reach;
   const cx = p.x + (p.dir === 0 ? 0 : p.dir * 18);
   const cy = p.y + (p.dir === 0 ? 18 : 0);
   for (const e of state.enemies) {
     if (e.dead) continue;
     const d = Math.hypot(e.x - cx, e.y - cy);
     if (d < reach) {
-      hitEnemy(e, 1, e.x - p.x, e.y - p.y);
+      hitEnemy(e, bl.dmg, e.x - p.x, e.y - p.y);
     }
   }
   // light boss projectiles too (deflect them)
@@ -1163,10 +1263,43 @@ function hitEnemy(e, dmg, dx, dy) {
 function killEnemy(e) {
   e.dead = true;
   state.killed++;
+
+  // ── blood splash ──
+  // wraiths bleed pale blue mist; stoker bleeds gold-orange; everything else red-orange ember-blood
+  const bloodCol = e.type === 'wraith' ? '#9fd9ff'
+                : e.type === 'stoker' ? '#ffd089'
+                : '#c8202a';
+  const dropCol  = e.type === 'wraith' ? 'rgba(140,200,240,0.45)'
+                : e.type === 'stoker' ? 'rgba(255,180,90,0.55)'
+                : 'rgba(120,18,22,0.65)';
+  // big burst of droplets that arc and land
+  const dropN = e.type === 'stoker' ? 60 : 28;
+  for (let i = 0; i < dropN; i++) {
+    const ang = Math.random() * Math.PI * 2;
+    const sp = 80 + Math.random() * 220;
+    state.particles.push({
+      kind: 'blood',
+      x: e.x, y: e.y - e.r * 0.4,
+      vx: Math.cos(ang) * sp,
+      vy: Math.sin(ang) * sp - 60 - Math.random() * 80,
+      life: 0.5 + Math.random() * 0.5,
+      col: bloodCol,
+      sz: 1.6 + Math.random() * 2.4,
+      landAt: e.y + 6 + Math.random() * 10,
+      landed: false,
+      dropCol
+    });
+  }
+  // a central pool decal at the kill site
+  state.bloodSplats.push({ x: e.x, y: e.y + 4, r: 14 + e.r * 0.5, col: dropCol, age: 0, max: 14 });
+  // brilliant spark burst on top (kept from before)
   for (let i = 0; i < 20; i++) {
     state.particles.push({ kind: 'spark', x: e.x, y: e.y, vx: (Math.random()-0.5)*200, vy: (Math.random()-0.5)*200, life: 0.9, col: e.type === 'wraith' ? '#9fd9ff' : '#ff7a2e' });
   }
   state.cam.shake = Math.min(1.0, state.cam.shake + 0.25);
+
+  awardBladeXP();
+
   if (e.type === 'stoker') {
     // boss defeat opens altar interaction & spawns ember-burst
     SFX.boss();
@@ -1372,9 +1505,27 @@ function updateParticles(dt) {
     } else if (pt.kind === 'ash') {
       pt.vx += (Math.random() - 0.5) * 4 * dt;
       pt.vy += 6 * dt;
+    } else if (pt.kind === 'blood') {
+      if (!pt.landed) {
+        pt.vy += 480 * dt;             // heavy gravity so it lands fast
+        pt.vx *= (1 - 1.2 * dt);
+        if (pt.y >= pt.landAt) {
+          pt.landed = true;
+          // leave a small persistent ground drop where it landed
+          state.bloodSplats.push({ x: pt.x, y: pt.landAt, r: pt.sz * 1.8, col: pt.dropCol, age: 0, max: 9 });
+          pt.life = 0; // remove the airborne droplet
+        }
+      }
     }
     pt.life -= dt;
     if (pt.life <= 0) state.particles.splice(i, 1);
+  }
+
+  // blood splats fade slowly so the player sees what they've done
+  for (let i = state.bloodSplats.length - 1; i >= 0; i--) {
+    const s = state.bloodSplats[i];
+    s.age += dt;
+    if (s.age >= s.max) state.bloodSplats.splice(i, 1);
   }
   // ambient ash drift, by zone
   if (Math.random() < 0.55) {
@@ -2296,28 +2447,101 @@ function drawPlayer() {
     ctx.fillRect(sxS - 3, syS - 3, 6, 6);
   }
 
-  // sword swing arc
+  // sword swing arc — scales with the iron's temper
+  const bl = currentBlade();
   if (p.swing > 0) {
-    const tt = 1 - (p.swing / 0.32);
-    const reach = 56;
+    const swingMax = p.swingMax || bl.swing;
+    const tt = 1 - (p.swing / swingMax);
+    const reach = bl.reach;
     const cx = sx + (dir === 0 ? 0 : dir * 14);
     const cy = sy + (dir === 0 ? 14 : 0);
     ctx.save();
     ctx.translate(cx, cy);
     const startAng = dir === 0 ? Math.PI / 2 - 1 : (dir === 1 ? -1 : Math.PI + 1);
     const ang = startAng + tt * 2;
-    ctx.strokeStyle = 'rgba(255,245,217,0.85)';
-    ctx.lineWidth = 8;
+    // soft additive halo so the cut feels white-hot
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.strokeStyle = bl.hot;
+    ctx.lineWidth = bl.w + 8;
+    ctx.beginPath();
+    ctx.arc(0, 0, reach, ang - 0.5, ang + 0.5);
+    ctx.stroke();
+    ctx.globalCompositeOperation = 'source-over';
+    // main blade arc — fat and bright
+    ctx.strokeStyle = bl.glow;
+    ctx.lineWidth = bl.w;
     ctx.beginPath();
     ctx.arc(0, 0, reach, ang - 0.7, ang + 0.7);
     ctx.stroke();
-    ctx.strokeStyle = 'rgba(255,208,137,0.6)';
-    ctx.lineWidth = 14;
+    // hot core slash — the bright streak in the middle
+    ctx.strokeStyle = bl.core;
+    ctx.lineWidth = Math.max(2, bl.w * 0.35);
     ctx.beginPath();
     ctx.arc(0, 0, reach, ang - 0.4, ang + 0.4);
     ctx.stroke();
     ctx.restore();
   }
+  // ─── the blade itself, drawn into the staff/lantern hand even at rest ───
+  // so the player can see the iron getting bigger as they level up
+  if (p.swing <= 0) {
+    const baseX = sxS + (dir === 0 ? 0 : dir * 2);
+    const baseY = syS + 6;
+    const bladeLen = 14 + bl.reach * 0.18;
+    const bladeW   = 1.6 + bl.w * 0.18;
+    const angle = dir === 0 ? Math.PI / 2 : (dir === 1 ? 0.35 : Math.PI - 0.35);
+    ctx.save();
+    ctx.translate(baseX, baseY);
+    ctx.rotate(angle);
+    // additive glow around the iron — gets brighter each level
+    ctx.globalCompositeOperation = 'lighter';
+    const g = ctx.createRadialGradient(bladeLen * 0.6, 0, 0, bladeLen * 0.6, 0, bladeLen);
+    g.addColorStop(0, bl.glow);
+    g.addColorStop(1, 'rgba(255,160,80,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(-2, -bladeW * 1.8, bladeLen + 4, bladeW * 3.6);
+    ctx.globalCompositeOperation = 'source-over';
+    // blade body
+    ctx.fillStyle = bl.core;
+    ctx.fillRect(0, -bladeW * 0.5, bladeLen, bladeW);
+    ctx.fillStyle = bl.glow;
+    ctx.fillRect(0, -bladeW * 0.2, bladeLen, bladeW * 0.4);
+    // tip
+    ctx.fillStyle = bl.core;
+    ctx.beginPath();
+    ctx.moveTo(bladeLen, -bladeW * 0.5);
+    ctx.lineTo(bladeLen + 3, 0);
+    ctx.lineTo(bladeLen, bladeW * 0.5);
+    ctx.closePath();
+    ctx.fill();
+    // crossguard
+    ctx.fillStyle = '#3a2818';
+    ctx.fillRect(-2, -bladeW * 1.4, 3, bladeW * 2.8);
+    ctx.restore();
+  }
+}
+
+function drawBloodSplats() {
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const offX = -state.cam.x + vw / 2;
+  const offY = -state.cam.y + vh / 2;
+  for (const s of state.bloodSplats) {
+    const sx = s.x + offX, sy = s.y + offY;
+    if (sx < -40 || sx > vw + 40 || sy < -40 || sy > vh + 40) continue;
+    const fade = Math.max(0, 1 - s.age / s.max);
+    ctx.save();
+    ctx.globalAlpha = fade;
+    ctx.fillStyle = s.col;
+    ctx.beginPath();
+    ctx.ellipse(sx, sy, s.r, s.r * 0.55, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // tiny inner kernel for depth
+    ctx.globalAlpha = fade * 0.7;
+    ctx.beginPath();
+    ctx.ellipse(sx - s.r * 0.2, sy - s.r * 0.15, s.r * 0.45, s.r * 0.28, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+  ctx.globalAlpha = 1;
 }
 
 function drawParticles() {
@@ -2328,6 +2552,18 @@ function drawParticles() {
     const sx = pt.x + offX, sy = pt.y + offY;
     if (sx < -20 || sx > vw + 20 || sy < -20 || sy > vh + 20) continue;
     const lifeF = Math.max(0, Math.min(1, pt.life / (pt.kind === 'ash' ? 5 : 1.5)));
+    if (pt.kind === 'blood') {
+      ctx.fillStyle = pt.col;
+      ctx.globalAlpha = Math.min(1, lifeF + 0.2);
+      ctx.beginPath();
+      ctx.arc(sx, sy, pt.sz, 0, Math.PI * 2);
+      ctx.fill();
+      // streak behind for motion
+      ctx.globalAlpha *= 0.5;
+      ctx.fillRect(sx - 0.5, sy - pt.sz * 0.4, 1, pt.sz * 0.8);
+      ctx.globalAlpha = 1;
+      continue;
+    }
     if (pt.kind === 'spark') {
       ctx.globalCompositeOperation = 'lighter';
       ctx.fillStyle = pt.col;
@@ -2382,20 +2618,28 @@ function drawLighting() {
   const offX = -state.cam.x + vw / 2;
   const offY = -state.cam.y + vh / 2;
 
+  // Subtle ambient flicker so the darkness breathes a little.
+  const ambient = 0.78 + Math.sin(state.flicker * 1.7) * 0.015;
+  const flick7 = Math.sin(state.flicker * 7);
+  const flick11 = Math.sin(state.flicker * 11 + 0.7);
+
   ctx.save();
-  // base darkness
-  ctx.fillStyle = 'rgba(15,10,24,0.74)';
+  // base darkness — a touch deeper, with a faint indigo bias
+  ctx.fillStyle = `rgba(12,8,20,${ambient})`;
   ctx.fillRect(0, 0, vw, vh);
   ctx.globalCompositeOperation = 'destination-out';
 
-  // player lantern
+  // player lantern — bigger, with a near-opaque hot core and a long soft falloff
   const playerSX = state.player.x + offX;
   const playerSY = state.player.y + offY;
-  const pR = state.player.oil > 0 ? 200 + Math.sin(state.flicker * 7) * 10 : 70;
-  const pg = ctx.createRadialGradient(playerSX, playerSY, 8, playerSX, playerSY, pR);
-  pg.addColorStop(0, 'rgba(0,0,0,1)');
-  pg.addColorStop(0.6, 'rgba(0,0,0,0.7)');
-  pg.addColorStop(1, 'rgba(0,0,0,0)');
+  const litR  = 240 + flick7 * 12 + flick11 * 4;
+  const darkR = 90 + flick7 * 4;
+  const pR = state.player.oil > 0 ? litR : darkR;
+  const pg = ctx.createRadialGradient(playerSX, playerSY, 6, playerSX, playerSY, pR);
+  pg.addColorStop(0,    'rgba(0,0,0,1)');
+  pg.addColorStop(0.35, 'rgba(0,0,0,0.92)');
+  pg.addColorStop(0.7,  'rgba(0,0,0,0.55)');
+  pg.addColorStop(1,    'rgba(0,0,0,0)');
   ctx.fillStyle = pg;
   ctx.beginPath();
   ctx.arc(playerSX, playerSY, pR, 0, Math.PI * 2);
@@ -2406,11 +2650,12 @@ function drawLighting() {
     if (!b.lit) continue;
     const sx = b.x + offX, sy = b.y + offY - 14;
     if (sx < -300 || sx > vw + 300 || sy < -300 || sy > vh + 300) continue;
-    const r = 170 + Math.sin(state.flicker * 4 + b.x * 0.01) * 8;
-    const g = ctx.createRadialGradient(sx, sy, 8, sx, sy, r);
-    g.addColorStop(0, 'rgba(0,0,0,1)');
-    g.addColorStop(0.55, 'rgba(0,0,0,0.6)');
-    g.addColorStop(1, 'rgba(0,0,0,0)');
+    const r = 200 + Math.sin(state.flicker * 4 + b.x * 0.01) * 12;
+    const g = ctx.createRadialGradient(sx, sy, 6, sx, sy, r);
+    g.addColorStop(0,    'rgba(0,0,0,1)');
+    g.addColorStop(0.4,  'rgba(0,0,0,0.85)');
+    g.addColorStop(0.75, 'rgba(0,0,0,0.4)');
+    g.addColorStop(1,    'rgba(0,0,0,0)');
     ctx.fillStyle = g;
     ctx.beginPath();
     ctx.arc(sx, sy, r, 0, Math.PI * 2);
@@ -2420,9 +2665,9 @@ function drawLighting() {
   for (const m of MEMORIES) {
     const sx = m.x + offX, sy = m.y + offY - 6;
     if (sx < -200 || sx > vw + 200 || sy < -200 || sy > vh + 200) continue;
-    const r = m.claimed ? 50 : 60;
-    const g = ctx.createRadialGradient(sx, sy, 4, sx, sy, r);
-    g.addColorStop(0, 'rgba(0,0,0,0.6)');
+    const r = m.claimed ? 60 : 75;
+    const g = ctx.createRadialGradient(sx, sy, 3, sx, sy, r);
+    g.addColorStop(0, 'rgba(0,0,0,0.75)');
     g.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = g;
     ctx.beginPath();
@@ -2434,9 +2679,10 @@ function drawLighting() {
     if (e.dead) continue;
     if (e.type === 'ember' || e.type === 'stoker') {
       const sx = e.x + offX, sy = e.y + offY;
-      const r = e.type === 'stoker' ? 200 : 70;
+      const r = e.type === 'stoker' ? 220 : 80;
       const g = ctx.createRadialGradient(sx, sy, 2, sx, sy, r);
-      g.addColorStop(0, 'rgba(0,0,0,0.7)');
+      g.addColorStop(0, 'rgba(0,0,0,0.8)');
+      g.addColorStop(0.6, 'rgba(0,0,0,0.35)');
       g.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = g;
       ctx.beginPath();
@@ -2446,27 +2692,39 @@ function drawLighting() {
   }
   ctx.restore();
 
-  // warm light tint pass (additive)
+  // warm light tint pass (additive) — richer amber near sources
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
   if (state.player.oil > 0) {
-    const pR2 = 140 + Math.sin(state.flicker * 7) * 6;
+    const pR2 = 180 + flick7 * 8;
     const pg2 = ctx.createRadialGradient(playerSX, playerSY, 0, playerSX, playerSY, pR2);
-    pg2.addColorStop(0, 'rgba(255,208,137,0.20)');
-    pg2.addColorStop(0.6, 'rgba(255,122,46,0.08)');
-    pg2.addColorStop(1, 'rgba(255,122,46,0)');
+    pg2.addColorStop(0,    'rgba(255,224,164,0.34)');
+    pg2.addColorStop(0.35, 'rgba(255,178,96,0.18)');
+    pg2.addColorStop(0.7,  'rgba(255,122,46,0.08)');
+    pg2.addColorStop(1,    'rgba(255,122,46,0)');
     ctx.fillStyle = pg2;
     ctx.fillRect(0, 0, vw, vh);
+
+    // tiny bright halo right at the lantern — sells the wick
+    const pCore = 36 + flick7 * 3;
+    const pgC = ctx.createRadialGradient(playerSX, playerSY - 4, 0, playerSX, playerSY - 4, pCore);
+    pgC.addColorStop(0, 'rgba(255,238,196,0.55)');
+    pgC.addColorStop(1, 'rgba(255,178,96,0)');
+    ctx.fillStyle = pgC;
+    ctx.beginPath();
+    ctx.arc(playerSX, playerSY - 4, pCore, 0, Math.PI * 2);
+    ctx.fill();
   }
   for (const b of BRAZIERS) {
     if (!b.lit) continue;
     const sx = b.x + offX, sy = b.y + offY - 14;
     if (sx < -300 || sx > vw + 300 || sy < -300 || sy > vh + 300) continue;
-    const r = 130 + Math.sin(state.flicker * 4 + b.x * 0.01) * 8;
+    const r = 160 + Math.sin(state.flicker * 4 + b.x * 0.01) * 12;
     const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, r);
-    g.addColorStop(0, 'rgba(255,208,137,0.24)');
-    g.addColorStop(0.5, 'rgba(255,122,46,0.10)');
-    g.addColorStop(1, 'rgba(255,122,46,0)');
+    g.addColorStop(0,    'rgba(255,224,164,0.38)');
+    g.addColorStop(0.35, 'rgba(255,178,96,0.18)');
+    g.addColorStop(0.7,  'rgba(255,122,46,0.08)');
+    g.addColorStop(1,    'rgba(255,122,46,0)');
     ctx.fillStyle = g;
     ctx.fillRect(sx - r, sy - r, r * 2, r * 2);
   }
@@ -2807,6 +3065,7 @@ function update(dt) {
 
 function render() {
   drawGround();
+  drawBloodSplats();
   drawRocksBushes();
   drawProps();
   drawMemories();

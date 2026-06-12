@@ -1,0 +1,14 @@
+{
+  "name": "Omenly — A small handmade browser arcade",
+  "short_name": "Omenly",
+  "description": "A tiny browser arcade of short, handmade games. Play in a tab.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0a0410",
+  "theme_color": "#0a0410",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ],
+  "categories": ["games", "entertainment"]
+}

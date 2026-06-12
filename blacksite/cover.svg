@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="80%">
+      <stop offset="0%" stop-color="#0a1410"/>
+      <stop offset="100%" stop-color="#000"/>
+    </radialGradient>
+    <linearGradient id="cone" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff3a3a" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#ff3a3a" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="cone2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffb830" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#ffb830" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+  </defs>
+  <rect width="600" height="400" fill="url(#bg)"/>
+
+  <!-- grid floor -->
+  <g stroke="#1a3a2e" stroke-width="0.6" opacity="0.6">
+    <path d="M0 130 L600 130 M0 170 L600 170 M0 210 L600 210 M0 250 L600 250 M0 290 L600 290 M0 330 L600 330 M0 370 L600 370"/>
+    <path d="M60 120 L60 400 M120 120 L120 400 M180 120 L180 400 M240 120 L240 400 M300 120 L300 400 M360 120 L360 400 M420 120 L420 400 M480 120 L480 400 M540 120 L540 400"/>
+  </g>
+
+  <!-- walls -->
+  <g fill="#0e1f17" stroke="#2a5040" stroke-width="1.2">
+    <rect x="80" y="140" width="160" height="14"/>
+    <rect x="340" y="140" width="180" height="14"/>
+    <rect x="80" y="350" width="200" height="14"/>
+    <rect x="380" y="350" width="140" height="14"/>
+    <rect x="80" y="140" width="14" height="220"/>
+    <rect x="506" y="140" width="14" height="220"/>
+    <rect x="260" y="220" width="14" height="100"/>
+    <rect x="340" y="220" width="14" height="100"/>
+  </g>
+
+  <!-- guard vision cones -->
+  <g filter="url(#glow)">
+    <polygon points="160,170 60,310 260,310" fill="url(#cone)"/>
+    <polygon points="440,170 360,310 530,310" fill="url(#cone2)"/>
+  </g>
+
+  <!-- guards -->
+  <g>
+    <circle cx="160" cy="170" r="7" fill="#ff3a3a"/>
+    <circle cx="160" cy="170" r="3" fill="#fff"/>
+    <circle cx="440" cy="170" r="7" fill="#ffb830"/>
+    <circle cx="440" cy="170" r="3" fill="#fff"/>
+  </g>
+
+  <!-- player (operative) -->
+  <g transform="translate(300 270)">
+    <circle r="10" fill="#0e1f17" stroke="#7fffd4" stroke-width="1.5"/>
+    <circle r="6" fill="#7fffd4" opacity="0.7"/>
+    <path d="M-3 -3 L3 -3 L3 3 L-3 3 Z" fill="#0a1410"/>
+  </g>
+
+  <!-- exit (extraction) -->
+  <g transform="translate(490 380)">
+    <rect x="-12" y="-12" width="24" height="24" fill="none" stroke="#7fffd4" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <text x="0" y="4" text-anchor="middle" font-size="10" fill="#7fffd4" font-family="Helvetica,sans-serif" font-weight="bold">EX</text>
+  </g>
+
+  <!-- title -->
+  <g font-family="Helvetica, sans-serif" fill="#e8f5ee">
+    <text x="300" y="58" text-anchor="middle" font-size="42" font-weight="bold" letter-spacing="14" style="text-shadow: 0 0 20px #7fffd4;">BLACKSITE</text>
+    <text x="300" y="88" text-anchor="middle" font-size="10" letter-spacing="8" fill="#7fffd4" opacity="0.8">CLASSIFIED · CIA · EYES ONLY</text>
+  </g>
+
+  <!-- classified bars -->
+  <g opacity="0.7">
+    <rect x="40" y="100" width="80" height="8" fill="#ff3a3a"/>
+    <rect x="480" y="100" width="80" height="8" fill="#ff3a3a"/>
+  </g>
+
+  <!-- corner stamps -->
+  <g font-family="Helvetica,sans-serif" font-size="8" fill="#7fffd4" opacity="0.5" letter-spacing="2">
+    <text x="20" y="390">FILE 0xC1A-7B</text>
+    <text x="580" y="390" text-anchor="end">LEVEL 5+</text>
+  </g>
+</svg>

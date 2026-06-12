@@ -3,7 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
-<title>ECHO — A Sonar Survival Game</title>
+<title>Echo — A sonar survival game in pitch dark · Omenly</title>
+<meta name="description" content="You cannot see. Click to listen. Echo is a sonar survival game where every ping is the only thing keeping you alive in the dark. Free in your browser.">
+<meta name="theme-color" content="#001a1f">
+<link rel="canonical" href="https://omenly.vercel.app/echo/">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Echo — A sonar survival game">
+<meta property="og:description" content="You cannot see. Click to listen. A sonar survival game in pitch dark.">
+<meta property="og:url" content="https://omenly.vercel.app/echo/">
+<meta property="og:image" content="https://omenly.vercel.app/echo/cover.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Echo — A sonar survival game">
+<meta name="twitter:description" content="You cannot see. Click to listen. A sonar survival game in pitch dark.">
+<meta name="twitter:image" content="https://omenly.vercel.app/echo/cover.svg">
+<script type="application/ld+json">
+{ "@context":"https://schema.org","@type":"VideoGame","name":"Echo","url":"https://omenly.vercel.app/echo/","description":"You cannot see. Click to listen. A sonar survival game in pitch dark.","genre":["arcade","survival"],"playMode":"SinglePlayer","gamePlatform":["Web browser"],"applicationCategory":"Game","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@type":"Organization","name":"Omenly"} }
+</script>
 <link rel="stylesheet" href="omenly.css">
 <script>
   window.OMENLY_CONFIG = {
@@ -407,17 +423,22 @@
   stickEl.addEventListener('lostpointercapture', endStick);
 
   // ── ping button ──
-  pingBtn.addEventListener('pointerdown', e => {
+  let pingBtnDebounce = 0;
+  function doPingPress(e) {
     e.preventDefault();
+    e.stopPropagation();
+    const now = performance.now();
+    if (now - pingBtnDebounce < 250) return;
+    pingBtnDebounce = now;
     ensureAudio();
     if (!started) { start(); return; }
     if (!alive) { start(); return; }
     if (pingBtn.disabled) return;
     ping(player.x, player.y);
-  });
-  ['touchstart', 'contextmenu'].forEach(ev =>
-    pingBtn.addEventListener(ev, e => e.preventDefault(), { passive: false })
-  );
+  }
+  pingBtn.addEventListener('pointerdown', doPingPress);
+  pingBtn.addEventListener('touchstart', doPingPress, { passive: false });
+  pingBtn.addEventListener('contextmenu', e => e.preventDefault());
 
   // ── collision ──
   function isWall(x, y) {

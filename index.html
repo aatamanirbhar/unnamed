@@ -1,10 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
+  <meta name="google-site-verification" content="8exM8nuSseZcSDH6a7teHdwZKuGWG4qY6FChA2bjkIM" />
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0a0410">
-<title>omenly</title>
+<title>Omenly — A small handmade browser arcade</title>
+<meta name="description" content="A tiny browser arcade of short, handmade games. Sonar survival, CIA stealth, hunting, zombies, narrative — play any in a tab. No installs, no accounts.">
+<meta name="keywords" content="browser games, indie arcade, free browser games, handmade games, html5 games, short games, omenly, play in browser">
+<meta name="author" content="Omenly">
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+<link rel="canonical" href="https://omenly.vercel.app/">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="alternate icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/favicon.svg">
+<link rel="manifest" href="/site.webmanifest">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Omenly — A small handmade browser arcade">
+<meta property="og:description" content="A little arcade of short, finished games. Play in a browser. No installs, no accounts.">
+<meta property="og:url" content="https://omenly.vercel.app/">
+<meta property="og:image" content="https://omenly.vercel.app/og-cover.svg">
+<meta property="og:site_name" content="Omenly">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Omenly — A small handmade browser arcade">
+<meta name="twitter:description" content="A little arcade of short, finished games. Play in a browser.">
+<meta name="twitter:image" content="https://omenly.vercel.app/og-cover.svg">
+
+<!-- Structured data: WebSite gives Google the sitelinks search box + a clean name -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Omenly",
+  "alternateName": "Omenly Arcade",
+  "url": "https://omenly.vercel.app/",
+  "description": "A tiny browser arcade of short, handmade games. Play in a tab.",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Omenly",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://omenly.vercel.app/favicon.svg"
+    }
+  },
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://omenly.vercel.app/?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "Omenly Games",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "url": "https://omenly.vercel.app/echo/",       "name": "Echo" },
+    { "@type": "ListItem", "position": 2, "url": "https://omenly.vercel.app/porchlight/",  "name": "Porchlight" },
+    { "@type": "ListItem", "position": 3, "url": "https://omenly.vercel.app/ashenreach/",  "name": "Ashenreach" },
+    { "@type": "ListItem", "position": 4, "url": "https://omenly.vercel.app/stillhunt/",   "name": "Stillhunt" },
+    { "@type": "ListItem", "position": 5, "url": "https://omenly.vercel.app/carve/",       "name": "Carve" },
+    { "@type": "ListItem", "position": 6, "url": "https://omenly.vercel.app/blacksite/",   "name": "Blacksite" },
+    { "@type": "ListItem", "position": 7, "url": "https://omenly.vercel.app/raccoon/",     "name": "Raccoon" }
+  ]
+}
+</script>
+
 <link rel="stylesheet" href="omenly.css">
 <script>
   window.OMENLY_CONFIG = {
@@ -97,6 +164,33 @@
     .tile:hover { transform: none; box-shadow: none; border-color: var(--line); }
     .tile:hover::after { opacity: 0; }
   }
+
+  /* Tip jar modal */
+  .tip-link { background: none; border: none; color: var(--accent); cursor: pointer; font: inherit; padding: 0; text-decoration: none; }
+  .tip-link:hover { text-decoration: underline; }
+  #tip-modal { position: fixed; inset: 0; z-index: 100; background: rgba(5,2,10,0.78); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; padding: 20px; }
+  #tip-modal.on { display: flex; }
+  #tip-modal .card { background: linear-gradient(160deg, #1a0826, #0e0418); border: 1px solid var(--line); border-radius: 6px; padding: 32px 28px 28px; max-width: 460px; width: 100%; position: relative; box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 40px rgba(255,95,162,0.15); }
+  #tip-modal .close { position: absolute; top: 10px; right: 14px; background: none; border: none; color: var(--dim); font-size: 24px; cursor: pointer; line-height: 1; }
+  #tip-modal .close:hover { color: var(--ink); }
+  #tip-modal .crown-tag { color: var(--warm); font-size: 10px; letter-spacing: 6px; text-transform: uppercase; font-family: Helvetica, sans-serif; margin-bottom: 10px; text-align: center; opacity: 0.8; }
+  #tip-modal h3 { font-style: italic; font-weight: normal; font-size: 26px; text-align: center; margin-bottom: 8px; }
+  #tip-modal .sub { text-align: center; color: var(--dim); font-style: italic; font-size: 14px; margin-bottom: 26px; }
+  #tip-modal .options { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  #tip-modal .opt { background: rgba(255,255,255,0.03); border: 1px solid var(--line); border-radius: 4px; padding: 18px 14px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; transition: border-color 0.25s, background 0.25s; text-decoration: none; color: inherit; }
+  #tip-modal .opt:hover { border-color: var(--accent); background: rgba(255,95,162,0.06); }
+  #tip-modal .opt .label { font-size: 10px; letter-spacing: 4px; text-transform: uppercase; color: var(--warm); font-family: Helvetica, sans-serif; font-weight: 600; }
+  #tip-modal .opt .name { font-style: italic; font-size: 16px; }
+  #tip-modal .opt .hint { font-size: 11px; color: var(--dim); font-family: Helvetica, sans-serif; letter-spacing: 1px; }
+  #tip-modal .opt .qr { width: 130px; height: 130px; background: #fff; padding: 6px; border-radius: 3px; }
+  #tip-modal .opt .qr img { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+  #tip-modal .opt .pp-logo { width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; background: #003087; border-radius: 50%; font-family: Helvetica, Arial, sans-serif; font-style: italic; font-weight: 800; color: #fff; font-size: 22px; letter-spacing: -1px; box-shadow: 0 0 16px rgba(0,114,206,0.5); }
+  #tip-modal .opt .pp-logo span { color: #009cde; }
+  #tip-modal .foot { margin-top: 22px; text-align: center; color: var(--dim); font-size: 11px; font-family: Helvetica, sans-serif; letter-spacing: 1px; line-height: 1.6; }
+  @media (max-width: 480px) {
+    #tip-modal .options { grid-template-columns: 1fr; }
+    #tip-modal .opt .qr { width: 160px; height: 160px; }
+  }
 </style>
 </head>
 <body>
@@ -120,12 +214,36 @@
 </main>
 
 <footer>
-  Made with care. <a href="https://www.paypal.me/vikas117" target="_blank" rel="noopener">Tip the dev</a> if something here stays with you.
+  Made with care. <button type="button" class="tip-link" id="tip-open">Tip the dev</button> if something here stays with you.
   <br>
   <a href="/about.html">about</a> · <a href="/privacy.html">privacy</a>
 </footer>
 
 <div id="donate"><a href="https://www.paypal.me/vikas117/10" target="_blank" rel="noopener" data-omenly-cta>SUPPORT</a></div>
+
+<div id="tip-modal" role="dialog" aria-modal="true" aria-labelledby="tip-title">
+  <div class="card">
+    <button type="button" class="close" id="tip-close" aria-label="Close">×</button>
+    <div class="crown-tag">— TIP THE DEV —</div>
+    <h3 id="tip-title">a small thank-you</h3>
+    <p class="sub">two ways to send a tip. anything is plenty.</p>
+    <div class="options">
+      <a class="opt" href="https://www.paypal.me/vikas117" target="_blank" rel="noopener">
+        <span class="label">PayPal</span>
+        <span class="pp-logo">P<span>P</span></span>
+        <span class="name">paypal.me/vikas117</span>
+        <span class="hint">tap to open</span>
+      </a>
+      <div class="opt" aria-label="UPI QR code">
+        <span class="label">UPI</span>
+        <span class="qr"><img src="/qr.jpeg" alt="UPI QR code" loading="lazy" decoding="async"></span>
+        <span class="name">scan to pay</span>
+        <span class="hint">any UPI app</span>
+      </div>
+    </div>
+    <div class="foot">no accounts, no receipts. honor system.</div>
+  </div>
+</div>
 
 <script>
 (() => {
@@ -232,6 +350,17 @@
   const sheet = document.createElement('style');
   sheet.textContent = `@keyframes tilein { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }`;
   document.head.appendChild(sheet);
+
+  // tip jar modal
+  const tipModal = document.getElementById('tip-modal');
+  const tipOpen  = document.getElementById('tip-open');
+  const tipClose = document.getElementById('tip-close');
+  function openTip()  { tipModal.classList.add('on'); }
+  function closeTip() { tipModal.classList.remove('on'); }
+  tipOpen.addEventListener('click', openTip);
+  tipClose.addEventListener('click', closeTip);
+  tipModal.addEventListener('click', e => { if (e.target === tipModal) closeTip(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && tipModal.classList.contains('on')) closeTip(); });
 })();
 </script>
 </body>

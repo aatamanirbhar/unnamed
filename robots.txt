@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /Instructions/
+
+Sitemap: https://omenly.vercel.app/sitemap.xml

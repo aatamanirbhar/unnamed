@@ -63,16 +63,28 @@
       "controls": "click + A/D (desktop) · tap to slash, tap edges to step (mobile)"
     },
     {
-      "id": "velvet-hour",
-      "title": "velvet-hour",
-      "blurb": "Coming of age",
-      "tags": ["narrative", "lgbt", "americana", "cozy"],
-      "minutes": 15,
-      "accent": "#ff8c42",
-      "background": "linear-gradient(135deg, #050817, #1a0e22)",
-      "cover": "velvet-hour/cover.svg",
-      "href": "velvet-hour/",
-      "controls": "click / tap"
+      "id": "blacksite",
+      "title": "Blacksite",
+      "blurb": "A CIA ghost in a hostile facility. Steal the intel. Stay out of the cones. Crouch and they don't hear you — usually.",
+      "tags": ["arcade", "stealth", "spy", "top-down"],
+      "minutes": 8,
+      "accent": "#7fffd4",
+      "background": "linear-gradient(135deg, #050a08, #0e1f17)",
+      "cover": "blacksite/cover.svg",
+      "href": "blacksite/",
+      "controls": "WASD + SHIFT (desktop) · joystick + CROUCH (mobile)"
+    },
+    {
+      "id": "raccoon",
+      "title": "Raccoon",
+      "blurb": "Raccoon City, after dark. An RPD operative with a handgun, a small map, and a lot of zombies in the way. Third-person 3D survival.",
+      "tags": ["3d", "survival horror", "shooter", "zombies", "third-person"],
+      "minutes": 10,
+      "accent": "#c8503a",
+      "background": "linear-gradient(135deg, #0a0604, #2a1208)",
+      "cover": "raccoon/cover.svg",
+      "href": "raccoon/",
+      "controls": "WASD + mouse + click (desktop) · joystick + look + FIRE (mobile)"
     }
   ]
 }
