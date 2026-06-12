@@ -61,6 +61,18 @@
       "cover": "carve/cover.svg",
       "href": "carve/",
       "controls": "click + A/D (desktop) · tap to slash, tap edges to step (mobile)"
+    },
+    {
+      "id": "velvet-hour",
+      "title": "velvet-hour",
+      "blurb": "Coming of age",
+      "tags": ["narrative", "lgbt", "americana", "cozy"],
+      "minutes": 15,
+      "accent": "#ff8c42",
+      "background": "linear-gradient(135deg, #050817, #1a0e22)",
+      "cover": "velvet-hour/cover.svg",
+      "href": "velvet-hour/",
+      "controls": "click / tap"
     }
   ]
 }
