@@ -280,6 +280,28 @@
     #hud-tr { top: 60px; font-size: 10px; }
     #killfeed { top: 60px; font-size: 10px; max-width: 50vw; }
   }
+  /* Landscape mobile: minimap was overlapping the centre of the screen.
+     Pin it to the top-right and shrink it so it doesn't obscure aiming. */
+  @media (orientation: landscape) and (max-height: 600px) {
+    #minimap { width: 92px; height: 92px; top: max(8px, env(safe-area-inset-top, 0px) + 4px); left: auto; right: max(8px, env(safe-area-inset-right, 0px) + 4px); transform: none; }
+    #hud-tr { top: max(106px, env(safe-area-inset-top, 0px) + 100px); right: 8px; }
+    #killfeed { top: max(8px, env(safe-area-inset-top, 0px) + 4px); left: 8px; max-width: 40vw; font-size: 10px; }
+    #top-bar { padding: 6px 10px; gap: 10px; font-size: 11px; }
+  }
+  /* Portrait mobile rotate-nag */
+  #rotate-nag { position: fixed; inset: 0; background: #0a0604; z-index: 200;
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 40px 24px; color: #ffd089;
+    font-family: 'Courier New', monospace; letter-spacing: 3px; }
+  #rotate-nag.show { display: flex; }
+  #rotate-nag .icon { font-size: 64px; margin-bottom: 28px; animation: rotateHint 2.4s ease-in-out infinite; transform-origin: center; line-height: 1; }
+  #rotate-nag h2 { font-size: clamp(20px, 4.5vw, 28px); margin-bottom: 14px; color: #ffd089; text-shadow: 0 0 10px #ffd089; }
+  #rotate-nag p { font-size: clamp(12px, 3vw, 15px); opacity: 0.85; max-width: 360px; line-height: 1.7; margin-bottom: 8px; }
+  #rotate-nag .small { font-size: 11px; opacity: 0.55; margin-top: 24px; letter-spacing: 2px; }
+  @keyframes rotateHint {
+    0%, 45% { transform: rotate(0deg); }
+    55%, 100% { transform: rotate(90deg); }
+  }
 
   /* ── donate ── */
   #donate { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 30; }
@@ -328,6 +350,13 @@
 <canvas id="scene"></canvas>
 <div id="damage-vignette"></div>
 <div id="flash-overlay"></div>
+<div id="rotate-nag">
+  <div class="icon">⟳</div>
+  <h2>BEST IN LANDSCAPE</h2>
+  <p>This game is best enjoyed in <b>landscape mode</b>.</p>
+  <p>We suggest rotating your device for full fun.</p>
+  <div class="small">— ROTATE TO BEGIN —</div>
+</div>
 
 <!-- ── Top scoreboard ── -->
 <div id="top-bar" class="hidden">
@@ -599,6 +628,17 @@
 
   const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || matchMedia('(pointer: coarse)').matches;
   if (isTouch) touchControls.classList.add('on');
+
+  // Portrait nag — fades in on touch + portrait orientation
+  const rotateNag = $('rotate-nag');
+  function checkOrientation() {
+    if (!isTouch) return;
+    const portrait = window.innerHeight > window.innerWidth;
+    rotateNag.classList.toggle('show', portrait);
+  }
+  checkOrientation();
+  window.addEventListener('resize', checkOrientation);
+  window.addEventListener('orientationchange', checkOrientation);
 
   // Initial nickname
   const NICK_KEY = 'siteline.nick';

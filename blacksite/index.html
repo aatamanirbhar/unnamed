@@ -111,8 +111,9 @@
 <script defer src="/_vercel/insights/script.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { width: 100%; height: 100%; overflow: hidden; background: #050a08; font-family: 'Courier New', monospace; color: #c8e8d8; user-select: none; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: none; }
-  #game { display: block; width: 100vw; height: 100dvh; cursor: crosshair; background: #050a08; }
+  /* CIA facility palette: cool fluorescent whites, sterile concrete greys, slate blues, red accent for alerts */
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #0a1018; font-family: 'Courier New', monospace; color: #c8d8e8; user-select: none; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: none; }
+  #game { display: block; width: 100vw; height: 100dvh; cursor: crosshair; background: #0a1018; }
   #hud { position: fixed; top: 14px; left: 14px; font-size: 12px; letter-spacing: 3px; pointer-events: none; text-shadow: 0 0 6px #7fffd4; z-index: 10; }
   #hud .label { opacity: 0.6; }
   #hud .val { color: #7fffd4; }
@@ -404,6 +405,15 @@
     cameraSee:() => { tone(1480, 0.06, 'square', 0.10); tone(1180, 0.06, 'square', 0.08); },
     bodyDrag: () => { tone(180, 0.10, 'sawtooth', 0.10); }
   };
+  // Distance-attenuated footstep. kind: 'player' | 'guard'. vol 0..1.
+  function playFootstep(kind, vol, alt) {
+    if (!audioCtx) return;
+    const baseHz = kind === 'guard' ? (alt ? 1700 : 1500) : (alt ? 1400 : 1100);
+    const baseVol = (kind === 'guard' ? 0.042 : 0.034) * vol;
+    if (baseVol < 0.005) return;
+    noise(0.035, baseVol, baseHz);
+    if (kind === 'guard') tone(alt ? 110 : 95, 0.022, 'sine', 0.035 * vol);
+  }
 
   // ── tiles ──
   // 0 floor, 1 wall, 2 cover (low wall — blocks vision, blocks movement)
@@ -517,7 +527,10 @@
       darts: carry ? carry.darts : (3 + upgrades.darts),
       coins: carry ? carry.coins : (2 + upgrades.coins),
       hackUses: carry ? carry.hackUses : (1 + upgrades.hacks),
-      dragging: null
+      dragging: null,
+      walkPhase: 0,
+      stepTimer: 0,
+      lastFoot: 0
     };
     exitGate = { x: (gw - 1.5) * CELL, y: (gh - 1.5) * CELL, r: 16 };
     // intel scattered in open cells
@@ -568,7 +581,20 @@
         coneRange: 180,
         coneHalfAngle: 0.42, // ~24°
         suspicion: 0,
-        waitTimer: 0
+        waitTimer: 0,
+        // Smarter-AI fields:
+        // lastSeen: where the player was last spotted; guards search around it
+        lastSeenX: null, lastSeenY: null,
+        searchTimer: 0,    // time spent searching at the last-seen position
+        searchAngle: 0,    // sweep angle while searching
+        // Footstep / animation state
+        walkPhase: Math.random() * Math.PI * 2,
+        stepTimer: 0,
+        lastFoot: 0,
+        // Personality: each guard has a small reaction-delay so they don't all
+        // alert simultaneously, and a sight-multiplier so some are more attentive.
+        reactDelay: 0.15 + Math.random() * 0.25,
+        sightMult: 0.85 + Math.random() * 0.35
       });
     }
     // ── cameras ──
@@ -1051,12 +1077,30 @@
     if (len > 1) { ix /= len; iy /= len; }
     player.crouching = crouchPressed;
     const speed = player.crouching ? 60 : 130;
+    const prevPX = player.x, prevPY = player.y;
     moveEntity(player, ix * speed * dt, iy * speed * dt);
+    const movedThisFrame = Math.hypot(player.x - prevPX, player.y - prevPY);
 
     // facing fallback when not aiming with mouse (touch / idle desktop)
     if (isTouch || (ix === 0 && iy === 0)) {
       // keep last facing; if moved this frame, face movement direction
       if (Math.abs(ix) + Math.abs(iy) > 0.05) player.facing = Math.atan2(iy, ix);
+    }
+
+    // Player footsteps + walk-cycle phase. Crouch is much quieter and slower.
+    if (movedThisFrame > 0.3) {
+      player.walkPhase += dt * (player.crouching ? 5 : 9);
+      player.stepTimer -= dt;
+      if (player.stepTimer <= 0) {
+        player.stepTimer = player.crouching ? 0.55 : 0.32;
+        const alt = player.lastFoot === 0;
+        player.lastFoot = alt ? 1 : 0;
+        // Crouching is silent enough that we still play it quietly for feedback
+        const vol = player.crouching ? 0.35 : 0.9;
+        playFootstep('player', vol, alt);
+      }
+    } else {
+      player.stepTimer = 0;
     }
 
     // intel pickup
@@ -1184,9 +1228,14 @@
       let angDiff = ang - g.facing;
       while (angDiff > Math.PI) angDiff -= Math.PI * 2;
       while (angDiff < -Math.PI) angDiff += Math.PI * 2;
-      const effRange = g.coneRange * (player.crouching ? 0.6 : 1);
+      const effRange = g.coneRange * (player.crouching ? 0.6 : 1) * g.sightMult;
       const inCone = Math.abs(angDiff) < g.coneHalfAngle && dist < effRange;
-      const seen = !guardSightDisabled && inCone && losClear(g.x, g.y, px, py);
+      // Peripheral vision: a wider cone with shorter range, slower suspicion buildup.
+      // Lets guards catch motion at the edge of their FOV without being instant-detect.
+      const inPeriph = Math.abs(angDiff) < g.coneHalfAngle * 2.2 && dist < effRange * 0.6;
+      const losClearCached = (inCone || inPeriph) ? losClear(g.x, g.y, px, py) : false;
+      const seen = !guardSightDisabled && inCone && losClearCached;
+      const peripherallyVisible = !guardSightDisabled && inPeriph && !inCone && losClearCached;
       // very close hearing — even crouching can be heard if right next to guard
       const veryClose = dist < (player.crouching ? 26 : 50);
 
@@ -1213,9 +1262,26 @@
 
       if (seen) {
         g.suspicion = Math.min(1.5, g.suspicion + dt * (player.crouching ? 1.0 : 2.2));
-        if (g.suspicion >= 1) alertTimer = 1.0;
+        // Remember where we saw them — used to hunt after losing LOS.
+        g.lastSeenX = px; g.lastSeenY = py;
+        g.searchTimer = 0;
+        if (g.suspicion >= 1) {
+          alertTimer = 1.0;
+          // Yell — every other living guard within 320px gets the last-seen too.
+          for (const other of guards) {
+            if (other === g || other.ko) continue;
+            if (Math.hypot(other.x - g.x, other.y - g.y) < 320) {
+              other.lastSeenX = px;
+              other.lastSeenY = py;
+              other.suspicion = Math.max(other.suspicion, 0.85);
+            }
+          }
+        }
+      } else if (peripherallyVisible) {
+        // Periph gives a slow buildup — you can sneak past if you're moving away
+        g.suspicion = Math.min(0.85, g.suspicion + dt * 0.65);
       } else {
-        g.suspicion = Math.max(0, g.suspicion - dt * 0.6);
+        g.suspicion = Math.max(0, g.suspicion - dt * 0.45);
       }
 
       // investigation timers tick down
@@ -1223,7 +1289,8 @@
 
       // movement
       const alerted = g.suspicion >= 1;
-      if (alerted) {
+      if (alerted && seen) {
+        // Chase the visible player directly
         const d = dist || 1;
         const stepX = (dx / d), stepY = (dy / d);
         g.facing = Math.atan2(stepY, stepX);
@@ -1234,8 +1301,25 @@
           caught();
           return;
         }
-        if (alertTimer <= 0 && dist > effRange * 1.4) {
-          g.suspicion = 0.5;
+      } else if (alerted && g.lastSeenX !== null) {
+        // Lost sight — run to last-seen, then search.
+        const tdx = g.lastSeenX - g.x, tdy = g.lastSeenY - g.y;
+        const td = Math.hypot(tdx, tdy);
+        if (td > 8) {
+          const gs = 80;
+          const stepX = (tdx / td), stepY = (tdy / td);
+          g.facing += clampAngle(Math.atan2(stepY, stepX) - g.facing) * Math.min(1, dt * 8);
+          moveEntity(g, stepX * gs * dt, stepY * gs * dt);
+        } else {
+          // Reached last-seen, sweep around for a few seconds before giving up.
+          g.searchTimer += dt;
+          g.searchAngle += dt * 1.8;
+          g.facing = Math.atan2(tdy || 0.001, tdx || 0.001) + Math.sin(g.searchAngle) * 1.2;
+          if (g.searchTimer > 4) {
+            g.lastSeenX = null;
+            g.lastSeenY = null;
+            g.suspicion = 0.4;
+          }
         }
       } else if (g.investTimer > 0 && g.investX !== undefined) {
         // walk to investigation point, then look around
@@ -1271,6 +1355,26 @@
       if (veryClose && !seen) {
         g.suspicion = Math.min(1.5, g.suspicion + dt * 1.4);
       }
+
+      // Footstep audio + walk anim — only when the guard actually moved this frame
+      const moved = Math.hypot(g.x - (g.prevX || g.x), g.y - (g.prevY || g.y));
+      g.prevX = g.x; g.prevY = g.y;
+      if (moved > 0.5) {
+        const speedFactor = alerted ? 2.2 : (g.investTimer > 0 ? 1.4 : 1);
+        g.walkPhase += dt * 8 * speedFactor;
+        g.stepTimer -= dt;
+        if (g.stepTimer <= 0) {
+          g.stepTimer = (alerted ? 0.22 : 0.42) / speedFactor;
+          const distToPlayer = Math.hypot(g.x - player.x, g.y - player.y);
+          // Only play if close enough to hear — falloff prevents constant boot noise.
+          if (distToPlayer < 360) {
+            const vol = Math.max(0.05, 1 - distToPlayer / 360);
+            // Adjust SFX volume by patching the noise call indirectly — use a quick local play
+            if (g.lastFoot === 0) { playFootstep('guard', vol, false); g.lastFoot = 1; }
+            else { playFootstep('guard', vol, true); g.lastFoot = 0; }
+          }
+        }
+      }
     }
     // refresh objective panel + interact hint
     updateObjectives();
@@ -1282,6 +1386,113 @@
     while (a > Math.PI) a -= Math.PI * 2;
     while (a < -Math.PI) a += Math.PI * 2;
     return a;
+  }
+
+  // Tiny top-down humanoid sprite. ~22px tall on screen.
+  // Drawn as: head (circle), torso (rounded rect), two arms swinging, two legs
+  // swinging. walkPhase animates the limbs; facing rotates the whole figure.
+  // colors: { skin, body, head, accent }
+  function drawAgent(x, y, facing, walkPhase, colors, opts) {
+    opts = opts || {};
+    const crouch = opts.crouch ? 0.72 : 1;
+    const swing = Math.sin(walkPhase) * (opts.crouch ? 0.18 : 0.42);
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(facing + Math.PI / 2); // sprite drawn pointing -y, rotate so it faces "facing"
+    // shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.45)';
+    ctx.beginPath();
+    ctx.ellipse(0, 2, 8 * crouch, 4 * crouch, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // legs — drawn behind torso
+    ctx.fillStyle = colors.body;
+    const legY = 5 * crouch;
+    const legW = 2.6, legH = 5 * crouch;
+    // left leg
+    ctx.save();
+    ctx.translate(-3, 0);
+    ctx.rotate(swing);
+    ctx.fillRect(-legW / 2, 0, legW, legH);
+    // boot
+    ctx.fillStyle = '#0e1218';
+    ctx.fillRect(-legW / 2 - 0.4, legH - 1.5, legW + 0.8, 2);
+    ctx.fillStyle = colors.body;
+    ctx.restore();
+    // right leg
+    ctx.save();
+    ctx.translate(3, 0);
+    ctx.rotate(-swing);
+    ctx.fillRect(-legW / 2, 0, legW, legH);
+    ctx.fillStyle = '#0e1218';
+    ctx.fillRect(-legW / 2 - 0.4, legH - 1.5, legW + 0.8, 2);
+    ctx.restore();
+    // torso (rounded rect)
+    ctx.fillStyle = colors.body;
+    const tW = 8.5, tH = 9 * crouch;
+    ctx.beginPath();
+    const r = 2.2;
+    ctx.moveTo(-tW / 2 + r, -tH / 2);
+    ctx.lineTo(tW / 2 - r, -tH / 2);
+    ctx.quadraticCurveTo(tW / 2, -tH / 2, tW / 2, -tH / 2 + r);
+    ctx.lineTo(tW / 2, tH / 2 - r);
+    ctx.quadraticCurveTo(tW / 2, tH / 2, tW / 2 - r, tH / 2);
+    ctx.lineTo(-tW / 2 + r, tH / 2);
+    ctx.quadraticCurveTo(-tW / 2, tH / 2, -tW / 2, tH / 2 - r);
+    ctx.lineTo(-tW / 2, -tH / 2 + r);
+    ctx.quadraticCurveTo(-tW / 2, -tH / 2, -tW / 2 + r, -tH / 2);
+    ctx.closePath();
+    ctx.fill();
+    // chest accent (tactical vest pocket, ID badge, etc.)
+    if (colors.accent) {
+      ctx.fillStyle = colors.accent;
+      ctx.fillRect(-1.5, -tH / 2 + 2, 3, 1.6);
+    }
+    // arms — swing opposite to legs
+    ctx.fillStyle = colors.body;
+    const armY = -tH / 2 + 1.5;
+    const armW = 2.2, armH = 6 * crouch;
+    // left arm
+    ctx.save();
+    ctx.translate(-tW / 2 - 0.3, armY + armH / 2);
+    ctx.rotate(-swing * 0.7);
+    ctx.fillRect(-armW / 2, -armH / 2, armW, armH);
+    // hand
+    ctx.fillStyle = colors.skin;
+    ctx.beginPath();
+    ctx.arc(0, armH / 2, 1.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    // right arm (often holds the weapon — forward pose if opts.aimRight)
+    ctx.save();
+    ctx.translate(tW / 2 + 0.3, armY + armH / 2);
+    if (opts.aimRight) {
+      ctx.rotate(-0.5);
+      ctx.fillStyle = colors.body;
+      ctx.fillRect(-armW / 2, -armH / 2, armW, armH);
+      // weapon — small dart pistol pointing forward
+      ctx.fillStyle = '#1a1a1a';
+      ctx.fillRect(-1, -armH / 2 - 4, 2, 4);
+    } else {
+      ctx.rotate(swing * 0.7);
+      ctx.fillStyle = colors.body;
+      ctx.fillRect(-armW / 2, -armH / 2, armW, armH);
+    }
+    ctx.fillStyle = colors.skin;
+    ctx.beginPath();
+    ctx.arc(0, armH / 2, 1.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    // head (drawn forward of torso)
+    ctx.fillStyle = colors.skin;
+    ctx.beginPath();
+    ctx.arc(0, -tH / 2 - 2.5, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+    // hair / cap
+    ctx.fillStyle = colors.head;
+    ctx.beginPath();
+    ctx.arc(0, -tH / 2 - 3.2, 3.5, Math.PI, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
   }
 
   function render(now) {
@@ -1307,18 +1518,21 @@
         const v = grid[y][x];
         const px = x * CELL, py = y * CELL;
         if (v === 0) {
-          ctx.fillStyle = ((x + y) & 1) ? 'rgba(20,40,32,0.6)' : 'rgba(14,30,24,0.6)';
+          // sterile fluorescent-lit floor tiles, alternating checker
+          ctx.fillStyle = ((x + y) & 1) ? 'rgba(38,48,62,0.7)' : 'rgba(28,38,52,0.7)';
           ctx.fillRect(px, py, CELL, CELL);
         } else if (v === 1) {
-          ctx.fillStyle = '#0e1f17';
+          // concrete wall
+          ctx.fillStyle = '#1a2230';
           ctx.fillRect(px, py, CELL, CELL);
-          ctx.strokeStyle = 'rgba(127,255,212,0.25)';
+          ctx.strokeStyle = 'rgba(160,180,210,0.18)';
           ctx.lineWidth = 1;
           ctx.strokeRect(px + 0.5, py + 0.5, CELL - 1, CELL - 1);
         } else if (v === 2) {
-          ctx.fillStyle = '#1a2a22';
+          // furniture / cover
+          ctx.fillStyle = '#2a3a4a';
           ctx.fillRect(px + 4, py + 4, CELL - 8, CELL - 8);
-          ctx.strokeStyle = 'rgba(127,255,212,0.4)';
+          ctx.strokeStyle = 'rgba(160,180,210,0.4)';
           ctx.lineWidth = 1;
           ctx.strokeRect(px + 4.5, py + 4.5, CELL - 9, CELL - 9);
         }
@@ -1543,25 +1757,22 @@
       ctx.stroke();
     }
 
-    // guards
+    // guards — drawn as tiny humanoid sprites instead of dots
     for (const g of guards) {
       if (g.ko) continue;
       const alerted = g.suspicion >= 1;
+      // Subtle aura — colored by state
       ctx.save();
-      ctx.shadowColor = alerted ? '#ff3a3a' : '#ffb830';
-      ctx.shadowBlur = 12;
-      ctx.fillStyle = alerted ? '#ff3a3a' : '#ffb830';
-      ctx.beginPath();
-      ctx.arc(g.x, g.y, g.r, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.shadowColor = alerted ? '#ff3a3a' : (g.suspicion > 0.3 ? '#ffb830' : '#1a2230');
+      ctx.shadowBlur = alerted ? 14 : (g.suspicion > 0.3 ? 8 : 0);
+      // CIA-facility security uniform: navy tactical with red ID accent when alerted
+      drawAgent(g.x, g.y, g.facing, g.walkPhase || 0, {
+        skin: '#d8b896',
+        body: alerted ? '#3a2030' : '#1a2638',     // navy tactical, slight blood-red shift when alerted
+        head: '#1a1a1a',                           // black cap
+        accent: alerted ? '#ff3a3a' : '#7fc8ff'    // red badge when alerted, blue otherwise
+      }, { aimRight: true });
       ctx.restore();
-      // facing indicator
-      ctx.strokeStyle = '#1a0a08';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(g.x, g.y);
-      ctx.lineTo(g.x + Math.cos(g.facing) * (g.r + 4), g.y + Math.sin(g.facing) * (g.r + 4));
-      ctx.stroke();
       // suspicion meter
       if (g.suspicion > 0.05 && !alerted) {
         ctx.fillStyle = `rgba(255,184,48,${g.suspicion})`;
@@ -1578,24 +1789,18 @@
       }
     }
 
-    // player
-    const pulse = 1 + Math.sin(now * 0.004) * 0.04;
-    ctx.fillStyle = '#0a1410';
-    ctx.beginPath();
-    ctx.arc(player.x, player.y, player.r + 4, 0, Math.PI * 2);
-    ctx.fill();
+    // player — CIA operative humanoid sprite
+    // Subtle teal aura so the player is still findable on a busy screen.
     ctx.save();
     ctx.shadowColor = '#7fffd4';
-    ctx.shadowBlur = player.crouching ? 6 : 14;
-    ctx.fillStyle = player.crouching ? 'rgba(127,255,212,0.55)' : '#7fffd4';
-    ctx.beginPath();
-    ctx.arc(player.x, player.y, player.r * (player.crouching ? 0.78 : 1) * pulse, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.shadowBlur = player.crouching ? 8 : 16;
+    drawAgent(player.x, player.y, player.facing, player.walkPhase || 0, {
+      skin: '#e8c8a8',
+      body: '#1a3a32',        // dark CIA tactical green-grey
+      head: '#0a1218',         // black tac cap
+      accent: '#7fffd4'        // teal badge — matches HUD accent
+    }, { aimRight: true, crouch: player.crouching });
     ctx.restore();
-    ctx.fillStyle = '#0a1410';
-    ctx.beginPath();
-    ctx.arc(player.x, player.y, 3, 0, Math.PI * 2);
-    ctx.fill();
 
     ctx.restore();
 
