@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="sky" cx="50%" cy="30%" r="90%">
+      <stop offset="0%" stop-color="#3a2a16"/>
+      <stop offset="50%" stop-color="#1a0f08"/>
+      <stop offset="100%" stop-color="#050302"/>
+    </radialGradient>
+    <linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5a4022"/>
+      <stop offset="100%" stop-color="#241608"/>
+    </linearGradient>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7a5a30"/>
+      <stop offset="100%" stop-color="#3a2614"/>
+    </linearGradient>
+    <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffb050" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#ffb050" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4"/>
+    </filter>
+  </defs>
+
+  <rect width="600" height="400" fill="url(#sky)"/>
+
+  <circle cx="450" cy="110" r="38" fill="#ffb050" opacity="0.5" filter="url(#glow)"/>
+  <circle cx="450" cy="110" r="22" fill="#ffd089"/>
+
+  <rect x="0" y="240" width="600" height="160" fill="url(#sand)"/>
+
+  <g fill="url(#wall)" stroke="#1a1008" stroke-width="1">
+    <rect x="20"  y="170" width="120" height="120"/>
+    <rect x="160" y="150" width="90"  height="140"/>
+    <rect x="270" y="200" width="60"  height="90"/>
+    <rect x="350" y="160" width="120" height="130"/>
+    <rect x="490" y="190" width="90"  height="100"/>
+  </g>
+
+  <g fill="#ffd089" opacity="0.7">
+    <rect x="40"  y="190" width="14" height="18"/>
+    <rect x="64"  y="190" width="14" height="18"/>
+    <rect x="40"  y="220" width="14" height="18"/>
+    <rect x="180" y="170" width="14" height="20"/>
+    <rect x="204" y="170" width="14" height="20"/>
+    <rect x="372" y="180" width="14" height="20"/>
+    <rect x="396" y="180" width="14" height="20"/>
+    <rect x="420" y="180" width="14" height="20"/>
+    <rect x="510" y="210" width="14" height="18"/>
+  </g>
+
+  <g fill="#1a0f08">
+    <rect x="80"  y="240" width="40" height="50"/>
+    <rect x="190" y="230" width="35" height="60"/>
+    <rect x="395" y="240" width="40" height="50"/>
+  </g>
+
+  <g stroke="#ffd089" stroke-width="2" opacity="0.85" fill="none">
+    <circle cx="300" cy="220" r="80"/>
+    <line x1="300" y1="130" x2="300" y2="310"/>
+    <line x1="210" y1="220" x2="390" y2="220"/>
+  </g>
+  <circle cx="300" cy="220" r="3" fill="#ffd089"/>
+
+  <g fill="#0a0604" opacity="0.5">
+    <polygon points="120,290 180,290 165,400 130,400"/>
+    <polygon points="420,290 470,290 460,400 425,400"/>
+  </g>
+
+  <g font-family="Georgia, serif" text-anchor="middle">
+    <text x="300" y="76" font-size="48" font-style="italic" fill="#ffd089" letter-spacing="8" filter="url(#glow)">SITELINE</text>
+    <text x="300" y="78" font-size="48" font-style="italic" fill="#ffe8b8" letter-spacing="8">SITELINE</text>
+    <text x="300" y="380" font-size="11" fill="#ffb050" letter-spacing="6" opacity="0.8">— 5V5 · BOMBSITE · BROWSER —</text>
+  </g>
+</svg>

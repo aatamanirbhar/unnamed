@@ -5,14 +5,14 @@
     {
       "id": "echo",
       "title": "ECHO",
-      "blurb": "You cannot see. Click to listen. A sonar survival game in pitch dark.",
-      "tags": ["arcade", "survival", "sonar"],
-      "minutes": 5,
+      "blurb": "The lights are gone. Ping to listen — run when they ping back. Five things hunt you in the dark: a stalker, a howler, a hunter, a tank, a whisperer. Manage your battery, descend deeper.",
+      "tags": ["arcade", "survival", "sonar", "horror", "stealth"],
+      "minutes": 10,
       "accent": "#7fffd4",
-      "background": "linear-gradient(135deg, #001a1f, #002233)",
+      "background": "linear-gradient(135deg, #000507, #001a1f)",
       "cover": "echo/cover.svg",
       "href": "echo/",
-      "controls": "joystick + ping (mobile) / WASD + click (desktop)"
+      "controls": "WASD + click + F/X (desktop) · joystick + PING + FLASH/EMP (mobile)"
     },
     {
       "id": "porchlight",
@@ -85,6 +85,18 @@
       "cover": "raccoon/cover.svg",
       "href": "raccoon/",
       "controls": "WASD + mouse + click (desktop) · joystick + look + FIRE (mobile)"
+    },
+    {
+      "id": "siteline",
+      "title": "Siteline",
+      "blurb": "A 5v5 bombsite FPS in your browser. Three maps — office, dust, dust 2. Handguns, AK, bullpup. HE, flash, smoke. Paste a code to join a friend. Up to 50 players, or play solo against CPU bots.",
+      "tags": ["3d", "fps", "shooter", "multiplayer", "tactical", "counter-strike"],
+      "minutes": 20,
+      "accent": "#ffd089",
+      "background": "linear-gradient(135deg, #1a0f08, #3a2614)",
+      "cover": "siteline/cover.svg",
+      "href": "siteline/",
+      "controls": "WASD + mouse + click + R/G/F/B (desktop) · joystick + FIRE + side buttons (mobile)"
     }
   ]
 }
