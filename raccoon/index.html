@@ -33,12 +33,17 @@
   };
 </script>
 <script src="omenly.js" defer></script>
+<script src="/gamepad.js" defer></script>
 <script defer src="/_vercel/insights/script.js"></script>
 <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0604; font-family: 'Courier New', monospace; color: #e8d8c8; user-select: none; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: none; }
-  #scene { display: block; width: 100vw; height: 100dvh; cursor: crosshair; background: #0a0604; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0604; font-family: 'Courier New', monospace; color: #e8d8c8; user-select: none; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: none; position: fixed; inset: 0; }
+  #scene { display: block; width: 100vw; height: 100vh; height: 100dvh; height: 100svh; cursor: crosshair; background: #0a0604; }
+  #fullscreen-btn { position: fixed; top: max(10px, env(safe-area-inset-top,0px) + 6px); left: 50%; transform: translateX(-50%); z-index: 60; background: rgba(10,6,4,0.7); border: 1px solid #c8503a; color: #c8503a; padding: 6px 14px; font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 3px; cursor: pointer; text-shadow: 0 0 6px #c8503a; display: none; }
+  #fullscreen-btn:hover { background: #c8503a; color: #0a0604; }
+  body.is-touch #fullscreen-btn { display: inline-block; }
+  body.is-fullscreen #fullscreen-btn { display: none; }
   #hud { position: fixed; top: 14px; left: 14px; font-size: 13px; letter-spacing: 2px; pointer-events: none; text-shadow: 0 0 6px #c8503a; z-index: 10; }
   #hud .row { margin-bottom: 4px; }
   #hud .label { opacity: 0.55; }
@@ -142,6 +147,7 @@
 </head>
 <body>
 <canvas id="scene"></canvas>
+<button id="fullscreen-btn" type="button" title="Fullscreen">⛶ FULLSCREEN</button>
 <div id="damage-vignette"></div>
 <div id="blood-splatter"></div>
 <div id="rotate-nag" style="display:none">
@@ -237,6 +243,41 @@
   if (isTouch) {
     touchControls.classList.add('on');
     controlsEl.style.display = 'none';
+    document.body.classList.add('is-touch');
+  }
+
+  // Fullscreen on first user gesture — hides URL/tabs on mobile and lets the
+  // game claim the full landscape viewport (otherwise the canvas leaves a
+  // band uncovered when the URL bar collapses mid-game).
+  const fsBtn = document.getElementById('fullscreen-btn');
+  function enterFullscreen() {
+    const el = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+    if (req) {
+      try {
+        const p = req.call(el);
+        if (p && p.then) {
+          p.then(() => {
+            if (screen.orientation && screen.orientation.lock) {
+              screen.orientation.lock('landscape').catch(()=>{});
+            }
+          }).catch(()=>{});
+        }
+      } catch(_) {}
+    }
+  }
+  if (fsBtn) fsBtn.addEventListener('click', (e) => { e.preventDefault(); enterFullscreen(); });
+  document.addEventListener('fullscreenchange', () => {
+    document.body.classList.toggle('is-fullscreen', !!document.fullscreenElement);
+    setTimeout(() => onResize(), 80);
+  });
+  // First in-game tap also triggers fullscreen on touch (since `start()` happens
+  // inside the user-gesture chain).
+  let fullscreenArmed = isTouch;
+  function maybeAutoFullscreen() {
+    if (!fullscreenArmed) return;
+    fullscreenArmed = false;
+    setTimeout(enterFullscreen, 80);
   }
 
   // Portrait-mode nag for touch devices — fades in if held vertically.
@@ -299,13 +340,28 @@
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = lowEnd ? 0.95 : 1.05;
 
+  function viewSize() {
+    const vv = window.visualViewport;
+    return {
+      w: vv ? Math.round(vv.width)  : window.innerWidth,
+      h: vv ? Math.round(vv.height) : window.innerHeight
+    };
+  }
   function onResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
+    const s = viewSize();
+    camera.aspect = s.w / s.h;
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight, false);
+    renderer.setSize(s.w, s.h, false);
+    canvas.style.width  = s.w + 'px';
+    canvas.style.height = s.h + 'px';
   }
   window.addEventListener('resize', onResize);
-  window.addEventListener('orientationchange', onResize);
+  window.addEventListener('orientationchange', () => setTimeout(onResize, 120));
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', onResize);
+    window.visualViewport.addEventListener('scroll', onResize);
+  }
+  onResize();
 
   // lighting — bloody dusk sun, deep shadows
   const ambient = new THREE.AmbientLight(0x8a4020, 0.55);
@@ -1150,9 +1206,20 @@
     for (const r of rockets) scene.remove(r.mesh);
     rockets.length = 0;
     for (const k in keys) keys[k] = false;
+    // reset extraction cinematic state from a previous run
+    if (extraction.chopper) scene.remove(extraction.chopper);
+    extraction.active = false; extraction.phase = ''; extraction.t = 0;
+    extraction.chopper = null; extraction.rotor = null; extraction.tailRotor = null;
+    extraction.ladder = null; extraction.bomb = null;
+    extraction.hordeSpawned = false; extraction.bombDropped = false; extraction.finished = false;
+    timeScale = 1; sloMoT = 0;
+    for (const d of debris) scene.remove(d);
+    debris.length = 0;
+    stopChopperLoop();
     updateHUD();
     startWave(1);
     ensureAudio();
+    maybeAutoFullscreen();
     if (!isTouch) tryLockPointer();
   }
 
@@ -1167,14 +1234,477 @@
   }
 
   function win() {
-    if (!alive) return;
+    // Old direct-end is replaced by the cinematic extraction sequence below.
+    if (!alive || extraction.active) return;
+    startExtractionCinematic();
+  }
+  function finishWin() {
     alive = false;
     SFX.win();
     document.exitPointerLock?.();
     goWave.textContent = wave;
     goKills.textContent = kills;
     document.getElementById('go-title').textContent = 'EXTRACTED';
-    setTimeout(() => { if (!alive) gameoverEl.classList.remove('hidden'); }, 1200);
+    gameoverEl.classList.remove('hidden');
+  }
+
+  // ── TTS DIALOGUE (Leon-style voice lines via Web Speech API) ──
+  const tts = {
+    voice: null,
+    ready: false
+  };
+  function pickVoice() {
+    if (!('speechSynthesis' in window)) return null;
+    const voices = speechSynthesis.getVoices();
+    // prefer a deep English male voice
+    const prefer = [
+      /Daniel/i, /Google US English/i, /Microsoft David/i, /Microsoft Mark/i,
+      /Alex/i, /en-US/i, /en_US/i, /English/i
+    ];
+    for (const re of prefer) {
+      const v = voices.find(v => re.test(v.name) || re.test(v.lang));
+      if (v) return v;
+    }
+    return voices[0] || null;
+  }
+  if ('speechSynthesis' in window) {
+    speechSynthesis.onvoiceschanged = () => { tts.voice = pickVoice(); tts.ready = true; };
+    setTimeout(() => { if (!tts.voice) { tts.voice = pickVoice(); tts.ready = !!tts.voice; } }, 250);
+  }
+  function speak(text, opts = {}) {
+    if (!('speechSynthesis' in window)) return;
+    try {
+      const u = new SpeechSynthesisUtterance(text);
+      if (tts.voice) u.voice = tts.voice;
+      u.rate = opts.rate ?? 0.95;
+      u.pitch = opts.pitch ?? 0.85; // deeper
+      u.volume = opts.volume ?? 1.0;
+      speechSynthesis.speak(u);
+    } catch (_) {}
+  }
+
+  // ── EXTRACTION CINEMATIC STATE ──
+  const extraction = {
+    active: false,
+    phase: '',
+    t: 0,
+    chopper: null,
+    rotor: null,
+    tailRotor: null,
+    ladder: null,
+    bomb: null,
+    hordeSpawned: false,
+    bombDropped: false,
+    finished: false
+  };
+
+  function startExtractionCinematic() {
+    extraction.active = true;
+    extraction.phase = 'incoming';
+    extraction.t = 0;
+    document.exitPointerLock?.();
+    mouseLocked = false;
+    // Voice line 1
+    setTimeout(() => speak("Coming to pick you up, boss.", { rate: 0.95, pitch: 0.8 }), 300);
+    // chopper whirr — sustained low rotor wash
+    playChopperLoop();
+    buildChopper();
+    spawnExtractionHorde();
+  }
+
+  // sustained chopper rotor noise + low thump
+  let chopperLoopNode = null;
+  function playChopperLoop() {
+    if (!audioCtx) return;
+    stopChopperLoop();
+    const t = audioCtx.currentTime;
+    // noise carrier — low filtered
+    const dur = 60;
+    const buf = audioCtx.createBuffer(1, Math.floor(audioCtx.sampleRate * 2), audioCtx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    const src = audioCtx.createBufferSource();
+    src.buffer = buf; src.loop = true;
+    const f = audioCtx.createBiquadFilter();
+    f.type = 'lowpass'; f.frequency.value = 320;
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.18, t + 1.2);
+    src.connect(f); f.connect(g); g.connect(audioCtx.destination);
+    src.start(t);
+    // rhythmic thump (rotor blade)
+    const lfo = audioCtx.createOscillator();
+    lfo.type = 'sine'; lfo.frequency.value = 18;
+    const lfoG = audioCtx.createGain(); lfoG.gain.value = 0.07;
+    lfo.connect(lfoG); lfoG.connect(g.gain);
+    lfo.start(t);
+    chopperLoopNode = { src, lfo, g, dur };
+  }
+  function stopChopperLoop() {
+    if (!chopperLoopNode || !audioCtx) return;
+    const { src, lfo, g } = chopperLoopNode;
+    const t = audioCtx.currentTime;
+    try {
+      g.gain.cancelScheduledValues(t);
+      g.gain.setValueAtTime(g.gain.value, t);
+      g.gain.linearRampToValueAtTime(0, t + 0.8);
+      src.stop(t + 0.85); lfo.stop(t + 0.85);
+    } catch(_) {}
+    chopperLoopNode = null;
+  }
+
+  function buildChopper() {
+    const g = new THREE.Group();
+    const olive = new THREE.MeshStandardMaterial({ color: 0x2a3018, roughness: 0.7, metalness: 0.3 });
+    const dark = new THREE.MeshStandardMaterial({ color: 0x141810, roughness: 0.7, metalness: 0.4 });
+    const glass = new THREE.MeshStandardMaterial({ color: 0x102028, transparent: true, opacity: 0.6, roughness: 0.2, metalness: 0.8, emissive: 0x102030, emissiveIntensity: 0.3 });
+    const lightMat = new THREE.MeshBasicMaterial({ color: 0xff4030 });
+    // body
+    const body = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.4, 4.4), olive);
+    body.castShadow = PERF.shadows; g.add(body);
+    // nose taper
+    const nose = new THREE.Mesh(new THREE.ConeGeometry(1.0, 1.6, 6), olive);
+    nose.rotation.z = Math.PI / 2; nose.rotation.x = Math.PI / 2;
+    nose.position.z = 2.6; nose.scale.set(1, 0.7, 1);
+    g.add(nose);
+    // cockpit canopy
+    const canopy = new THREE.Mesh(new THREE.SphereGeometry(0.9, 12, 8, 0, Math.PI * 2, 0, Math.PI / 1.7), glass);
+    canopy.position.set(0, 0.6, 1.7);
+    g.add(canopy);
+    // tail boom
+    const tail = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 3.6), olive);
+    tail.position.z = -3.4; g.add(tail);
+    // tail fin
+    const fin = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1, 0.8), olive);
+    fin.position.set(0, 0.4, -5.0); g.add(fin);
+    // skids
+    const skidMat = dark;
+    const skidL = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 4, 6), skidMat);
+    skidL.rotation.x = Math.PI / 2; skidL.position.set(-0.9, -0.9, 0); g.add(skidL);
+    const skidR = skidL.clone(); skidR.position.x = 0.9; g.add(skidR);
+    // main rotor
+    const rotor = new THREE.Group();
+    const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.18, 8), dark);
+    rotor.add(hub);
+    for (let i = 0; i < 4; i++) {
+      const blade = new THREE.Mesh(new THREE.BoxGeometry(5.4, 0.06, 0.18), dark);
+      blade.rotation.y = (Math.PI / 2) * i;
+      rotor.add(blade);
+    }
+    rotor.position.y = 1.0;
+    g.add(rotor);
+    // tail rotor
+    const tailRotor = new THREE.Group();
+    const tHub = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.08, 6), dark);
+    tHub.rotation.z = Math.PI / 2; tailRotor.add(tHub);
+    for (let i = 0; i < 2; i++) {
+      const blade = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.04, 0.08), dark);
+      blade.rotation.x = (Math.PI / 2) * i;
+      tailRotor.add(blade);
+    }
+    tailRotor.position.set(0.25, 0.4, -5.0);
+    g.add(tailRotor);
+    // running lights
+    const lightR = new THREE.Mesh(new THREE.SphereGeometry(0.07, 6, 4), lightMat);
+    lightR.position.set(-1.2, 0, 0); g.add(lightR);
+    const lightG = new THREE.Mesh(new THREE.SphereGeometry(0.07, 6, 4), new THREE.MeshBasicMaterial({ color: 0x40ff60 }));
+    lightG.position.set(1.2, 0, 0); g.add(lightG);
+    // belly spot light (warm)
+    const spot = new THREE.PointLight(0xffd089, 2.5, 30, 1.5);
+    spot.position.set(0, -1.2, 0);
+    g.add(spot);
+    // start far up and over the city, off-frame to north
+    g.position.set(goal.position.x + 60, 40, goal.position.z - 80);
+    g.rotation.y = Math.PI * 0.85;
+    scene.add(g);
+    extraction.chopper = g;
+    extraction.rotor = rotor;
+    extraction.tailRotor = tailRotor;
+  }
+
+  // Spawn a horde behind the player on the road for the cinematic howling
+  function spawnExtractionHorde() {
+    if (extraction.hordeSpawned) return;
+    extraction.hordeSpawned = true;
+    const N = lowEnd ? 14 : 26;
+    for (let i = 0; i < N; i++) {
+      // an arc behind the goal, +Z side
+      const ang = (Math.random() - 0.5) * Math.PI * 0.9;
+      const dist = 14 + Math.random() * 16;
+      const x = goal.position.x + Math.cos(ang) * dist * (Math.random() < 0.5 ? -1 : 1);
+      const z = goal.position.z + 14 + Math.sin(Math.abs(ang)) * dist;
+      spawnZombie(x, z);
+    }
+    // delayed howl chorus
+    setTimeout(() => { for (let i = 0; i < 5; i++) setTimeout(() => SFX.groan(), i * 120); }, 900);
+    setTimeout(() => { for (let i = 0; i < 7; i++) setTimeout(() => SFX.groan(), i * 100); }, 4200);
+  }
+
+  function buildLadder(chopper) {
+    if (extraction.ladder) return extraction.ladder;
+    const g = new THREE.Group();
+    const rope = new THREE.MeshStandardMaterial({ color: 0x2a1810, roughness: 1 });
+    const rung = new THREE.MeshStandardMaterial({ color: 0x3a2818, roughness: 0.9 });
+    const ropeL = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 14, 6), rope);
+    ropeL.position.set(-0.25, -7, 0); g.add(ropeL);
+    const ropeR = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 14, 6), rope);
+    ropeR.position.set( 0.25, -7, 0); g.add(ropeR);
+    for (let i = 0; i < 18; i++) {
+      const r = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.6, 6), rung);
+      r.rotation.z = Math.PI / 2;
+      r.position.set(0, -0.4 - i * 0.7, 0);
+      g.add(r);
+    }
+    g.position.set(0, -0.9, 0.5);
+    chopper.add(g);
+    extraction.ladder = g;
+    return g;
+  }
+
+  function buildBomb(chopper) {
+    if (extraction.bomb) return extraction.bomb;
+    const g = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.42, 1.4, 12), new THREE.MeshStandardMaterial({ color: 0x4a2010, roughness: 0.6, metalness: 0.3 }));
+    body.rotation.z = Math.PI / 2; g.add(body);
+    const fin = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.5, 0.5), new THREE.MeshStandardMaterial({ color: 0x1a1008 }));
+    fin.position.x = -0.7; g.add(fin);
+    // blinking light
+    const led = new THREE.Mesh(new THREE.SphereGeometry(0.06, 6, 4), new THREE.MeshBasicMaterial({ color: 0xff2020 }));
+    led.position.x = 0.7; g.add(led);
+    g.userData.led = led;
+    g.position.set(0, -1.0, 0.6);
+    chopper.add(g);
+    extraction.bomb = g;
+    return g;
+  }
+
+  function tickExtraction(dt) {
+    if (!extraction.active) return;
+    extraction.t += dt;
+    const ch = extraction.chopper;
+    if (extraction.rotor) extraction.rotor.rotation.y += dt * 38;
+    if (extraction.tailRotor) extraction.tailRotor.rotation.x += dt * 50;
+    if (!ch) return;
+    // anchor over the helipad
+    const padX = goal.position.x, padZ = goal.position.z;
+
+    if (extraction.phase === 'incoming') {
+      // fly from far away down to ~14m above pad, slight tilt
+      const t = Math.min(1, extraction.t / 6);
+      const ease = t * t * (3 - 2 * t);
+      ch.position.x = (padX + 60) * (1 - ease) + padX * ease;
+      ch.position.z = (padZ - 80) * (1 - ease) + (padZ - 2) * ease;
+      ch.position.y = 40 * (1 - ease) + 14 * ease;
+      ch.rotation.y = Math.PI * 0.85 * (1 - ease) + Math.PI * ease;
+      if (t >= 1) {
+        extraction.phase = 'hover';
+        extraction.t = 0;
+        buildLadder(ch);
+      }
+    } else if (extraction.phase === 'hover') {
+      // gentle bob
+      ch.position.x = padX + Math.sin(extraction.t * 1.2) * 0.2;
+      ch.position.z = padZ - 2;
+      ch.position.y = 14 + Math.sin(extraction.t * 1.6) * 0.15;
+      if (extraction.t > 1.2) {
+        extraction.phase = 'climb';
+        extraction.t = 0;
+      }
+    } else if (extraction.phase === 'climb') {
+      // Player visually climbs the ladder: lock hero pose, ride upward as
+      // chopper begins to rise. Camera reframes from the side, cinematic.
+      ch.position.x = padX;
+      ch.position.z = padZ - 2;
+      ch.position.y = 14 + extraction.t * 1.6; // chopper rises
+      // hero "climbs" — rise along ladder
+      const climbT = Math.min(1, extraction.t / 5);
+      const ease = climbT * climbT;
+      const groundY = 0;
+      const ladderTopY = ch.position.y - 1.0; // ladder is 14 long, but visually we rise toward chopper
+      hero.position.y = groundY + (ladderTopY - groundY) * ease - 1.5;
+      hero.rotation.y = Math.PI; // face the city
+      // tilt arms up
+      if (hero.armL) hero.armL.rotation.x = -2.2;
+      if (hero.armR) hero.armR.rotation.x = -2.2;
+      // camera: wide cinematic side shot
+      const camAng = extraction.t * 0.25;
+      camera.position.set(padX + Math.cos(camAng) * 16, 8 + extraction.t * 0.5, padZ + Math.sin(camAng) * 16);
+      camera.lookAt(hero.position.x, hero.position.y + 1.5, hero.position.z);
+      if (climbT >= 1) {
+        extraction.phase = 'bomb_drop';
+        extraction.t = 0;
+        // attach hero to chopper visually
+        hero.userData.attached = true;
+        buildBomb(ch);
+      }
+    } else if (extraction.phase === 'bomb_drop') {
+      // chopper keeps rising; hero hangs from ladder bottom
+      ch.position.x = padX;
+      ch.position.z = padZ - 2;
+      ch.position.y = 22 + extraction.t * 2.5;
+      hero.position.y = ch.position.y - 6;
+      hero.position.x = ch.position.x;
+      hero.position.z = ch.position.z + 0.5;
+      // tail rotor blade blur LED
+      if (extraction.bomb) {
+        const led = extraction.bomb.userData.led;
+        if (led) led.material.color.setHex(Math.floor(extraction.t * 8) % 2 === 0 ? 0xff2020 : 0x300000);
+      }
+      // cinematic ground shot of howling zombies
+      const camY = Math.max(2.5, ch.position.y - 24);
+      camera.position.set(padX + 18, camY, padZ + 14);
+      camera.lookAt(padX, 1.5, padZ + 8);
+      if (extraction.t > 1.4 && !extraction.bombDropped) {
+        extraction.bombDropped = true;
+        speak("Hell yeah! That's why you are Leon ass Kentucky, boss! Wuhuuuu!", { rate: 0.95, pitch: 0.85, volume: 1 });
+        // release bomb world-space, falls toward city block
+        const bomb = extraction.bomb;
+        const wp = new THREE.Vector3();
+        bomb.getWorldPosition(wp);
+        ch.remove(bomb);
+        scene.add(bomb);
+        bomb.position.copy(wp);
+        bomb.userData.vx = 0;
+        bomb.userData.vy = 0;
+        bomb.userData.vz = 2; // slight forward toss
+        bomb.userData.falling = true;
+      }
+      if (extraction.bombDropped && extraction.bomb) {
+        const b = extraction.bomb;
+        b.userData.vy -= 18 * dt;
+        b.position.x += b.userData.vx * dt;
+        b.position.y += b.userData.vy * dt;
+        b.position.z += b.userData.vz * dt;
+        b.rotation.z += dt * 3;
+        if (b.position.y <= 0.4) {
+          detonateCityBlock(b.position.x, b.position.z);
+          scene.remove(b);
+          extraction.bomb = null;
+          extraction.phase = 'flyaway';
+          extraction.t = 0;
+        }
+      }
+    } else if (extraction.phase === 'flyaway') {
+      // chopper banks away, big aerial cinematic
+      const t = Math.min(1, extraction.t / 6);
+      const ease = t * t * (3 - 2 * t);
+      ch.position.x = padX + 80 * ease;
+      ch.position.z = padZ - 2 - 60 * ease;
+      ch.position.y = 22 + extraction.t * 1.0;
+      ch.rotation.y = Math.PI - 0.7 * ease;
+      hero.position.set(ch.position.x, ch.position.y - 6, ch.position.z + 0.5);
+      camera.position.set(padX - 30, 18, padZ + 20);
+      camera.lookAt(ch.position.x, ch.position.y, ch.position.z);
+      if (t >= 1 && !extraction.finished) {
+        extraction.finished = true;
+        stopChopperLoop();
+        setTimeout(() => finishWin(), 1500);
+      }
+    }
+  }
+
+  function detonateCityBlock(cx, cz) {
+    SFX.explode();
+    setTimeout(SFX.explode, 180);
+    setTimeout(SFX.explode, 360);
+    // brilliant flash
+    flashBangScreen();
+    // huge fireball
+    const ball = new THREE.Mesh(
+      new THREE.SphereGeometry(8, 20, 16),
+      new THREE.MeshBasicMaterial({ color: 0xffd089, transparent: true, opacity: 1 })
+    );
+    ball.position.set(cx, 4, cz);
+    scene.add(ball);
+    const blast = new THREE.PointLight(0xffa040, 30, 120, 1.4);
+    blast.position.set(cx, 8, cz);
+    scene.add(blast);
+    // shockwave ring on ground
+    const ring = new THREE.Mesh(
+      new THREE.RingGeometry(0.5, 0.8, 48),
+      new THREE.MeshBasicMaterial({ color: 0xffd089, transparent: true, opacity: 0.9, side: THREE.DoubleSide })
+    );
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.set(cx, 0.1, cz);
+    scene.add(ring);
+    let t = 0;
+    const animBlast = () => {
+      t += 0.04;
+      ball.scale.setScalar(1 + t * 6);
+      ball.material.opacity = Math.max(0, 1 - t * 0.6);
+      blast.intensity = Math.max(0, 30 - t * 25);
+      ring.scale.setScalar(1 + t * 60);
+      ring.material.opacity = Math.max(0, 0.9 - t * 0.6);
+      if (t < 1.5) requestAnimationFrame(animBlast);
+      else { scene.remove(ball); scene.remove(blast); scene.remove(ring); }
+    };
+    requestAnimationFrame(animBlast);
+    // kill every zombie within huge radius
+    for (const z of zombies) {
+      if (z.userData.dead) continue;
+      const dx = z.position.x - cx, dz = z.position.z - cz;
+      if (dx*dx + dz*dz > 60*60) continue;
+      z.userData.dead = true;
+      z.userData.deathTimer = 0;
+      z.userData.gibVx = (Math.random() - 0.5) * 10;
+      z.userData.gibVy = 6 + Math.random() * 5;
+      z.userData.gibVz = (Math.random() - 0.5) * 10;
+      z.userData.gibSpin = (Math.random() - 0.5) * 10;
+      spawnBlood(new THREE.Vector3(z.position.x, 1.4, z.position.z), new THREE.Vector3(dx/40, 0.5, dz/40), 12);
+    }
+    // rain debris from city buildings — visible "destruction" suggestion
+    for (let i = 0; i < 40; i++) {
+      const d = new THREE.Mesh(
+        new THREE.BoxGeometry(0.4 + Math.random() * 0.6, 0.4 + Math.random() * 0.6, 0.4 + Math.random() * 0.6),
+        new THREE.MeshStandardMaterial({ color: 0x2a1a10 })
+      );
+      d.position.set(cx + (Math.random() - 0.5) * 20, 1 + Math.random() * 4, cz + (Math.random() - 0.5) * 20);
+      d.userData.vx = (Math.random() - 0.5) * 16;
+      d.userData.vy = 5 + Math.random() * 10;
+      d.userData.vz = (Math.random() - 0.5) * 16;
+      d.userData.spin = (Math.random() - 0.5) * 8;
+      d.userData.life = 4;
+      scene.add(d);
+      debris.push(d);
+    }
+  }
+  const debris = [];
+  function tickDebris(dt) {
+    for (let i = debris.length - 1; i >= 0; i--) {
+      const d = debris[i];
+      d.userData.life -= dt;
+      d.userData.vy -= 18 * dt;
+      d.position.x += d.userData.vx * dt;
+      d.position.y += d.userData.vy * dt;
+      d.position.z += d.userData.vz * dt;
+      d.rotation.x += d.userData.spin * dt;
+      d.rotation.z += d.userData.spin * dt;
+      if (d.position.y < 0.1) { d.position.y = 0.1; d.userData.vy = 0; d.userData.vx *= 0.5; d.userData.vz *= 0.5; }
+      if (d.userData.life <= 0) { scene.remove(d); debris.splice(i, 1); }
+    }
+  }
+  function flashBangScreen() {
+    const v = damageVignette.style;
+    const old = v.background;
+    v.background = '#ffffff';
+    v.opacity = '1';
+    setTimeout(() => { v.opacity = '0'; setTimeout(() => v.background = old, 600); }, 80);
+  }
+
+  // ── SLO-MO ──
+  // After a kill (especially rocket / multi / headshot) we drop the global
+  // timestep to ~0.35x for ~500ms. Feels like an action-movie hit.
+  let timeScale = 1;
+  let sloMoT = 0;
+  function startSloMo(ms = 500, scale = 0.35) {
+    sloMoT = ms / 1000;
+    timeScale = scale;
+  }
+  function tickSloMo(dt) {
+    if (sloMoT > 0) {
+      sloMoT -= dt;
+      if (sloMoT <= 0) { timeScale = 1; sloMoT = 0; }
+    }
   }
 
   function fire() {
@@ -1238,8 +1768,8 @@
         // Close kills splatter the camera lens
         const distToCam = camera.position.distanceTo(z.position);
         if (distToCam < 8) showLensSplatter();
-        if (headShot) sayCallout('headshot');
-        else if (kills > 0 && kills % 3 === 0) sayCallout('streak');
+        if (headShot) { sayCallout('headshot'); startSloMo(450, 0.35); }
+        else if (kills > 0 && kills % 3 === 0) { sayCallout('streak'); startSloMo(420, 0.4); }
         if (Math.random() < 0.45) ammoReserve += 6;
       }
     }
@@ -1430,6 +1960,8 @@
       SFX.death();
       // a chorus for multi-kills
       if (gibbed > 1) setTimeout(SFX.death, 120);
+      // bigger slo-mo on multi-kills
+      startSloMo(gibbed > 2 ? 800 : 600, 0.3);
     }
     killsEl.textContent = kills;
     sayCallout('rocket');
@@ -1709,6 +2241,16 @@
 
   // ── update ──
   function update(dt) {
+    // During the extraction cinematic the camera + hero are driven by
+    // tickExtraction. Skip all the normal input/movement/aim logic so the
+    // sequence reads as a fixed-camera cutscene.
+    if (extraction.active) {
+      // still let blood/tracers/rockets finish
+      tickRockets(dt);
+      tickBlood(dt);
+      for (const f of flickerObjs) if (f.userData.update) f.userData.update(dt);
+      return;
+    }
     // pointer-lock check for desktop
     // input → move
     let mx = 0, mz = 0;
@@ -1717,10 +2259,14 @@
     if (keys['a'] || keys['arrowleft'])  mx -= 1;
     if (keys['d'] || keys['arrowright']) mx += 1;
     if (stickMoveVec.x || stickMoveVec.y) { mx += stickMoveVec.x; mz += stickMoveVec.y; }
+    if (window.OmenlyGamepad) {
+      const ax = window.OmenlyGamepad.axis(0);
+      if (ax.x || ax.y) { mx += ax.x; mz += ax.y; }
+    }
     const len = Math.hypot(mx, mz);
     if (len > 1) { mx /= len; mz /= len; }
 
-    const sprint = !!keys['shift'];
+    const sprint = !!keys['shift'] || (window.OmenlyGamepad && window.OmenlyGamepad.button('ls'));
     const sp = sprint ? player.sprint : player.speed;
     // move relative to yaw
     const cosY = Math.cos(player.yaw), sinY = Math.sin(player.yaw);
@@ -1741,6 +2287,15 @@
       player.yaw -= stickLookVec.x * dt * 2.4;
       player.pitch -= stickLookVec.y * dt * 1.8;
       player.pitch = Math.max(-1.2, Math.min(1.2, player.pitch));
+    }
+    // look (gamepad right stick)
+    if (window.OmenlyGamepad) {
+      const lx = window.OmenlyGamepad.axis(1);
+      if (lx.x || lx.y) {
+        player.yaw -= lx.x * dt * 3.4;
+        player.pitch -= lx.y * dt * 2.4;
+        player.pitch = Math.max(-1.2, Math.min(1.2, player.pitch));
+      }
     }
 
     // hero position + animation
@@ -1985,11 +2540,31 @@
   function loop(now) {
     requestAnimationFrame(loop);
     if (!pageVisible) { last = now; return; }
+    // Poll gamepad once per frame BEFORE update reads it.
+    if (window.OmenlyGamepad) {
+      window.OmenlyGamepad.poll();
+      // Edge-triggered actions need to be checked on the SAME frame as the
+      // poll, so they live here next to it.
+      if (started && alive && !extraction.active) {
+        const GP = window.OmenlyGamepad;
+        if (GP.pressed('a') && !keys[' ']) { keys[' '] = true; setTimeout(() => keys[' '] = false, 80); }
+        if (GP.pressed('b')) reload();
+        if (GP.pressed('x')) setWeapon(player.weapon === 'pistol' ? (player.rockets > 0 ? 'rocket' : 'pistol') : 'pistol');
+        if (GP.pressed('y') && player.rockets > 0) setWeapon('rocket');
+        if (GP.button('rt')) fire();
+      }
+    }
     // Clamp dt — if we drop a frame, simulate at most 33ms so physics doesn't
     // tunnel through walls and the player doesn't get teleported.
-    const dt = Math.min(0.033, (now - last) / 1000);
+    const realDt = Math.min(0.033, (now - last) / 1000);
     last = now;
+    // Slo-mo timer ticks on REAL time (so it ends in wall-clock terms),
+    // but everything else uses scaled dt for cinematic kills.
+    tickSloMo(realDt);
+    const dt = realDt * timeScale;
     if (started && alive) update(dt);
+    if (extraction.active) tickExtraction(realDt);
+    tickDebris(realDt);
     renderer.render(scene, camera);
   }
   requestAnimationFrame(loop);
