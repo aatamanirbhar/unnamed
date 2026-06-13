@@ -97,6 +97,18 @@
       "cover": "siteline/cover.svg",
       "href": "siteline/",
       "controls": "WASD + mouse + click + R/G/F/B (desktop) · joystick + FIRE + side buttons (mobile)"
+    },
+    {
+      "id": "nocturne",
+      "title": "Nocturne",
+      "blurb": "A pixel-noir whodunit. One apartment floor. Five neighbours. One killer. Knock, listen, watch what they do through the keyhole. Lock three tells in your notebook and accuse before dawn.",
+      "tags": ["narrative", "mystery", "detective", "noir", "pixel"],
+      "minutes": 5,
+      "accent": "#9fd9ff",
+      "background": "linear-gradient(135deg, #04060e, #0a1228)",
+      "cover": "nocturne/cover.svg",
+      "href": "nocturne/",
+      "controls": "click / tap"
     }
   ]
 }

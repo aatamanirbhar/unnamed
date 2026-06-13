@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a0418"/>
+      <stop offset="45%" stop-color="#1a0e2a"/>
+      <stop offset="80%" stop-color="#3a1614"/>
+      <stop offset="100%" stop-color="#1a0608"/>
+    </linearGradient>
+    <radialGradient id="moonGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#ffeac0" stop-opacity="0.5"/>
+      <stop offset="60%" stop-color="#ffb060" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#ff8c42" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="moon" cx="0.4" cy="0.35" r="0.7">
+      <stop offset="0%" stop-color="#fff4c8"/>
+      <stop offset="60%" stop-color="#e8c478"/>
+      <stop offset="100%" stop-color="#8a6238"/>
+    </radialGradient>
+    <radialGradient id="porchLight" cx="0.5" cy="0.6" r="0.45">
+      <stop offset="0%" stop-color="#ffb060" stop-opacity="0.85"/>
+      <stop offset="40%" stop-color="#ff8c42" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#ff6b35" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="windowGlow" cx="0.5" cy="0.5" r="0.6">
+      <stop offset="0%" stop-color="#ffd089" stop-opacity="0.95"/>
+      <stop offset="70%" stop-color="#ff8c42" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#ff6b35" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="jackoGlow" cx="0.5" cy="0.5" r="0.55">
+      <stop offset="0%" stop-color="#fff5a0" stop-opacity="1"/>
+      <stop offset="60%" stop-color="#ffb060" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#ff6b35" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="vignette" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#000" stop-opacity="0.5"/>
+      <stop offset="50%" stop-color="#000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.65"/>
+    </linearGradient>
+    <filter id="soft" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+  </defs>
+
+  <rect width="800" height="600" fill="url(#sky)"/>
+
+  <g fill="#ffeac0">
+    <circle cx="60" cy="50" r="1"/>
+    <circle cx="120" cy="80" r="1.4"/>
+    <circle cx="190" cy="35" r="0.8"/>
+    <circle cx="240" cy="68" r="1.1"/>
+    <circle cx="310" cy="45" r="0.9"/>
+    <circle cx="360" cy="78" r="1.2"/>
+    <circle cx="430" cy="50" r="0.8"/>
+    <circle cx="500" cy="32" r="1"/>
+    <circle cx="570" cy="65" r="0.7"/>
+    <circle cx="650" cy="40" r="1.1"/>
+    <circle cx="720" cy="80" r="0.9"/>
+    <circle cx="770" cy="50" r="0.8"/>
+    <circle cx="30" cy="120" r="0.8"/>
+    <circle cx="160" cy="140" r="1"/>
+    <circle cx="280" cy="115" r="0.8"/>
+    <circle cx="450" cy="135" r="1.1"/>
+    <circle cx="600" cy="120" r="0.7"/>
+    <circle cx="740" cy="155" r="1"/>
+  </g>
+
+  <circle cx="640" cy="130" r="120" fill="url(#moonGlow)"/>
+  <circle cx="640" cy="130" r="60" fill="url(#moon)"/>
+  <circle cx="625" cy="118" r="5" fill="#8a6238" opacity="0.45"/>
+  <circle cx="650" cy="142" r="3.5" fill="#8a6238" opacity="0.4"/>
+  <circle cx="660" cy="120" r="2.5" fill="#8a6238" opacity="0.35"/>
+  <circle cx="618" cy="148" r="2" fill="#8a6238" opacity="0.4"/>
+
+  <path d="M 0 380 L 60 340 L 110 365 L 165 320 L 220 355 L 275 330 L 330 365 L 360 380 L 0 380 Z" fill="#06030c" opacity="0.85"/>
+  <path d="M 470 380 L 510 350 L 555 370 L 600 332 L 650 358 L 700 338 L 745 365 L 800 350 L 800 380 L 470 380 Z" fill="#06030c" opacity="0.85"/>
+
+  <g>
+    <rect x="220" y="320" width="360" height="220" fill="#0a0612"/>
+    <polygon points="200,328 400,200 600,328" fill="#0a0612"/>
+    <polygon points="200,328 400,200 600,328" fill="none" stroke="#1a1024" stroke-width="1"/>
+    <rect x="220" y="320" width="360" height="220" fill="none" stroke="#1a1024" stroke-width="1"/>
+
+    <rect x="510" y="218" width="22" height="50" fill="#0a0612" stroke="#1a1024" stroke-width="1"/>
+    <rect x="508" y="214" width="26" height="6" fill="#0a0612"/>
+    <ellipse cx="521" cy="210" rx="14" ry="6" fill="#3a2218" opacity="0.55" filter="url(#soft)"/>
+
+    <rect x="246" y="350" width="60" height="74" fill="url(#windowGlow)"/>
+    <rect x="246" y="350" width="60" height="74" fill="none" stroke="#3a2418" stroke-width="1"/>
+    <line x1="276" y1="350" x2="276" y2="424" stroke="#3a2418" stroke-width="1"/>
+    <line x1="246" y1="387" x2="306" y2="387" stroke="#3a2418" stroke-width="1"/>
+
+    <rect x="494" y="350" width="60" height="74" fill="#140a18"/>
+    <rect x="494" y="350" width="60" height="74" fill="none" stroke="#2a1828" stroke-width="1"/>
+    <line x1="524" y1="350" x2="524" y2="424" stroke="#2a1828" stroke-width="1"/>
+    <line x1="494" y1="387" x2="554" y2="387" stroke="#2a1828" stroke-width="1"/>
+
+    <rect x="372" y="412" width="56" height="128" fill="#100608"/>
+    <rect x="372" y="412" width="56" height="128" fill="none" stroke="#2a1610" stroke-width="1"/>
+    <circle cx="418" cy="478" r="2.2" fill="#ffd089"/>
+  </g>
+
+  <rect x="340" y="402" width="120" height="6" fill="#06030c"/>
+  <line x1="346" y1="408" x2="346" y2="540" stroke="#1a1024" stroke-width="2.5"/>
+  <line x1="454" y1="408" x2="454" y2="540" stroke="#1a1024" stroke-width="2.5"/>
+
+  <ellipse cx="400" cy="500" rx="280" ry="120" fill="url(#porchLight)"/>
+
+  <g transform="translate(300, 470)">
+    <ellipse cx="0" cy="22" rx="42" ry="6" fill="#000" opacity="0.55"/>
+    <ellipse cx="0" cy="50" rx="80" ry="22" fill="url(#jackoGlow)" opacity="0.85" filter="url(#soft)"/>
+    <ellipse cx="0" cy="0" rx="36" ry="30" fill="#ff6b35"/>
+    <ellipse cx="-14" cy="-4" rx="10" ry="22" fill="#cf4a1f" opacity="0.5"/>
+    <ellipse cx="14" cy="-4" rx="10" ry="22" fill="#cf4a1f" opacity="0.5"/>
+    <path d="M -22 -2 L -10 -16 L 0 -2 L 10 -16 L 22 -2 L 12 12 L 0 2 L -12 12 Z" fill="#1a0608"/>
+    <path d="M -22 -2 L -10 -16 L 0 -2 L 10 -16 L 22 -2 L 12 12 L 0 2 L -12 12 Z" fill="url(#jackoGlow)" opacity="0.85"/>
+    <path d="M -8 14 L -4 22 L 4 14 L 8 22" stroke="#1a0608" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <rect x="-3" y="-34" width="6" height="8" fill="#3a2a1a"/>
+  </g>
+
+  <g transform="translate(500, 478)">
+    <ellipse cx="0" cy="18" rx="30" ry="5" fill="#000" opacity="0.55"/>
+    <ellipse cx="0" cy="0" rx="24" ry="20" fill="#ff6b35"/>
+    <ellipse cx="-9" cy="-2" rx="6" ry="14" fill="#cf4a1f" opacity="0.5"/>
+    <ellipse cx="9" cy="-2" rx="6" ry="14" fill="#cf4a1f" opacity="0.5"/>
+    <path d="M -14 -1 L -6 -10 L 0 -1 L 6 -10 L 14 -1 L 7 8 L 0 1 L -7 8 Z" fill="#1a0608"/>
+    <path d="M -14 -1 L -6 -10 L 0 -1 L 6 -10 L 14 -1 L 7 8 L 0 1 L -7 8 Z" fill="url(#jackoGlow)" opacity="0.7"/>
+    <rect x="-2" y="-24" width="4" height="6" fill="#3a2a1a"/>
+  </g>
+
+  <g transform="translate(120, 540)" opacity="0.92">
+    <ellipse cx="0" cy="6" rx="14" ry="3" fill="#000" opacity="0.4"/>
+    <rect x="-10" y="-30" width="20" height="36" fill="#1a0e1a"/>
+    <rect x="-12" y="-46" width="24" height="18" fill="#1a0e1a"/>
+    <ellipse cx="0" cy="-50" rx="11" ry="10" fill="#2a1a20"/>
+    <path d="M -8 -22 L -16 -10 L -10 -8 L -2 -18 Z" fill="#1a0e1a"/>
+    <path d="M 8 -22 L 16 -10 L 10 -8 L 2 -18 Z" fill="#1a0e1a"/>
+    <rect x="-12" y="-22" width="24" height="14" rx="2" fill="#5a2818"/>
+    <rect x="-10" y="-20" width="20" height="10" rx="1" fill="#7a3a20"/>
+    <ellipse cx="0" cy="-15" rx="7" ry="3" fill="#3a1808" opacity="0.7"/>
+  </g>
+
+  <g fill="#ff8c42" opacity="0.7">
+    <ellipse cx="70" cy="555" rx="6" ry="3" transform="rotate(20 70 555)"/>
+    <ellipse cx="180" cy="570" rx="5" ry="2.5" transform="rotate(-25 180 570)"/>
+    <ellipse cx="240" cy="558" rx="5" ry="2.5" transform="rotate(35 240 558)"/>
+    <ellipse cx="620" cy="568" rx="6" ry="3" transform="rotate(-15 620 568)"/>
+    <ellipse cx="700" cy="554" rx="5" ry="2.5" transform="rotate(20 700 554)"/>
+    <ellipse cx="755" cy="572" rx="6" ry="3" transform="rotate(-30 755 572)"/>
+  </g>
+
+  <rect x="0" y="0" width="800" height="600" fill="url(#vignette)"/>
+
+  <g>
+    <text x="400" y="92" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="64" fill="#fff4c8" text-anchor="middle" letter-spacing="3" opacity="0.97" style="text-shadow: 0 4px 18px rgba(0,0,0,0.7)">
+      Porch<tspan fill="#ff8c42">light</tspan>
+    </text>
+    <text x="400" y="124" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#ffb060" text-anchor="middle" letter-spacing="9" opacity="0.85">— ONE HALLOWEEN · SIX DOORS —</text>
+  </g>
+</svg>

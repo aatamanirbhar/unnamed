@@ -106,13 +106,37 @@
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     text-align: center; padding: 40px 24px; color: #ffd089;
     font-family: 'Courier New', monospace; letter-spacing: 3px; }
-  #rotate-nag .icon { font-size: 64px; margin-bottom: 28px; animation: rotateHint 2.4s ease-in-out infinite; transform-origin: center; line-height: 1; }
-  #rotate-nag h2 { font-size: clamp(20px, 4.5vw, 28px); margin-bottom: 14px; color: #ff8040; text-shadow: 0 0 10px #c8503a; }
-  #rotate-nag p { font-size: clamp(12px, 3vw, 15px); opacity: 0.85; max-width: 360px; line-height: 1.7; margin-bottom: 8px; }
-  #rotate-nag .small { font-size: 11px; opacity: 0.55; margin-top: 24px; letter-spacing: 2px; }
+  #rotate-nag .icon { font-size: clamp(40px, 12vw, 64px); margin-bottom: 22px; animation: rotateHint 2.4s ease-in-out infinite; transform-origin: center; line-height: 1; }
+  #rotate-nag h2 { font-size: clamp(18px, 5vw, 28px); margin-bottom: 14px; color: #ff8040; text-shadow: 0 0 10px #c8503a; }
+  #rotate-nag p { font-size: clamp(11px, 3vw, 15px); opacity: 0.85; max-width: 360px; line-height: 1.7; margin-bottom: 8px; }
+  #rotate-nag .small { font-size: 10px; opacity: 0.55; margin-top: 18px; letter-spacing: 2px; }
+  #rotate-nag .skip-btn { margin-top: 22px; background: transparent; border: 1px solid #ff8040; color: #ff8040;
+    padding: 12px 22px; font-family: 'Courier New', monospace; font-size: 12px; letter-spacing: 4px;
+    cursor: pointer; transition: all 0.2s; pointer-events: auto; }
+  #rotate-nag .skip-btn:hover, #rotate-nag .skip-btn:active { background: #ff8040; color: #0a0604; box-shadow: 0 0 18px #ff8040; }
   @keyframes rotateHint {
     0%, 45% { transform: rotate(0deg); }
     55%, 100% { transform: rotate(90deg); }
+  }
+  /* Compact mobile HUD so 0.5–6 inch phones don't overflow */
+  @media (max-width: 600px) {
+    #hud { font-size: 11px; letter-spacing: 1px; top: 8px; left: 8px; }
+    #hud .hp-bar { width: 80px; }
+    #wave { font-size: 11px; letter-spacing: 2px; top: 8px; right: 8px; }
+    #donate { bottom: 8px; right: 8px; }
+    #donate a { padding: 6px 10px; font-size: 10px; letter-spacing: 2px; }
+    #title h1 { letter-spacing: 4px; }
+    #title p { font-size: 11px; letter-spacing: 2px; }
+  }
+  /* Landscape phones: shrink fire/look stick a touch + tighten gap */
+  @media (orientation: landscape) and (max-height: 480px) {
+    #stick-move, #stick-look { width: 100px; height: 100px; }
+    .knob { width: 44px; height: 44px; margin: -22px 0 0 -22px; }
+    #fire-btn { width: 78px; height: 78px; font-size: 11px; }
+    #reload-btn { width: 60px; height: 42px; bottom: max(170px, env(safe-area-inset-bottom, 0px) + 160px); }
+    #stick-move { bottom: max(40px, env(safe-area-inset-bottom, 0px) + 30px); left: max(18px, env(safe-area-inset-left, 0px) + 10px); }
+    #stick-look { bottom: max(40px, env(safe-area-inset-bottom, 0px) + 30px); right: max(120px, env(safe-area-inset-right, 0px) + 110px); }
+    #fire-btn { bottom: max(40px, env(safe-area-inset-bottom, 0px) + 30px); right: max(18px, env(safe-area-inset-right, 0px) + 10px); }
   }
 </style>
 </head>
@@ -125,7 +149,8 @@
   <h2>BEST IN LANDSCAPE</h2>
   <p>This game is best enjoyed in <b>landscape mode</b>.</p>
   <p>We suggest rotating your device for full fun.</p>
-  <div class="small">— ROTATE TO BEGIN —</div>
+  <button class="skip-btn" type="button" id="rotate-skip">PLAY ANYWAY</button>
+  <div class="small">— OR ROTATE YOUR DEVICE —</div>
 </div>
 <div id="crosshair" class="hidden"></div>
 
@@ -215,15 +240,23 @@
   }
 
   // Portrait-mode nag for touch devices — fades in if held vertically.
+  // Skippable: once user taps PLAY ANYWAY we never show it again this session.
   const rotateNag = document.getElementById('rotate-nag');
+  let rotateNagSkipped = false;
   function checkOrientation() {
-    if (!isTouch) return;
+    if (!isTouch || rotateNagSkipped) { rotateNag.style.display = 'none'; return; }
     const portrait = window.innerHeight > window.innerWidth;
     rotateNag.style.display = portrait ? 'flex' : 'none';
   }
   checkOrientation();
   window.addEventListener('resize', checkOrientation);
   window.addEventListener('orientationchange', checkOrientation);
+  const rotateSkipBtn = document.getElementById('rotate-skip');
+  if (rotateSkipBtn) {
+    const skip = (e) => { e.preventDefault(); rotateNagSkipped = true; rotateNag.style.display = 'none'; };
+    rotateSkipBtn.addEventListener('click', skip);
+    rotateSkipBtn.addEventListener('touchend', skip, { passive: false });
+  }
 
   // Detect low-end devices (mobile, low core count, low memory) so we can cut
   // shadow maps, particle counts, and draw distance. Without this the 200m map
@@ -332,48 +365,7 @@
     }
   }
 
-  // ── ground / map ──
-  // Smaller map on low-end devices: fewer colliders, draw calls, particles.
-  const MAP_RADIUS = lowEnd ? 70 : 100;
-  const groundTex = concreteTex.clone();
-  groundTex.needsUpdate = true;
-  groundTex.repeat.set(MAP_RADIUS / 4, MAP_RADIUS / 4);
-  const groundGeo = new THREE.PlaneGeometry(MAP_RADIUS * 2, MAP_RADIUS * 2, 1, 1);
-  const groundMat = new THREE.MeshStandardMaterial({ color: 0x2a1810, map: groundTex, roughness: 1 });
-  const ground = new THREE.Mesh(groundGeo, groundMat);
-  ground.rotation.x = -Math.PI / 2;
-  if (PERF.shadows) ground.receiveShadow = true;
-  scene.add(ground);
-
-  // road strip — wet asphalt look
-  const roadTex = concreteTex.clone();
-  roadTex.needsUpdate = true;
-  roadTex.repeat.set(2, MAP_RADIUS / 4);
-  const roadGeo = new THREE.PlaneGeometry(12, MAP_RADIUS * 2);
-  const roadMat = new THREE.MeshStandardMaterial({ color: 0x141014, map: roadTex, roughness: 0.7 });
-  const road = new THREE.Mesh(roadGeo, roadMat);
-  road.rotation.x = -Math.PI / 2;
-  road.position.y = 0.01;
-  scene.add(road);
-  // sidewalks
-  const swMat = new THREE.MeshStandardMaterial({ color: 0x4a3828, roughness: 1 });
-  for (const sx of [-7, 7]) {
-    const sw = new THREE.Mesh(new THREE.PlaneGeometry(1.6, MAP_RADIUS * 2), swMat);
-    sw.rotation.x = -Math.PI / 2;
-    sw.position.set(sx, 0.015, 0);
-    sw.receiveShadow = true;
-    scene.add(sw);
-  }
-  // road dashes (brighter, more visible in sunlight)
-  const dashMat = new THREE.MeshStandardMaterial({ color: 0xfff0a0, emissive: 0x806020, emissiveIntensity: 0.2 });
-  for (let z = -MAP_RADIUS + 4; z < MAP_RADIUS; z += 6) {
-    const dash = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 2), dashMat);
-    dash.rotation.x = -Math.PI / 2;
-    dash.position.set(0, 0.02, z);
-    scene.add(dash);
-  }
-
-  // buildings
+  // ── textures (defined first so map setup can use them) ──
   const colliders = []; // { x, z, halfW, halfD }
   // Generate a brick texture once and reuse the material everywhere so we don't
   // create dozens of materials. Canvas-based, no network fetches.
@@ -424,6 +416,47 @@
     t.wrapS = t.wrapT = THREE.RepeatWrapping;
     return t;
   })();
+
+  // ── ground / map ──
+  // Smaller map on low-end devices: fewer colliders, draw calls, particles.
+  const MAP_RADIUS = lowEnd ? 70 : 100;
+  const groundTex = concreteTex.clone();
+  groundTex.needsUpdate = true;
+  groundTex.repeat.set(MAP_RADIUS / 4, MAP_RADIUS / 4);
+  const groundGeo = new THREE.PlaneGeometry(MAP_RADIUS * 2, MAP_RADIUS * 2, 1, 1);
+  const groundMat = new THREE.MeshStandardMaterial({ color: 0x2a1810, map: groundTex, roughness: 1 });
+  const ground = new THREE.Mesh(groundGeo, groundMat);
+  ground.rotation.x = -Math.PI / 2;
+  if (PERF.shadows) ground.receiveShadow = true;
+  scene.add(ground);
+
+  // road strip — wet asphalt look
+  const roadTex = concreteTex.clone();
+  roadTex.needsUpdate = true;
+  roadTex.repeat.set(2, MAP_RADIUS / 4);
+  const roadGeo = new THREE.PlaneGeometry(12, MAP_RADIUS * 2);
+  const roadMat = new THREE.MeshStandardMaterial({ color: 0x141014, map: roadTex, roughness: 0.7 });
+  const road = new THREE.Mesh(roadGeo, roadMat);
+  road.rotation.x = -Math.PI / 2;
+  road.position.y = 0.01;
+  scene.add(road);
+  // sidewalks
+  const swMat = new THREE.MeshStandardMaterial({ color: 0x4a3828, roughness: 1 });
+  for (const sx of [-7, 7]) {
+    const sw = new THREE.Mesh(new THREE.PlaneGeometry(1.6, MAP_RADIUS * 2), swMat);
+    sw.rotation.x = -Math.PI / 2;
+    sw.position.set(sx, 0.015, 0);
+    sw.receiveShadow = true;
+    scene.add(sw);
+  }
+  // road dashes (brighter, more visible in sunlight)
+  const dashMat = new THREE.MeshStandardMaterial({ color: 0xfff0a0, emissive: 0x806020, emissiveIntensity: 0.2 });
+  for (let z = -MAP_RADIUS + 4; z < MAP_RADIUS; z += 6) {
+    const dash = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 2), dashMat);
+    dash.rotation.x = -Math.PI / 2;
+    dash.position.set(0, 0.02, z);
+    scene.add(dash);
+  }
 
   function addBuilding(x, z, w, d, h, color) {
     const geo = new THREE.BoxGeometry(w, h, d);

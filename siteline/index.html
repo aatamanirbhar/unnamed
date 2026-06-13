@@ -171,7 +171,7 @@
   #hud-br .weap-row span { padding: 2px 8px; border: 1px solid rgba(255,208,137,0.35); font-size: 10px; letter-spacing: 2px; opacity: 0.5; }
   #hud-br .weap-row span.on { opacity: 1; background: rgba(255,208,137,0.18); }
 
-  #hud-tr { position: fixed; top: 90px; right: 14px; font-size: 11px; letter-spacing: 2px; z-index: 10; pointer-events: none; text-align: right; opacity: 0.85; }
+  #hud-tr { position: fixed; top: max(186px, env(safe-area-inset-top, 0px) + 180px); right: max(14px, env(safe-area-inset-right, 0px) + 8px); font-size: 11px; letter-spacing: 2px; z-index: 10; pointer-events: none; text-align: right; opacity: 0.85; }
   #hud-tr .kd { font-size: 14px; color: #ffd089; text-shadow: 0 0 6px #ffd089; margin-bottom: 4px; }
   #hud-tr .roomcode { font-size: 11px; color: #ffd089; opacity: 0.6; }
 
@@ -205,7 +205,7 @@
   #flash-overlay { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 30; transition: opacity 0.3s; }
 
   /* ── minimap ── */
-  #minimap { position: fixed; top: 90px; left: 50%; transform: translateX(-50%); width: 160px; height: 160px; background: rgba(10,6,4,0.6); border: 1px solid rgba(255,208,137,0.3); z-index: 10; pointer-events: none; }
+  #minimap { position: fixed; top: max(14px, env(safe-area-inset-top, 0px) + 8px); right: max(14px, env(safe-area-inset-right, 0px) + 8px); width: 160px; height: 160px; background: rgba(10,6,4,0.6); border: 1px solid rgba(255,208,137,0.3); z-index: 10; pointer-events: none; }
   #minimap canvas { width: 100%; height: 100%; display: block; }
 
   /* ── menus ── */
@@ -276,14 +276,13 @@
     .knob { width: 48px; height: 48px; margin: -24px 0 0 -24px; }
     #fire-btn { width: 88px; height: 88px; font-size: 12px; }
     #top-bar { gap: 14px; padding: 8px 14px; font-size: 12px; }
-    #minimap { width: 110px; height: 110px; top: 60px; }
-    #hud-tr { top: 60px; font-size: 10px; }
+    #minimap { width: 110px; height: 110px; }
+    #hud-tr { top: max(132px, env(safe-area-inset-top, 0px) + 126px); font-size: 10px; }
     #killfeed { top: 60px; font-size: 10px; max-width: 50vw; }
   }
-  /* Landscape mobile: minimap was overlapping the centre of the screen.
-     Pin it to the top-right and shrink it so it doesn't obscure aiming. */
+  /* Landscape mobile: shrink minimap so the top-right corner isn't dominated by it. */
   @media (orientation: landscape) and (max-height: 600px) {
-    #minimap { width: 92px; height: 92px; top: max(8px, env(safe-area-inset-top, 0px) + 4px); left: auto; right: max(8px, env(safe-area-inset-right, 0px) + 4px); transform: none; }
+    #minimap { width: 92px; height: 92px; top: max(8px, env(safe-area-inset-top, 0px) + 4px); right: max(8px, env(safe-area-inset-right, 0px) + 4px); }
     #hud-tr { top: max(106px, env(safe-area-inset-top, 0px) + 100px); right: 8px; }
     #killfeed { top: max(8px, env(safe-area-inset-top, 0px) + 4px); left: 8px; max-width: 40vw; font-size: 10px; }
     #top-bar { padding: 6px 10px; gap: 10px; font-size: 11px; }
@@ -294,13 +293,52 @@
     text-align: center; padding: 40px 24px; color: #ffd089;
     font-family: 'Courier New', monospace; letter-spacing: 3px; }
   #rotate-nag.show { display: flex; }
-  #rotate-nag .icon { font-size: 64px; margin-bottom: 28px; animation: rotateHint 2.4s ease-in-out infinite; transform-origin: center; line-height: 1; }
-  #rotate-nag h2 { font-size: clamp(20px, 4.5vw, 28px); margin-bottom: 14px; color: #ffd089; text-shadow: 0 0 10px #ffd089; }
-  #rotate-nag p { font-size: clamp(12px, 3vw, 15px); opacity: 0.85; max-width: 360px; line-height: 1.7; margin-bottom: 8px; }
-  #rotate-nag .small { font-size: 11px; opacity: 0.55; margin-top: 24px; letter-spacing: 2px; }
+  #rotate-nag .icon { font-size: clamp(40px, 12vw, 64px); margin-bottom: 22px; animation: rotateHint 2.4s ease-in-out infinite; transform-origin: center; line-height: 1; }
+  #rotate-nag h2 { font-size: clamp(18px, 5vw, 28px); margin-bottom: 14px; color: #ffd089; text-shadow: 0 0 10px #ffd089; }
+  #rotate-nag p { font-size: clamp(11px, 3vw, 15px); opacity: 0.85; max-width: 360px; line-height: 1.7; margin-bottom: 8px; }
+  #rotate-nag .small { font-size: 10px; opacity: 0.55; margin-top: 18px; letter-spacing: 2px; }
+  #rotate-nag .skip-btn { margin-top: 22px; background: transparent; border: 1px solid #ffd089; color: #ffd089;
+    padding: 12px 22px; font-family: 'Courier New', monospace; font-size: 12px; letter-spacing: 4px;
+    cursor: pointer; transition: all 0.2s; pointer-events: auto; }
+  #rotate-nag .skip-btn:hover, #rotate-nag .skip-btn:active { background: #ffd089; color: #0a0604; box-shadow: 0 0 18px #ffd089; }
   @keyframes rotateHint {
     0%, 45% { transform: rotate(0deg); }
     55%, 100% { transform: rotate(90deg); }
+  }
+  /* Very-small phone HUD pass — keep top-bar, hud, scoreboard, panels fitting */
+  @media (max-width: 600px) {
+    #top-bar { gap: 10px; padding: 6px 10px; font-size: 10px; letter-spacing: 2px; }
+    #top-bar .timer { font-size: 14px; min-width: 48px; }
+    #top-bar .phase { font-size: 9px; }
+    #hud-bl { bottom: 8px; left: 8px; font-size: 11px; letter-spacing: 1px; }
+    #hud-bl .hp-bar { width: 90px; }
+    #hud-bl .money { font-size: 13px; }
+    #hud-br { bottom: 8px; right: 8px; font-size: 11px; }
+    #hud-br .ammo { font-size: 20px; }
+    #grenades { bottom: 56px; right: 8px; }
+    #grenades div { width: 30px; height: 30px; font-size: 9px; }
+    #minimap { width: 96px; height: 96px; }
+    #scoreboard { min-width: 0; width: 92vw; padding: 12px 14px; }
+    .panel .card { padding: 18px 14px; }
+    .panel h1 { letter-spacing: 4px; }
+    #buy { min-width: 0; width: 92vw; padding: 14px; }
+    #buy .buy-grid { grid-template-columns: 1fr; }
+  }
+  /* Tighten landscape mobile spacing so touch sticks and fire btn don't overlap minimap or HUD */
+  @media (orientation: landscape) and (max-height: 480px) {
+    #stick-move, #stick-look { width: 100px; height: 100px; }
+    .knob { width: 44px; height: 44px; margin: -22px 0 0 -22px; }
+    #fire-btn { width: 78px; height: 78px; font-size: 11px; }
+    #side-btns button { width: 64px; font-size: 9px; padding: 6px 0; }
+    #side-btns { bottom: max(150px, env(safe-area-inset-bottom, 0px) + 140px); gap: 4px; }
+    #stick-move { bottom: max(40px, env(safe-area-inset-bottom, 0px) + 30px); left: max(18px, env(safe-area-inset-left, 0px) + 10px); }
+    #stick-look { bottom: max(40px, env(safe-area-inset-bottom, 0px) + 30px); right: max(120px, env(safe-area-inset-right, 0px) + 110px); }
+    #fire-btn { bottom: max(40px, env(safe-area-inset-bottom, 0px) + 30px); right: max(18px, env(safe-area-inset-right, 0px) + 10px); }
+    #grenades { bottom: max(120px, env(safe-area-inset-bottom, 0px) + 110px); right: max(110px, env(safe-area-inset-right, 0px) + 100px); }
+    #hud-bl { bottom: max(150px, env(safe-area-inset-bottom, 0px) + 140px); left: 8px; font-size: 10px; letter-spacing: 1px; }
+    #hud-bl .hp-bar { width: 80px; }
+    #donate { bottom: 4px; }
+    #donate a { padding: 4px 8px; font-size: 9px; }
   }
 
   /* ── donate ── */
@@ -355,7 +393,8 @@
   <h2>BEST IN LANDSCAPE</h2>
   <p>This game is best enjoyed in <b>landscape mode</b>.</p>
   <p>We suggest rotating your device for full fun.</p>
-  <div class="small">— ROTATE TO BEGIN —</div>
+  <button class="skip-btn" type="button" id="rotate-skip">PLAY ANYWAY</button>
+  <div class="small">— OR ROTATE YOUR DEVICE —</div>
 </div>
 
 <!-- ── Top scoreboard ── -->
@@ -629,16 +668,23 @@
   const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || matchMedia('(pointer: coarse)').matches;
   if (isTouch) touchControls.classList.add('on');
 
-  // Portrait nag — fades in on touch + portrait orientation
+  // Portrait nag — fades in on touch + portrait orientation, skippable
   const rotateNag = $('rotate-nag');
+  let rotateNagSkipped = false;
   function checkOrientation() {
-    if (!isTouch) return;
+    if (!isTouch || rotateNagSkipped) { rotateNag.classList.remove('show'); return; }
     const portrait = window.innerHeight > window.innerWidth;
     rotateNag.classList.toggle('show', portrait);
   }
   checkOrientation();
   window.addEventListener('resize', checkOrientation);
   window.addEventListener('orientationchange', checkOrientation);
+  const rotateSkipBtn = $('rotate-skip');
+  if (rotateSkipBtn) {
+    const skip = (e) => { e.preventDefault(); rotateNagSkipped = true; rotateNag.classList.remove('show'); };
+    rotateSkipBtn.addEventListener('click', skip);
+    rotateSkipBtn.addEventListener('touchend', skip, { passive: false });
+  }
 
   // Initial nickname
   const NICK_KEY = 'siteline.nick';

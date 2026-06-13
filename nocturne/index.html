@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Nocturne — Five doors, one killer · A pixel-noir whodunit · Omenly</title>
+<meta name="description" content="A 3-minute pixel-noir whodunit in your browser. One apartment floor. Five neighbours. One killer. Knock, listen to their alibi, watch what they do through the keyhole. Lock three tells in your notebook and accuse before the clock runs out. Free, no download.">
+<meta name="theme-color" content="#0a1228">
+<link rel="canonical" href="https://omenly.vercel.app/nocturne/">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Nocturne — A pixel-noir whodunit in your browser">
+<meta property="og:description" content="Five doors. One killer. Knock, listen, watch. Lock three tells and accuse before dawn.">
+<meta property="og:url" content="https://omenly.vercel.app/nocturne/">
+<meta property="og:image" content="https://omenly.vercel.app/nocturne/cover.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Nocturne — pixel-noir whodunit">
+<meta name="twitter:description" content="Five doors. One killer. One night.">
+<meta name="twitter:image" content="https://omenly.vercel.app/nocturne/cover.svg">
+<script type="application/ld+json">
+{ "@context":"https://schema.org","@type":"VideoGame","name":"Nocturne","url":"https://omenly.vercel.app/nocturne/","description":"A short pixel-noir whodunit. One apartment floor, five neighbours, one killer, one night.","genre":["narrative","mystery","detective","noir"],"playMode":"SinglePlayer","gamePlatform":["Web browser"],"applicationCategory":"Game","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@type":"Organization","name":"Omenly"} }
+</script>
+<link rel="stylesheet" href="omenly.css">
+<script>
+  window.OMENLY_CONFIG = {
+    game: 'nocturne',
+    gameTitle: 'Nocturne',
+    price: 3,
+    isHub: false,
+    donateUrl: 'https://www.paypal.me/vikas117/3',
+    allAccessDonateUrl: 'https://www.paypal.me/vikas117/10',
+    theme: { accent: '#9fd9ff' }
+  };
+</script>
+<script src="omenly.js" defer></script>
+<script defer src="/_vercel/insights/script.js"></script>
+<style>
+  :root {
+    --bg-a: #04060e;
+    --bg-b: #0a1228;
+    --ink: #e8e0d0;
+    --dim: rgba(232,224,208,0.55);
+    --line: rgba(232,224,208,0.13);
+    --accent: #9fd9ff;
+    --warm: #ffd089;
+    --red: #ff4d6d;
+    --green: #9bd877;
+    --gold: #ffe7a0;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg-a); color: var(--ink);
+    font-family: 'Georgia','Times New Roman',serif; touch-action: none; overscroll-behavior: none; }
+  body { position: relative; }
+
+  /* ── Title screen ────────────────────────────────────────────── */
+  #title { position: fixed; inset: 0; z-index: 30; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; padding: 28px; text-align: center; overflow-y: auto;
+    background: radial-gradient(ellipse at 50% 35%, rgba(159,217,255,0.08), transparent 60%),
+                linear-gradient(180deg, #04060e 0%, #0a1228 60%, #04060e 100%); }
+  #title .crown { font-size: 11px; letter-spacing: 6px; opacity: 0.6; text-transform: uppercase;
+    font-family: 'Helvetica',sans-serif; color: var(--accent); margin-bottom: 18px; }
+  #title h1 { font-family: 'Georgia',serif; font-style: italic; font-size: clamp(48px, 11vw, 86px);
+    letter-spacing: 4px; color: var(--ink); text-shadow: 0 0 24px rgba(159,217,255,0.35), 0 4px 18px rgba(0,0,0,0.6); margin-bottom: 4px; }
+  #title h1 span { color: var(--accent); }
+  #title .sub { font-size: 12px; letter-spacing: 5px; text-transform: uppercase; opacity: 0.75;
+    font-family: 'Helvetica',sans-serif; color: var(--accent); margin-bottom: 30px; }
+  #title .opener { font-style: italic; font-size: clamp(14px, 2.1vw, 17px); line-height: 1.75; max-width: 600px;
+    opacity: 0.9; margin-bottom: 30px; }
+  #title .opener em { color: var(--warm); font-style: italic; }
+  #title .controls { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.55;
+    font-family: 'Helvetica',sans-serif; margin-top: 18px; line-height: 1.9; }
+  .btn { display: inline-block; padding: 14px 28px; background: transparent; border: 1px solid var(--accent);
+    color: var(--accent); font-family: 'Helvetica',sans-serif; font-size: 12px; letter-spacing: 5px;
+    text-transform: uppercase; cursor: pointer; transition: all 0.25s; }
+  .btn:hover, .btn:focus-visible, .btn:active { background: var(--accent); color: var(--bg-a);
+    box-shadow: 0 0 24px rgba(159,217,255,0.45); outline: none; }
+
+  /* ── Stage (the apartment-floor view) ────────────────────────── */
+  #stage { position: fixed; inset: 0; z-index: 1; display: none; flex-direction: column;
+    background: linear-gradient(180deg, #04060e 0%, #0a1228 55%, #04060e 100%); }
+  body.playing #stage { display: flex; }
+  body.playing #title { display: none; }
+
+  /* top status bar */
+  #status { display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 10px 18px; border-bottom: 1px solid var(--line); background: rgba(4,6,14,0.78);
+    backdrop-filter: blur(6px); font-family: 'Helvetica',sans-serif; font-size: 11px; letter-spacing: 3px;
+    text-transform: uppercase; }
+  #status .clock { font-size: 16px; color: var(--accent); letter-spacing: 4px;
+    text-shadow: 0 0 10px rgba(159,217,255,0.55); min-width: 80px; text-align: center; }
+  #status .clock.danger { color: var(--red); text-shadow: 0 0 12px rgba(255,77,109,0.7); animation: pulse 0.8s infinite alternate; }
+  #status .right { display: flex; gap: 14px; align-items: center; opacity: 0.85; }
+  #status button { background: transparent; border: 1px solid var(--line); color: var(--ink);
+    padding: 6px 10px; font-family: inherit; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; }
+  #status button:hover { border-color: var(--accent); color: var(--accent); }
+  @keyframes pulse { from { opacity: 0.7; } to { opacity: 1; } }
+
+  /* corridor: 5 doors arranged in a row */
+  #corridor { flex: 1; display: flex; align-items: center; justify-content: center; gap: clamp(8px, 2vw, 22px);
+    padding: 24px clamp(12px, 3vw, 28px); position: relative; }
+  #corridor::before { content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.55) 90%); }
+  .door { position: relative; flex: 1; max-width: 180px; min-width: 100px; aspect-ratio: 2 / 3.6;
+    background: linear-gradient(180deg, #1a0e1a 0%, #0e0612 100%); border: 1px solid var(--line);
+    border-radius: 4px 4px 0 0; cursor: pointer; transition: transform 0.18s, border-color 0.18s, box-shadow 0.25s;
+    display: flex; flex-direction: column; align-items: center; padding: 10% 8% 8%; }
+  .door:hover, .door:focus-visible { transform: translateY(-4px); border-color: var(--accent);
+    box-shadow: 0 12px 36px rgba(0,0,0,0.7), 0 0 18px rgba(159,217,255,0.18); outline: none; }
+  .door[data-suspect="1"] { border-color: var(--warm); box-shadow: 0 0 18px rgba(255,208,137,0.25); }
+  .door[data-cleared="1"] { opacity: 0.55; }
+  .door[data-cleared="1"]::after { content: '✕'; position: absolute; inset: 0; display: flex; align-items: center;
+    justify-content: center; color: var(--green); font-size: clamp(40px, 6vw, 64px); text-shadow: 0 0 14px var(--green); }
+  .door .num { position: absolute; top: 18%; width: 36px; height: 36px; border: 1px solid var(--warm);
+    background: rgba(255,208,137,0.08); display: flex; align-items: center; justify-content: center;
+    font-family: 'Georgia',serif; font-style: italic; font-size: 18px; color: var(--warm); border-radius: 2px; }
+  .door .knob { position: absolute; right: 14%; top: 52%; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--gold); box-shadow: 0 0 5px var(--gold); }
+  .door .name { position: absolute; bottom: -34px; left: 0; right: 0; text-align: center;
+    font-family: 'Helvetica',sans-serif; font-size: 10px; letter-spacing: 2px; color: var(--dim);
+    text-transform: uppercase; pointer-events: none; }
+  .door .name b { color: var(--ink); font-weight: 600; }
+  .door .light { position: absolute; bottom: -2px; left: 6%; right: 6%; height: 4px;
+    background: linear-gradient(180deg, rgba(255,208,137,0.85), rgba(255,208,137,0)); filter: blur(2px); }
+  .door.dim .light { background: linear-gradient(180deg, rgba(159,217,255,0.25), rgba(159,217,255,0)); }
+
+  /* the small "what they're doing" loop at top of door */
+  .door .peep { position: absolute; top: 8%; left: 50%; transform: translateX(-50%);
+    width: 18px; height: 18px; border-radius: 50%; background: #04060e; border: 2px solid var(--line);
+    overflow: hidden; }
+  .door .peep canvas { width: 100%; height: 100%; display: block; }
+
+  /* notebook + accuse panel */
+  #notebook { position: relative; padding: 14px 22px 18px; border-top: 1px solid var(--line);
+    background: rgba(6,8,16,0.85); font-family: 'Helvetica',sans-serif; }
+  #notebook h3 { font-family: 'Georgia',serif; font-style: italic; color: var(--accent);
+    font-size: 14px; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 8px; }
+  #notebook .tells { display: flex; gap: 8px; flex-wrap: wrap; min-height: 28px; }
+  .tell { padding: 5px 10px; border: 1px solid var(--line); background: rgba(159,217,255,0.04);
+    color: var(--ink); font-size: 11px; letter-spacing: 1px; cursor: pointer; transition: all 0.18s;
+    border-radius: 2px; font-family: 'Helvetica',sans-serif; }
+  .tell:hover, .tell:focus-visible { border-color: var(--accent); background: rgba(159,217,255,0.12); outline: none; }
+  .tell.locked { background: rgba(255,77,109,0.18); border-color: var(--red); color: var(--red); }
+  .tell .who { opacity: 0.65; margin-right: 6px; font-style: italic; }
+  #notebook .row { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; gap: 12px; flex-wrap: wrap; }
+  #notebook .progress { font-size: 10px; letter-spacing: 3px; color: var(--dim); text-transform: uppercase; }
+  #notebook .progress b { color: var(--warm); }
+  #accuse-btn { padding: 10px 18px; font-size: 11px; letter-spacing: 4px; background: transparent;
+    border: 1px solid var(--red); color: var(--red); cursor: pointer; transition: all 0.18s;
+    font-family: 'Helvetica',sans-serif; text-transform: uppercase; }
+  #accuse-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  #accuse-btn:enabled:hover { background: var(--red); color: var(--bg-a); box-shadow: 0 0 18px var(--red); }
+
+  /* ── Door modal (knock view) ─────────────────────────────────── */
+  #modal { position: fixed; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center;
+    padding: 18px; background: rgba(4,6,14,0.85); backdrop-filter: blur(6px); }
+  #modal.on { display: flex; }
+  #modal .card { max-width: 580px; width: 100%; background: rgba(10,14,28,0.96); border: 1px solid var(--accent);
+    box-shadow: 0 30px 80px rgba(0,0,0,0.7), 0 0 24px rgba(159,217,255,0.15);
+    padding: 26px 24px 22px; position: relative; max-height: 92vh; overflow-y: auto; }
+  #modal .place { font-size: 10px; letter-spacing: 5px; text-transform: uppercase; opacity: 0.65;
+    font-family: 'Helvetica',sans-serif; color: var(--accent); margin-bottom: 4px; }
+  #modal .who { font-family: 'Georgia',serif; font-style: italic; color: var(--ink); font-size: 28px;
+    letter-spacing: 2px; margin-bottom: 14px; }
+  #modal .who small { display: block; font-style: normal; font-family: 'Helvetica',sans-serif;
+    font-size: 10px; letter-spacing: 4px; color: var(--dim); margin-top: 4px; text-transform: uppercase; }
+  #modal .peephole { width: 100%; aspect-ratio: 4/3; background: #04060e; border: 1px solid var(--line);
+    margin-bottom: 14px; position: relative; overflow: hidden; }
+  #modal .peephole canvas { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+  #modal .peephole .label { position: absolute; bottom: 6px; left: 8px; font-family: 'Helvetica',sans-serif;
+    font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); opacity: 0.75;
+    text-shadow: 0 0 6px #000; }
+  #modal .prose { font-size: 15px; line-height: 1.7; margin-bottom: 18px; font-style: italic; }
+  #modal .prose .said { font-style: normal; color: var(--warm); }
+  #modal .prose .tell-hint { display: inline-block; padding: 2px 8px; margin: 4px 4px 0 0;
+    border: 1px dashed var(--accent); color: var(--accent); font-style: normal; font-size: 11px;
+    letter-spacing: 1px; cursor: pointer; transition: all 0.2s; font-family: 'Helvetica',sans-serif; border-radius: 2px; }
+  #modal .prose .tell-hint:hover { background: rgba(159,217,255,0.12); }
+  #modal .prose .tell-hint.added { border-style: solid; background: rgba(159,217,255,0.18); }
+  #modal .prose .tell-hint.added::before { content: '✓ '; color: var(--green); }
+  #modal .actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+  #modal .actions button { padding: 10px 16px; font-size: 11px; letter-spacing: 3px; }
+  .ghostbtn { background: transparent; border: 1px solid var(--line); color: var(--ink); cursor: pointer;
+    font-family: 'Helvetica',sans-serif; text-transform: uppercase; transition: all 0.2s; }
+  .ghostbtn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Ending screen ───────────────────────────────────────────── */
+  #ending { position: fixed; inset: 0; z-index: 50; display: none; flex-direction: column;
+    align-items: center; justify-content: center; padding: 28px; text-align: center; overflow-y: auto;
+    background: radial-gradient(ellipse at 50% 40%, rgba(159,217,255,0.05), transparent 60%),
+                linear-gradient(180deg, #04060e 0%, #0a1228 55%, #04060e 100%); }
+  #ending.on { display: flex; }
+  #ending .crown { font-size: 11px; letter-spacing: 6px; opacity: 0.65; text-transform: uppercase;
+    font-family: 'Helvetica',sans-serif; color: var(--accent); margin-bottom: 10px; }
+  #ending h2 { font-family: 'Georgia',serif; font-style: italic; font-size: clamp(34px, 7vw, 52px);
+    color: var(--ink); margin-bottom: 18px; letter-spacing: 4px; }
+  #ending h2.win { color: var(--green); text-shadow: 0 0 18px var(--green); }
+  #ending h2.lose { color: var(--red); text-shadow: 0 0 18px var(--red); }
+  #ending .prose { max-width: 580px; font-size: 15px; line-height: 1.8; opacity: 0.92; font-style: italic; margin-bottom: 22px; }
+  #ending .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 24px; margin: 16px auto 22px;
+    max-width: 380px; font-family: 'Helvetica',sans-serif; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; }
+  #ending .stats div { padding: 6px 0; border-bottom: 1px dotted var(--line); display: flex; justify-content: space-between; }
+  #ending .stats b { color: var(--warm); }
+  #ending .row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+
+  /* ── small-screen tightening ─────────────────────────────────── */
+  @media (max-width: 720px) {
+    #corridor { gap: 6px; padding: 18px 10px; }
+    .door { min-width: 0; aspect-ratio: 2 / 3.4; }
+    .door .num { width: 26px; height: 26px; font-size: 13px; }
+    .door .name { bottom: -28px; font-size: 9px; letter-spacing: 1px; }
+    .door .name b { display: block; }
+    #notebook { padding: 10px 14px 14px; }
+    #notebook h3 { font-size: 12px; letter-spacing: 3px; }
+    .tell { font-size: 10px; padding: 4px 8px; }
+    #modal .card { padding: 18px 16px; }
+    #modal .who { font-size: 22px; }
+    #modal .prose { font-size: 14px; line-height: 1.65; }
+    #status { padding: 8px 12px; font-size: 10px; gap: 10px; }
+    #status .clock { font-size: 14px; }
+  }
+  @media (orientation: landscape) and (max-height: 480px) {
+    #status { padding: 6px 12px; font-size: 10px; }
+    #corridor { padding: 10px; }
+    .door .name { bottom: -22px; font-size: 8px; }
+    #notebook { padding: 8px 12px 10px; }
+    #notebook h3 { font-size: 11px; margin-bottom: 4px; }
+    #notebook .tells { min-height: 22px; }
+  }
+
+  /* ── donate ──────────────────────────────────────────────────── */
+  #donate { position: fixed; bottom: 14px; right: 14px; z-index: 35; }
+  #donate a { display: inline-block; padding: 7px 13px; background: rgba(159,217,255,0.05);
+    border: 1px solid var(--accent); color: var(--accent); text-decoration: none;
+    font-family: 'Helvetica',sans-serif; font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+    backdrop-filter: blur(4px); transition: all 0.2s; }
+  #donate a:hover { background: var(--accent); color: var(--bg-a); box-shadow: 0 0 16px var(--accent); }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- ─────────── TITLE ─────────── -->
+<div id="title">
+  <div class="crown">— OMENLY ARCADE · NOCTURNE —</div>
+  <h1>Noc<span>turne</span></h1>
+  <div class="sub">— FIVE DOORS · ONE KILLER · ONE NIGHT —</div>
+  <div class="opener">
+    The buzzer in apartment <em>5</em> rang at 11:47. By the time someone answered, the call was a dead line.
+    By the time the radio call came in, the rain had started.
+    <br><br>
+    The super swore she heard a thud through the ceiling. Five neighbours on this floor, all home, all hers to vouch for. One of them is lying.
+    <br><br>
+    <em>You have until dawn. Knock on every door. Listen to what they say. Watch what they do.</em>
+  </div>
+  <button class="btn" id="start-btn">— Step into the hall —</button>
+  <div class="controls">
+    Click a door to knock · click a phrase in their alibi to lock it as a TELL · three locked tells on one suspect unlock ACCUSE
+  </div>
+  <div data-omenly-ad style="margin-top: 36px; max-width: 600px;"></div>
+</div>
+
+<!-- ─────────── STAGE ─────────── -->
+<div id="stage">
+  <div id="status">
+    <span>NIGHT <b id="night-num">1</b> · <span id="building-name">3814 ARBOUR ST</span></span>
+    <span class="clock" id="clock">3:00</span>
+    <span class="right">
+      <span>KNOCKS <b id="knocks">0</b></span>
+      <button id="restart-btn" type="button">RESTART</button>
+    </span>
+  </div>
+
+  <div id="corridor"></div>
+
+  <div id="notebook">
+    <h3>Notebook</h3>
+    <div class="tells" id="tells-list"><div class="tell" style="opacity:0.5; border-style:dashed;">— knock on a door, click a phrase that catches your ear —</div></div>
+    <div class="row">
+      <div class="progress">LOCKED TELLS · <b id="tells-count">0</b> / 3 on a single suspect</div>
+      <button id="accuse-btn" disabled>ACCUSE</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────── DOOR MODAL ─────────── -->
+<div id="modal">
+  <div class="card">
+    <div class="place">— APARTMENT <span id="modal-num">·</span> —</div>
+    <div class="who" id="modal-who">·<small id="modal-job">·</small></div>
+    <div class="peephole">
+      <canvas id="peep-canvas"></canvas>
+      <div class="label">— through the keyhole —</div>
+    </div>
+    <div class="prose" id="modal-prose">·</div>
+    <div class="actions">
+      <button class="ghostbtn" id="modal-accuse" type="button">ACCUSE THEM</button>
+      <button class="ghostbtn" id="modal-close" type="button">— close the door —</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────── ENDING ─────────── -->
+<div id="ending">
+  <div class="crown" id="end-crown">— DAWN —</div>
+  <h2 id="end-title">·</h2>
+  <div class="prose" id="end-prose">·</div>
+  <div class="stats">
+    <div><span>Nights survived</span><b id="end-nights">·</b></div>
+    <div><span>Knocks tonight</span><b id="end-knocks">·</b></div>
+    <div><span>Tells locked</span><b id="end-tells">·</b></div>
+    <div><span>Killer</span><b id="end-killer">·</b></div>
+  </div>
+  <div class="row">
+    <button class="btn" id="next-night-btn">— NEXT NIGHT —</button>
+    <button class="btn ghostbtn" id="end-restart-btn">— GIVE UP —</button>
+  </div>
+  <div data-omenly-ad style="margin-top: 30px; max-width: 580px;"></div>
+</div>
+
+<div id="donate">
+  <a href="https://www.paypal.me/vikas117/3" target="_blank" rel="noopener" data-omenly-cta>SUPPORT THE DEV</a>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  // ─────────── DATA POOLS ───────────
+
+  const NAMES = [
+    ['Mrs. Calder', 'retired piano teacher'],
+    ['Mr. Voss', 'night-shift radiologist'],
+    ['Lena Park', 'graduate student'],
+    ['Dr. Halverson', 'dentist, divorced'],
+    ['Marisol Chen', 'illustrator'],
+    ['Eddie Bramwell', 'bartender'],
+    ['Pastor Owen', 'lives alone since June'],
+    ['The Akinyemis', 'newlyweds, the wife works late'],
+    ['Tomás Reyes', 'plumber, three kids'],
+    ['Ms. Whitmore', 'court stenographer'],
+    ['Ari Solomon', 'second-year resident'],
+    ['Old Beaufort', 'retired off the railroad']
+  ];
+
+  const STREETS = [
+    '3814 ARBOUR ST', '221 PEARL LANE', '88 KENT AVE', '4407 LINDEN CT',
+    '512 ORCHARD WAY', '17 BRAEMORE TERRACE', '904 HEMLOCK ROW'
+  ];
+
+  // Each ALIBI is a short paragraph with one or two "TELL hooks" — phrases the
+  // player can click to lock as evidence. The HOOKS list is parallel: each entry
+  // is the text the tell will show in the notebook.
+  // Some alibis are honest (truthy=true), some are lying (truthy=false). The
+  // KILLER's tells are wired so locking THREE of them on the same suspect lets
+  // you accuse correctly.
+  const ALIBI_TEMPLATES = [
+    {
+      truthful: true,
+      lines: (n) => [
+        `${n.name} answers in slippers, holding a teabag in one hand.`,
+        `<span class="said">"I was on the phone with my sister till about eleven-thirty. Then I made tea."</span>`,
+        `She lifts the mug a little. The tea is still steaming.`,
+        `<span class="said">"I heard the buzzer at quarter to twelve, same as everyone, I'd say. I didn't go look. It's not my floor."</span>`
+      ],
+      hooks: ['on the phone with sister till 11:30', 'tea still steaming']
+    },
+    {
+      truthful: false,
+      lines: (n) => [
+        `${n.name} opens the door six inches and stands behind it.`,
+        `<span class="said">"I was in the kitchen. Cooking. I didn't hear anything."</span>`,
+        `The hall smells of detergent, not cooking. Something inside the apartment is dripping into a metal sink.`,
+        `<span class="said">"You should ask the woman in 3 — she's the busybody."</span>`
+      ],
+      hooks: ['claimed to be cooking but smelled like detergent', 'something dripping into a metal sink', 'eager to deflect to apartment 3']
+    },
+    {
+      truthful: true,
+      lines: (n) => [
+        `${n.name} is in a hospital sweater, hair still wet.`,
+        `<span class="said">"Got off at ten, walked home in the rain, took a shower. You can ask the night clerk at Mercy."</span>`,
+        `His shoes by the door are soaked through.`,
+        `<span class="said">"I'd help you if I knew anything. I was under the water for forty minutes."</span>`
+      ],
+      hooks: ['shoes soaked through', 'said night clerk at Mercy will confirm']
+    },
+    {
+      truthful: false,
+      lines: (n) => [
+        `${n.name} answers with the chain still on, peering through the gap.`,
+        `<span class="said">"I've been in bed since nine. Migraine. Lights off, white noise on."</span>`,
+        `The TV behind her is on, paused on a news bulletin from <em>tonight at 11:30</em>.`,
+        `<span class="said">"Whoever it was, it wasn't me. I take my medication early."</span>`
+      ],
+      hooks: ['TV paused on an 11:30 news bulletin', 'said she had been in bed since nine']
+    },
+    {
+      truthful: true,
+      lines: (n) => [
+        `${n.name} opens the door wide, holding a sleeping cat.`,
+        `<span class="said">"I was painting. Whole apartment smells of turpentine — sorry."</span>`,
+        `It does. The kitchen table is covered in brushes and a half-finished pomegranate.`,
+        `<span class="said">"I had the radio on the whole time. Twelve hours of weather and bad jazz."</span>`
+      ],
+      hooks: ['kitchen table covered in brushes', 'said the radio was on with bad jazz']
+    },
+    {
+      truthful: false,
+      lines: (n) => [
+        `${n.name} is dressed for going out — coat, scarf, an umbrella still wet by the door.`,
+        `<span class="said">"I just got back, like, two minutes ago. From a friend's. I don't even know what happened."</span>`,
+        `Her keys are not on the hook. They're on the counter, the way you set them down in a hurry.`,
+        `<span class="said">"Look, I'm tired. Can we do this in the morning?"</span>`
+      ],
+      hooks: ['umbrella still wet by the door', 'keys not hung up but tossed on the counter', 'tried to push the questions to morning']
+    },
+    {
+      truthful: true,
+      lines: (n) => [
+        `${n.name} answers chewing the end of a pen, reading glasses on.`,
+        `<span class="said">"Marking papers. I haven't moved since dinner. Ask the radiator, it'll back me up."</span>`,
+        `He gestures behind him at a kitchen table full of essays.`,
+        `<span class="said">"I'd offer you a cup of something, but I'm out of everything except hot water and the will to grade these."</span>`
+      ],
+      hooks: ['kitchen table full of marked essays', 'chewing the end of a pen']
+    },
+    {
+      truthful: false,
+      lines: (n) => [
+        `${n.name} answers shoeless, holding a wet washcloth to a knuckle.`,
+        `<span class="said">"Cut myself on a cabinet. Stupid. I was getting a glass of water."</span>`,
+        `The cut looks deeper than a cabinet edge. The washcloth is pink.`,
+        `<span class="said">"Don't make a thing of it. I'll wrap it. Was there anything else?"</span>`
+      ],
+      hooks: ['fresh deeper-than-cabinet cut on a knuckle', 'washcloth pink with blood', 'wanted you off the threshold fast']
+    },
+    {
+      truthful: true,
+      lines: (n) => [
+        `${n.name} is on the floor stretching, gym clothes on.`,
+        `<span class="said">"Late workout — I do hot yoga at the place on Sixth. Got back about ten-forty."</span>`,
+        `A pair of running shoes by the door, soles still warm-looking.`,
+        `<span class="said">"I'd vouch for anyone on this floor. We're all decent."</span>`
+      ],
+      hooks: ['running shoes soles still warm', 'said hot yoga at the place on Sixth']
+    },
+    {
+      truthful: false,
+      lines: (n) => [
+        `${n.name} answers with a coat half-on and a duffel bag at the foot of the door.`,
+        `<span class="said">"I was — I was watching something. I lost track of time."</span>`,
+        `He keeps glancing back toward a back bedroom that you can't see.`,
+        `<span class="said">"I really don't have time for this right now, ok?"</span>`
+      ],
+      hooks: ['coat half on and a duffel bag packed by the door', 'kept glancing toward a back bedroom']
+    }
+  ];
+
+  // Tiny peep-canvas room loops. Each is drawn into a small offscreen canvas
+  // and ticked every frame. Behaviors: tea, pacing, scrubbing, TV-watching,
+  // packing, painting, stretching, marking, on-the-phone, bleeding.
+  const ROOM_LOOPS = [
+    { kind: 'tea',      bg: '#1a1228' },
+    { kind: 'scrub',    bg: '#180e1a' },
+    { kind: 'shower',   bg: '#0e1622' },
+    { kind: 'tv',       bg: '#0a0a18' },
+    { kind: 'paint',    bg: '#1a1018' },
+    { kind: 'pack',     bg: '#180c14' },
+    { kind: 'mark',     bg: '#101428' },
+    { kind: 'bleed',    bg: '#1a0e12' },
+    { kind: 'stretch',  bg: '#0e1820' },
+    { kind: 'glance',   bg: '#100a18' }
+  ];
+
+  // ─────────── STATE ───────────
+  const state = {
+    night: 1,
+    knocks: 0,
+    timeLeft: 180, // seconds — 3 minutes
+    suspects: [],  // 5 generated suspects with assigned alibi + killer flag
+    tells: [],     // {id, suspectId, label, locked}
+    killerId: null,
+    over: false,
+    activeSuspect: null,
+    peepRAF: 0
+  };
+
+  // ─────────── UI ───────────
+  const $ = (id) => document.getElementById(id);
+  const titleEl = $('title');
+  const stage = $('stage');
+  const corridor = $('corridor');
+  const tellsList = $('tells-list');
+  const tellsCount = $('tells-count');
+  const accuseBtn = $('accuse-btn');
+  const clockEl = $('clock');
+  const knocksEl = $('knocks');
+  const nightNum = $('night-num');
+  const buildingName = $('building-name');
+  const modal = $('modal');
+  const peepCanvas = $('peep-canvas');
+  const endingEl = $('ending');
+
+  // ─────────── AUDIO ───────────
+  let audioCtx = null;
+  function ensureAudio() {
+    if (!audioCtx) {
+      try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (_) {}
+    }
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  }
+  function blip(freq, dur, type, vol) {
+    if (!audioCtx) return;
+    const t = audioCtx.currentTime;
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = type || 'sine';
+    o.frequency.setValueAtTime(freq, t);
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(vol || 0.12, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(audioCtx.destination);
+    o.start(t); o.stop(t + dur + 0.05);
+  }
+  function noise(dur, vol, lp) {
+    if (!audioCtx) return;
+    const t = audioCtx.currentTime;
+    const buf = audioCtx.createBuffer(1, Math.max(1, audioCtx.sampleRate * dur), audioCtx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+    const src = audioCtx.createBufferSource(); src.buffer = buf;
+    const f = audioCtx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = lp || 1200;
+    const g = audioCtx.createGain(); g.gain.value = vol || 0.18;
+    src.connect(f).connect(g).connect(audioCtx.destination);
+    src.start(t);
+  }
+  const SFX = {
+    knock:  () => { blip(120, 0.08, 'square', 0.18); setTimeout(() => blip(110, 0.09, 'square', 0.16), 90); setTimeout(() => blip(100, 0.10, 'square', 0.14), 180); },
+    tick:   () => { blip(880, 0.04, 'square', 0.05); },
+    lock:   () => { blip(660, 0.10, 'triangle', 0.10); setTimeout(() => blip(990, 0.16, 'triangle', 0.08), 90); },
+    wrong:  () => { blip(120, 0.4, 'sawtooth', 0.2); noise(0.4, 0.15, 400); },
+    right:  () => { const notes = [440, 554, 660, 880]; notes.forEach((f, i) => setTimeout(() => blip(f, 0.4, 'sine', 0.12), i * 140)); },
+    rain:   () => { noise(0.6, 0.05, 800); },
+    dawn:   () => { const notes = [262, 330, 392, 523]; notes.forEach((f, i) => setTimeout(() => blip(f, 0.7, 'sine', 0.09), i * 280)); }
+  };
+
+  // gentle rain bed every 3s
+  setInterval(() => { if (audioCtx && !state.over) SFX.rain(); }, 3200);
+
+  // ─────────── SETUP A NIGHT ───────────
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = (Math.random() * (i + 1)) | 0;
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function buildNight() {
+    state.knocks = 0;
+    state.timeLeft = 180 + (state.night - 1) * -15;     // gets tighter each night
+    if (state.timeLeft < 120) state.timeLeft = 120;
+    state.tells = [];
+    state.over = false;
+
+    nightNum.textContent = state.night;
+    buildingName.textContent = STREETS[(Math.random() * STREETS.length) | 0];
+    knocksEl.textContent = '0';
+
+    // Pick 5 unique names + assign alibis. Always include AT LEAST one liar
+    // template that becomes the killer. Killer index is random among liars.
+    const nameSet = shuffle(NAMES).slice(0, 5);
+    const liarTemplates = shuffle(ALIBI_TEMPLATES.filter(a => !a.truthful));
+    const truthTemplates = shuffle(ALIBI_TEMPLATES.filter(a => a.truthful));
+    // 1 killer + 1 or 2 other liars (red herrings) + the rest honest
+    const assigns = [];
+    assigns.push({ tpl: liarTemplates[0], isKiller: true });
+    if (liarTemplates[1]) assigns.push({ tpl: liarTemplates[1], isKiller: false });
+    if (state.night >= 2 && liarTemplates[2]) assigns.push({ tpl: liarTemplates[2], isKiller: false });
+    while (assigns.length < 5) assigns.push({ tpl: truthTemplates[assigns.length - liarTemplates.length] || truthTemplates[0], isKiller: false });
+    const shuffled = shuffle(assigns);
+
+    state.suspects = nameSet.map((n, i) => {
+      const a = shuffled[i];
+      const room = ROOM_LOOPS[(Math.random() * ROOM_LOOPS.length) | 0];
+      return {
+        id: i + 1,
+        name: n[0],
+        job: n[1],
+        room,
+        tpl: a.tpl,
+        isKiller: a.isKiller,
+        knocked: false,
+        cleared: false
+      };
+    });
+    state.killerId = state.suspects.find(s => s.isKiller).id;
+
+    renderCorridor();
+    renderTells();
+  }
+
+  // ─────────── CORRIDOR ───────────
+  function renderCorridor() {
+    corridor.innerHTML = '';
+    for (const s of state.suspects) {
+      const d = document.createElement('button');
+      d.className = 'door';
+      if (s.knocked) d.classList.add('dim');
+      if (s.cleared) d.dataset.cleared = '1';
+      // suspicion attribute — counts the locked tells on this suspect
+      const locked = state.tells.filter(t => t.locked && t.suspectId === s.id).length;
+      if (locked >= 1) d.dataset.suspect = '1';
+      d.innerHTML = `
+        <div class="num">${s.id}</div>
+        <div class="knob"></div>
+        <div class="peep"><canvas width="40" height="40"></canvas></div>
+        <div class="light"></div>
+        <div class="name"><b>${s.name}</b><br>${s.job}</div>
+      `;
+      d.addEventListener('click', () => openDoor(s));
+      corridor.appendChild(d);
+      // start the small peep animation
+      runPeepLoop(d.querySelector('.peep canvas'), s.room.kind, s.room.bg);
+    }
+  }
+
+  // ─────────── PEEPHOLE ANIMATIONS ───────────
+  // Each loop draws a tiny silhouette + a behavior cue. Cheap, ~6fps.
+  const peepRunners = new WeakMap();
+  function runPeepLoop(c, kind, bg) {
+    const ctx = c.getContext('2d');
+    let t = 0;
+    function frame() {
+      t += 0.12;
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, c.width, c.height);
+      drawSilhouette(ctx, c.width, c.height, kind, t, 0.5);
+      peepRunners.set(c, requestAnimationFrame(frame));
+    }
+    if (peepRunners.has(c)) cancelAnimationFrame(peepRunners.get(c));
+    frame();
+  }
+  function drawSilhouette(ctx, w, h, kind, t, scale) {
+    // base figure: head + body, centered
+    const cx = w / 2, cy = h * 0.65;
+    const headR = 4 * scale, bodyW = 8 * scale, bodyH = 12 * scale;
+    ctx.save();
+    // breathing wobble
+    const wob = Math.sin(t) * 0.6;
+    const moveX = (kind === 'glance' ? Math.sin(t * 0.7) * 5 : 0)
+                + (kind === 'pack'   ? Math.sin(t * 1.2) * 3 : 0)
+                + (kind === 'scrub'  ? Math.sin(t * 3) * 1.5 : 0);
+    ctx.translate(moveX, wob);
+    ctx.fillStyle = '#04060e';
+    // body
+    ctx.fillRect(cx - bodyW / 2, cy - bodyH / 2, bodyW, bodyH);
+    // head
+    ctx.beginPath();
+    ctx.arc(cx, cy - bodyH / 2 - headR * 0.6, headR, 0, Math.PI * 2);
+    ctx.fill();
+    // kind-specific cue
+    if (kind === 'tea') {
+      ctx.fillStyle = '#ffd089'; ctx.fillRect(cx + 4, cy - 4, 2, 3); // mug
+      ctx.fillStyle = 'rgba(255,255,255,0.45)'; ctx.fillRect(cx + 4, cy - 8 + Math.sin(t) * 0.5, 1, 2); // steam
+    } else if (kind === 'scrub') {
+      ctx.fillStyle = '#9fd9ff'; ctx.fillRect(cx - 7, cy + 4 + Math.sin(t * 3) * 1, 5, 2); // scrubbing motion
+    } else if (kind === 'shower') {
+      ctx.fillStyle = 'rgba(110,200,255,0.6)';
+      for (let i = 0; i < 4; i++) ctx.fillRect(cx - 6 + i * 3, ((t * 14 + i * 3) % h), 1, 3);
+    } else if (kind === 'tv') {
+      ctx.fillStyle = (Math.sin(t * 6) > 0) ? '#9fd9ff' : '#3a4a6a';
+      ctx.fillRect(2, h - 12, 10, 8);
+    } else if (kind === 'paint') {
+      ctx.fillStyle = '#ff6b35'; ctx.fillRect(cx + 5, cy - 2, 3, 3); // pomegranate
+      ctx.strokeStyle = '#9fd9ff'; ctx.beginPath(); ctx.moveTo(cx + 3, cy); ctx.lineTo(cx + 6, cy - 1); ctx.stroke();
+    } else if (kind === 'pack') {
+      ctx.fillStyle = '#3a2a18'; ctx.fillRect(cx - 10, cy + 3, 6, 4); // duffel
+    } else if (kind === 'mark') {
+      ctx.fillStyle = '#e8e0d0'; for (let i = 0; i < 3; i++) ctx.fillRect(cx - 6, cy - 2 + i * 2, 12, 1); // papers
+    } else if (kind === 'bleed') {
+      ctx.fillStyle = '#ff4d6d'; ctx.fillRect(cx + 5, cy - 1, 2, 2); // knuckle
+    } else if (kind === 'stretch') {
+      // sit pose
+      ctx.fillStyle = '#04060e'; ctx.fillRect(cx - 3, cy + bodyH / 2 - 2, 10, 2);
+    } else if (kind === 'glance') {
+      // head turn — tiny dot for eye direction
+      ctx.fillStyle = '#9fd9ff'; ctx.fillRect(cx + 1 + (Math.sin(t * 0.7) > 0 ? 1 : -1), cy - bodyH / 2 - headR * 0.6, 1, 1);
+    }
+    ctx.restore();
+  }
+
+  // ─────────── DOOR MODAL ───────────
+  function openDoor(s) {
+    ensureAudio();
+    SFX.knock();
+    s.knocked = true;
+    state.knocks++;
+    knocksEl.textContent = state.knocks;
+    state.activeSuspect = s;
+
+    $('modal-num').textContent = s.id;
+    $('modal-who').innerHTML = `${s.name}<small>${s.job}</small>`;
+
+    const lines = s.tpl.lines({ name: s.name });
+    let html = '';
+    for (const line of lines) html += `<p>${line}</p>`;
+    // Append clickable TELL hints below the prose
+    html += `<p style="margin-top: 12px; font-size: 12px; letter-spacing: 2px; color: var(--accent); font-style: normal; opacity: 0.8; text-transform: uppercase;">— What caught your eye? —</p>`;
+    html += `<div style="margin-top: 8px;">`;
+    for (const hook of s.tpl.hooks) {
+      const alreadyLocked = state.tells.some(t => t.suspectId === s.id && t.label === hook && t.locked);
+      html += `<button class="tell-hint${alreadyLocked ? ' added' : ''}" data-hook="${escapeHtml(hook)}">${escapeHtml(hook)}</button>`;
+    }
+    html += `</div>`;
+    $('modal-prose').innerHTML = html;
+
+    // wire hooks
+    $('modal-prose').querySelectorAll('.tell-hint').forEach(btn => {
+      btn.addEventListener('click', () => lockTell(s, btn.dataset.hook, btn));
+    });
+
+    // start a bigger peep canvas
+    runBigPeep(s.room.kind, s.room.bg);
+    modal.classList.add('on');
+  }
+
+  function runBigPeep(kind, bg) {
+    cancelAnimationFrame(state.peepRAF);
+    const c = peepCanvas;
+    c.width = 480; c.height = 360;
+    const ctx = c.getContext('2d');
+    let t = 0;
+    function frame() {
+      t += 0.06;
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, c.width, c.height);
+      // dim wallpaper grid
+      ctx.fillStyle = 'rgba(255,255,255,0.04)';
+      for (let i = 0; i < c.width; i += 32) ctx.fillRect(i, 0, 1, c.height);
+      for (let j = 0; j < c.height; j += 32) ctx.fillRect(0, j, c.width, 1);
+      // floor
+      ctx.fillStyle = 'rgba(0,0,0,0.4)';
+      ctx.fillRect(0, c.height * 0.7, c.width, c.height * 0.3);
+      // furniture splotches
+      ctx.fillStyle = 'rgba(255,255,255,0.05)';
+      ctx.fillRect(30, c.height * 0.55, 70, 70);
+      ctx.fillRect(c.width - 110, c.height * 0.5, 90, 100);
+      // figure scaled big
+      ctx.save();
+      ctx.translate(c.width / 2 - 40, c.height * 0.4);
+      ctx.scale(8, 8);
+      drawSilhouette(ctx, 16, 24, kind, t, 1);
+      ctx.restore();
+      // peephole vignette
+      const g = ctx.createRadialGradient(c.width / 2, c.height / 2, c.width * 0.2, c.width / 2, c.height / 2, c.width * 0.55);
+      g.addColorStop(0, 'rgba(0,0,0,0)');
+      g.addColorStop(1, 'rgba(0,0,0,0.9)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, c.width, c.height);
+      state.peepRAF = requestAnimationFrame(frame);
+    }
+    frame();
+  }
+
+  function closeModal() {
+    modal.classList.remove('on');
+    cancelAnimationFrame(state.peepRAF);
+    state.activeSuspect = null;
+    renderCorridor();
+    renderTells();
+  }
+
+  $('modal-close').addEventListener('click', closeModal);
+  $('modal-accuse').addEventListener('click', () => {
+    const s = state.activeSuspect;
+    if (!s) return;
+    closeModal();
+    accuse(s);
+  });
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+  function lockTell(suspect, label, btn) {
+    ensureAudio();
+    // already locked?
+    if (state.tells.some(t => t.suspectId === suspect.id && t.label === label && t.locked)) return;
+    state.tells.push({ id: Date.now() + Math.random(), suspectId: suspect.id, label, locked: true });
+    SFX.lock();
+    btn.classList.add('added');
+    renderTells();
+  }
+
+  function renderTells() {
+    const locked = state.tells.filter(t => t.locked);
+    if (locked.length === 0) {
+      tellsList.innerHTML = '<div class="tell" style="opacity:0.5; border-style:dashed;">— knock on a door, click a phrase that catches your ear —</div>';
+    } else {
+      tellsList.innerHTML = '';
+      for (const t of locked) {
+        const s = state.suspects.find(x => x.id === t.suspectId);
+        const span = document.createElement('button');
+        span.className = 'tell locked';
+        span.innerHTML = `<span class="who">${s ? s.name : '?'}</span>${t.label}`;
+        span.addEventListener('click', () => unlockTell(t));
+        tellsList.appendChild(span);
+      }
+    }
+    // max locked count on a single suspect
+    const max = state.suspects.reduce((m, s) => {
+      const n = state.tells.filter(t => t.locked && t.suspectId === s.id).length;
+      return n > m ? n : m;
+    }, 0);
+    tellsCount.textContent = max;
+    accuseBtn.disabled = max < 3;
+  }
+
+  function unlockTell(t) {
+    t.locked = false;
+    state.tells = state.tells.filter(x => x !== t);
+    renderTells();
+  }
+
+  // ─────────── ACCUSE ───────────
+  accuseBtn.addEventListener('click', () => {
+    // accuse the suspect with the most locked tells
+    let best = null, bestN = 0;
+    for (const s of state.suspects) {
+      const n = state.tells.filter(t => t.locked && t.suspectId === s.id).length;
+      if (n > bestN) { bestN = n; best = s; }
+    }
+    if (best) accuse(best);
+  });
+
+  function accuse(suspect) {
+    if (state.over) return;
+    state.over = true;
+    const right = suspect.id === state.killerId;
+    showEnding(right, suspect);
+  }
+
+  function showEnding(win, accused) {
+    const killer = state.suspects.find(s => s.id === state.killerId);
+    $('end-title').textContent = win ? 'GOTCHA.' : 'WRONG DOOR.';
+    $('end-title').className = win ? 'win' : 'lose';
+    $('end-crown').textContent = win ? '— DAWN, AND A QUIET HALLWAY —' : '— DAWN, AND ONE DOOR STILL UNLOCKED —';
+    $('end-prose').innerHTML = win
+      ? `You knock on ${accused.name}'s door one more time, this time with two patrol uniforms behind you. They open the door and they don't say anything. They already know. The hallway light flickers once and stops.`
+      : `By the time you realize you accused the wrong neighbour, ${killer.name} is gone — luggage, photographs, the small things people take when they don't plan to come back. The hallway is quiet. Apartment 5's door is still open a half-inch.`;
+    $('end-nights').textContent = state.night;
+    $('end-knocks').textContent = state.knocks;
+    $('end-tells').textContent = state.tells.filter(t => t.locked).length;
+    $('end-killer').textContent = killer.name;
+    $('next-night-btn').textContent = win ? '— NEXT NIGHT —' : '— TRY ANOTHER NIGHT —';
+    endingEl.classList.add('on');
+    win ? SFX.right() : SFX.wrong();
+    setTimeout(() => SFX.dawn(), 700);
+  }
+
+  $('next-night-btn').addEventListener('click', () => {
+    endingEl.classList.remove('on');
+    state.night += 1;
+    buildNight();
+  });
+  $('end-restart-btn').addEventListener('click', () => {
+    endingEl.classList.remove('on');
+    state.night = 1;
+    buildNight();
+  });
+
+  // ─────────── CLOCK ───────────
+  let lastTick = performance.now();
+  function tick(now) {
+    requestAnimationFrame(tick);
+    if (!document.body.classList.contains('playing') || state.over) { lastTick = now; return; }
+    if (modal.classList.contains('on')) { lastTick = now; return; } // pause while reading
+    const dt = (now - lastTick) / 1000;
+    lastTick = now;
+    state.timeLeft -= dt;
+    if (state.timeLeft <= 0) {
+      state.timeLeft = 0;
+      state.over = true;
+      // ran out
+      showEnding(false, { id: -1, name: 'No-one' });
+    }
+    const m = Math.floor(state.timeLeft / 60);
+    const s = Math.floor(state.timeLeft - m * 60);
+    clockEl.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+    clockEl.classList.toggle('danger', state.timeLeft < 30);
+    if (Math.abs(state.timeLeft - Math.floor(state.timeLeft)) < dt && state.timeLeft < 11 && state.timeLeft > 0.5) SFX.tick();
+  }
+  requestAnimationFrame(tick);
+
+  // ─────────── START / RESTART ───────────
+  $('start-btn').addEventListener('click', () => {
+    ensureAudio();
+    document.body.classList.add('playing');
+    state.night = 1;
+    buildNight();
+  });
+  $('restart-btn').addEventListener('click', () => {
+    state.night = 1;
+    buildNight();
+  });
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -595,6 +596,45 @@ function noiseBurst(dur, gain, hp) {
   src.connect(f).connect(g).connect(audioCtx.destination);
   src.start(t);
 }
+// A wailing scream — high tone sliding down with breathy noise, slight tremolo.
+// Used when an enemy is killed: a ghostly cry into the night.
+function scream() {
+  if (!audioCtx) return;
+  const t = audioCtx.currentTime;
+  const dur = 0.7 + Math.random() * 0.3;
+  // primary oscillator sweep — sawtooth from ~900Hz down to ~180Hz
+  const o = audioCtx.createOscillator();
+  o.type = 'sawtooth';
+  const startF = 760 + Math.random() * 260;
+  const endF   = 150 + Math.random() * 60;
+  o.frequency.setValueAtTime(startF, t);
+  o.frequency.exponentialRampToValueAtTime(endF, t + dur);
+  // tremolo via a slow LFO into a gain
+  const lfo = audioCtx.createOscillator();
+  lfo.type = 'sine';
+  lfo.frequency.value = 8 + Math.random() * 4;
+  const lfoGain = audioCtx.createGain();
+  lfoGain.gain.value = 0.06;
+  lfo.connect(lfoGain);
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(0.22, t + 0.04);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  lfoGain.connect(g.gain);
+  // breathy highpass noise layer
+  const bufLen = Math.max(1, Math.floor(audioCtx.sampleRate * dur));
+  const buf = audioCtx.createBuffer(1, bufLen, audioCtx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < bufLen; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / bufLen);
+  const ns = audioCtx.createBufferSource(); ns.buffer = buf;
+  const nf = audioCtx.createBiquadFilter(); nf.type = 'highpass'; nf.frequency.value = 900;
+  const ng = audioCtx.createGain(); ng.gain.value = 0.14;
+  ns.connect(nf).connect(ng).connect(audioCtx.destination);
+  o.connect(g).connect(audioCtx.destination);
+  o.start(t); o.stop(t + dur + 0.05);
+  lfo.start(t); lfo.stop(t + dur + 0.05);
+  ns.start(t);
+}
 const SFX = {
   swing:  () => { noiseBurst(0.14, 0.15, 1400); blip(620, 0.08, 'triangle', 0.07); },
   hit:    () => { noiseBurst(0.16, 0.22, 600); blip(180, 0.12, 'square', 0.13); },
@@ -606,6 +646,8 @@ const SFX = {
   death:  () => { blip(200, 0.3, 'sawtooth', 0.16); blip(120, 0.5, 'sine', 0.12); },
   boss:   () => { blip(80, 0.6, 'sawtooth', 0.20); blip(60, 0.8, 'sine', 0.15); },
   ember:  () => { blip(320, 0.16, 'sawtooth', 0.07); },
+  // Ghostly wail for slain enemies — a wavering cry that fades into the dark.
+  scream,
   ending: () => {
     if (!audioCtx) return;
     const notes = [262, 330, 392, 523];
@@ -656,12 +698,12 @@ const state = {
 // Blade progression — each kindled put down stokes the iron a little.
 // Reach, dmg, color, glow all scale.
 const BLADE_LEVELS = [
-  { name: 'A striking-iron at the tip', reach: 56,  dmg: 1, swing: 0.32, w: 8,  glow: 'rgba(255,245,217,0.85)',  hot: 'rgba(255,208,137,0.6)',  core: '#fff5d9' },
-  { name: 'The iron remembers',          reach: 64,  dmg: 1, swing: 0.30, w: 10, glow: 'rgba(255,232,180,0.92)',  hot: 'rgba(255,178,96,0.75)',   core: '#fff8dd' },
-  { name: 'A whetted edge',              reach: 72,  dmg: 2, swing: 0.28, w: 12, glow: 'rgba(255,224,164,0.96)',  hot: 'rgba(255,160,80,0.85)',   core: '#fff5cf' },
-  { name: 'A burning brand',             reach: 82,  dmg: 2, swing: 0.26, w: 14, glow: 'rgba(255,208,137,1.0)',   hot: 'rgba(255,122,46,0.95)',   core: '#ffe8b0' },
-  { name: 'The valley-iron',             reach: 92,  dmg: 3, swing: 0.24, w: 16, glow: 'rgba(255,200,120,1.0)',   hot: 'rgba(255,90,30,1.0)',     core: '#ffdb88' },
-  { name: 'Ashbreaker',                  reach: 110, dmg: 4, swing: 0.22, w: 19, glow: 'rgba(255,245,217,1.0)',   hot: 'rgba(255,60,30,1.0)',     core: '#fff5d9' }
+  { name: 'A striking-iron at the tip', reach: 80,  dmg: 1, swing: 0.32, w: 12, glow: 'rgba(255,245,217,0.95)',  hot: 'rgba(255,208,137,0.7)',  core: '#fff8e0' },
+  { name: 'The iron remembers',          reach: 92,  dmg: 1, swing: 0.30, w: 15, glow: 'rgba(255,232,180,1.0)',   hot: 'rgba(255,178,96,0.85)',   core: '#fffae3' },
+  { name: 'A whetted edge',              reach: 104, dmg: 2, swing: 0.28, w: 18, glow: 'rgba(255,224,164,1.0)',   hot: 'rgba(255,160,80,0.95)',   core: '#fff5cf' },
+  { name: 'A burning brand',             reach: 118, dmg: 2, swing: 0.26, w: 22, glow: 'rgba(255,210,140,1.0)',   hot: 'rgba(255,122,46,1.0)',    core: '#ffe8b0' },
+  { name: 'The valley-iron',             reach: 134, dmg: 3, swing: 0.24, w: 26, glow: 'rgba(255,205,124,1.0)',   hot: 'rgba(255,90,30,1.0)',     core: '#ffdb88' },
+  { name: 'Ashbreaker',                  reach: 160, dmg: 4, swing: 0.22, w: 30, glow: 'rgba(255,245,217,1.0)',   hot: 'rgba(255,60,30,1.0)',     core: '#fff5d9' }
 ];
 const BLADE_XP = [3, 6, 10, 16, 24];
 function currentBlade() { return BLADE_LEVELS[state.blade.level]; }
@@ -1263,6 +1305,10 @@ function hitEnemy(e, dmg, dx, dy) {
 function killEnemy(e) {
   e.dead = true;
   state.killed++;
+
+  // Ghostly wail on death — every slain thing in the valley screams as it goes.
+  // Boss gets its own thunder cue further down so we skip the scream there.
+  if (e.type !== 'stoker') SFX.scream();
 
   // ── blood splash ──
   // wraiths bleed pale blue mist; stoker bleeds gold-orange; everything else red-orange ember-blood
@@ -2214,25 +2260,52 @@ function drawEnemy(e, sx, sy) {
 
   else if (e.type === 'wraith') {
     const sway = Math.sin(e.t * 2.4) * 3;
-    // tall thin body
-    ctx.fillStyle = flash ? '#fff' : '#3a3850';
+    // outer aura — ghostly halo so the wraith reads clearly against the lighter night
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    const aura = ctx.createRadialGradient(sx + sway, sy - 8, 0, sx + sway, sy - 8, 34);
+    aura.addColorStop(0, 'rgba(159,217,255,0.55)');
+    aura.addColorStop(0.5, 'rgba(110,180,230,0.22)');
+    aura.addColorStop(1, 'rgba(110,180,230,0)');
+    ctx.fillStyle = aura;
+    ctx.beginPath();
+    ctx.arc(sx + sway, sy - 8, 34, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    // tall thin body — brighter, semi-transparent so it still feels spectral
+    ctx.save();
+    ctx.globalAlpha = 0.78;
+    ctx.fillStyle = flash ? '#fff' : '#8aa8c8';
     ctx.beginPath();
     ctx.moveTo(sx - 10 + sway, sy + 12);
     ctx.bezierCurveTo(sx - 14 + sway, sy - 8, sx - 8 + sway, sy - 22, sx + sway, sy - 26);
     ctx.bezierCurveTo(sx + 8 + sway, sy - 22, sx + 14 + sway, sy - 8, sx + 10 + sway, sy + 12);
     ctx.closePath();
     ctx.fill();
-    // head smudge
-    ctx.fillStyle = flash ? '#fff' : '#54506a';
+    // inner highlight — pale rim so the silhouette pops
+    ctx.globalAlpha = 0.45;
+    ctx.fillStyle = flash ? '#fff' : '#cfe5ff';
     ctx.beginPath();
-    ctx.arc(sx + sway, sy - 24, 6, 0, Math.PI * 2);
+    ctx.moveTo(sx - 4 + sway, sy + 6);
+    ctx.bezierCurveTo(sx - 7 + sway, sy - 6, sx - 4 + sway, sy - 18, sx + sway, sy - 22);
+    ctx.bezierCurveTo(sx + 4 + sway, sy - 18, sx + 7 + sway, sy - 6, sx + 4 + sway, sy + 6);
+    ctx.closePath();
     ctx.fill();
-    // glowing eyes
-    ctx.fillStyle = flash ? '#fff' : '#9fd9ff';
+    ctx.restore();
+    // head — slightly brighter, more readable
+    ctx.fillStyle = flash ? '#fff' : '#b4c8e0';
     ctx.beginPath();
-    ctx.arc(sx - 2 + sway, sy - 24, 1.2, 0, Math.PI * 2);
-    ctx.arc(sx + 2 + sway, sy - 24, 1.2, 0, Math.PI * 2);
+    ctx.arc(sx + sway, sy - 24, 7, 0, Math.PI * 2);
     ctx.fill();
+    // glowing eyes — bright pinpoints
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = flash ? '#fff' : '#cfeeff';
+    ctx.beginPath();
+    ctx.arc(sx - 2 + sway, sy - 24, 1.8, 0, Math.PI * 2);
+    ctx.arc(sx + 2 + sway, sy - 24, 1.8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
     // hp bar above
     drawHpBar(e, sx, sy - 36, '#9fd9ff');
   }
@@ -2486,36 +2559,53 @@ function drawPlayer() {
   if (p.swing <= 0) {
     const baseX = sxS + (dir === 0 ? 0 : dir * 2);
     const baseY = syS + 6;
-    const bladeLen = 14 + bl.reach * 0.18;
-    const bladeW   = 1.6 + bl.w * 0.18;
+    // Beefier blade — longer reach + wider body so it reads as a real sword at every level
+    const bladeLen = 22 + bl.reach * 0.28;
+    const bladeW   = 2.6 + bl.w * 0.28;
     const angle = dir === 0 ? Math.PI / 2 : (dir === 1 ? 0.35 : Math.PI - 0.35);
     ctx.save();
     ctx.translate(baseX, baseY);
     ctx.rotate(angle);
-    // additive glow around the iron — gets brighter each level
+    // additive glow around the iron — fatter halo so it shines like a heated bar
     ctx.globalCompositeOperation = 'lighter';
-    const g = ctx.createRadialGradient(bladeLen * 0.6, 0, 0, bladeLen * 0.6, 0, bladeLen);
-    g.addColorStop(0, bl.glow);
-    g.addColorStop(1, 'rgba(255,160,80,0)');
+    const g = ctx.createRadialGradient(bladeLen * 0.55, 0, 0, bladeLen * 0.55, 0, bladeLen * 1.05);
+    g.addColorStop(0,   bl.glow);
+    g.addColorStop(0.5, bl.hot);
+    g.addColorStop(1,   'rgba(255,160,80,0)');
     ctx.fillStyle = g;
-    ctx.fillRect(-2, -bladeW * 1.8, bladeLen + 4, bladeW * 3.6);
+    ctx.fillRect(-4, -bladeW * 2.6, bladeLen + 8, bladeW * 5.2);
     ctx.globalCompositeOperation = 'source-over';
-    // blade body
+    // blade body — broader, with bevel highlights
+    ctx.fillStyle = '#2a1a14';
+    ctx.fillRect(0, -bladeW * 0.7, bladeLen, bladeW * 1.4);
     ctx.fillStyle = bl.core;
-    ctx.fillRect(0, -bladeW * 0.5, bladeLen, bladeW);
+    ctx.fillRect(0, -bladeW * 0.55, bladeLen, bladeW * 1.1);
+    // central fuller line — a bright reflective stripe
     ctx.fillStyle = bl.glow;
-    ctx.fillRect(0, -bladeW * 0.2, bladeLen, bladeW * 0.4);
+    ctx.fillRect(0, -bladeW * 0.18, bladeLen, bladeW * 0.36);
+    // top-edge specular streak (shiny highlight)
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.fillRect(bladeLen * 0.1, -bladeW * 0.55, bladeLen * 0.7, Math.max(1, bladeW * 0.14));
     // tip
     ctx.fillStyle = bl.core;
     ctx.beginPath();
-    ctx.moveTo(bladeLen, -bladeW * 0.5);
-    ctx.lineTo(bladeLen + 3, 0);
-    ctx.lineTo(bladeLen, bladeW * 0.5);
+    ctx.moveTo(bladeLen, -bladeW * 0.7);
+    ctx.lineTo(bladeLen + 6, 0);
+    ctx.lineTo(bladeLen, bladeW * 0.7);
     ctx.closePath();
     ctx.fill();
-    // crossguard
+    // bright sparkle at the tip
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.beginPath();
+    ctx.arc(bladeLen + 2, 0, Math.max(2, bladeW * 0.45), 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+    // crossguard — wider so the new blade has a proper hilt
     ctx.fillStyle = '#3a2818';
-    ctx.fillRect(-2, -bladeW * 1.4, 3, bladeW * 2.8);
+    ctx.fillRect(-3, -bladeW * 2.0, 4, bladeW * 4.0);
+    ctx.fillStyle = '#5a3a20';
+    ctx.fillRect(-3, -bladeW * 0.4, 4, bladeW * 0.8);
     ctx.restore();
   }
 }
@@ -2619,21 +2709,23 @@ function drawLighting() {
   const offY = -state.cam.y + vh / 2;
 
   // Subtle ambient flicker so the darkness breathes a little.
-  const ambient = 0.78 + Math.sin(state.flicker * 1.7) * 0.015;
+  // Lighter ambient — softer indigo wash, not pitch-black; easier on the eyes
+  // while still readable as a moody night valley.
+  const ambient = 0.55 + Math.sin(state.flicker * 1.7) * 0.012;
   const flick7 = Math.sin(state.flicker * 7);
   const flick11 = Math.sin(state.flicker * 11 + 0.7);
 
   ctx.save();
-  // base darkness — a touch deeper, with a faint indigo bias
-  ctx.fillStyle = `rgba(12,8,20,${ambient})`;
+  // base darkness — softer, warmer night so unlit areas read without straining
+  ctx.fillStyle = `rgba(28,22,42,${ambient})`;
   ctx.fillRect(0, 0, vw, vh);
   ctx.globalCompositeOperation = 'destination-out';
 
   // player lantern — bigger, with a near-opaque hot core and a long soft falloff
   const playerSX = state.player.x + offX;
   const playerSY = state.player.y + offY;
-  const litR  = 240 + flick7 * 12 + flick11 * 4;
-  const darkR = 90 + flick7 * 4;
+  const litR  = 300 + flick7 * 14 + flick11 * 6;
+  const darkR = 130 + flick7 * 5;
   const pR = state.player.oil > 0 ? litR : darkR;
   const pg = ctx.createRadialGradient(playerSX, playerSY, 6, playerSX, playerSY, pR);
   pg.addColorStop(0,    'rgba(0,0,0,1)');
