@@ -1,0 +1,269 @@
+/* ─────────────────────────────────────────────────────────────
+   Omenly · ads + donate library — styles
+   Drop-in. Inherits page font via "inherit", uses CSS vars
+   from window.OMENLY_CONFIG.theme.
+   ──────────────────────────────────────────────────────────── */
+
+:root {
+  --omenly-accent: #ff5fa2;
+  --omenly-ink: #f4ecf7;
+  --omenly-dim: rgba(244, 236, 247, 0.65);
+  --omenly-panel: rgba(10, 4, 16, 0.92);
+  --omenly-line: rgba(244, 236, 247, 0.18);
+}
+
+/* ── In-page ad slot ───────────────────────────────────────── */
+[data-omenly-ad] {
+  display: block;
+  width: 100%;
+  max-width: 728px;
+  margin: 18px auto;
+  min-height: 90px;
+  background: transparent;
+}
+[data-omenly-ad].omenly-empty { display: none; }
+[data-omenly-ad] .omenly-ad-label {
+  display: block;
+  text-align: center;
+  font-family: 'Helvetica', sans-serif;
+  font-size: 9px;
+  letter-spacing: 3px;
+  opacity: 0.45;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+/* ── Small "Remove ads" CTA chip ──────────────────────────── */
+[data-omenly-cta], .omenly-cta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--omenly-accent);
+  color: var(--omenly-accent);
+  font-family: 'Helvetica', sans-serif;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  border-radius: 2px;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+[data-omenly-cta]:hover, .omenly-cta-chip:hover,
+[data-omenly-cta]:focus-visible, .omenly-cta-chip:focus-visible {
+  background: var(--omenly-accent);
+  color: #0a0410;
+  box-shadow: 0 0 18px var(--omenly-accent);
+  outline: none;
+}
+[data-omenly-cta]::before, .omenly-cta-chip::before {
+  content: '✕';
+  font-size: 11px;
+  line-height: 1;
+  opacity: 0.85;
+}
+
+/* ── "Pass active" badge (replaces the CTA when redeemed) ── */
+[data-omenly-badge].omenly-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: rgba(255, 209, 102, 0.08);
+  border: 1px solid #ffd166;
+  color: #ffd166;
+  font-family: 'Helvetica', sans-serif;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  font-weight: 600;
+  border-radius: 2px;
+  text-shadow: 0 0 6px rgba(255, 209, 102, 0.5);
+}
+[data-omenly-badge].omenly-badge::before {
+  content: '★';
+  font-size: 11px;
+}
+
+/* ── Modal: donate / paste-pass dialog ─────────────────────── */
+.omenly-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(2, 1, 4, 0.78);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: omenly-fade 0.2s ease-out;
+}
+.omenly-modal.on { display: flex; }
+@keyframes omenly-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.omenly-modal__card {
+  width: 100%;
+  max-width: 460px;
+  background: var(--omenly-panel);
+  border: 1px solid var(--omenly-line);
+  border-radius: 4px;
+  padding: 28px 26px 24px;
+  color: var(--omenly-ink);
+  font-family: 'Georgia', 'Times New Roman', serif;
+  position: relative;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 60px rgba(255, 95, 162, 0.15);
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  animation: omenly-pop 0.25s cubic-bezier(.2, .8, .2, 1);
+}
+@keyframes omenly-pop { from { transform: translateY(8px) scale(0.98); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+
+.omenly-modal__close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: transparent;
+  border: 0;
+  color: var(--omenly-dim);
+  font-size: 22px;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  line-height: 1;
+  -webkit-tap-highlight-color: transparent;
+}
+.omenly-modal__close:hover { color: var(--omenly-ink); }
+
+.omenly-modal__crown {
+  font-family: 'Helvetica', sans-serif;
+  font-size: 10px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--omenly-accent);
+  opacity: 0.8;
+  margin-bottom: 10px;
+}
+.omenly-modal h2 {
+  font-style: italic;
+  font-weight: normal;
+  font-size: 26px;
+  line-height: 1.15;
+  margin: 0 0 12px;
+}
+.omenly-modal p { font-size: 15px; line-height: 1.55; opacity: 0.85; margin-bottom: 14px; }
+.omenly-modal p strong { color: var(--omenly-accent); font-weight: normal; font-style: italic; }
+.omenly-modal small { display: block; opacity: 0.55; font-size: 12px; line-height: 1.55; margin-top: 12px; font-family: 'Helvetica', sans-serif; letter-spacing: 1px; }
+
+.omenly-modal__btn {
+  display: block;
+  width: 100%;
+  padding: 14px 18px;
+  margin-top: 12px;
+  background: var(--omenly-accent);
+  color: #0a0410;
+  border: 0;
+  border-radius: 2px;
+  font-family: 'Helvetica', sans-serif;
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  font-weight: 700;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.omenly-modal__btn:hover, .omenly-modal__btn:focus-visible {
+  box-shadow: 0 0 24px var(--omenly-accent);
+  outline: none;
+}
+.omenly-modal__btn:active { transform: scale(0.98); }
+.omenly-modal__btn--ghost {
+  background: transparent;
+  border: 1px solid var(--omenly-line);
+  color: var(--omenly-ink);
+}
+.omenly-modal__btn--ghost:hover, .omenly-modal__btn--ghost:focus-visible {
+  border-color: var(--omenly-ink);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: none;
+}
+
+.omenly-modal__sep {
+  display: flex;
+  align-items: center;
+  margin: 18px 0 6px;
+  font-family: 'Helvetica', sans-serif;
+  font-size: 9px;
+  letter-spacing: 4px;
+  opacity: 0.4;
+  text-transform: uppercase;
+}
+.omenly-modal__sep::before, .omenly-modal__sep::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--omenly-line);
+}
+.omenly-modal__sep::before { margin-right: 10px; }
+.omenly-modal__sep::after { margin-left: 10px; }
+
+.omenly-modal__hint {
+  display: block;
+  text-align: center;
+  margin-top: 14px;
+  font-family: 'Helvetica', sans-serif;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--omenly-dim);
+}
+.omenly-modal__hint a {
+  color: var(--omenly-accent);
+  text-decoration: none;
+  cursor: pointer;
+}
+.omenly-modal__hint a:hover { text-decoration: underline; }
+
+/* Toast for confirmation messages */
+.omenly-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 32px;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(10, 4, 16, 0.95);
+  border: 1px solid #ffd166;
+  color: #ffd166;
+  padding: 12px 18px;
+  font-family: 'Helvetica', sans-serif;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  z-index: 100001;
+  border-radius: 2px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+.omenly-toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+.omenly-toast.err { border-color: #ff4d6d; color: #ff4d6d; }
+
+@media (hover: none) {
+  [data-omenly-cta]:hover, .omenly-cta-chip:hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--omenly-accent);
+    box-shadow: none;
+  }
+}
+
+@media (max-width: 500px) {
+  .omenly-modal__card { padding: 22px 18px 18px; }
+  .omenly-modal h2 { font-size: 21px; }
+  .omenly-modal p { font-size: 14px; }
+}

@@ -99,6 +99,18 @@
       "controls": "WASD + mouse + click + R/G/F/B (desktop) · joystick + FIRE + side buttons (mobile)"
     },
     {
+      "id": "clash",
+      "title": "Clash",
+      "blurb": "A 3D browser fighting game. Seven fighters, each with a unique special — slam, teleport-strike, burn, grapple-slam, plasma beam, freeze, iaido. Solo campaign, ranked ladder, friends room. Kbd / gamepad / touch.",
+      "tags": ["3d", "fighting", "tekken", "versus", "arcade"],
+      "minutes": 15,
+      "accent": "#ffd089",
+      "background": "linear-gradient(135deg, #0a0610, #1a0e22)",
+      "cover": "clash/cover.svg",
+      "href": "clash/",
+      "controls": "WASD + J/K/L/I (desktop) · gamepad · joystick + on-screen buttons (mobile)"
+    },
+    {
       "id": "nocturne",
       "title": "Nocturne",
       "blurb": "A pixel-noir whodunit. One apartment floor. Five neighbours. One killer. Knock, listen, watch what they do through the keyhole. Lock three tells in your notebook and accuse before dawn.",

@@ -173,7 +173,9 @@
   <div class="row"><span class="label" id="weap-label">PISTOL</span> <span id="ammo" class="val">15</span> / <span id="ammo-reserve" class="val">45</span></div>
   <div class="row"><span class="label">ROCKETS</span> <span id="rockets" class="val">3</span></div>
   <div class="row"><span class="label">KILLS</span> <span id="kills" class="val">0</span></div>
+  <div class="row" id="weap-strip" style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap;max-width:300px;"></div>
 </div>
+<div id="slowmo-tint" style="position:fixed;inset:0;pointer-events:none;z-index:7;background:radial-gradient(ellipse at center, rgba(200,80,58,0) 35%, rgba(20,4,2,0.55) 100%);opacity:0;transition:opacity 0.18s;mix-blend-mode:multiply;"></div>
 <div id="wave" class="hidden">NIGHT · WAVE <span id="wave-num">1</span></div>
 
 <div id="title">
@@ -213,7 +215,7 @@
 <div id="controls">
   <div>WASD — MOVE · MOUSE — LOOK</div>
   <div>CLICK — FIRE · R — RELOAD</div>
-  <div>1 — HANDGUN · 2 — ROCKET</div>
+  <div>1-9 — WEAPONS · Q/E — CYCLE</div>
   <div>SHIFT — SPRINT</div>
 </div>
 
@@ -799,10 +801,41 @@
     hp: 100,
     walkPhase: 0,
     aliveAnim: true,
-    weapon: 'pistol',   // 'pistol' | 'rocket'
+    weapon: 'pistol',   // key into WEAPONS
     rockets: 3,
     rocketCool: 0
   };
+
+  // ── WEAPONS REGISTRY ──
+  // dmg/cycle/spread are the per-shot characteristics; mag/reserve drive ammo;
+  // family decides which viewmodel mesh is shown and which fire path runs.
+  // Slow-mo on kill is keyed off the `dramatic` flag (heavy hits, melee, AOE).
+  const WEAPONS = {
+    pistol:  { name: 'M9 PISTOL',  mag: 15, reserve: 90,  cycle: 0.18, dmg: 1, pellets: 1, spread: 0.0, range: 60, headMul: 4, family: 'pistol',  sfx: 'shoot',  dramatic: false },
+    revolver:{ name: 'REVOLVER',   mag: 6,  reserve: 36,  cycle: 0.45, dmg: 3, pellets: 1, spread: 0.0, range: 70, headMul: 5, family: 'pistol',  sfx: 'revolver',dramatic: true },
+    uzi:     { name: 'UZI SMG',    mag: 32, reserve: 192, cycle: 0.08, dmg: 1, pellets: 1, spread: 0.04,range: 45, headMul: 3, family: 'smg',     sfx: 'shoot',  autoFire: true },
+    mp5:     { name: 'MP5',        mag: 30, reserve: 180, cycle: 0.085,dmg: 1, pellets: 1, spread: 0.025,range: 55,headMul: 3, family: 'smg',     sfx: 'shoot',  autoFire: true },
+    ak:      { name: 'AK-47',      mag: 30, reserve: 150, cycle: 0.1,  dmg: 2, pellets: 1, spread: 0.025,range: 90,headMul: 4, family: 'rifle',   sfx: 'rifle',  autoFire: true },
+    m4:      { name: 'M4 CARBINE', mag: 30, reserve: 150, cycle: 0.09, dmg: 2, pellets: 1, spread: 0.018,range: 90,headMul: 4, family: 'rifle',   sfx: 'rifle',  autoFire: true },
+    shotgun: { name: 'SHOTGUN',    mag: 6,  reserve: 30,  cycle: 0.55, dmg: 1, pellets: 8, spread: 0.10, range: 30, headMul: 3, family: 'shotgun', sfx: 'shotgun',dramatic: true },
+    sniper:  { name: 'SNIPER',     mag: 5,  reserve: 25,  cycle: 1.0,  dmg: 8, pellets: 1, spread: 0.0,  range: 200,headMul: 5, family: 'sniper',  sfx: 'sniper', dramatic: true },
+    minigun: { name: 'MINIGUN',    mag: 200,reserve: 400, cycle: 0.04, dmg: 1, pellets: 1, spread: 0.05, range: 70, headMul: 3, family: 'rifle',   sfx: 'shoot',  autoFire: true },
+    rocket:  { name: 'RPG-7',      mag: 1,  reserve: 0,   cycle: 0.9,  dmg: 99,pellets: 1, spread: 0.0,  range: 200,headMul: 1, family: 'rocket',  sfx: 'rocket', dramatic: true, special: 'rocket' },
+    blade:   { name: 'KATANA',     mag: 0,  reserve: 0,   cycle: 0.35, dmg: 9, pellets: 1, spread: 0.0,  range: 2.6,headMul: 2, family: 'blade',   sfx: 'slash',  dramatic: true, melee: true },
+    knife:   { name: 'COMBAT KNIFE',mag: 0, reserve: 0,   cycle: 0.25, dmg: 5, pellets: 1, spread: 0.0,  range: 1.8,headMul: 2, family: 'knife',   sfx: 'slash',  dramatic: true, melee: true },
+    grenade: { name: 'FRAG GRENADE',mag: 1, reserve: 0,   cycle: 1.0,  dmg: 99,pellets: 1, spread: 0.0,  range: 25, headMul: 1, family: 'grenade', sfx: 'rocket', dramatic: true, special: 'grenade' }
+  };
+  // Ammo state — one record per weapon (so swapping doesn't reset mags).
+  const ammoState = {};
+  for (const k in WEAPONS) ammoState[k] = { ammo: WEAPONS[k].mag, reserve: WEAPONS[k].reserve, unlocked: false };
+  ammoState.pistol.unlocked = true;
+  ammoState.knife.unlocked  = true;
+  // Hotbar keys 1–9 (10–12 cycled via Q/E)
+  const HOTBAR = ['pistol','knife','blade','shotgun','uzi','ak','sniper','rocket','grenade','m4','mp5','minigun','revolver'];
+  // Grenades on hand — counted separately so we don't run out instantly.
+  const grenadeStock = { count: 2 };
+  // Slo-mo tint element
+  const slowmoTint = document.getElementById('slowmo-tint');
 
   const hero = new THREE.Group();
   scene.add(hero);
@@ -936,13 +969,169 @@
   buildHero();
   hero.position.copy(player.pos);
 
+  // Build extra weapon viewmodels lazily, parented to hero.armR.
+  function buildExtraViewmodels() {
+    if (hero._extraBuilt) return;
+    hero._extraBuilt = true;
+    const armR = hero.armR;
+    const black = new THREE.MeshStandardMaterial({ color: 0x141414, roughness: 0.4, metalness: 0.7 });
+    const dark  = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, roughness: 0.5, metalness: 0.5 });
+    const wood  = new THREE.MeshStandardMaterial({ color: 0x5a3818, roughness: 0.8 });
+    const steel = new THREE.MeshStandardMaterial({ color: 0xc0c0c8, roughness: 0.25, metalness: 0.9 });
+    hero.viewmodels = {};
+    // helper: positions all viewmodels in the same right-hand slot
+    function placeR(g) { g.position.set(0, -0.7, 0.2); g.visible = false; armR.add(g); return g; }
+
+    // shotgun — pump style
+    const sg = new THREE.Group();
+    sg.add(new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.85), dark));
+    const sgBarrel = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.55, 8), black);
+    sgBarrel.rotation.x = Math.PI / 2; sgBarrel.position.z = 0.45; sg.add(sgBarrel);
+    const sgPump = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.08, 0.16), wood);
+    sgPump.position.set(0, -0.08, 0.25); sg.add(sgPump);
+    const sgStock = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.18, 0.3), wood);
+    sgStock.position.set(0, -0.05, -0.4); sg.add(sgStock);
+    hero.viewmodels.shotgun = placeR(sg);
+
+    // uzi
+    const uzi = new THREE.Group();
+    uzi.add(new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.12, 0.55), black));
+    const uziBarrel = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.18, 6), black);
+    uziBarrel.rotation.x = Math.PI / 2; uziBarrel.position.z = 0.36; uzi.add(uziBarrel);
+    const uziMag = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.28, 0.06), dark);
+    uziMag.position.set(0, -0.18, 0.05); uzi.add(uziMag);
+    const uziGrip = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.16, 0.1), dark);
+    uziGrip.position.set(0, -0.15, -0.15); uzi.add(uziGrip);
+    hero.viewmodels.uzi = placeR(uzi);
+
+    // mp5 — heavier smg
+    const mp5 = new THREE.Group();
+    mp5.add(new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.13, 0.7), black));
+    const mp5b = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.22, 6), black);
+    mp5b.rotation.x = Math.PI / 2; mp5b.position.z = 0.45; mp5.add(mp5b);
+    const mp5m = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.3, 0.08), dark);
+    mp5m.position.set(0, -0.2, 0.0); mp5.add(mp5m);
+    const mp5s = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.4), dark);
+    mp5s.position.set(0, 0.0, -0.35); mp5.add(mp5s);
+    hero.viewmodels.mp5 = placeR(mp5);
+
+    // ak — wooden furniture
+    const ak = new THREE.Group();
+    ak.add(new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.15, 0.9), wood));
+    const akBarrel = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.5, 8), black);
+    akBarrel.rotation.x = Math.PI / 2; akBarrel.position.z = 0.5; ak.add(akBarrel);
+    const akMag = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.32, 0.08), dark);
+    akMag.position.set(0, -0.22, 0.05); ak.add(akMag);
+    const akStock = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.18, 0.4), wood);
+    akStock.position.set(0, -0.05, -0.45); ak.add(akStock);
+    hero.viewmodels.ak = placeR(ak);
+
+    // m4 — tactical
+    const m4 = new THREE.Group();
+    m4.add(new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.14, 0.8), dark));
+    const m4Barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.5, 8), black);
+    m4Barrel.rotation.x = Math.PI / 2; m4Barrel.position.z = 0.5; m4.add(m4Barrel);
+    const m4Mag = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.28, 0.07), black);
+    m4Mag.position.set(0, -0.2, 0.0); m4.add(m4Mag);
+    const m4Sight = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.08, 0.12), black);
+    m4Sight.position.set(0, 0.1, 0.0); m4.add(m4Sight);
+    hero.viewmodels.m4 = placeR(m4);
+
+    // sniper — long barrel + scope
+    const sn = new THREE.Group();
+    sn.add(new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.14, 1.0), dark));
+    const snBarrel = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.7, 8), black);
+    snBarrel.rotation.x = Math.PI / 2; snBarrel.position.z = 0.65; sn.add(snBarrel);
+    const scope = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.22, 8), black);
+    scope.rotation.x = Math.PI / 2; scope.position.set(0, 0.1, 0.05); sn.add(scope);
+    hero.viewmodels.sniper = placeR(sn);
+
+    // minigun — multi barrel
+    const mg = new THREE.Group();
+    const mgBody = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.5, 8), dark);
+    mgBody.rotation.x = Math.PI / 2; mgBody.position.z = 0.1; mg.add(mgBody);
+    for (let i = 0; i < 6; i++) {
+      const ang = (i / 6) * Math.PI * 2;
+      const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.6, 6), black);
+      barrel.rotation.x = Math.PI / 2;
+      barrel.position.set(Math.cos(ang) * 0.1, Math.sin(ang) * 0.1, 0.5);
+      mg.add(barrel);
+    }
+    hero.viewmodels.minigun = placeR(mg);
+    hero.viewmodels.minigun.barrels = mg;
+
+    // revolver — long barrel pistol
+    const rv = new THREE.Group();
+    rv.add(new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.16, 0.35), black));
+    const rvB = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.32, 8), black);
+    rvB.rotation.x = Math.PI / 2; rvB.position.z = 0.3; rv.add(rvB);
+    const cylinder = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.1, 8), steel);
+    cylinder.rotation.x = Math.PI / 2; cylinder.position.set(0, 0, 0.0); rv.add(cylinder);
+    const rvG = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.2, 0.1), wood);
+    rvG.position.set(0, -0.17, -0.1); rv.add(rvG);
+    hero.viewmodels.revolver = placeR(rv);
+
+    // blade — katana
+    const bl = new THREE.Group();
+    const blade = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 1.1), steel);
+    blade.position.z = 0.55; bl.add(blade);
+    const guard = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.04, 0.04), new THREE.MeshStandardMaterial({ color: 0xc89040, metalness: 0.7, roughness: 0.4 }));
+    guard.position.z = 0.05; bl.add(guard);
+    const handle = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 0.25), wood);
+    handle.position.z = -0.1; bl.add(handle);
+    hero.viewmodels.blade = placeR(bl);
+
+    // knife — short blade
+    const kn = new THREE.Group();
+    const knBlade = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.025, 0.35), steel);
+    knBlade.position.z = 0.2; kn.add(knBlade);
+    const knHandle = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 0.14), wood);
+    knHandle.position.z = -0.02; kn.add(knHandle);
+    hero.viewmodels.knife = placeR(kn);
+
+    // grenade — pinneable orb in hand
+    const gn = new THREE.Group();
+    const gnBody = new THREE.Mesh(new THREE.SphereGeometry(0.12, 10, 8), new THREE.MeshStandardMaterial({ color: 0x2a3018, roughness: 0.7 }));
+    gn.add(gnBody);
+    const gnTop = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.06, 6), dark);
+    gnTop.position.y = 0.13; gn.add(gnTop);
+    const gnRing = new THREE.Mesh(new THREE.TorusGeometry(0.04, 0.008, 4, 8), steel);
+    gnRing.position.y = 0.18; gn.add(gnRing);
+    hero.viewmodels.grenade = placeR(gn);
+  }
+
   function setWeapon(w) {
+    if (!WEAPONS[w]) return;
+    if (!ammoState[w].unlocked) return;
+    buildExtraViewmodels();
     player.weapon = w;
-    if (hero.gun) hero.gun.visible = (w === 'pistol');
+    // hide all viewmodels
+    if (hero.gun)    hero.gun.visible    = (w === 'pistol');
     if (hero.rocket) hero.rocket.visible = (w === 'rocket');
+    if (hero.viewmodels) for (const k in hero.viewmodels) hero.viewmodels[k].visible = (k === w);
     const lbl = document.getElementById('weap-label');
-    if (lbl) lbl.textContent = w === 'pistol' ? 'PISTOL' : 'ROCKET';
+    if (lbl) lbl.textContent = WEAPONS[w].name;
     updateHUD();
+    refreshWeapStrip();
+  }
+  function unlockWeapon(w) {
+    if (!WEAPONS[w] || ammoState[w].unlocked) return;
+    ammoState[w].unlocked = true;
+    refreshWeapStrip();
+  }
+  function refreshWeapStrip() {
+    const strip = document.getElementById('weap-strip');
+    if (!strip) return;
+    strip.innerHTML = '';
+    HOTBAR.forEach((k, i) => {
+      if (!ammoState[k] || !ammoState[k].unlocked) return;
+      const el = document.createElement('span');
+      el.style.cssText = 'padding:2px 5px;border:1px solid rgba(200,80,58,0.45);font-size:9px;letter-spacing:1px;opacity:'
+        + (k === player.weapon ? '1' : '0.5') + ';color:#ffb070;background:'
+        + (k === player.weapon ? 'rgba(200,80,58,0.18)' : 'transparent');
+      el.textContent = (i < 9 ? (i + 1) + ' ' : '') + WEAPONS[k].name;
+      strip.appendChild(el);
+    });
   }
 
   // ── zombies ──
@@ -956,6 +1145,7 @@
     const torso = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.85, 0.38), cloth);
     torso.position.y = 1.25;
     if (PERF.shadows) torso.castShadow = true;
+    torso.userData.bodyPart = 'torso';
     z0.add(torso);
     // blood splotch
     const bloodSplotch = new THREE.Mesh(new THREE.PlaneGeometry(0.4, 0.5), blood);
@@ -963,11 +1153,13 @@
     z0.add(bloodSplotch);
     const hips = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.28, 0.36), cloth2);
     hips.position.y = 0.72;
+    hips.userData.bodyPart = 'hips';
     z0.add(hips);
     const head = new THREE.Mesh(new THREE.SphereGeometry(0.26, 10, 8), skin);
     head.position.y = 1.92;
     if (PERF.shadows) head.castShadow = true;
     head.userData.isHead = true;
+    head.userData.bodyPart = 'head';
     z0.add(head);
     // eyes
     const eyeMat = new THREE.MeshBasicMaterial({ color: 0xff2a3a });
@@ -981,14 +1173,14 @@
     const legL = new THREE.Group(); legL.position.set(-0.15, 0.6, 0); z0.add(legL); z0.legL = legL;
     const legR = new THREE.Group(); legR.position.set( 0.15, 0.6, 0); z0.add(legR); z0.legR = legR;
     const legGeo = new THREE.BoxGeometry(0.2, 0.68, 0.2);
-    const legLM = new THREE.Mesh(legGeo, cloth2); legLM.position.y = -0.34; if (PERF.shadows) legLM.castShadow = true; legL.add(legLM);
-    const legRM = new THREE.Mesh(legGeo, cloth2); legRM.position.y = -0.34; if (PERF.shadows) legRM.castShadow = true; legR.add(legRM);
+    const legLM = new THREE.Mesh(legGeo, cloth2); legLM.position.y = -0.34; if (PERF.shadows) legLM.castShadow = true; legLM.userData.bodyPart = 'legL'; legL.add(legLM);
+    const legRM = new THREE.Mesh(legGeo, cloth2); legRM.position.y = -0.34; if (PERF.shadows) legRM.castShadow = true; legRM.userData.bodyPart = 'legR'; legR.add(legRM);
     // arms reaching forward
     const armL = new THREE.Group(); armL.position.set(-0.4, 1.6, 0); z0.add(armL); z0.armL = armL;
     const armR = new THREE.Group(); armR.position.set( 0.4, 1.6, 0); z0.add(armR); z0.armR = armR;
     const armGeo = new THREE.BoxGeometry(0.16, 0.65, 0.16);
-    const armLM = new THREE.Mesh(armGeo, cloth); armLM.position.y = -0.32; if (PERF.shadows) armLM.castShadow = true; armL.add(armLM);
-    const armRM = new THREE.Mesh(armGeo, cloth); armRM.position.y = -0.32; if (PERF.shadows) armRM.castShadow = true; armR.add(armRM);
+    const armLM = new THREE.Mesh(armGeo, cloth); armLM.position.y = -0.32; if (PERF.shadows) armLM.castShadow = true; armLM.userData.bodyPart = 'armL'; armL.add(armLM);
+    const armRM = new THREE.Mesh(armGeo, cloth); armRM.position.y = -0.32; if (PERF.shadows) armRM.castShadow = true; armRM.userData.bodyPart = 'armR'; armR.add(armRM);
     armL.rotation.x = -1.2 + Math.random() * 0.3;
     armR.rotation.x = -1.1 + Math.random() * 0.3;
     armL.rotation.z = 0.15;
@@ -1119,7 +1311,13 @@
       tone(660, 0.15, 'sine', 0.15);
       setTimeout(() => tone(880, 0.15, 'sine', 0.15), 130);
       setTimeout(() => tone(1100, 0.3, 'sine', 0.15), 260);
-    }
+    },
+    rifle:    () => { tone(220, 0.05, 'square', 0.22); tone(90, 0.1, 'sawtooth', 0.14); noise(0.06, 0.18, 1200); },
+    shotgun:  () => { noise(0.12, 0.4, 200); tone(70, 0.18, 'sawtooth', 0.28); tone(180, 0.07, 'square', 0.18); },
+    sniper:   () => { tone(420, 0.07, 'square', 0.3); noise(0.18, 0.32, 600); tone(60, 0.4, 'sawtooth', 0.22); },
+    revolver: () => { tone(160, 0.08, 'square', 0.28); noise(0.1, 0.25, 800); tone(70, 0.18, 'sawtooth', 0.2); },
+    slash:    () => { noise(0.06, 0.18, 2200); tone(1400, 0.04, 'sine', 0.08); },
+    powerup:  () => { tone(440, 0.06, 'sine', 0.15); setTimeout(() => tone(660, 0.08, 'sine', 0.15), 60); setTimeout(() => tone(880, 0.1, 'sine', 0.15), 130); }
   };
 
   // ── HERO CALLOUTS (Leon-style one-liners) ──
@@ -1179,14 +1377,27 @@
 
   function updateHUD() {
     hpFill.style.width = Math.max(0, player.hp) + '%';
-    ammoEl.textContent = ammo;
-    ammoReserveEl.textContent = ammoReserve;
+    const W = WEAPONS[player.weapon] || WEAPONS.pistol;
+    if (W.melee) {
+      ammoEl.textContent = '∞';
+      ammoReserveEl.textContent = '∞';
+    } else if (W.special === 'grenade') {
+      ammoEl.textContent = grenadeStock.count;
+      ammoReserveEl.textContent = '—';
+    } else if (W.special === 'rocket') {
+      ammoEl.textContent = player.rockets;
+      ammoReserveEl.textContent = '—';
+    } else {
+      const a = ammoState[player.weapon];
+      ammoEl.textContent = a ? a.ammo : ammo;
+      ammoReserveEl.textContent = a ? a.reserve : ammoReserve;
+    }
     killsEl.textContent = kills;
     waveNum.textContent = wave;
     const rEl = document.getElementById('rockets');
     if (rEl) rEl.textContent = player.rockets;
     const wlbl = document.getElementById('weap-label');
-    if (wlbl) wlbl.textContent = player.weapon === 'rocket' ? 'ROCKET' : 'PISTOL';
+    if (wlbl) wlbl.textContent = W.name;
   }
 
   function startWave(n) {
@@ -1381,6 +1592,14 @@
     rockets.length = 0;
     for (const c of limbChunks) scene.remove(c.mesh);
     limbChunks.length = 0;
+    for (const p of pickups) scene.remove(p.mesh);
+    pickups.length = 0;
+    // restore zombie weapon ammo state to defaults
+    for (const k in WEAPONS) {
+      ammoState[k].ammo = WEAPONS[k].mag;
+      ammoState[k].reserve = WEAPONS[k].reserve;
+    }
+    grenadeStock.count = 2;
     for (const k in keys) keys[k] = false;
     // reset extraction cinematic state from a previous run
     if (extraction.chopper) scene.remove(extraction.chopper);
@@ -1580,6 +1799,21 @@
     }
     rotor.position.y = 1.0;
     g.add(rotor);
+    // rotor-disc blur — a translucent disc fades in once the rotor is past
+    // visible spin; the eye reads it as a real spinning blade
+    const discMat = new THREE.MeshBasicMaterial({ color: 0x202020, transparent: true, opacity: 0.18, side: THREE.DoubleSide });
+    const disc = new THREE.Mesh(new THREE.CircleGeometry(2.7, 24), discMat);
+    disc.rotation.x = -Math.PI / 2;
+    disc.position.y = 1.0;
+    g.add(disc);
+    g.rotorDisc = disc;
+    // belly searchlight cone — sweeps as the chopper holds
+    const coneMat = new THREE.MeshBasicMaterial({ color: 0xffd089, transparent: true, opacity: 0.22, fog: false, side: THREE.DoubleSide, depthWrite: false });
+    const cone = new THREE.Mesh(new THREE.ConeGeometry(2.4, 12, 18, 1, true), coneMat);
+    cone.position.y = -6.6;
+    cone.rotation.x = Math.PI;
+    g.add(cone);
+    g.searchCone = cone;
     // tail rotor
     const tailRotor = new THREE.Group();
     const tHub = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.08, 6), dark);
@@ -1672,6 +1906,15 @@
     if (extraction.rotor) extraction.rotor.rotation.y += dt * 38;
     if (extraction.tailRotor) extraction.tailRotor.rotation.x += dt * 50;
     if (!ch) return;
+    // searchlight sweep
+    if (ch.searchCone) {
+      ch.searchCone.rotation.y = Math.sin(extraction.t * 0.9) * 0.5;
+    }
+    // rotor wash kicks up dust + small camera shake when low
+    if (ch.position.y < 28) {
+      shakeCamera(0.18 * (1 - ch.position.y / 28), 0.15);
+      if (Math.random() < 0.4) spawnDustPuff(goal.position.x, goal.position.z);
+    }
     // anchor over the helipad
     const padX = goal.position.x, padZ = goal.position.z;
 
@@ -1870,6 +2113,38 @@
       if (d.userData.life <= 0) { scene.remove(d); debris.splice(i, 1); }
     }
   }
+  // dust puffs from rotor wash — short-lived translucent spheres on the pad
+  const dustPuffs = [];
+  const dustGeo = new THREE.SphereGeometry(0.4, 6, 4);
+  function spawnDustPuff(cx, cz) {
+    if (dustPuffs.length > 30) return;
+    const mat = new THREE.MeshBasicMaterial({ color: 0xc8a890, transparent: true, opacity: 0.55, depthWrite: false });
+    const m = new THREE.Mesh(dustGeo, mat);
+    const ang = Math.random() * Math.PI * 2;
+    const r = Math.random() * 4;
+    m.position.set(cx + Math.cos(ang) * r, 0.2, cz + Math.sin(ang) * r);
+    scene.add(m);
+    dustPuffs.push({
+      mesh: m, mat,
+      vx: Math.cos(ang) * (1 + Math.random() * 2),
+      vy: 0.4 + Math.random() * 0.6,
+      vz: Math.sin(ang) * (1 + Math.random() * 2),
+      life: 1.2 + Math.random() * 0.6
+    });
+  }
+  function tickDust(dt) {
+    for (let i = dustPuffs.length - 1; i >= 0; i--) {
+      const d = dustPuffs[i];
+      d.life -= dt;
+      d.mesh.position.x += d.vx * dt;
+      d.mesh.position.y += d.vy * dt;
+      d.mesh.position.z += d.vz * dt;
+      d.mesh.scale.setScalar(1 + (1.5 - d.life) * 1.2);
+      d.mat.opacity = Math.max(0, d.life / 1.5 * 0.55);
+      if (d.life <= 0) { scene.remove(d.mesh); d.mat.dispose(); dustPuffs.splice(i, 1); }
+    }
+  }
+
   function flashBangScreen() {
     const v = damageVignette.style;
     const old = v.background;
@@ -1886,65 +2161,123 @@
   function startSloMo(ms = 500, scale = 0.35) {
     sloMoT = ms / 1000;
     timeScale = scale;
+    if (slowmoTint) slowmoTint.style.opacity = '1';
   }
   function tickSloMo(dt) {
     if (sloMoT > 0) {
       sloMoT -= dt;
-      if (sloMoT <= 0) { timeScale = 1; sloMoT = 0; }
+      if (sloMoT <= 0) {
+        timeScale = 1; sloMoT = 0;
+        if (slowmoTint) slowmoTint.style.opacity = '0';
+      }
     }
+  }
+
+  // ── camera shake (used by explosions, heli rotor wash, melee hits)
+  let shakeAmp = 0, shakeT = 0;
+  function shakeCamera(amp = 0.4, time = 0.25) {
+    shakeAmp = Math.max(shakeAmp, amp);
+    shakeT = Math.max(shakeT, time);
+  }
+  function applyShake() {
+    if (shakeT <= 0) return;
+    const a = shakeAmp * (shakeT > 0 ? shakeT / 0.3 : 0);
+    camera.position.x += (Math.random() - 0.5) * a * 0.6;
+    camera.position.y += (Math.random() - 0.5) * a * 0.5;
   }
 
   function fire() {
     if (!alive || reloading) return;
-    if (player.weapon === 'rocket') return fireRocket();
+    const wkey = player.weapon;
+    const W = WEAPONS[wkey] || WEAPONS.pistol;
+    if (W.special === 'rocket')  return fireRocket();
+    if (W.special === 'grenade') return throwGrenade();
+    if (W.melee)                 return meleeSwing(W);
     if (fireCool > 0) return;
-    if (ammo <= 0) { SFX.empty(); reload(); return; }
-    ammo--;
-    fireCool = 0.18;
+    const a = ammoState[wkey];
+    if (a.ammo <= 0) { SFX.empty(); reload(); return; }
+    a.ammo--;
+    if (wkey === 'pistol') ammo = a.ammo; // legacy mirror for HUD path below
+    fireCool = W.cycle;
     muzzleFlashTimer = 0.06;
-    SFX.shoot();
+    const sfxName = W.sfx || 'shoot';
+    if (SFX[sfxName]) SFX[sfxName](); else SFX.shoot();
+    // recoil camera shake (modest)
+    shakeCamera(W.dramatic ? 0.5 : 0.18, 0.18);
     // raycast: from camera forward
     const origin = new THREE.Vector3();
     camera.getWorldPosition(origin);
     const dir = new THREE.Vector3();
     camera.getWorldDirection(dir);
-    // Pre-filter: only consider zombies within a forward cone (~30° half-angle,
-    // 40m range). On low-end devices this drops the per-shot raycast cost from
-    // O(zombies × meshes per zombie) to a handful of candidates.
+    // For shotgun, fire multiple pellets with spread.
+    if (W.pellets > 1) {
+      const muzzleStart = new THREE.Vector3();
+      hero.gun.getWorldPosition(muzzleStart);
+      for (let i = 0; i < W.pellets; i++) {
+        const d = dir.clone();
+        d.x += (Math.random() - 0.5) * W.spread;
+        d.y += (Math.random() - 0.5) * W.spread;
+        d.z += (Math.random() - 0.5) * W.spread;
+        d.normalize();
+        rayHitOnce(origin, d, W, muzzleStart);
+      }
+      updateHUD();
+      return;
+    }
+    // single bullet with optional spread
+    if (W.spread > 0) {
+      dir.x += (Math.random() - 0.5) * W.spread;
+      dir.y += (Math.random() - 0.5) * W.spread;
+      dir.z += (Math.random() - 0.5) * W.spread;
+      dir.normalize();
+    }
+    const muzzleStart = new THREE.Vector3();
+    hero.gun.getWorldPosition(muzzleStart);
+    rayHitOnce(origin, dir, W, muzzleStart);
+    updateHUD();
+  }
+
+  // Single bullet/pellet trace + hit resolution. Pulled out so shotguns can
+  // call it per-pellet without duplicating the cone-cull and damage flow.
+  function rayHitOnce(origin, dir, W, muzzleStart) {
     const targets = [];
     for (const z of zombies) {
       if (z.userData.dead) continue;
       const dx = z.position.x - origin.x;
       const dz = z.position.z - origin.z;
       const dist = Math.hypot(dx, dz);
-      if (dist > 40) continue;
-      // dot with forward direction (xz plane); cos(30°) ≈ 0.5 — generous so head hits at angle still register
+      if (dist > W.range + 2) continue;
       if (dist > 1.5) {
         const fwdDot = (dx * dir.x + dz * dir.z) / dist;
         if (fwdDot < 0.5) continue;
       }
       z.traverse(o => {
-        if (o.isMesh) {
+        if (o.isMesh && o.visible) {
           o.userData._zombie = z;
           targets.push(o);
         }
       });
     }
-    const raycaster = new THREE.Raycaster(origin, dir, 0.5, 80);
+    const raycaster = new THREE.Raycaster(origin, dir, 0.5, Math.max(40, W.range));
     const hits = raycaster.intersectObjects(targets, false);
-    let muzzleEnd = origin.clone().add(dir.clone().multiplyScalar(60));
+    let muzzleEnd = origin.clone().add(dir.clone().multiplyScalar(W.range));
     if (hits.length > 0) {
       const hit = hits[0];
       muzzleEnd = hit.point;
       const z = hit.object.userData._zombie;
-      const headShot = !!hit.object.userData.isHead;
-      const dmg = headShot ? 4 : 1;
+      const part = hit.object.userData.bodyPart || (hit.object.userData.isHead ? 'head' : 'torso');
+      const headShot = part === 'head';
+      const dmg = W.dmg * (headShot ? W.headMul : 1);
       z.userData.hp -= dmg;
       z.userData.hurtFlash = 0.1;
-      // blood splatter at hit point
-      spawnBlood(hit.point, dir, headShot ? 18 : 8);
-      // a fragment of the zombie flies along the bullet vector
-      spawnLimbChunk(hit.point, dir, headShot ? 'head' : (Math.random() < 0.35 ? 'arm' : 'chunk'));
+      // Detach the hit limb visually — flies away on the bullet vector. Each
+      // body-part mesh has userData.bodyPart so we can hide the original and
+      // spawn a matching chunk that ragdolls into the world.
+      const detached = detachBodyPart(z, hit.object, dir);
+      // blood splatter — heavier for headshots and dramatic weapons
+      const bloodMul = W.dramatic ? 1.6 : 1.0;
+      spawnBlood(hit.point, dir, Math.floor((headShot ? 22 : 10) * bloodMul));
+      if (!detached) spawnLimbChunk(hit.point, dir, headShot ? 'head' : (Math.random() < 0.35 ? 'arm' : 'chunk'));
       if (headShot) SFX.headshot(); else SFX.hit();
       if (z.userData.hp <= 0 && !z.userData.dead) {
         z.userData.dead = true;
@@ -1952,21 +2285,246 @@
         kills++;
         killsEl.textContent = kills;
         SFX.death();
-        spawnBlood(hit.point, dir, 28);
+        spawnBlood(hit.point, dir, 30);
         spawnBloodPool(z.position.x, z.position.z);
-        // Close kills splatter the camera lens
         const distToCam = camera.position.distanceTo(z.position);
         if (distToCam < 8) showLensSplatter();
-        if (headShot) { sayCallout('headshot'); startSloMo(450, 0.35); }
+        // Slow-mo trigger: any dramatic kill OR every Nth streak OR headshot
+        if (headShot) { sayCallout('headshot'); startSloMo(500, 0.32); }
+        else if (W.dramatic) { startSloMo(420, 0.36); }
         else if (kills > 0 && kills % 3 === 0) { sayCallout('streak'); startSloMo(420, 0.4); }
-        if (Math.random() < 0.45) ammoReserve += 6;
+        if (Math.random() < 0.5) {
+          // Drop: ammo for reserve or a new weapon unlock
+          ammoReserve += 6;
+          maybeDropWeapon(z.position.x, z.position.z);
+        }
       }
     }
-    // tracer
-    const muzzleStart = new THREE.Vector3();
-    hero.gun.getWorldPosition(muzzleStart);
     fireTracer(muzzleStart, muzzleEnd);
+  }
+
+  // ── DETACH BODY PART ON HIT ──
+  // The zombie mesh that took the bullet is hidden, and a free-floating clone is
+  // spawned at the same world transform with an outward velocity so it visually
+  // flies off in chunks instead of just registering damage.
+  function detachBodyPart(z, mesh, dir) {
+    if (!mesh || !mesh.visible) return false;
+    // Don't strip the torso or hips — those would leave a floating head/limb.
+    const part = mesh.userData.bodyPart;
+    if (!part || part === 'torso' || part === 'hips') return false;
+    mesh.visible = false;
+    const wp = new THREE.Vector3();
+    const wq = new THREE.Quaternion();
+    mesh.getWorldPosition(wp);
+    mesh.getWorldQuaternion(wq);
+    let geo;
+    if (part === 'head') geo = limbHeadGeo;
+    else if (part === 'armL' || part === 'armR') geo = limbArmGeo;
+    else if (part === 'legL' || part === 'legR') geo = limbArmGeo;
+    else geo = limbBoxGeo;
+    const m = new THREE.Mesh(geo, part === 'head' ? limbSkinMat : limbClothMat);
+    m.position.copy(wp);
+    m.quaternion.copy(wq);
+    if (PERF.shadows) m.castShadow = true;
+    scene.add(m);
+    if (limbChunks.length >= MAX_LIMB_CHUNKS) {
+      const o = limbChunks.shift();
+      scene.remove(o.mesh);
+    }
+    const power = part === 'head' ? 11 : 7;
+    limbChunks.push({
+      mesh: m,
+      vx: dir.x * power + (Math.random() - 0.5) * 3,
+      vy: 5 + Math.random() * 4,
+      vz: dir.z * power + (Math.random() - 0.5) * 3,
+      spinX: (Math.random() - 0.5) * 20,
+      spinZ: (Math.random() - 0.5) * 20,
+      life: 3.5,
+      settled: false
+    });
+    // Spew extra blood at the wound for a beat
+    spawnBlood(wp, dir, 14);
+    return true;
+  }
+
+  // ── MELEE SWING (blade / knife) ──
+  function meleeSwing(W) {
+    if (fireCool > 0) return;
+    fireCool = W.cycle;
+    SFX[W.sfx]?.() || SFX.slash();
+    // animate the right arm sweep
+    const armR = hero.armR;
+    armR.userData._swing = 0;
+    armR.userData._swingDur = 0.28;
+    // hit any zombie within range in front of the player
+    const origin = new THREE.Vector3();
+    camera.getWorldPosition(origin);
+    const dir = new THREE.Vector3();
+    camera.getWorldDirection(dir);
+    let hitOne = false;
+    for (const z of zombies) {
+      if (z.userData.dead) continue;
+      const dx = z.position.x - player.pos.x;
+      const dz = z.position.z - player.pos.z;
+      const dist = Math.hypot(dx, dz);
+      if (dist > W.range) continue;
+      const fwdDot = (dx * Math.sin(player.yaw) * -1 + dz * Math.cos(player.yaw) * -1) / dist;
+      if (fwdDot < 0.6) continue;
+      hitOne = true;
+      const hitPoint = new THREE.Vector3(z.position.x, 1.4, z.position.z);
+      // Pick the closest body mesh to slice off — prefer head when very close.
+      const bodyParts = [];
+      z.traverse(o => { if (o.isMesh && o.visible && o.userData.bodyPart) bodyParts.push(o); });
+      if (bodyParts.length) {
+        const target = bodyParts[(Math.random() * bodyParts.length) | 0];
+        detachBodyPart(z, target, dir);
+      }
+      z.userData.hp -= W.dmg;
+      z.userData.hurtFlash = 0.15;
+      spawnBlood(hitPoint, dir, 22);
+      if (z.userData.hp <= 0 && !z.userData.dead) {
+        z.userData.dead = true;
+        z.userData.deathTimer = 0;
+        kills++;
+        killsEl.textContent = kills;
+        SFX.death();
+        spawnBloodPool(z.position.x, z.position.z);
+        showLensSplatter();
+        sayCallout('headshot');
+        startSloMo(550, 0.28);
+      }
+    }
+    if (hitOne) shakeCamera(0.35, 0.18);
     updateHUD();
+  }
+
+  // ── GRENADE THROW ──
+  function throwGrenade() {
+    if (fireCool > 0) return;
+    if (grenadeStock.count <= 0) { SFX.empty(); return; }
+    grenadeStock.count--;
+    fireCool = 0.6;
+    SFX.rocket();
+    const origin = new THREE.Vector3();
+    if (hero.viewmodels && hero.viewmodels.grenade) {
+      hero.viewmodels.grenade.getWorldPosition(origin);
+    } else {
+      hero.gun.getWorldPosition(origin);
+    }
+    const dir = new THREE.Vector3();
+    camera.getWorldDirection(dir);
+    // ad-hoc projectile that triggers a small radius explosion on impact
+    const body = new THREE.Mesh(
+      new THREE.SphereGeometry(0.12, 8, 6),
+      new THREE.MeshStandardMaterial({ color: 0x2a3018, roughness: 0.7 })
+    );
+    body.position.copy(origin);
+    scene.add(body);
+    const vx = dir.x * 18, vy = dir.y * 18 + 4, vz = dir.z * 18;
+    const start = performance.now();
+    function tickG() {
+      const t = (performance.now() - start) / 1000;
+      if (t > 2.0 || body.position.y <= 0.15) {
+        // detonate
+        const pos = body.position.clone();
+        scene.remove(body);
+        // reuse rocket explosion radius logic but smaller
+        const ball = new THREE.Mesh(
+          new THREE.SphereGeometry(1.8, 12, 8),
+          new THREE.MeshBasicMaterial({ color: 0xffd089, transparent: true, opacity: 0.9 })
+        );
+        ball.position.copy(pos);
+        scene.add(ball);
+        const blast = new THREE.PointLight(0xffa040, 6, 22, 1.4);
+        blast.position.copy(pos);
+        scene.add(blast);
+        let tt = 0;
+        function fade() {
+          tt += 0.05;
+          ball.scale.setScalar(1 + tt * 1.4);
+          ball.material.opacity = Math.max(0, 0.9 - tt * 1.4);
+          blast.intensity = Math.max(0, 6 - tt * 12);
+          if (tt < 1.1) requestAnimationFrame(fade);
+          else { scene.remove(ball); scene.remove(blast); }
+        }
+        requestAnimationFrame(fade);
+        SFX.explode();
+        shakeCamera(0.6, 0.4);
+        const RAD = 5.5;
+        for (const z of zombies) {
+          if (z.userData.dead) continue;
+          const dx = z.position.x - pos.x;
+          const dz = z.position.z - pos.z;
+          const d = Math.hypot(dx, dz);
+          if (d > RAD) continue;
+          const outward = new THREE.Vector3(dx / (d || 1), 0.6, dz / (d || 1));
+          spawnBlood(new THREE.Vector3(z.position.x, 1.4, z.position.z), outward, 28);
+          z.userData.hp = 0;
+          z.userData.dead = true;
+          z.userData.deathTimer = 0;
+          spawnBloodPool(z.position.x, z.position.z);
+          z.userData.gibVx = outward.x * 8;
+          z.userData.gibVy = 4 + Math.random() * 3;
+          z.userData.gibVz = outward.z * 8;
+          z.userData.gibSpin = (Math.random() - 0.5) * 8;
+          kills++;
+        }
+        startSloMo(600, 0.32);
+        killsEl.textContent = kills;
+        updateHUD();
+        return;
+      }
+      const dt = 0.016;
+      body.position.x += vx * dt;
+      body.position.y += vy * dt - 9 * t * dt;
+      body.position.z += vz * dt;
+      requestAnimationFrame(tickG);
+    }
+    requestAnimationFrame(tickG);
+    updateHUD();
+  }
+
+  // ── WEAPON PICKUPS ──
+  // When zombies die there's a chance they drop a new weapon. The pickup is a
+  // small floating crate; walking over it unlocks the weapon.
+  const pickups = [];
+  function maybeDropWeapon(x, z) {
+    if (Math.random() > 0.18) return;
+    // pick a locked weapon to drop
+    const locked = Object.keys(WEAPONS).filter(k => !ammoState[k].unlocked);
+    if (!locked.length) return;
+    const key = locked[(Math.random() * locked.length) | 0];
+    const g = new THREE.Group();
+    const box = new THREE.Mesh(
+      new THREE.BoxGeometry(0.6, 0.6, 0.6),
+      new THREE.MeshStandardMaterial({ color: 0xc8503a, emissive: 0xc8503a, emissiveIntensity: 0.5, roughness: 0.5 })
+    );
+    g.add(box);
+    g.position.set(x, 0.4, z);
+    scene.add(g);
+    pickups.push({ mesh: g, weapon: key, phase: Math.random() * 6.28 });
+  }
+  function tickPickups(dt) {
+    for (let i = pickups.length - 1; i >= 0; i--) {
+      const p = pickups[i];
+      p.phase += dt * 3;
+      p.mesh.position.y = 0.4 + Math.sin(p.phase) * 0.12;
+      p.mesh.rotation.y += dt * 1.5;
+      const dx = p.mesh.position.x - player.pos.x;
+      const dz = p.mesh.position.z - player.pos.z;
+      if (dx * dx + dz * dz < 1.2 * 1.2) {
+        unlockWeapon(p.weapon);
+        ammoState[p.weapon].ammo = WEAPONS[p.weapon].mag;
+        ammoState[p.weapon].reserve = WEAPONS[p.weapon].reserve;
+        SFX.powerup();
+        const lbl = WEAPONS[p.weapon].name;
+        const c = document.getElementById('callout');
+        if (c) { c.textContent = 'PICKED UP: ' + lbl; c.style.opacity = '1'; setTimeout(() => c.style.opacity = '0', 1500); }
+        scene.remove(p.mesh);
+        pickups.splice(i, 1);
+        setWeapon(p.weapon);
+      }
+    }
   }
 
   // ── ROCKET LAUNCHER ──
@@ -2316,8 +2874,10 @@
 
   function reload() {
     if (reloading) return;
-    if (ammo === magSize) return;
-    if (ammoReserve <= 0) return;
+    const W = WEAPONS[player.weapon] || WEAPONS.pistol;
+    if (W.melee || W.special) return;
+    const a = ammoState[player.weapon];
+    if (!a || a.ammo >= W.mag || a.reserve <= 0) return;
     reloading = true;
     reloadTimer = 1.2;
     SFX.reload();
@@ -2331,9 +2891,18 @@
     if (!alive && (k === ' ' || k === 'enter')) { start(); return; }
     keys[k] = true;
     if (k === 'r') reload();
-    if (k === '1') setWeapon('pistol');
-    if (k === '2') { if (player.rockets > 0) setWeapon('rocket'); }
-    if (k === 'q') setWeapon(player.weapon === 'pistol' ? (player.rockets > 0 ? 'rocket' : 'pistol') : 'pistol');
+    if (/^[1-9]$/.test(k)) {
+      const idx = parseInt(k, 10) - 1;
+      const target = HOTBAR[idx];
+      if (target && ammoState[target] && ammoState[target].unlocked) setWeapon(target);
+    }
+    if (k === 'q' || k === 'e') {
+      const unlocked = HOTBAR.filter(x => ammoState[x] && ammoState[x].unlocked);
+      const cur = unlocked.indexOf(player.weapon);
+      const step = k === 'e' ? 1 : -1;
+      const next = unlocked[(cur + step + unlocked.length) % unlocked.length];
+      if (next) setWeapon(next);
+    }
   });
   window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
   window.addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
@@ -2344,14 +2913,18 @@
   document.addEventListener('pointerlockchange', () => {
     mouseLocked = document.pointerLockElement === canvas;
   });
+  let mouseHeld = false;
   canvas.addEventListener('mousedown', e => {
     if (isTouch) return;
     ensureAudio();
     if (!started) { start(); return; }
     if (!alive) { start(); return; }
     if (!mouseLocked) { tryLockPointer(); return; }
+    mouseHeld = true;
     fire();
   });
+  window.addEventListener('mouseup',   () => { mouseHeld = false; });
+  window.addEventListener('blur',      () => { mouseHeld = false; });
   window.addEventListener('mousemove', e => {
     if (!mouseLocked || !alive) return;
     const sens = 0.0022;
@@ -2554,13 +3127,18 @@
     // keep gun arm steady (aiming)
     hero.armR.rotation.x = -Math.PI / 2.1;
 
-    // camera: third-person over-the-shoulder
+    // camera: third-person over-the-shoulder — smoothed toward target
     const camOffset = new THREE.Vector3(0.7, 2.1, 3.2);
-    // rotate offset by yaw
     const rotX = camOffset.x * cosY + camOffset.z * sinY;
     const rotZ = -camOffset.x * sinY + camOffset.z * cosY;
-    camera.position.set(player.pos.x + rotX, camOffset.y, player.pos.z + rotZ);
-    // aim at point in front of player based on pitch
+    const targetX = player.pos.x + rotX;
+    const targetY = camOffset.y;
+    const targetZ = player.pos.z + rotZ;
+    // exponential smoothing (frame-rate independent)
+    const camLerp = 1 - Math.pow(0.0008, dt);
+    camera.position.x += (targetX - camera.position.x) * camLerp;
+    camera.position.y += (targetY - camera.position.y) * camLerp;
+    camera.position.z += (targetZ - camera.position.z) * camLerp;
     const aimDist = 8;
     const aimY = 1.7 + Math.tan(player.pitch) * aimDist;
     const aimX = player.pos.x - sinY * aimDist;
@@ -2583,10 +3161,20 @@
     if (reloading) {
       reloadTimer -= dt;
       if (reloadTimer <= 0) {
-        const need = magSize - ammo;
-        const give = Math.min(need, ammoReserve);
-        ammo += give;
-        ammoReserve -= give;
+        const W = WEAPONS[player.weapon] || WEAPONS.pistol;
+        const a = ammoState[player.weapon];
+        if (a) {
+          const need = W.mag - a.ammo;
+          const give = Math.min(need, a.reserve);
+          a.ammo += give;
+          a.reserve -= give;
+          if (player.weapon === 'pistol') { ammo = a.ammo; ammoReserve = a.reserve; }
+        } else {
+          const need = magSize - ammo;
+          const give = Math.min(need, ammoReserve);
+          ammo += give;
+          ammoReserve -= give;
+        }
         reloading = false;
         updateHUD();
       }
@@ -2737,12 +3325,41 @@
     goalRing.scale.setScalar(pulse);
     if (goal.sign) goal.sign.rotation.y = Math.sin(performance.now() * 0.0008) * 0.15;
 
+    // auto-fire — held LMB on auto weapons re-triggers fire() at cycle pace
+    const W = WEAPONS[player.weapon] || WEAPONS.pistol;
+    if (W.autoFire && (mouseHeld || (window.OmenlyGamepad && window.OmenlyGamepad.button('rt')))) fire();
+
+    // animate melee swing
+    if (hero.armR && hero.armR.userData._swing !== undefined) {
+      const dur = hero.armR.userData._swingDur || 0.25;
+      hero.armR.userData._swing += dt;
+      const k = hero.armR.userData._swing / dur;
+      if (k >= 1) {
+        hero.armR.userData._swing = undefined;
+        hero.armR.rotation.z = 0;
+      } else {
+        // smooth in/out arc
+        const arc = Math.sin(k * Math.PI);
+        hero.armR.rotation.z = -1.5 * arc;
+      }
+    }
+
+    // spin minigun barrels while firing
+    if (W === WEAPONS.minigun && hero.viewmodels && hero.viewmodels.minigun) {
+      const spin = (mouseHeld || (window.OmenlyGamepad && window.OmenlyGamepad.button('rt'))) ? 36 : 6;
+      hero.viewmodels.minigun.barrels.rotation.z += dt * spin;
+    }
+
     // rockets, blood, flickering wrecks
     tickRockets(dt);
     tickBlood(dt);
     tickLimbs(dt);
     tickWeather(dt);
+    tickPickups(dt);
     for (const f of flickerObjs) if (f.userData.update) f.userData.update(dt);
+
+    // shake decay
+    if (shakeT > 0) shakeT = Math.max(0, shakeT - dt);
   }
 
   function spawnWaveZombies() {
@@ -2804,6 +3421,8 @@
     if (started && alive) update(dt);
     if (extraction.active) tickExtraction(realDt);
     tickDebris(realDt);
+    tickDust(realDt);
+    applyShake();
     renderer.render(scene, camera);
   }
   requestAnimationFrame(loop);
