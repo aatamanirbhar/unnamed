@@ -218,8 +218,21 @@
   #minimap canvas { width: 100%; height: 100%; display: block; }
 
   /* ── menus ── */
-  .panel { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; display: flex; align-items: center; justify-content: center; z-index: 50; background: rgba(10,6,4,0.85); backdrop-filter: blur(8px); padding: 16px; }
-  .panel .card { width: min(560px, 96vw); background: rgba(10,6,4,0.9); border: 1px solid rgba(255,208,137,0.35); padding: 26px 24px; text-align: center; box-shadow: 0 0 40px rgba(255,208,137,0.15); }
+  .panel { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; display: flex; align-items: center; justify-content: center; z-index: 50; background: rgba(10,6,4,0.85); backdrop-filter: blur(8px); padding: 16px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .panel .card { width: min(560px, 96vw); background: rgba(10,6,4,0.9); border: 1px solid rgba(255,208,137,0.35); padding: 26px 24px; text-align: center; box-shadow: 0 0 40px rgba(255,208,137,0.15); max-height: calc(100dvh - 16px); overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  /* Landscape mobile: card is taller than viewport — align to top so the
+     start button is reachable by scrolling instead of being cut off. */
+  @media (orientation: landscape) and (max-height: 600px) {
+    .panel { align-items: flex-start; padding: 8px; }
+    .panel .card { padding: 14px 14px; max-height: calc(100dvh - 16px); }
+    .panel h2 { margin-bottom: 8px; font-size: 18px; letter-spacing: 4px; }
+    .panel h1 { font-size: 30px; letter-spacing: 4px; margin-bottom: 2px; }
+    .panel .crown { margin-bottom: 8px; }
+    .panel p { margin-bottom: 8px; font-size: 11px; }
+    .panel .row { margin-bottom: 8px; gap: 6px; }
+    .panel button, .panel .btn { padding: 8px 12px; font-size: 11px; letter-spacing: 2px; }
+    .panel .map-grid { margin: 6px 0 8px; gap: 6px; }
+  }
   .panel h1 { font-family: Georgia, serif; font-style: italic; font-size: clamp(36px, 7vw, 56px); letter-spacing: 8px; color: #ffd089; text-shadow: 0 0 18px #ffd089, 0 0 40px #5a3818; margin-bottom: 6px; }
   .panel .crown { color: #ffd089; font-size: 10px; letter-spacing: 8px; opacity: 0.7; margin-bottom: 18px; }
   .panel h2 { font-family: Georgia, serif; font-style: italic; font-size: 22px; letter-spacing: 6px; color: #ffd089; margin-bottom: 14px; }
@@ -247,9 +260,9 @@
   .panel .lobby-list .t  { color: #ffb050; }
 
   /* ── buy menu ── */
-  #buy { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); background: rgba(10,6,4,0.9); border: 1px solid rgba(255,208,137,0.35); padding: 20px; z-index: 40; min-width: 320px; max-width: 92vw; }
+  #buy { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); background: rgba(10,6,4,0.9); border: 1px solid rgba(255,208,137,0.35); padding: 20px; z-index: 40; min-width: 520px; max-width: 92vw; max-height: 88vh; display: flex; flex-direction: column; }
   #buy h3 { font-family: Georgia, serif; font-style: italic; color: #ffd089; letter-spacing: 6px; text-align: center; margin-bottom: 14px; font-size: 18px; }
-  #buy .buy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  #buy .buy-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; overflow-y: auto; max-height: 60vh; padding-right: 4px; }
   #buy button { background: transparent; border: 1px solid rgba(255,208,137,0.4); color: #ffd089; padding: 9px 10px; font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 2px; cursor: pointer; transition: all 0.15s; text-align: left; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
   #buy button:hover:not(:disabled) { background: rgba(255,208,137,0.15); border-color: #ffd089; }
   #buy button:disabled { opacity: 0.35; cursor: not-allowed; }
@@ -331,7 +344,7 @@
     .panel .card { padding: 18px 14px; }
     .panel h1 { letter-spacing: 4px; }
     #buy { min-width: 0; width: 92vw; padding: 14px; }
-    #buy .buy-grid { grid-template-columns: 1fr; }
+    #buy .buy-grid { grid-template-columns: 1fr 1fr; max-height: 64vh; }
   }
   /* Medium landscape phones (480–600px tall): keep right column compact */
   @media (orientation: landscape) and (min-height: 481px) and (max-height: 600px) {
@@ -455,6 +468,11 @@
 <!-- Kill feed -->
 <div id="killfeed" class="hidden"></div>
 
+<!-- Hostage HUD (hostage mode only) -->
+<div id="hostage-hud" class="hidden" style="position:fixed;top:max(60px,env(safe-area-inset-top,0px)+54px);left:50%;transform:translateX(-50%);z-index:10;pointer-events:none;font-size:11px;letter-spacing:3px;color:#ffd089;text-shadow:0 0 6px #ffd089;background:rgba(10,6,4,0.55);padding:5px 12px;border:1px solid rgba(255,208,137,0.3);">
+  HOSTAGES <span id="hostage-count">0 / 0</span> <span id="hostage-action" style="margin-left:14px;opacity:0;color:#b8e070;">PRESS E TO RESCUE</span>
+</div>
+
 <!-- Minimap -->
 <div id="minimap" class="hidden"><canvas id="minimap-c" width="320" height="320"></canvas></div>
 
@@ -488,7 +506,12 @@
 <div id="solo-setup" class="panel hidden">
   <div class="card">
     <h2>SOLO · MATCH SETUP</h2>
-    <p>CHOOSE A MAP, YOUR SIDE, AND BOT DIFFICULTY.</p>
+    <p>CHOOSE A MAP, MODE, YOUR SIDE, AND BOT DIFFICULTY.</p>
+    <p style="opacity:0.7;">GAME MODE</p>
+    <div class="row">
+      <button class="mode-pick" data-mode="bomb">BOMBSITE</button>
+      <button class="mode-pick" data-mode="hostage">HOSTAGE RESCUE</button>
+    </div>
     <p style="opacity:0.7;">MAP</p>
     <div class="map-grid">
       <button data-map="office" class="map-pick">OFFICE</button>
@@ -525,6 +548,11 @@
     <h2>HOST · WAITING FOR FRIENDS</h2>
     <p>SHARE THIS CODE. FRIENDS PASTE IT IN THEIR JOIN MENU.<br>UP TO 50 PLAYERS. EMPTY SLOTS FILL WITH BOTS.</p>
     <div id="host-code-box" class="code-box" title="click to copy">— — — — — —</div>
+    <p style="opacity:0.7;">GAME MODE</p>
+    <div class="row">
+      <button class="mode-pick-h" data-mode="bomb">BOMBSITE</button>
+      <button class="mode-pick-h" data-mode="hostage">HOSTAGE RESCUE</button>
+    </div>
     <p style="opacity:0.7;">MAP</p>
     <div class="map-grid">
       <button data-map="office" class="map-pick-h">OFFICE</button>
@@ -597,18 +625,9 @@
 <!-- ── BUY MENU (in-game) ── -->
 <div id="buy" class="hidden">
   <h3>BUY MENU</h3>
-  <div class="buy-grid">
-    <button data-buy="pistol">PISTOL <span class="cost">$200</span></button>
-    <button data-buy="ak47">AK-47 <span class="cost">$2700</span></button>
-    <button data-buy="bullpup">BULLPUP <span class="cost">$3300</span></button>
-    <button data-buy="armor">KEVLAR <span class="cost">$650</span></button>
-    <button data-buy="he">HE GRENADE <span class="cost">$300</span></button>
-    <button data-buy="flash">FLASHBANG <span class="cost">$200</span></button>
-    <button data-buy="smoke">SMOKE <span class="cost">$300</span></button>
-    <button data-buy="ammo">FULL AMMO <span class="cost">$150</span></button>
-  </div>
+  <div class="buy-grid" id="buy-grid"><!-- populated from WEAPONS at runtime --></div>
   <div class="footer"><span>MONEY: $ <span id="buy-money">0</span></span><span id="buy-timer">15</span></div>
-  <div class="hint">B TO CLOSE</div>
+  <div class="hint">B TO CLOSE · TAP SECTION TABS</div>
 </div>
 
 <!-- ── SCOREBOARD (TAB) ── -->
@@ -639,6 +658,7 @@
     <button id="btn-reload">RELOAD</button>
     <button id="btn-weap">SWAP</button>
     <button id="btn-gren">NADE</button>
+    <button id="btn-use">USE</button>
     <button id="btn-buy">BUY</button>
   </div>
 </div>
@@ -795,6 +815,10 @@
     pistol: () => { tone(720, 0.04, 'square', 0.18); noise(0.06, 0.12, 1400); tone(160, 0.07, 'sawtooth', 0.12); },
     ak:     () => { tone(420, 0.04, 'square', 0.22); noise(0.05, 0.16, 700); tone(120, 0.09, 'sawtooth', 0.18); },
     bullpup:() => { tone(520, 0.03, 'square', 0.18); noise(0.04, 0.13, 1000); tone(140, 0.06, 'sawtooth', 0.14); },
+    smg:    () => { tone(620, 0.03, 'square', 0.16); noise(0.04, 0.10, 1200); tone(150, 0.05, 'sawtooth', 0.12); },
+    sniper: () => { tone(280, 0.08, 'square', 0.26); noise(0.16, 0.30, 400); tone(60, 0.30, 'sawtooth', 0.28); },
+    shotgun:() => { noise(0.18, 0.42, 200); tone(90, 0.18, 'sawtooth', 0.30); tone(220, 0.10, 'square', 0.18); },
+    knife:  () => { tone(1200, 0.04, 'sine', 0.10); tone(700, 0.04, 'sine', 0.08); },
     reload: () => { tone(420, 0.05, 'square', 0.08); setTimeout(() => tone(330, 0.05, 'square', 0.08), 110); setTimeout(() => tone(520, 0.06, 'square', 0.1), 280); },
     empty:  () => { tone(180, 0.04, 'square', 0.08); },
     hit:    () => { tone(440, 0.05, 'square', 0.08); },
@@ -809,6 +833,59 @@
     lose:   () => { tone(330, 0.16, 'sawtooth', 0.16); setTimeout(() => tone(220, 0.3, 'sawtooth', 0.16), 150); },
     plant:  () => { tone(660, 0.08, 'square', 0.12); setTimeout(() => tone(770, 0.08, 'square', 0.12), 90); }
   };
+
+  // ── TACTICAL VOICE CALLOUTS ──
+  // Uses the Web Speech API. Throttled so a chaotic firefight doesn't talk over
+  // itself. Each `kind` is a pool of lines; we pick at random.
+  const TAC_LINES = {
+    push:          ["Go go go!", "Push, push, push!", "Move up!", "On me!"],
+    fire_in_hole:  ["Fire in the hole!", "Frag out!", "Grenade out!"],
+    flashbang:     ["Flashbang out!", "Flash, flash, flash!", "Cover your eyes!"],
+    smoke:         ["Smoke out!", "Smoking off!", "Throwing smoke."],
+    decoy:         ["Decoy out!", "Decoy planted."],
+    enemy_spotted: ["Enemy spotted!", "Tango at my front!", "Contact!"],
+    one_down:      ["One down!", "Tango down!", "Got him!", "Scratch one."],
+    reload:        ["Reloading!", "Cover me, reloading!", "Mag's dry!"],
+    stealth_kill:  ["Silent.", "Knife took him.", "He never saw me."],
+    hostage_save:  ["Hostage secured.", "I've got the hostage.", "Civilian safe!"],
+    plant:         ["Bomb planted!", "C4's planted, hold the site!"],
+    defuse:        ["Defusing!", "Cover me, I'm on it!"],
+    win:           ["Hooyah!", "Mission complete!", "That's how we do it!"],
+    lose:          ["We lost it.", "Hostiles took the site.", "Damn it."]
+  };
+  const tts = { voice: null };
+  function pickTacVoice() {
+    if (!('speechSynthesis' in window)) return null;
+    const voices = speechSynthesis.getVoices();
+    const prefer = [/Daniel/i, /Microsoft David/i, /Microsoft Mark/i, /Alex/i, /Google US English/i, /en-US/i, /English/i];
+    for (const re of prefer) {
+      const v = voices.find(v => re.test(v.name) || re.test(v.lang));
+      if (v) return v;
+    }
+    return voices[0] || null;
+  }
+  if ('speechSynthesis' in window) {
+    speechSynthesis.onvoiceschanged = () => { tts.voice = pickTacVoice(); };
+    setTimeout(() => { if (!tts.voice) tts.voice = pickTacVoice(); }, 250);
+  }
+  let lastTacAt = 0;
+  function tacticalCallout(kind) {
+    const now = performance.now();
+    if (now - lastTacAt < 900) return; // throttle so lines don't pile up
+    const pool = TAC_LINES[kind]; if (!pool) return;
+    const line = pool[(Math.random() * pool.length) | 0];
+    lastTacAt = now;
+    if ('speechSynthesis' in window) {
+      try {
+        const u = new SpeechSynthesisUtterance(line);
+        if (tts.voice) u.voice = tts.voice;
+        u.rate = 1.05; u.pitch = 0.85; u.volume = 0.95;
+        speechSynthesis.speak(u);
+      } catch (_) {}
+    }
+    // Also flash the line on screen briefly for accessibility
+    showCenter(line.toUpperCase(), 1200);
+  }
 
   // ── Three.js scene ──
   const scene = new THREE.Scene();
@@ -1284,18 +1361,53 @@
   }
 
   // ── WEAPONS ──
+  // Slots: 1 = secondary (pistols, knife), 2 = primary (rifles, smgs, snipers, lmg, shotgun).
+  // `family` drives the viewmodel fallback (pistol-shape vs rifle-shape vs knife-shape vs shotgun).
   const WEAPONS = {
-    pistol:  { name: 'PISTOL',  slot: 1, mag: 12, reserve: 48, cycle: 0.20, dmg: 22, spread: 0.005, recoil: 0.06, autofire: false, range: 80, headMul: 4.0, sfx: 'pistol', cost: 200 },
-    ak47:    { name: 'AK-47',   slot: 2, mag: 30, reserve: 90, cycle: 0.10, dmg: 32, spread: 0.022, recoil: 0.18, autofire: true,  range: 110, headMul: 4.0, sfx: 'ak',     cost: 2700 },
-    bullpup: { name: 'BULLPUP', slot: 2, mag: 30, reserve: 90, cycle: 0.08, dmg: 24, spread: 0.012, recoil: 0.10, autofire: true,  range: 110, headMul: 4.0, sfx: 'bullpup',cost: 3300 }
+    // ── melee (always carried, free) ──
+    knife:    { name: 'KNIFE',     slot: 1, mag: 1,  reserve: 0,  cycle: 0.45, dmg: 55,  spread: 0.001, recoil: 0.00, autofire: false, range: 2.0,   headMul: 2.0, sfx: 'knife',   cost: 0,    family: 'knife', stealthMul: 4.0 },
+    // ── pistols (slot 1) ──
+    pistol:   { name: 'GLOCK',     slot: 1, mag: 12, reserve: 48, cycle: 0.20, dmg: 22,  spread: 0.005, recoil: 0.06, autofire: false, range: 80,    headMul: 4.0, sfx: 'pistol',  cost: 200,  family: 'pistol' },
+    usp:      { name: 'USP-S',     slot: 1, mag: 12, reserve: 24, cycle: 0.18, dmg: 28,  spread: 0.004, recoil: 0.06, autofire: false, range: 80,    headMul: 4.0, sfx: 'pistol',  cost: 200,  family: 'pistol' },
+    deagle:   { name: 'DEAGLE',    slot: 1, mag: 7,  reserve: 35, cycle: 0.30, dmg: 65,  spread: 0.010, recoil: 0.22, autofire: false, range: 100,   headMul: 4.5, sfx: 'pistol',  cost: 700,  family: 'pistol' },
+    fiveseven:{ name: 'FIVE-SEVEN',slot: 1, mag: 20, reserve: 80, cycle: 0.15, dmg: 24,  spread: 0.006, recoil: 0.05, autofire: false, range: 80,    headMul: 4.0, sfx: 'pistol',  cost: 500,  family: 'pistol' },
+    p250:     { name: 'P250',      slot: 1, mag: 13, reserve: 26, cycle: 0.16, dmg: 26,  spread: 0.005, recoil: 0.06, autofire: false, range: 80,    headMul: 4.0, sfx: 'pistol',  cost: 300,  family: 'pistol' },
+    dualies:  { name: 'DUAL BERETTAS', slot: 1, mag: 30, reserve: 60, cycle: 0.10, dmg: 18, spread: 0.012, recoil: 0.08, autofire: true, range: 70,  headMul: 3.5, sfx: 'pistol', cost: 300,  family: 'pistol' },
+    // ── SMGs (slot 2) ──
+    mp5:      { name: 'MP5',       slot: 2, mag: 30, reserve: 90, cycle: 0.075, dmg: 22, spread: 0.018, recoil: 0.08, autofire: true,  range: 90,    headMul: 4.0, sfx: 'smg',     cost: 1500, family: 'rifle' },
+    mac10:    { name: 'MAC-10',    slot: 2, mag: 30, reserve: 90, cycle: 0.07,  dmg: 21, spread: 0.026, recoil: 0.10, autofire: true,  range: 80,    headMul: 4.0, sfx: 'smg',     cost: 1050, family: 'rifle' },
+    p90:      { name: 'P90',       slot: 2, mag: 50, reserve: 100,cycle: 0.07,  dmg: 21, spread: 0.024, recoil: 0.09, autofire: true,  range: 90,    headMul: 4.0, sfx: 'smg',     cost: 2350, family: 'rifle' },
+    ump:      { name: 'UMP-45',    slot: 2, mag: 25, reserve: 75, cycle: 0.10,  dmg: 28, spread: 0.020, recoil: 0.10, autofire: true,  range: 90,    headMul: 4.0, sfx: 'smg',     cost: 1200, family: 'rifle' },
+    // ── rifles (slot 2) ──
+    ak47:     { name: 'AK-47',     slot: 2, mag: 30, reserve: 90, cycle: 0.10,  dmg: 32, spread: 0.022, recoil: 0.18, autofire: true,  range: 110,   headMul: 4.0, sfx: 'ak',      cost: 2700, family: 'rifle' },
+    m4a1:     { name: 'M4A1-S',    slot: 2, mag: 25, reserve: 75, cycle: 0.09,  dmg: 28, spread: 0.014, recoil: 0.12, autofire: true,  range: 110,   headMul: 4.0, sfx: 'ak',      cost: 2900, family: 'rifle' },
+    bullpup:  { name: 'BULLPUP',   slot: 2, mag: 30, reserve: 90, cycle: 0.08,  dmg: 24, spread: 0.012, recoil: 0.10, autofire: true,  range: 110,   headMul: 4.0, sfx: 'bullpup', cost: 3300, family: 'rifle' },
+    famas:    { name: 'FAMAS',     slot: 2, mag: 25, reserve: 90, cycle: 0.09,  dmg: 26, spread: 0.018, recoil: 0.10, autofire: true,  range: 100,   headMul: 4.0, sfx: 'ak',      cost: 2050, family: 'rifle' },
+    galil:    { name: 'GALIL AR',  slot: 2, mag: 35, reserve: 90, cycle: 0.09,  dmg: 28, spread: 0.022, recoil: 0.14, autofire: true,  range: 100,   headMul: 4.0, sfx: 'ak',      cost: 1800, family: 'rifle' },
+    aug:      { name: 'AUG',       slot: 2, mag: 30, reserve: 90, cycle: 0.10,  dmg: 30, spread: 0.014, recoil: 0.12, autofire: true,  range: 115,   headMul: 4.0, sfx: 'ak',      cost: 3300, family: 'rifle' },
+    sg553:    { name: 'SG 553',    slot: 2, mag: 30, reserve: 90, cycle: 0.10,  dmg: 32, spread: 0.016, recoil: 0.14, autofire: true,  range: 115,   headMul: 4.0, sfx: 'ak',      cost: 3000, family: 'rifle' },
+    // ── snipers (slot 2) ──
+    awp:      { name: 'AWP',       slot: 2, mag: 10, reserve: 30, cycle: 1.45,  dmg: 115,spread: 0.001, recoil: 0.32, autofire: false, range: 200,   headMul: 4.0, sfx: 'sniper',  cost: 4750, family: 'sniper' },
+    ssg:      { name: 'SSG 08',    slot: 2, mag: 10, reserve: 90, cycle: 1.25,  dmg: 88, spread: 0.001, recoil: 0.28, autofire: false, range: 200,   headMul: 4.0, sfx: 'sniper',  cost: 1700, family: 'sniper' },
+    scar:     { name: 'SCAR-20',   slot: 2, mag: 20, reserve: 90, cycle: 0.35,  dmg: 80, spread: 0.005, recoil: 0.18, autofire: false, range: 180,   headMul: 4.0, sfx: 'sniper',  cost: 5000, family: 'sniper' },
+    // ── shotguns (slot 2) ──
+    nova:     { name: 'NOVA',      slot: 2, mag: 8,  reserve: 32, cycle: 0.85,  dmg: 26, spread: 0.060, recoil: 0.20, autofire: false, range: 35,    headMul: 3.0, sfx: 'shotgun', cost: 1050, family: 'shotgun', pellets: 9 },
+    xm1014:   { name: 'XM1014',    slot: 2, mag: 7,  reserve: 32, cycle: 0.30,  dmg: 20, spread: 0.070, recoil: 0.16, autofire: false, range: 35,    headMul: 3.0, sfx: 'shotgun', cost: 2000, family: 'shotgun', pellets: 6 },
+    mag7:     { name: 'MAG-7',     slot: 2, mag: 5,  reserve: 32, cycle: 0.75,  dmg: 30, spread: 0.050, recoil: 0.18, autofire: false, range: 35,    headMul: 3.0, sfx: 'shotgun', cost: 1300, family: 'shotgun', pellets: 8 },
+    // ── LMG (slot 2) ──
+    m249:     { name: 'M249',      slot: 2, mag: 100,reserve: 200,cycle: 0.075, dmg: 26, spread: 0.024, recoil: 0.16, autofire: true,  range: 120,   headMul: 4.0, sfx: 'ak',      cost: 5200, family: 'rifle' },
+    negev:    { name: 'NEGEV',     slot: 2, mag: 150,reserve: 200,cycle: 0.07,  dmg: 24, spread: 0.030, recoil: 0.18, autofire: true,  range: 110,   headMul: 4.0, sfx: 'ak',      cost: 1700, family: 'rifle' }
   };
-  const ITEM_COSTS = { armor: 650, he: 300, flash: 200, smoke: 300, ammo: 150 };
+  const ITEM_COSTS = { armor: 650, he: 300, flash: 200, smoke: 300, molotov: 400, decoy: 50, incgren: 600, ammo: 150 };
 
   // ── grenade defs ──
   const GREN = {
-    he:    { fuse: 1.6, radius: 7.0, dmg: 100 },
-    flash: { fuse: 1.4, radius: 14.0 },
-    smoke: { fuse: 1.2, radius: 5.5, life: 16 }
+    he:       { fuse: 1.6, radius: 7.0, dmg: 100 },
+    flash:    { fuse: 1.4, radius: 14.0 },
+    smoke:    { fuse: 1.2, radius: 5.5, life: 16 },
+    molotov:  { fuse: 1.8, radius: 4.5, life: 7, dmg: 35 },     // ground fire, damage over time
+    decoy:    { fuse: 0.8, radius: 1.0, life: 12 },             // fake gunfire to bait enemies
+    incgren:  { fuse: 1.8, radius: 4.5, life: 7, dmg: 40 }      // CT incendiary variant of molotov
   };
 
   // ── PLAYER STATE (shared model for local, remote, bots) ──
@@ -1309,6 +1421,12 @@
   let myTeam = 'CT';
   let pendingTeamChoice = null;
   let scoreCT = 0, scoreT = 0;
+  let gameMode = 'bomb';       // 'bomb' | 'hostage'
+  // Hostage mode: hostages spawn near T spawn; CTs press USE to pick up and
+  // escort to the rescue zone (CT spawn) to score. A round ends when all
+  // hostages are rescued (CT win) or all CTs die (T win), or timer runs out.
+  const hostages = [];         // { id, x, z, y, mesh, carriedBy, rescued, alive }
+  let rescueZone = null;       // { x, z, r }
   let roundPhase = 'menu';     // 'buy' | 'live' | 'ended' | 'menu'
   let roundTime = 0;           // seconds remaining in phase
   let roundIndex = 0;
@@ -1334,9 +1452,9 @@
       hp: 100, armor: 0, money: 800,
       alive: true,
       weap: 'pistol',
-      slot1: 'pistol', slot2: null,
+      slot1: 'pistol', slot2: null, melee: 'knife',
       ammo: WEAPONS.pistol.mag, reserve: WEAPONS.pistol.reserve,
-      gren: { he: 0, flash: 0, smoke: 0 },
+      gren: { he: 0, flash: 0, smoke: 0, molotov: 0, incgren: 0, decoy: 0 },
       activeGren: 'he',
       kills: 0, deaths: 0,
       lastFireT: 0, reloading: false, reloadEnd: 0,
@@ -1461,7 +1579,8 @@
     hand.add(handR);
 
     let gun;
-    if (p.weap === 'pistol') {
+    const fam = (w && w.family) || 'rifle';
+    if (p.weap === 'pistol' || fam === 'pistol') {
       gun = new THREE.Group();
       const body = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.16, 0.36), metal);
       gun.add(body);
@@ -1470,6 +1589,40 @@
       const grip = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.18, 0.10), metal);
       grip.position.set(0, -0.16, 0.10); gun.add(grip);
       gun.position.set(0, 0, -0.18);
+    } else if (fam === 'knife') {
+      gun = new THREE.Group();
+      const blade = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.02, 0.34),
+        new THREE.MeshStandardMaterial({ color: 0xb8c0c8, roughness: 0.3, metalness: 0.85 }));
+      blade.position.z = -0.18; gun.add(blade);
+      const hilt = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 0.10), wood);
+      hilt.position.z = 0.04; gun.add(hilt);
+      gun.position.set(0, -0.04, -0.10);
+    } else if (fam === 'sniper') {
+      gun = new THREE.Group();
+      const body = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.10, 0.92), metal);
+      body.position.z = -0.30; gun.add(body);
+      const stock = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.14, 0.30), wood);
+      stock.position.set(0, -0.02, 0.20); gun.add(stock);
+      const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.46, 8), metal);
+      bar.rotation.x = Math.PI / 2; bar.position.set(0, 0.05, -0.80); gun.add(bar);
+      const scope = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.32, 12), metal);
+      scope.rotation.x = Math.PI / 2; scope.position.set(0, 0.13, -0.25); gun.add(scope);
+      const grip = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.13, 0.08), wood);
+      grip.position.set(0, -0.16, 0.05); gun.add(grip);
+      gun.position.set(0, 0, -0.12);
+    } else if (fam === 'shotgun') {
+      gun = new THREE.Group();
+      const body = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.12, 0.66), metal);
+      body.position.z = -0.18; gun.add(body);
+      const stock = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.14, 0.28), wood);
+      stock.position.set(0, -0.02, 0.22); gun.add(stock);
+      const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.34, 10), metal);
+      bar.rotation.x = Math.PI / 2; bar.position.set(0, 0.05, -0.60); gun.add(bar);
+      const pump = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.07, 0.14), wood);
+      pump.position.set(0, -0.06, -0.32); gun.add(pump);
+      const grip = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.13, 0.08), wood);
+      grip.position.set(0, -0.15, 0.05); gun.add(grip);
+      gun.position.set(0, 0, -0.12);
     } else if (p.weap === 'ak47') {
       gun = new THREE.Group();
       const body = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.10, 0.7), metal);
@@ -1486,7 +1639,7 @@
       fore.position.set(0, -0.04, -0.34); gun.add(fore);
       gun.position.set(0, 0, -0.12);
     } else {
-      // bullpup
+      // generic rifle (covers bullpup, SMGs, AR variants, LMG)
       gun = new THREE.Group();
       const body = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.12, 0.6), metal);
       body.position.z = -0.15; gun.add(body);
@@ -1605,7 +1758,7 @@
       if (attacker && attacker.id !== target.id) {
         attacker.kills++;
         attacker.money = Math.min(16000, attacker.money + 300);
-        if (attacker.isLocal) SFX.kill();
+        if (attacker.isLocal) { SFX.kill(); tacticalCallout('one_down'); }
       }
       addKillFeed(attacker ? attacker.name : 'WORLD', attacker ? attacker.team : 'CT', target.name, target.team, weapName || '×', !!headshot);
       // hide mesh
@@ -1678,7 +1831,17 @@
       if (hit.player) {
         hitTarget = hit.player;
         headshot = hit.head;
-        const dmg = Math.floor(w.dmg * (hit.head ? w.headMul : 1));
+        let dmg = Math.floor(w.dmg * (hit.head ? w.headMul : 1));
+        // Knife: stealth kill from behind multiplies damage massively.
+        // Attacker's forward direction matches the target's own forward (back stab).
+        if (w.family === 'knife' && hitTarget && w.stealthMul) {
+          const tfx = -Math.sin(hitTarget.yaw), tfz = -Math.cos(hitTarget.yaw);
+          const dot = (dirX * tfx + dirZ * tfz);
+          if (dot > 0.5) { // attacker hitting target's back
+            dmg = Math.floor(w.dmg * w.stealthMul);
+            if (p.isLocal) tacticalCallout('stealth_kill');
+          }
+        }
         dealDamage(hitTarget, dmg, p, w.name, hit.head);
         if (p.isLocal) {
           hitMarker.classList.add('on');
@@ -1800,7 +1963,7 @@
     if (p.reserve <= 0) return;
     p.reloading = true;
     p.reloadEnd = performance.now() / 1000 + 1.6;
-    if (p.isLocal) SFX.reload();
+    if (p.isLocal) { SFX.reload(); tacticalCallout('reload'); }
   }
   function finishReload(p) {
     const w = WEAPONS[p.weap];
@@ -1838,9 +2001,19 @@
   }
 
   // ── grenades ──
+  // Grenade mesh colour per kind. Unknown kinds fall back to HE green.
+  function grenMeshColor(kind) {
+    return kind === 'he'      ? 0x405038
+         : kind === 'flash'   ? 0x707080
+         : kind === 'smoke'   ? 0x405048
+         : kind === 'molotov' ? 0xa05030
+         : kind === 'incgren' ? 0x3050a0
+         : kind === 'decoy'   ? 0x707038
+         : 0x405038;
+  }
   function throwGrenade(p, kind) {
     if (!p.alive || roundPhase === 'buy') return;
-    if (p.gren[kind] <= 0) return;
+    if (!p.gren[kind] || p.gren[kind] <= 0) return;
     p.gren[kind]--;
     const ox = p.x, oy = 1.5, oz = p.z;
     let dx, dy, dz;
@@ -1858,10 +2031,13 @@
       fuse: GREN[kind].fuse,
       owner: p,
       smokeAge: 0,
+      fireAge: 0,
+      decoyAge: 0,
+      decoyNext: 0,
       mesh: null,
       lit: false
     };
-    const mat = new THREE.MeshStandardMaterial({ color: kind === 'he' ? 0x405038 : kind === 'flash' ? 0x707080 : 0x405048, roughness: 0.5, metalness: 0.5 });
+    const mat = new THREE.MeshStandardMaterial({ color: grenMeshColor(kind), roughness: 0.5, metalness: 0.5 });
     const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.12, 10, 8), mat);
     mesh.position.set(ox, oy, oz);
     mesh.castShadow = true;
@@ -1869,6 +2045,13 @@
     g.mesh = mesh;
     liveGrenades.push(g);
     SFX.pin();
+    // Tactical callouts on throw
+    if (p.isLocal) {
+      if (kind === 'he' || kind === 'molotov' || kind === 'incgren') tacticalCallout('fire_in_hole');
+      else if (kind === 'flash') tacticalCallout('flashbang');
+      else if (kind === 'smoke') tacticalCallout('smoke');
+      else if (kind === 'decoy') tacticalCallout('decoy');
+    }
     if (p.isLocal) setHud(p);
   }
 
@@ -1878,7 +2061,6 @@
       if (g.exploded) {
         if (g.kind === 'smoke') {
           g.smokeAge += dt;
-          // animate growing then steady then dissipate
           const grow = Math.min(1, g.smokeAge / 0.6);
           const fade = g.smokeAge > GREN.smoke.life - 2 ? Math.max(0, (GREN.smoke.life - g.smokeAge) / 2) : 1;
           if (g.smokeMesh) {
@@ -1891,8 +2073,45 @@
             liveGrenades.splice(i, 1);
           }
           continue;
+        } else if (g.kind === 'molotov' || g.kind === 'incgren') {
+          g.fireAge += dt;
+          const def = GREN[g.kind];
+          // damage anyone in the fire every ~0.4s
+          g.fireDmgT = (g.fireDmgT || 0) - dt;
+          if (g.fireDmgT <= 0) {
+            g.fireDmgT = 0.4;
+            for (const pl of players.values()) {
+              if (!pl.alive) continue;
+              const d = Math.hypot(pl.x - g.x, pl.z - g.z);
+              if (d > def.radius) continue;
+              dealDamage(pl, Math.floor(def.dmg * 0.18), g.owner, g.kind === 'incgren' ? 'INCGREN' : 'MOLOTOV', false);
+            }
+          }
+          if (g.fireMesh) {
+            const f = 0.85 + Math.random() * 0.3;
+            g.fireMesh.scale.set(f, 1 + Math.random() * 0.2, f);
+            const opa = g.fireAge > def.life - 1 ? Math.max(0, def.life - g.fireAge) : 1;
+            g.fireMesh.material.opacity = 0.85 * opa;
+          }
+          if (g.fireAge > def.life) {
+            if (g.fireMesh) scene.remove(g.fireMesh);
+            if (g.fireLight) scene.remove(g.fireLight);
+            liveGrenades.splice(i, 1);
+          }
+          continue;
+        } else if (g.kind === 'decoy') {
+          g.decoyAge += dt;
+          g.decoyNext -= dt;
+          if (g.decoyNext <= 0) {
+            g.decoyNext = 0.6 + Math.random() * 1.2;
+            SFX.pistol();
+          }
+          if (g.decoyAge > GREN.decoy.life) {
+            if (g.mesh) scene.remove(g.mesh);
+            liveGrenades.splice(i, 1);
+          }
+          continue;
         } else {
-          // remove after small delay
           g.exploded += dt;
           if (g.exploded > 0.5 && g.mesh) {
             scene.remove(g.mesh);
@@ -1902,17 +2121,13 @@
         }
       }
       g.fuse -= dt;
-      // physics
       g.vy -= 18 * dt;
       let nx = g.x + g.vx * dt;
       let ny = g.y + g.vy * dt;
       let nz = g.z + g.vz * dt;
-      // ground bounce
       if (ny < 0.12) { ny = 0.12; g.vy = -g.vy * 0.4; g.vx *= 0.7; g.vz *= 0.7; }
-      // wall collision (simple — clip)
       const [cx, cz] = clipMove(g.x, g.z, nx - g.x, nz - g.z, 0.15);
       if (cx !== nx || cz !== nz) {
-        // bounce: reflect velocity
         if (Math.abs(cx - nx) > 0.001) g.vx = -g.vx * 0.4;
         if (Math.abs(cz - nz) > 0.001) g.vz = -g.vz * 0.4;
       }
@@ -1997,6 +2212,30 @@
       g.smokeMesh = sm;
       g.exploded = 0.001;
       SFX.smoke();
+    } else if (g.kind === 'molotov' || g.kind === 'incgren') {
+      // ground fire pool
+      const def = GREN[g.kind];
+      const color = g.kind === 'incgren' ? 0x6080ff : 0xff7030;
+      const fire = new THREE.Mesh(
+        new THREE.CylinderGeometry(def.radius * 0.85, def.radius, 0.5, 18, 1, true),
+        new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.85, side: THREE.DoubleSide })
+      );
+      fire.position.set(g.x, 0.3, g.z);
+      scene.add(fire);
+      g.fireMesh = fire;
+      const L = new THREE.PointLight(color, 4, def.radius * 4, 1.5);
+      L.position.set(g.x, 1.5, g.z);
+      scene.add(L);
+      g.fireLight = L;
+      // remove projectile sphere
+      if (g.mesh) { scene.remove(g.mesh); g.mesh = null; }
+      g.exploded = 0.001;
+      SFX.grenade();
+    } else if (g.kind === 'decoy') {
+      // sits and chirps fake gunfire for life seconds
+      g.exploded = 0.001;
+      g.decoyNext = 0.4;
+      SFX.pin();
     }
   }
 
@@ -2120,6 +2359,183 @@
     if (p.mesh) p.mesh.visible = true;
   }
 
+  // ── HOSTAGE MODE ──
+  // Hostages spawn around the T spawn. A CT presses USE within ~2m to "carry"
+  // a hostage (the hostage follows behind). Reaching the rescue zone (CT
+  // spawn) drops it and scores. T's win by killing all CTs or running clock.
+  function clearHostages() {
+    for (const h of hostages) {
+      if (h.mesh) scene.remove(h.mesh);
+    }
+    hostages.length = 0;
+    rescueZone = null;
+    if (window._rescueMesh) { scene.remove(window._rescueMesh); window._rescueMesh = null; }
+  }
+  function buildHostageMesh(team) {
+    const g = new THREE.Group();
+    const skin = new THREE.MeshStandardMaterial({ color: 0xc8a070, roughness: 0.7 });
+    const shirt = new THREE.MeshStandardMaterial({ color: 0xe8e0d0, roughness: 0.85 });
+    const pants = new THREE.MeshStandardMaterial({ color: 0x303030, roughness: 0.85 });
+    const torso = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 0.34), shirt);
+    torso.position.y = 1.25; torso.castShadow = true; g.add(torso);
+    const hips = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.26, 0.32), pants);
+    hips.position.y = 0.75; g.add(hips);
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.24, 14, 12), skin);
+    head.position.y = 1.92; head.castShadow = true; g.add(head);
+    // bound wrists (back) — small box
+    const cuff = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.06, 0.10),
+      new THREE.MeshStandardMaterial({ color: 0x707070, roughness: 0.6, metalness: 0.4 }));
+    cuff.position.set(0, 1.05, -0.20); g.add(cuff);
+    // legs
+    const legGeo = new THREE.BoxGeometry(0.18, 0.7, 0.18);
+    const legL = new THREE.Group(); legL.position.set(-0.12, 0.6, 0); g.add(legL); g.legL = legL;
+    const legR = new THREE.Group(); legR.position.set( 0.12, 0.6, 0); g.add(legR); g.legR = legR;
+    const legLM = new THREE.Mesh(legGeo, pants); legLM.position.y = -0.35; legL.add(legLM);
+    const legRM = new THREE.Mesh(legGeo, pants); legRM.position.y = -0.35; legR.add(legRM);
+    // marker beacon above
+    const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.10, 10, 8),
+      new THREE.MeshBasicMaterial({ color: 0xb8e070 }));
+    beacon.position.y = 2.4; g.add(beacon); g.beacon = beacon;
+    return g;
+  }
+  function spawnHostages() {
+    clearHostages();
+    if (gameMode !== 'hostage' || !mapMeta) return;
+    // Place 2 hostages around T spawn area; rescue at CT spawn
+    const sp = mapMeta.tSpawn;
+    const count = 2;
+    for (let i = 0; i < count; i++) {
+      const ang = (i / count) * Math.PI * 2 + Math.random() * 0.6;
+      const r = 3 + Math.random() * 2;
+      const hx = sp.x + Math.cos(ang) * r;
+      const hz = sp.z + Math.sin(ang) * r;
+      const mesh = buildHostageMesh();
+      mesh.position.set(hx, 0, hz);
+      scene.add(mesh);
+      hostages.push({
+        id: 'h_' + roundIndex + '_' + i, x: hx, z: hz, y: 0, yaw: 0,
+        mesh, carriedBy: null, rescued: false, alive: true,
+        walkPhase: 0
+      });
+    }
+    // Rescue zone = CT spawn area
+    rescueZone = { x: mapMeta.ctSpawn.x, z: mapMeta.ctSpawn.z, r: 5 };
+    const ring = new THREE.Mesh(
+      new THREE.RingGeometry(rescueZone.r - 0.4, rescueZone.r, 36),
+      new THREE.MeshBasicMaterial({ color: 0xb8e070, transparent: true, opacity: 0.55, side: THREE.DoubleSide })
+    );
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.set(rescueZone.x, 0.03, rescueZone.z);
+    scene.add(ring);
+    window._rescueMesh = ring;
+  }
+  function nearestHostageToLocal() {
+    const me = players.get(localId);
+    if (!me || !me.alive || me.team !== 'CT') return null;
+    let best = null, bestD = 2.2;
+    for (const h of hostages) {
+      if (h.rescued || !h.alive) continue;
+      if (h.carriedBy && h.carriedBy !== me.id) continue;
+      const d = Math.hypot(h.x - me.x, h.z - me.z);
+      if (d < bestD) { bestD = d; best = h; }
+    }
+    return best;
+  }
+  function tryUseHostage() {
+    const me = players.get(localId);
+    if (!me || !me.alive) return;
+    if (gameMode !== 'hostage') return;
+    if (me.team !== 'CT') return;
+    // In MP non-host case, queue the use for the host to resolve.
+    if (isMultiplayer && !isHost) { myInput._use = true; return; }
+    // already carrying? drop
+    const carried = hostages.find(h => h.carriedBy === me.id);
+    if (carried) { carried.carriedBy = null; return; }
+    const h = nearestHostageToLocal();
+    if (h) {
+      h.carriedBy = me.id;
+      tacticalCallout('hostage_save');
+    }
+  }
+  function updateHostages(dt) {
+    if (gameMode !== 'hostage' || roundPhase !== 'live') return;
+    const hostagesActionEl = $('hostage-action');
+    let total = 0, rescued = 0;
+    for (const h of hostages) {
+      total++;
+      if (h.rescued) { rescued++; continue; }
+      if (!h.alive) { rescued++; continue; } // counts as removed
+      if (h.carriedBy) {
+        const carrier = players.get(h.carriedBy);
+        if (!carrier || !carrier.alive) {
+          // dropped where carrier was
+          if (carrier) { h.x = carrier.x; h.z = carrier.z; }
+          h.carriedBy = null;
+        } else {
+          // follow ~1m behind carrier
+          const tx = carrier.x - Math.sin(carrier.yaw) * -1.2;
+          const tz = carrier.z - Math.cos(carrier.yaw) * -1.2;
+          const dx = tx - h.x, dz = tz - h.z;
+          const d = Math.hypot(dx, dz);
+          const sp = 5.2;
+          if (d > 0.05) {
+            const mv = Math.min(d, sp * dt) / d;
+            h.x += dx * mv; h.z += dz * mv;
+            h.walkPhase += dt * 9;
+            h.yaw = Math.atan2(dx, dz) + Math.PI;
+          }
+          // rescue check
+          if (rescueZone) {
+            const rd = Math.hypot(h.x - rescueZone.x, h.z - rescueZone.z);
+            if (rd < rescueZone.r) {
+              h.rescued = true;
+              h.carriedBy = null;
+              showCenter('HOSTAGE RESCUED', 1400);
+              carrier.money = Math.min(16000, carrier.money + 1000);
+              if (carrier.isLocal) setHud(carrier);
+              tacticalCallout('hostage_save');
+              rescued++;
+            }
+          }
+        }
+      }
+      if (h.mesh) {
+        h.mesh.position.set(h.x, h.y, h.z);
+        h.mesh.rotation.y = h.yaw || 0;
+        const sw = Math.sin(h.walkPhase) * (h.carriedBy ? 0.5 : 0);
+        if (h.mesh.legL) h.mesh.legL.rotation.x = sw;
+        if (h.mesh.legR) h.mesh.legR.rotation.x = -sw;
+        if (h.mesh.beacon) {
+          const t = performance.now() / 300;
+          h.mesh.beacon.position.y = 2.4 + Math.sin(t) * 0.1;
+          h.mesh.beacon.visible = !h.carriedBy && !h.rescued;
+        }
+        h.mesh.visible = !h.rescued;
+      }
+    }
+    $('hostage-count').textContent = rescued + ' / ' + total;
+    // action prompt
+    const me = players.get(localId);
+    if (me && me.team === 'CT' && me.alive) {
+      const carrying = hostages.find(h => h.carriedBy === me.id);
+      if (carrying) {
+        hostagesActionEl.style.opacity = '1';
+        hostagesActionEl.textContent = 'PRESS E TO DROP';
+      } else if (nearestHostageToLocal()) {
+        hostagesActionEl.style.opacity = '1';
+        hostagesActionEl.textContent = 'PRESS E TO RESCUE';
+      } else {
+        hostagesActionEl.style.opacity = '0';
+      }
+    } else {
+      hostagesActionEl.style.opacity = '0';
+    }
+    // round-end check by hostage rescue count
+    if (total > 0 && rescued >= total) {
+      endRound('CT');
+    }
+  }
+
   // ── ROUND / MATCH ──
   const MAX_ROUNDS = 16;
   function startRound() {
@@ -2127,7 +2543,8 @@
     roundPhase = 'buy';
     roundTime = 15;
     for (const p of players.values()) spawnPlayer(p);
-    showCenter('ROUND ' + roundIndex, 1400);
+    spawnHostages();
+    showCenter('ROUND ' + roundIndex + (gameMode === 'hostage' ? ' · RESCUE' : ''), 1400);
     if (players.get(localId)?.isLocal) setHud(players.get(localId));
     setScores();
     closeBuyMenu();
@@ -2137,12 +2554,15 @@
     roundTime = 1 * 60 + 45;
     closeBuyMenu();
     if (players.get(localId)?.isLocal && pointerWanted) tryLockPointer();
+    setTimeout(() => tacticalCallout('push'), 250);
   }
   function endRound(winnerTeam) {
     if (roundPhase === 'ended') return;
     roundPhase = 'ended';
     roundTime = 5;
     if (winnerTeam === 'CT') { scoreCT++; SFX.win(); } else { scoreT++; SFX.lose(); }
+    const me = players.get(localId);
+    if (me && me.team === winnerTeam) tacticalCallout('win'); else if (me) tacticalCallout('lose');
     showCenter(winnerTeam + ' WIN', 2400);
     // money
     for (const p of players.values()) {
@@ -2176,10 +2596,51 @@
 
   // ── BUY ──
   let buyOpen = false;
+  function buyCatalog() {
+    // Order: pistols, smgs, rifles, snipers, shotguns, lmgs, then grenades/utility.
+    const order = [
+      'pistol','usp','p250','fiveseven','dualies','deagle',
+      'mp5','mac10','ump','p90',
+      'famas','galil','ak47','m4a1','bullpup','aug','sg553',
+      'ssg','awp','scar',
+      'nova','mag7','xm1014',
+      'm249','negev'
+    ];
+    const list = [];
+    for (const k of order) {
+      const w = WEAPONS[k]; if (!w) continue;
+      list.push({ key: k, label: w.name, cost: w.cost, kind: 'weap' });
+    }
+    list.push(
+      { key: 'armor',   label: 'KEVLAR',     cost: ITEM_COSTS.armor,   kind: 'item' },
+      { key: 'he',      label: 'HE GRENADE', cost: ITEM_COSTS.he,      kind: 'gren' },
+      { key: 'flash',   label: 'FLASHBANG',  cost: ITEM_COSTS.flash,   kind: 'gren' },
+      { key: 'smoke',   label: 'SMOKE',      cost: ITEM_COSTS.smoke,   kind: 'gren' },
+      { key: 'molotov', label: 'MOLOTOV',    cost: ITEM_COSTS.molotov, kind: 'gren' },
+      { key: 'incgren', label: 'INCENDIARY', cost: ITEM_COSTS.incgren, kind: 'gren' },
+      { key: 'decoy',   label: 'DECOY',      cost: ITEM_COSTS.decoy,   kind: 'gren' },
+      { key: 'ammo',    label: 'FULL AMMO',  cost: ITEM_COSTS.ammo,    kind: 'item' }
+    );
+    return list;
+  }
+  function ensureBuyGrid() {
+    const grid = $('buy-grid');
+    if (!grid || grid.dataset.populated === '1') return;
+    grid.innerHTML = '';
+    for (const it of buyCatalog()) {
+      const b = document.createElement('button');
+      b.dataset.buy = it.key;
+      b.innerHTML = `${it.label} <span class="cost">$${it.cost}</span>`;
+      b.addEventListener('click', () => buyItem(it.key));
+      grid.appendChild(b);
+    }
+    grid.dataset.populated = '1';
+  }
   function openBuyMenu() {
     if (roundPhase !== 'buy') return;
     const p = players.get(localId);
     if (!p) return;
+    ensureBuyGrid();
     buyOpen = true;
     buyEl.classList.remove('hidden');
     document.exitPointerLock?.();
@@ -2195,23 +2656,34 @@
     $('buy-money').textContent = p.money;
     $('buy-timer').textContent = Math.max(0, Math.ceil(roundTime));
     const m = p.money;
-    [['pistol', 200], ['ak47', 2700], ['bullpup', 3300], ['armor', 650], ['he', 300], ['flash', 200], ['smoke', 300], ['ammo', 150]].forEach(([k, c]) => {
-      document.querySelector(`#buy button[data-buy="${k}"]`).disabled = m < c;
-    });
+    for (const it of buyCatalog()) {
+      const el = document.querySelector(`#buy button[data-buy="${it.key}"]`);
+      if (el) el.disabled = m < it.cost;
+    }
   }
   function buyItem(item) {
     const p = players.get(localId);
     if (!p || roundPhase !== 'buy') return;
-    if (item === 'pistol' && p.money >= 200) { p.money -= 200; saveAmmoForSlot(p); p.slot1 = 'pistol'; switchWeapon(p, 'pistol'); p.ammoBySlot[p.weap] = { ammo: WEAPONS.pistol.mag, reserve: WEAPONS.pistol.reserve }; p.ammo = WEAPONS.pistol.mag; p.reserve = WEAPONS.pistol.reserve; }
-    else if (item === 'ak47' && p.money >= 2700 && p.team === 'T') { p.money -= 2700; saveAmmoForSlot(p); p.slot2 = 'ak47'; switchWeapon(p, 'ak47'); p.ammoBySlot[p.weap] = { ammo: WEAPONS.ak47.mag, reserve: WEAPONS.ak47.reserve }; p.ammo = WEAPONS.ak47.mag; p.reserve = WEAPONS.ak47.reserve; }
-    else if (item === 'ak47' && p.money >= 2700 && p.team === 'CT') { p.money -= 2700; saveAmmoForSlot(p); p.slot2 = 'ak47'; switchWeapon(p, 'ak47'); p.ammoBySlot[p.weap] = { ammo: WEAPONS.ak47.mag, reserve: WEAPONS.ak47.reserve }; p.ammo = WEAPONS.ak47.mag; p.reserve = WEAPONS.ak47.reserve; }
-    else if (item === 'bullpup' && p.money >= 3300) { p.money -= 3300; saveAmmoForSlot(p); p.slot2 = 'bullpup'; switchWeapon(p, 'bullpup'); p.ammoBySlot[p.weap] = { ammo: WEAPONS.bullpup.mag, reserve: WEAPONS.bullpup.reserve }; p.ammo = WEAPONS.bullpup.mag; p.reserve = WEAPONS.bullpup.reserve; }
-    else if (item === 'armor' && p.money >= 650) { p.money -= 650; p.armor = 100; }
-    else if (item === 'he' && p.money >= 300 && p.gren.he < 1) { p.money -= 300; p.gren.he++; }
-    else if (item === 'flash' && p.money >= 200 && p.gren.flash < 2) { p.money -= 200; p.gren.flash++; }
-    else if (item === 'smoke' && p.money >= 300 && p.gren.smoke < 1) { p.money -= 300; p.gren.smoke++; }
-    else if (item === 'ammo' && p.money >= 150) {
-      p.money -= 150;
+    // Weapons: generic handler. Slot is read from the weapon definition.
+    if (WEAPONS[item]) {
+      const w = WEAPONS[item];
+      if (p.money < w.cost) return;
+      p.money -= w.cost;
+      saveAmmoForSlot(p);
+      if (w.slot === 1) p.slot1 = item; else p.slot2 = item;
+      switchWeapon(p, item);
+      p.ammoBySlot[p.weap] = { ammo: w.mag, reserve: w.reserve };
+      p.ammo = w.mag; p.reserve = w.reserve;
+    }
+    else if (item === 'armor' && p.money >= ITEM_COSTS.armor) { p.money -= ITEM_COSTS.armor; p.armor = 100; }
+    else if (item === 'he'      && p.money >= ITEM_COSTS.he      && p.gren.he      < 1) { p.money -= ITEM_COSTS.he;      p.gren.he++; }
+    else if (item === 'flash'   && p.money >= ITEM_COSTS.flash   && p.gren.flash   < 2) { p.money -= ITEM_COSTS.flash;   p.gren.flash++; }
+    else if (item === 'smoke'   && p.money >= ITEM_COSTS.smoke   && p.gren.smoke   < 1) { p.money -= ITEM_COSTS.smoke;   p.gren.smoke++; }
+    else if (item === 'molotov' && p.money >= ITEM_COSTS.molotov && (p.gren.molotov||0) < 1) { p.money -= ITEM_COSTS.molotov; p.gren.molotov = (p.gren.molotov||0) + 1; }
+    else if (item === 'incgren' && p.money >= ITEM_COSTS.incgren && (p.gren.incgren||0) < 1) { p.money -= ITEM_COSTS.incgren; p.gren.incgren = (p.gren.incgren||0) + 1; }
+    else if (item === 'decoy'   && p.money >= ITEM_COSTS.decoy   && (p.gren.decoy||0)   < 1) { p.money -= ITEM_COSTS.decoy;   p.gren.decoy   = (p.gren.decoy||0) + 1; }
+    else if (item === 'ammo' && p.money >= ITEM_COSTS.ammo) {
+      p.money -= ITEM_COSTS.ammo;
       const w = WEAPONS[p.weap]; if (w) p.reserve = Math.min(w.reserve * 2, p.reserve + w.reserve);
     }
     setHud(p); updateBuyMenu();
@@ -2262,8 +2734,10 @@
     if (k === 'b') { if (buyOpen) closeBuyMenu(); else openBuyMenu(); }
     if (k === '1') { const p = players.get(localId); if (p && p.slot1) { saveAmmoForSlot(p); switchWeapon(p, p.slot1); } }
     if (k === '2') { const p = players.get(localId); if (p && p.slot2) { saveAmmoForSlot(p); switchWeapon(p, p.slot2); } }
+    if (k === '3') { const p = players.get(localId); if (p && p.melee) { saveAmmoForSlot(p); switchWeapon(p, p.melee); } }
     if (k === 'g') { const p = players.get(localId); if (p) cycleGren(p); }
     if (k === 'f') { const p = players.get(localId); if (p) throwGrenade(p, p.activeGren); }
+    if (k === 'e') { tryUseHostage(); }
     if (k === 'tab') { e.preventDefault(); openScoreboard(); }
     if (k === 'enter') { chatInput.classList.add('on'); chatInput.focus(); }
     if (k === 'escape') { document.exitPointerLock?.(); }
@@ -2276,10 +2750,10 @@
   window.addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
 
   function cycleGren(p) {
-    const order = ['he', 'flash', 'smoke'];
+    const order = ['he', 'flash', 'smoke', 'molotov', 'incgren', 'decoy'];
     const i = order.indexOf(p.activeGren);
-    for (let n = 1; n <= 3; n++) {
-      const k = order[(i + n) % 3];
+    for (let n = 1; n <= order.length; n++) {
+      const k = order[(i + n) % order.length];
       p.activeGren = k;
       if (p.gren[k] > 0) break;
     }
@@ -2357,7 +2831,12 @@
     e.preventDefault();
     const p = players.get(localId); if (!p) return;
     saveAmmoForSlot(p);
-    switchWeapon(p, p.weap === p.slot1 ? (p.slot2 || p.slot1) : p.slot1);
+    // Cycle: slot1 → slot2 → melee → slot1 …
+    let next;
+    if (p.weap === p.slot1) next = p.slot2 || p.melee;
+    else if (p.weap === p.slot2) next = p.melee || p.slot1;
+    else next = p.slot1;
+    switchWeapon(p, next);
   });
   $('btn-gren').addEventListener('pointerdown', e => {
     e.preventDefault();
@@ -2366,6 +2845,7 @@
     else cycleGren(p);
   });
   $('btn-buy').addEventListener('pointerdown', e => { e.preventDefault(); if (buyOpen) closeBuyMenu(); else openBuyMenu(); });
+  $('btn-use').addEventListener('pointerdown', e => { e.preventDefault(); tryUseHostage(); });
 
   // ── PEERJS MULTIPLAYER ──
   const ROOM_PREFIX = 'omsl-';
@@ -2412,7 +2892,7 @@
         conns.set(cid, { conn, playerId: remoteP.id });
         conn.on('data', d => onHostData(cid, d));
         conn.on('close', () => onClientLeave(cid));
-        conn.send({ t: 'welcome', id: remoteP.id, mapName: currentMap, scoreCT, scoreT, perSide, botDifficulty });
+        conn.send({ t: 'welcome', id: remoteP.id, mapName: currentMap, scoreCT, scoreT, perSide, botDifficulty, gameMode });
         updateHostLobby();
       });
     });
@@ -2453,6 +2933,7 @@
       p._wantSwitch = d.switchTo;
       p._wantReload = d.reload;
       p._wantNade = d.nade;
+      p._wantUse = !!d.use;
     } else if (d.t === 'buy') {
       // mimic local buy
       const oldLocal = localId;
@@ -2513,6 +2994,7 @@
       localId = d.id;
       perSide = d.perSide;
       botDifficulty = d.botDifficulty;
+      gameMode = d.gameMode || 'bomb';
       // make a local "ghost" player object
       buildMap(d.mapName);
       const me = makePlayer({ id: d.id, name: ($('nick').value || 'PLAYER').slice(0, 12), team: 'CT', isLocal: true });
@@ -2568,6 +3050,43 @@
     roundTime = snap.roundT;
     scoreCT = snap.scoreCT; scoreT = snap.scoreT;
     setScores();
+    if (snap.mode) gameMode = snap.mode;
+    if (snap.hostages) {
+      // If host has reset hostages (new round) ids may differ — drop ours.
+      const snapIds = new Set(snap.hostages.map(h => h.id));
+      if (hostages.some(h => !snapIds.has(h.id))) clearHostages();
+      // Lazy create hostage meshes locally on first snap
+      if (hostages.length === 0 && snap.hostages.length > 0 && mapMeta) {
+        rescueZone = { x: mapMeta.ctSpawn.x, z: mapMeta.ctSpawn.z, r: 5 };
+        if (!window._rescueMesh) {
+          const ring = new THREE.Mesh(
+            new THREE.RingGeometry(rescueZone.r - 0.4, rescueZone.r, 36),
+            new THREE.MeshBasicMaterial({ color: 0xb8e070, transparent: true, opacity: 0.55, side: THREE.DoubleSide })
+          );
+          ring.rotation.x = -Math.PI / 2;
+          ring.position.set(rescueZone.x, 0.03, rescueZone.z);
+          scene.add(ring);
+          window._rescueMesh = ring;
+        }
+        for (const hs of snap.hostages) {
+          const mesh = buildHostageMesh();
+          mesh.position.set(hs.x, 0, hs.z);
+          scene.add(mesh);
+          hostages.push({ id: hs.id, x: hs.x, z: hs.z, y: 0, yaw: hs.yaw || 0, mesh, carriedBy: null, rescued: hs.rescued, alive: true, walkPhase: 0 });
+        }
+      }
+      for (const hs of snap.hostages) {
+        const h = hostages.find(x => x.id === hs.id);
+        if (!h) continue;
+        h.x = hs.x; h.z = hs.z; h.yaw = hs.yaw || 0; h.rescued = hs.rescued;
+        if (h.mesh) {
+          h.mesh.position.set(h.x, 0, h.z);
+          h.mesh.rotation.y = h.yaw;
+          h.mesh.visible = !h.rescued;
+        }
+      }
+      $('hostage-count').textContent = snap.hostages.filter(h => h.rescued).length + ' / ' + snap.hostages.length;
+    }
   }
 
   function buildSnap() {
@@ -2582,7 +3101,8 @@
         kills: p.kills, deaths: p.deaths, alive: p.alive
       });
     }
-    return { t: 'snap', players: arr, phase: roundPhase, roundT: roundTime, scoreCT, scoreT };
+    const hArr = hostages.map(h => ({ id: h.id, x: h.x, z: h.z, yaw: h.yaw, rescued: h.rescued, carried: !!h.carriedBy }));
+    return { t: 'snap', players: arr, phase: roundPhase, roundT: roundTime, scoreCT, scoreT, mode: gameMode, hostages: hArr };
   }
   function hostBroadcastSnap() {
     if (!isHost || conns.size === 0) return;
@@ -2599,9 +3119,10 @@
         fire: !!myInput.fire,
         sprint: !!myInput.sprint, walk: !!myInput.walk,
         reload: !!myInput._reload, nade: myInput._nade || null,
-        switchTo: myInput._switch || null
+        switchTo: myInput._switch || null,
+        use: !!myInput._use
       });
-      myInput._reload = false; myInput._nade = null; myInput._switch = null;
+      myInput._reload = false; myInput._nade = null; myInput._switch = null; myInput._use = false;
     } catch (_) {}
   }
   function sendChat(msg) {
@@ -2664,9 +3185,11 @@
     minimap.classList.remove('hidden');
     crosshair.classList.remove('hidden');
     chatEl.classList.remove('hidden');
+    if (gameMode === 'hostage') $('hostage-hud').classList.remove('hidden');
+    else $('hostage-hud').classList.add('hidden');
   }
-  let soloPicks = { map: 'dust2', side: 'CT', diff: 'medium', size: 5 };
-  let hostPicks = { map: 'dust2', diff: 'medium', size: 5 };
+  let soloPicks = { map: 'dust2', side: 'CT', diff: 'medium', size: 5, mode: 'bomb' };
+  let hostPicks = { map: 'dust2', diff: 'medium', size: 5, mode: 'bomb' };
 
   document.querySelectorAll('.map-pick').forEach(b => b.addEventListener('click', () => { soloPicks.map = b.dataset.map; markSelected('.map-pick', b); }));
   document.querySelectorAll('.side-pick').forEach(b => b.addEventListener('click', () => { soloPicks.side = b.dataset.side; markSelected('.side-pick', b); }));
@@ -2675,6 +3198,8 @@
   document.querySelectorAll('.map-pick-h').forEach(b => b.addEventListener('click', () => { hostPicks.map = b.dataset.map; markSelected('.map-pick-h', b); }));
   document.querySelectorAll('.diff-pick-h').forEach(b => b.addEventListener('click', () => { hostPicks.diff = b.dataset.diff; markSelected('.diff-pick-h', b); }));
   document.querySelectorAll('.size-pick-h').forEach(b => b.addEventListener('click', () => { hostPicks.size = +b.dataset.size; markSelected('.size-pick-h', b); }));
+  document.querySelectorAll('.mode-pick').forEach(b => b.addEventListener('click', () => { soloPicks.mode = b.dataset.mode; markSelected('.mode-pick', b); }));
+  document.querySelectorAll('.mode-pick-h').forEach(b => b.addEventListener('click', () => { hostPicks.mode = b.dataset.mode; markSelected('.mode-pick-h', b); }));
   function markSelected(sel, btn) {
     document.querySelectorAll(sel).forEach(b => b.classList.remove('sel'));
     btn.classList.add('sel');
@@ -2688,6 +3213,8 @@
     document.querySelector('.map-pick-h[data-map="dust2"]')?.classList.add('sel');
     document.querySelector('.diff-pick-h[data-diff="medium"]')?.classList.add('sel');
     document.querySelector('.size-pick-h[data-size="5"]')?.classList.add('sel');
+    document.querySelector('.mode-pick[data-mode="bomb"]')?.classList.add('sel');
+    document.querySelector('.mode-pick-h[data-mode="bomb"]')?.classList.add('sel');
   }, 50);
 
   $('btn-solo').addEventListener('click', () => { ensureAudio(); hideAllPanels(['solo-setup']); soloPanel.classList.remove('hidden'); });
@@ -2743,6 +3270,7 @@
     botDifficulty = soloPicks.diff;
     perSide = soloPicks.size;
     myTeam = soloPicks.side;
+    gameMode = soloPicks.mode || 'bomb';
     buildMap(soloPicks.map);
     players.clear();
     const me = makePlayer({ id: 'local', name: ($('nick').value || 'PLAYER').slice(0, 12), team: myTeam, isLocal: true });
@@ -2762,6 +3290,7 @@
     botDifficulty = hostPicks.diff;
     perSide = hostPicks.size;
     myTeam = balanceTeam();
+    gameMode = hostPicks.mode || 'bomb';
     buildMap(hostPicks.map);
     // local player
     const me = makePlayer({ id: 'host_' + Math.random().toString(36).slice(2, 6), name: ($('nick').value || 'PLAYER').slice(0, 12), team: myTeam, isLocal: true });
@@ -2824,7 +3353,8 @@
   }
 
   // ── BUY MENU button handlers ──
-  document.querySelectorAll('#buy button[data-buy]').forEach(b => b.addEventListener('click', () => buyItem(b.dataset.buy)));
+  // Buy buttons are wired per-button in ensureBuyGrid() now that the catalog
+  // is populated dynamically from WEAPONS, so no static querySelectorAll here.
 
   // ── MOVE / MAIN LOGIC ──
   function updateLocal(dt, now) {
@@ -2886,11 +3416,26 @@
     }
     // reload finished?
     if (me.reloading && performance.now() / 1000 >= me.reloadEnd) finishReload(me);
-    // viewmodel sway + kick
+    // viewmodel sway + kick (+ reload tilt)
     if (viewmodel.hand) {
       const sway = Math.sin(me.walkPhase) * 0.012;
       const bob = Math.abs(Math.sin(me.walkPhase * 0.5)) * 0.012;
-      viewmodel.hand.position.set(0.22 + sway, -0.22 - bob, -0.55 + (viewmodel.kickT ? viewmodel.kickT * 0.5 : 0));
+      let rx = 0, ry = 0, rDip = 0;
+      if (me.reloading) {
+        const tRemain = Math.max(0, me.reloadEnd - now);
+        const rPhase = 1 - Math.min(1, tRemain / 1.6);
+        // gun tilts down-and-right, then back up at end
+        rDip = Math.sin(rPhase * Math.PI) * 0.16;
+        rx = Math.sin(rPhase * Math.PI) * 0.55;
+        ry = Math.sin(rPhase * Math.PI) * 0.30;
+      }
+      viewmodel.hand.position.set(
+        0.22 + sway + ry * 0.1,
+        -0.22 - bob - rDip,
+        -0.55 + (viewmodel.kickT ? viewmodel.kickT * 0.5 : 0)
+      );
+      viewmodel.hand.rotation.x = rx;
+      viewmodel.hand.rotation.y = ry * 0.5;
     }
     if (viewmodel.kickT > 0) viewmodel.kickT -= dt;
     // muzzle visual fade
@@ -2935,20 +3480,107 @@
       if (p._wantReload) { startReload(p); p._wantReload = false; }
       if (p._wantSwitch) { saveAmmoForSlot(p); switchWeapon(p, p._wantSwitch); p._wantSwitch = null; }
       if (p._wantNade) { throwGrenade(p, p._wantNade); p._wantNade = null; }
+      if (p._wantUse) {
+        // host-side hostage USE for remote player
+        if (gameMode === 'hostage' && p.team === 'CT') {
+          const carried = hostages.find(h => h.carriedBy === p.id);
+          if (carried) carried.carriedBy = null;
+          else {
+            let best = null, bestD = 2.2;
+            for (const h of hostages) {
+              if (h.rescued || !h.alive) continue;
+              if (h.carriedBy && h.carriedBy !== p.id) continue;
+              const d = Math.hypot(h.x - p.x, h.z - p.z);
+              if (d < bestD) { bestD = d; best = h; }
+            }
+            if (best) best.carriedBy = p.id;
+          }
+        }
+        p._wantUse = false;
+      }
     }
   }
 
   function updateRemoteMeshes() {
+    const nowMs = performance.now();
     for (const p of players.values()) {
       if (p.isLocal || !p.mesh) continue;
-      p.mesh.position.set(p.x, p.y || 0, p.z);
-      p.mesh.rotation.y = p.yaw;
-      // walk anim
-      const sw = Math.sin(p.walkPhase || 0) * 0.45;
-      if (p.mesh.legL) p.mesh.legL.rotation.x = sw;
-      if (p.mesh.legR) p.mesh.legR.rotation.x = -sw;
-      if (p.mesh.armL) p.mesh.armL.rotation.x = -Math.PI / 3 + sw * 0.4;
-      if (p.mesh.nameSpr) p.mesh.nameSpr.lookAt(camera.position);
+      const m = p.mesh;
+      // Death animation: tip forward and sink slightly until visible=false.
+      if (!p.alive) {
+        if (m.visible) {
+          p._deathT = (p._deathT || 0) + 0.05;
+          const k = Math.min(1, p._deathT);
+          m.rotation.z = k * 1.1;                  // fall sideways
+          m.position.set(p.x, (p.y || 0) - k * 0.3, p.z);
+          m.rotation.y = p.yaw;
+          // hide after settling
+          if (p._deathT > 6) m.visible = false;
+        }
+        continue;
+      } else if (p._deathT) {
+        p._deathT = 0;
+        m.rotation.z = 0;
+      }
+      m.position.set(p.x, p.y || 0, p.z);
+      m.rotation.y = p.yaw;
+
+      // Walk cycle: amplitude scales with movement speed (walkPhase advance
+      // rate is already proportional to speed in the bot/host sims).
+      const speedFactor = Math.min(1, ((p._lastPhase != null) ? Math.abs((p.walkPhase || 0) - p._lastPhase) * 7 : 0.8));
+      p._lastPhase = p.walkPhase || 0;
+      const sw = Math.sin(p.walkPhase || 0) * 0.55 * speedFactor;
+      const bob = Math.abs(Math.cos((p.walkPhase || 0) * 0.5)) * 0.04 * speedFactor;
+      if (m.legL) m.legL.rotation.x = sw;
+      if (m.legR) m.legR.rotation.x = -sw;
+      if (m.torso) m.torso.position.y = 1.3 + bob;
+
+      // Arms: rifle stance, left arm braces gun (steady), right arm holds.
+      // While reloading, swing left arm down and back up.
+      const baseArmR = -Math.PI / 2.1;
+      const baseArmL = -Math.PI / 3.0;
+      let armR = baseArmR;
+      let armL = baseArmL;
+      if (p.reloading) {
+        const tRemain = Math.max(0, (p.reloadEnd || 0) - nowMs / 1000);
+        const rPhase = 1 - Math.min(1, tRemain / 1.6); // 0→1
+        // arm swings down then up
+        const swing = Math.sin(rPhase * Math.PI) * 1.1;
+        armL = baseArmL - swing;
+        armR = baseArmR + swing * 0.15;
+      } else {
+        // subtle counter-sway with walk
+        armR = baseArmR - sw * 0.15;
+        armL = baseArmL + sw * 0.35;
+      }
+      // Pitch: bend torso/arms so character "aims up/down" too.
+      const pitch = Math.max(-0.8, Math.min(0.8, p.pitch || 0));
+      armR -= pitch * 0.6;
+      armL -= pitch * 0.6;
+      if (m.armR) m.armR.rotation.x = armR;
+      if (m.armL) m.armL.rotation.x = armL;
+      if (m.head) m.head.rotation.x = pitch * 0.5;
+
+      // Recoil kick — when remote fires we bump _recoilT.
+      const dtFire = nowMs / 1000 - (p.lastFireT || 0);
+      if (dtFire < 0.10 && m.rifle) {
+        const k = (0.10 - dtFire) / 0.10;
+        m.rifle.position.z = 0.30 - k * 0.06;
+        if (m.armR) m.armR.rotation.x -= k * 0.25;
+      } else if (m.rifle) {
+        m.rifle.position.z = 0.30;
+      }
+
+      // Weapon-family pose: shrink rifle for pistol, hide for knife.
+      const fam = WEAPONS[p.weap]?.family || 'rifle';
+      if (m.rifle) {
+        if (fam === 'knife') m.rifle.visible = false;
+        else m.rifle.visible = true;
+        const s = fam === 'pistol' ? 0.55 : fam === 'sniper' ? 1.15 : 1;
+        m.rifle.scale.set(s, s, s);
+      }
+
+      if (m.nameSpr) m.nameSpr.lookAt(camera.position);
     }
   }
 
@@ -3078,6 +3710,7 @@
     if (isHost) updatePlayersServer(dt, nowSec);
 
     tickGrenades(dt);
+    updateHostages(dt);
     // tracer fade
     for (let i = tracers.length - 1; i >= 0; i--) {
       const t = tracers[i];

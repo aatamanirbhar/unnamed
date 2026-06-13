@@ -101,6 +101,14 @@
   #fire-btn { position: absolute; bottom: max(80px, env(safe-area-inset-bottom, 0px) + 70px); right: max(28px, env(safe-area-inset-right, 0px) + 18px); width: 100px; height: 100px; border-radius: 50%; background: rgba(200,80,58,0.15); border: 2px solid #c8503a; color: #ffd089; font-family: 'Courier New', monospace; font-size: 14px; font-weight: bold; letter-spacing: 3px; text-shadow: 0 0 8px #c8503a; box-shadow: 0 0 18px rgba(200,80,58,0.3); pointer-events: auto; touch-action: manipulation; }
   #fire-btn:active { background: rgba(200,80,58,0.4); transform: scale(0.95); }
   #reload-btn { position: absolute; bottom: max(190px, env(safe-area-inset-bottom, 0px) + 180px); right: max(28px, env(safe-area-inset-right, 0px) + 18px); width: 70px; height: 50px; border-radius: 8px; background: rgba(200,80,58,0.08); border: 1px solid #c8503a; color: #c8503a; font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 2px; text-shadow: 0 0 6px #c8503a; pointer-events: auto; touch-action: manipulation; }
+  /* Title-screen options (time of day + weather) */
+  #opts .opt-row { display:flex; align-items:center; gap:6px; flex-wrap:wrap; justify-content:center; }
+  #opts .opt-label { font-size:10px; letter-spacing:3px; color:#c8503a; min-width:90px; text-align:right; opacity:0.85; }
+  #opts .opt-btn { background:rgba(10,6,4,0.55); border:1px solid rgba(200,80,58,0.55); color:#e8d8c8; font-family:'Courier New',monospace; font-size:10px; letter-spacing:2px; padding:6px 10px; cursor:pointer; }
+  #opts .opt-btn.on { background:#c8503a; color:#0a0604; box-shadow:0 0 12px #c8503a; }
+  @media (max-width: 480px) {
+    #opts .opt-label { min-width:auto; width:100%; text-align:center; margin-bottom:2px; }
+  }
   @media (max-width: 480px) {
     #stick-move, #stick-look { width: 110px; height: 110px; }
     .knob { width: 48px; height: 48px; margin: -24px 0 0 -24px; }
@@ -169,13 +177,27 @@
 <div id="wave" class="hidden">NIGHT · WAVE <span id="wave-num">1</span></div>
 
 <div id="title">
-  <div class="crown">— RACCOON CITY · SEPT 1998 · 18:42 —</div>
+  <div class="crown">— RACCOON CITY · SEPT 1998 —</div>
   <h1>RACCOON</h1>
-  <p>THE SUN'S GOING DOWN OVER A DEAD CITY.</p>
   <p>HANDGUN. ROCKET LAUNCHER. ONE EXTRACTION POINT.</p>
-  <p>HOLD THE STREETS UNTIL THE CHOPPER ARRIVES.</p>
-  <p class="start">— CLICK / TAP TO BEGIN —</p>
-  <div data-omenly-ad style="margin-top: 24px; pointer-events: auto;"></div>
+  <p>FIGHT YOUR WAY TO THE HELIPAD. THE CHOPPER IS INBOUND.</p>
+  <div id="opts" style="margin-top:18px;pointer-events:auto;display:flex;flex-direction:column;gap:10px;align-items:center;">
+    <div class="opt-row" data-group="time">
+      <span class="opt-label">TIME OF DAY</span>
+      <button class="opt-btn" data-time="day">DAYLIGHT</button>
+      <button class="opt-btn" data-time="dusk">DUSK</button>
+      <button class="opt-btn" data-time="night">NIGHT</button>
+    </div>
+    <div class="opt-row" data-group="weather">
+      <span class="opt-label">WEATHER</span>
+      <button class="opt-btn" data-weather="clear">CLEAR</button>
+      <button class="opt-btn" data-weather="rain">RAIN</button>
+      <button class="opt-btn" data-weather="snow">SNOW</button>
+      <button class="opt-btn" data-weather="autumn">AUTUMN</button>
+    </div>
+  </div>
+  <p class="start" style="margin-top:16px;">— CLICK / TAP TO BEGIN —</p>
+  <div data-omenly-ad style="margin-top: 18px; pointer-events: auto;"></div>
 </div>
 
 <!-- Hero one-liner overlay -->
@@ -311,7 +333,7 @@
     shadowMapSize: lowEnd ? 0 : 2048,
     cityBuildings: lowEnd ? 14 : 28,
     wrecks: lowEnd ? 2 : 4,
-    crates: lowEnd ? 12 : 24,
+    crates: lowEnd ? 4 : 8,
     cars: lowEnd ? 8 : 16,
     lampStride: lowEnd ? 30 : 18,
     fogNear: lowEnd ? 35 : 60,
@@ -587,9 +609,10 @@
       const cz = -MAP_RADIUS + 8 + Math.random() * (MAP_RADIUS * 2 - 16);
       addCar((Math.random() - 0.5) * 5, cz, Math.random() * Math.PI);
     }
-    // dumpsters / crates as cover
+    // dumpsters / crates as cover — kept along the building lines (>16 from road
+    // centre) so the road stays a clear sprint lane to the extraction.
     for (let i = 0; i < PERF.crates; i++) {
-      const cx = (Math.random() < 0.5 ? -1 : 1) * (10 + Math.random() * 22);
+      const cx = (Math.random() < 0.5 ? -1 : 1) * (16 + Math.random() * 18);
       const cz = -MAP_RADIUS + 8 + Math.random() * (MAP_RADIUS * 2 - 16);
       addCrate(cx, cz);
     }
@@ -1173,6 +1196,157 @@
     waveDelay = 1.5;
   }
 
+  // ── OPTIONS (time of day + weather), chosen on the title screen ──
+  const OPTS = { time: 'day', weather: 'clear' };
+
+  // Weather particles + ground tint live in this group so we can swap or clear them.
+  const weatherGroup = new THREE.Group();
+  scene.add(weatherGroup);
+  let weatherParticles = null;       // { points, geom, mat, velY, kind }
+  const RAIN_COUNT  = lowEnd ? 600 : 1400;
+  const SNOW_COUNT  = lowEnd ? 400 : 900;
+  const LEAF_COUNT  = lowEnd ? 60  : 120;
+
+  function clearWeather() {
+    while (weatherGroup.children.length) {
+      const c = weatherGroup.children.pop();
+      if (c.geometry) c.geometry.dispose();
+      if (c.material) c.material.dispose();
+    }
+    weatherParticles = null;
+  }
+
+  function makeParticleField(count, color, sizeMin, sizeMax, vyMin, vyMax, kind) {
+    const positions = new Float32Array(count * 3);
+    const vels = new Float32Array(count);
+    for (let i = 0; i < count; i++) {
+      positions[i * 3]     = (Math.random() - 0.5) * MAP_RADIUS * 2;
+      positions[i * 3 + 1] = Math.random() * 50;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * MAP_RADIUS * 2;
+      vels[i] = vyMin + Math.random() * (vyMax - vyMin);
+    }
+    const geom = new THREE.BufferGeometry();
+    geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const mat = new THREE.PointsMaterial({
+      color, size: sizeMin + Math.random() * (sizeMax - sizeMin),
+      transparent: true, opacity: 0.85, depthWrite: false, fog: true
+    });
+    const points = new THREE.Points(geom, mat);
+    weatherGroup.add(points);
+    weatherParticles = { points, geom, mat, vels, kind };
+  }
+
+  function applyTimeAndWeather() {
+    // ── time of day ──
+    if (OPTS.time === 'day') {
+      scene.background = new THREE.Color(0x88b8d8);
+      scene.fog = new THREE.Fog(0x9ac8e0, PERF.fogNear + 30, PERF.fogFar + 60);
+      ambient.intensity = 0.85; ambient.color.setHex(0xc8d8e8);
+      hemi.intensity = 0.7; hemi.color.setHex(0xc8e0f0); hemi.groundColor.setHex(0x3a3028);
+      sun.intensity = 1.6; sun.color.setHex(0xfff0d0);
+      sunDisc.position.set(60, 140, 30); sunDisc.material.color.setHex(0xfff8e0);
+      sunHalo.position.copy(sunDisc.position); sunHalo.material.color.setHex(0xffe0a0);
+      renderer.toneMappingExposure = 1.15;
+    } else if (OPTS.time === 'night') {
+      scene.background = new THREE.Color(0x080610);
+      scene.fog = new THREE.Fog(0x080610, PERF.fogNear - 10, PERF.fogFar - 60);
+      ambient.intensity = 0.18; ambient.color.setHex(0x202840);
+      hemi.intensity = 0.18; hemi.color.setHex(0x303060); hemi.groundColor.setHex(0x080810);
+      sun.intensity = 0.25; sun.color.setHex(0x506080);
+      sunDisc.position.set(-60, 90, -40); sunDisc.material.color.setHex(0xc8c8e0);
+      sunHalo.position.copy(sunDisc.position); sunHalo.material.color.setHex(0x6080a0);
+      renderer.toneMappingExposure = 0.85;
+    } else { // dusk
+      scene.background = new THREE.Color(0x6a3018);
+      scene.fog = new THREE.Fog(0x6a3018, PERF.fogNear, PERF.fogFar);
+      ambient.intensity = 0.55; ambient.color.setHex(0x8a4020);
+      hemi.intensity = 0.4; hemi.color.setHex(0xff7040); hemi.groundColor.setHex(0x1a0a08);
+      sun.intensity = 1.4; sun.color.setHex(0xff8040);
+      sunDisc.position.set(140, 90, 60); sunDisc.material.color.setHex(0xffd089);
+      sunHalo.position.copy(sunDisc.position); sunHalo.material.color.setHex(0xffb050);
+      renderer.toneMappingExposure = lowEnd ? 0.95 : 1.05;
+    }
+
+    // ── weather ──
+    clearWeather();
+    if (OPTS.weather === 'rain') {
+      makeParticleField(RAIN_COUNT, 0xa8c4e0, 0.18, 0.22, 22, 30, 'rain');
+      // wet asphalt: darken ground, drop fog
+      groundMat.color.setHex(0x1a1208);
+      scene.fog.far *= 0.7;
+    } else if (OPTS.weather === 'snow') {
+      makeParticleField(SNOW_COUNT, 0xffffff, 0.22, 0.32, 2, 4, 'snow');
+      // snow-dusted ground
+      groundMat.color.setHex(0xb8b8c8);
+      scene.fog.color.setHex(0xc8c8d8);
+      scene.background.setHex(OPTS.time === 'night' ? 0x202028 : 0x9aa4b8);
+      scene.fog.far *= 0.8;
+    } else if (OPTS.weather === 'autumn') {
+      makeParticleField(LEAF_COUNT, 0xc06028, 0.28, 0.36, 1.5, 2.5, 'leaf');
+      groundMat.color.setHex(0x3a2008);
+    } else {
+      groundMat.color.setHex(0x2a1810);
+    }
+    groundMat.needsUpdate = true;
+  }
+
+  function tickWeather(dt) {
+    if (!weatherParticles) return;
+    const wp = weatherParticles;
+    const pos = wp.geom.attributes.position.array;
+    const N = pos.length / 3;
+    if (wp.kind === 'rain') {
+      for (let i = 0; i < N; i++) {
+        pos[i * 3 + 1] -= wp.vels[i] * dt;
+        if (pos[i * 3 + 1] < 0) {
+          pos[i * 3 + 1] = 30 + Math.random() * 20;
+          pos[i * 3]     = player.pos.x + (Math.random() - 0.5) * 120;
+          pos[i * 3 + 2] = player.pos.z + (Math.random() - 0.5) * 120;
+        }
+      }
+    } else if (wp.kind === 'snow') {
+      for (let i = 0; i < N; i++) {
+        pos[i * 3 + 1] -= wp.vels[i] * dt;
+        pos[i * 3]     += Math.sin(performance.now() * 0.0008 + i) * dt * 0.4;
+        if (pos[i * 3 + 1] < 0) {
+          pos[i * 3 + 1] = 30 + Math.random() * 20;
+          pos[i * 3]     = player.pos.x + (Math.random() - 0.5) * 120;
+          pos[i * 3 + 2] = player.pos.z + (Math.random() - 0.5) * 120;
+        }
+      }
+    } else if (wp.kind === 'leaf') {
+      for (let i = 0; i < N; i++) {
+        pos[i * 3 + 1] -= wp.vels[i] * dt;
+        pos[i * 3]     += Math.sin(performance.now() * 0.0012 + i) * dt * 1.2;
+        pos[i * 3 + 2] += Math.cos(performance.now() * 0.001 + i) * dt * 0.6;
+        if (pos[i * 3 + 1] < 0) {
+          pos[i * 3 + 1] = 14 + Math.random() * 16;
+          pos[i * 3]     = player.pos.x + (Math.random() - 0.5) * 80;
+          pos[i * 3 + 2] = player.pos.z + (Math.random() - 0.5) * 80;
+        }
+      }
+    }
+    wp.geom.attributes.position.needsUpdate = true;
+  }
+
+  // Wire title-screen option buttons
+  document.querySelectorAll('#opts .opt-btn[data-time]').forEach(btn => {
+    if (btn.dataset.time === OPTS.time) btn.classList.add('on');
+    btn.addEventListener('click', (e) => {
+      e.preventDefault(); e.stopPropagation();
+      OPTS.time = btn.dataset.time;
+      document.querySelectorAll('#opts .opt-btn[data-time]').forEach(b => b.classList.toggle('on', b.dataset.time === OPTS.time));
+    });
+  });
+  document.querySelectorAll('#opts .opt-btn[data-weather]').forEach(btn => {
+    if (btn.dataset.weather === OPTS.weather) btn.classList.add('on');
+    btn.addEventListener('click', (e) => {
+      e.preventDefault(); e.stopPropagation();
+      OPTS.weather = btn.dataset.weather;
+      document.querySelectorAll('#opts .opt-btn[data-weather]').forEach(b => b.classList.toggle('on', b.dataset.weather === OPTS.weather));
+    });
+  });
+
   function start() {
     titleEl.classList.add('hidden');
     gameoverEl.classList.add('hidden');
@@ -1205,6 +1379,8 @@
     bloodPools.length = 0;
     for (const r of rockets) scene.remove(r.mesh);
     rockets.length = 0;
+    for (const c of limbChunks) scene.remove(c.mesh);
+    limbChunks.length = 0;
     for (const k in keys) keys[k] = false;
     // reset extraction cinematic state from a previous run
     if (extraction.chopper) scene.remove(extraction.chopper);
@@ -1219,6 +1395,8 @@
     updateHUD();
     startWave(1);
     ensureAudio();
+    applyTimeAndWeather();
+    radioChatter();
     maybeAutoFullscreen();
     if (!isTouch) tryLockPointer();
   }
@@ -1281,6 +1459,15 @@
       u.volume = opts.volume ?? 1.0;
       speechSynthesis.speak(u);
     } catch (_) {}
+  }
+
+  // ── BIKE / CHOPPER RADIO CHATTER (start-of-mission) ──
+  // Player wakes up in Raccoon City — pilot is inbound. The bike that was supposed
+  // to be the exfil ride is wrecked across town, so the chopper is the only way out.
+  function radioChatter() {
+    const intro = "Leon, this is Bravo. Your bike's a wreck on Main and Oak. Forget it. Helicopter inbound to the helipad in twelve mikes. Get to extraction.";
+    setTimeout(() => speak(intro, { rate: 0.95, pitch: 0.75 }), 800);
+    setTimeout(() => sayCallout('streak'), 4500);
   }
 
   // ── EXTRACTION CINEMATIC STATE ──
@@ -1756,6 +1943,8 @@
       z.userData.hurtFlash = 0.1;
       // blood splatter at hit point
       spawnBlood(hit.point, dir, headShot ? 18 : 8);
+      // a fragment of the zombie flies along the bullet vector
+      spawnLimbChunk(hit.point, dir, headShot ? 'head' : (Math.random() < 0.35 ? 'arm' : 'chunk'));
       if (headShot) SFX.headshot(); else SFX.hit();
       if (z.userData.hp <= 0 && !z.userData.dead) {
         z.userData.dead = true;
@@ -1974,6 +2163,63 @@
   const bloodAirMat = new THREE.MeshBasicMaterial({ color: 0x8a0a0a, transparent: true, opacity: 0.95 });
   const bloodPoolMat = new THREE.MeshBasicMaterial({ color: 0x4a0606, transparent: true, opacity: 0.85 });
   const bloodGeo = new THREE.SphereGeometry(0.05, 4, 3);
+
+  // ── FLYING LIMB CHUNKS ──
+  // Every time a zombie is hit we shed a chunk (skin-coloured shard / head /
+  // forearm) that flies along the bullet vector before settling on the ground.
+  // Capped to avoid runaway count.
+  const limbChunks = [];
+  const MAX_LIMB_CHUNKS = lowEnd ? 20 : 60;
+  const limbSkinMat  = new THREE.MeshStandardMaterial({ color: 0x6a6a4a, roughness: 0.9 });
+  const limbClothMat = new THREE.MeshStandardMaterial({ color: 0x3a2818, roughness: 1 });
+  const limbBoxGeo   = new THREE.BoxGeometry(0.18, 0.18, 0.18);
+  const limbArmGeo   = new THREE.BoxGeometry(0.18, 0.5, 0.18);
+  const limbHeadGeo  = new THREE.SphereGeometry(0.22, 8, 6);
+  function spawnLimbChunk(point, dir, kind) {
+    if (limbChunks.length >= MAX_LIMB_CHUNKS) {
+      const o = limbChunks.shift();
+      scene.remove(o.mesh);
+    }
+    let geo, mat;
+    if (kind === 'head') { geo = limbHeadGeo; mat = limbSkinMat; }
+    else if (kind === 'arm') { geo = limbArmGeo; mat = limbClothMat; }
+    else { geo = limbBoxGeo; mat = limbSkinMat; }
+    const m = new THREE.Mesh(geo, mat);
+    m.position.copy(point);
+    if (PERF.shadows) m.castShadow = true;
+    scene.add(m);
+    const power = kind === 'head' ? 9 : (kind === 'arm' ? 7 : 5);
+    limbChunks.push({
+      mesh: m,
+      vx: dir.x * power + (Math.random() - 0.5) * 3,
+      vy: 4 + Math.random() * 4,
+      vz: dir.z * power + (Math.random() - 0.5) * 3,
+      spinX: (Math.random() - 0.5) * 18,
+      spinZ: (Math.random() - 0.5) * 18,
+      life: 3.5,
+      settled: false
+    });
+  }
+  function tickLimbs(dt) {
+    for (let i = limbChunks.length - 1; i >= 0; i--) {
+      const c = limbChunks[i];
+      c.life -= dt;
+      if (!c.settled) {
+        c.vy -= 18 * dt;
+        c.mesh.position.x += c.vx * dt;
+        c.mesh.position.y += c.vy * dt;
+        c.mesh.position.z += c.vz * dt;
+        c.mesh.rotation.x += c.spinX * dt;
+        c.mesh.rotation.z += c.spinZ * dt;
+        if (c.mesh.position.y <= 0.1) {
+          c.mesh.position.y = 0.1; c.settled = true;
+          // a little spot of blood under it
+          spawnBlood(new THREE.Vector3(c.mesh.position.x, 0.1, c.mesh.position.z), new THREE.Vector3(0, 0.1, 0), 4);
+        }
+      }
+      if (c.life <= 0) { scene.remove(c.mesh); limbChunks.splice(i, 1); }
+    }
+  }
   function spawnBlood(point, dir, count) {
     // Scale down counts on low-end and respect global cap to prevent unbounded growth.
     const scale = lowEnd ? 0.4 : 1;
@@ -2346,26 +2592,17 @@
       }
     }
 
-    // wave management
+    // Player can extract at ANY time — just reach the helipad. The chopper is
+    // on standby; killing the horde is optional. Reaching the pad starts the
+    // pickup cinematic immediately.
+    const dGoal = Math.hypot(player.pos.x - goal.position.x, player.pos.z - goal.position.z);
+    if (dGoal < 5) { win(); return; }
+    // wave management runs in parallel
     if (waveDelay > 0) {
       waveDelay -= dt;
-      if (waveDelay <= 0) {
-        // spawn the wave's zombies
-        spawnWaveZombies();
-      }
+      if (waveDelay <= 0) spawnWaveZombies();
     } else if (pendingZombies === 0 && zombies.every(z => z.userData.dead)) {
-      // check win condition: reached goal
-      const dGoal = Math.hypot(player.pos.x - goal.position.x, player.pos.z - goal.position.z);
-      if (dGoal < 5) {
-        win();
-        return;
-      }
-      // next wave
-      if (wave < 6) {
-        startWave(wave + 1);
-      } else {
-        // after wave 6, no more spawns; player must reach extraction
-      }
+      if (wave < 6) startWave(wave + 1);
     }
 
     // zombies
@@ -2503,6 +2740,8 @@
     // rockets, blood, flickering wrecks
     tickRockets(dt);
     tickBlood(dt);
+    tickLimbs(dt);
+    tickWeather(dt);
     for (const f of flickerObjs) if (f.userData.update) f.userData.update(dt);
   }
 
