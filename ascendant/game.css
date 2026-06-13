@@ -1,11 +1,11 @@
 :root {
-  --ink: #fff7e5;
-  --muted: rgba(255, 247, 229, 0.72);
-  --gold: #f5c45e;
-  --hot: #f25f4c;
-  --blue: #66d9ff;
-  --line: rgba(245, 196, 94, 0.26);
-  --panel: rgba(8, 10, 16, 0.78);
+  --ink: #fff3e7;
+  --muted: rgba(255, 243, 231, 0.7);
+  --red: #ff3d5a;
+  --gold: #ffd36a;
+  --cyan: #68e8ff;
+  --line: rgba(255, 211, 106, 0.24);
+  --panel: rgba(7, 8, 13, 0.78);
 }
 
 * {
@@ -19,7 +19,7 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #06070a;
+  background: #050609;
   color: var(--ink);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   user-select: none;
@@ -43,45 +43,60 @@ button {
   display: block;
   width: 100vw;
   height: 100vh;
-  background: #06070a;
+  height: 100dvh;
+  background: #050609;
 }
 
 .hidden {
   display: none !important;
 }
 
-#flash {
+#flash,
+#grain {
   position: fixed;
   inset: 0;
-  z-index: 8;
-  background: rgba(255, 241, 190, 0.45);
-  opacity: 0;
   pointer-events: none;
-  transition: opacity 120ms ease;
+}
+
+#flash {
+  z-index: 8;
+  background: rgba(255, 243, 210, 0.55);
+  opacity: 0;
+  transition: opacity 110ms ease;
 }
 
 #flash.on {
   opacity: 1;
-  transition: opacity 16ms ease;
+  transition: opacity 18ms ease;
+}
+
+#grain {
+  z-index: 2;
+  opacity: 0.12;
+  background-image:
+    linear-gradient(45deg, rgba(255,255,255,0.08) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255,255,255,0.05) 25%, transparent 25%);
+  background-size: 5px 5px;
+  mix-blend-mode: overlay;
 }
 
 #hud {
   position: fixed;
+  z-index: 12;
   top: 0;
   left: 0;
   right: 0;
-  z-index: 10;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  gap: clamp(8px, 2vw, 26px);
-  padding: max(14px, env(safe-area-inset-top)) clamp(10px, 3vw, 34px) 0;
+  gap: clamp(8px, 2vw, 28px);
+  padding: max(14px, env(safe-area-inset-top)) clamp(10px, 3vw, 36px) 0;
   pointer-events: none;
 }
 
 .side {
   min-width: 0;
   display: grid;
-  gap: 7px;
+  gap: 6px;
 }
 
 .side.right {
@@ -89,17 +104,31 @@ button {
   text-align: right;
 }
 
-.name {
-  max-width: 100%;
+.tag {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+}
+
+.tag span {
   overflow: hidden;
-  color: #fff9e8;
+  color: #fff8ee;
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(15px, 2.2vw, 28px);
   font-style: italic;
-  letter-spacing: 0.13em;
+  letter-spacing: 0.12em;
   text-overflow: ellipsis;
-  text-shadow: 0 0 16px rgba(245, 196, 94, 0.8);
+  text-shadow: 0 0 16px rgba(255, 61, 90, 0.72);
   white-space: nowrap;
+}
+
+.tag i {
+  color: var(--muted);
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
 }
 
 .bar {
@@ -107,47 +136,52 @@ button {
   width: min(42vw, 520px);
   overflow: hidden;
   border: 1px solid var(--line);
-  background: rgba(0, 0, 0, 0.5);
-  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.05), 0 14px 36px rgba(0, 0, 0, 0.28);
+  background: rgba(0, 0, 0, 0.52);
+  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.05), 0 14px 40px rgba(0, 0, 0, 0.34);
 }
 
 .bar span,
-.bar i {
+.bar em {
   position: absolute;
   inset: 0 auto 0 0;
   width: 100%;
   transform-origin: left center;
 }
 
-.bar.right span,
-.bar.right i {
+.bar.reverse span,
+.bar.reverse em {
   right: 0;
   left: auto;
   transform-origin: right center;
 }
 
-.hp {
-  height: clamp(17px, 2vw, 25px);
+.health {
+  height: clamp(18px, 2vw, 26px);
 }
 
-.hp span {
-  background: linear-gradient(90deg, #2bdc87, #f4e96c 58%, #ff634d);
+.health span {
+  background: linear-gradient(90deg, #2ee080, #ffe25d 55%, #ff3d5a);
 }
 
-.hp i {
-  background: rgba(255, 255, 255, 0.36);
+.health em {
+  background: rgba(255, 255, 255, 0.35);
   mix-blend-mode: screen;
   transition: width 420ms ease;
 }
 
+.guard,
 .meter {
-  height: 9px;
+  height: 8px;
+}
+
+.guard span {
+  background: linear-gradient(90deg, #68e8ff, #fff3e7);
 }
 
 .meter span {
   width: 0;
-  background: linear-gradient(90deg, #5984ff, #66d9ff, #fff7e5);
-  box-shadow: 0 0 18px rgba(102, 217, 255, 0.8);
+  background: linear-gradient(90deg, #665cff, #ff3d5a, #ffd36a);
+  box-shadow: 0 0 18px rgba(255, 61, 90, 0.76);
 }
 
 .rounds {
@@ -164,7 +198,7 @@ button {
   height: 13px;
   border: 1px solid var(--gold);
   border-radius: 50%;
-  opacity: 0.42;
+  opacity: 0.38;
 }
 
 .rounds i.win {
@@ -173,53 +207,57 @@ button {
   box-shadow: 0 0 14px var(--gold);
 }
 
-.center {
-  min-width: clamp(86px, 13vw, 138px);
+.mid {
+  min-width: clamp(80px, 12vw, 132px);
   display: grid;
   justify-items: center;
   align-content: start;
-  gap: 2px;
+  gap: 1px;
   text-align: center;
 }
 
-#round-label,
-#mode-label {
+.mid b {
   color: var(--muted);
   font-size: 10px;
   font-weight: 900;
-  letter-spacing: 0.24em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
 }
 
 #timer {
-  color: #fff9e8;
+  color: #fff8ee;
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(38px, 6vw, 74px);
   line-height: 0.95;
-  text-shadow: 0 0 18px rgba(245, 196, 94, 0.86), 0 0 52px rgba(242, 95, 76, 0.35);
+  text-shadow: 0 0 18px rgba(255, 61, 90, 0.9), 0 0 52px rgba(255, 211, 106, 0.35);
+}
+
+#combo,
+#banner,
+#pads-status {
+  position: fixed;
+  z-index: 18;
+  pointer-events: none;
+  text-align: center;
+  text-shadow: 0 5px 18px #000, 0 0 28px rgba(255, 61, 90, 0.76);
 }
 
 #combo,
 #banner {
-  position: fixed;
-  z-index: 16;
   left: 50%;
   transform: translateX(-50%);
-  pointer-events: none;
-  text-align: center;
-  text-shadow: 0 5px 18px #000, 0 0 28px rgba(245, 196, 94, 0.76);
 }
 
 #combo {
   top: 30%;
   color: var(--gold);
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(32px, 6vw, 72px);
+  font-size: clamp(34px, 6vw, 78px);
   font-style: italic;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   opacity: 0;
   transform: translate(-50%, -14px) scale(0.92);
-  transition: opacity 160ms ease, transform 160ms ease;
+  transition: opacity 140ms ease, transform 140ms ease;
 }
 
 #combo.show {
@@ -229,26 +267,26 @@ button {
 
 #combo small {
   display: block;
-  margin-top: 4px;
-  color: var(--blue);
+  margin-top: 3px;
+  color: var(--cyan);
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
   font-size: 11px;
   font-style: normal;
   font-weight: 900;
-  letter-spacing: 0.32em;
+  letter-spacing: 0.28em;
   text-transform: uppercase;
 }
 
 #banner {
   top: 42%;
-  color: #fff9e8;
+  color: #fff8ee;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(42px, 8vw, 112px);
+  font-size: clamp(44px, 8vw, 116px);
   font-style: italic;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   opacity: 0;
   transform: translateX(-50%) scale(0.96);
-  transition: opacity 220ms ease, transform 220ms ease;
+  transition: opacity 200ms ease, transform 200ms ease;
   white-space: nowrap;
 }
 
@@ -257,16 +295,26 @@ button {
   transform: translateX(-50%) scale(1);
 }
 
+#pads-status {
+  right: max(12px, env(safe-area-inset-right));
+  bottom: max(12px, env(safe-area-inset-bottom));
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
 .icon {
   position: fixed;
   top: max(12px, env(safe-area-inset-top));
   right: max(12px, env(safe-area-inset-right));
-  z-index: 18;
+  z-index: 22;
   width: 42px;
   height: 42px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: rgba(8, 10, 16, 0.68);
+  background: rgba(7, 8, 13, 0.72);
   color: var(--ink);
   font-weight: 900;
   backdrop-filter: blur(10px);
@@ -275,18 +323,18 @@ button {
 #menu {
   position: fixed;
   inset: 0;
-  z-index: 30;
+  z-index: 32;
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr);
   gap: 14px;
   padding: max(24px, env(safe-area-inset-top)) clamp(14px, 4vw, 54px) max(18px, env(safe-area-inset-bottom));
   overflow-y: auto;
   background:
-    radial-gradient(circle at 50% 16%, rgba(245, 196, 94, 0.18), transparent 30%),
-    radial-gradient(circle at 15% 36%, rgba(102, 217, 255, 0.12), transparent 26%),
-    radial-gradient(circle at 84% 38%, rgba(242, 95, 76, 0.13), transparent 27%),
-    linear-gradient(180deg, rgba(5, 6, 10, 0.88), rgba(8, 10, 16, 0.97));
-  backdrop-filter: blur(8px);
+    radial-gradient(circle at 50% 18%, rgba(255, 61, 90, 0.2), transparent 28%),
+    radial-gradient(circle at 18% 38%, rgba(104, 232, 255, 0.14), transparent 26%),
+    radial-gradient(circle at 82% 34%, rgba(255, 211, 106, 0.15), transparent 25%),
+    linear-gradient(180deg, rgba(5, 6, 9, 0.88), rgba(7, 8, 13, 0.97));
+  backdrop-filter: blur(9px);
 }
 
 .brand {
@@ -295,28 +343,28 @@ button {
 
 .brand span,
 .modal span {
-  color: var(--blue);
+  color: var(--cyan);
   font-size: 11px;
   font-weight: 900;
-  letter-spacing: 0.34em;
+  letter-spacing: 0.32em;
   text-transform: uppercase;
 }
 
 .brand h1 {
-  color: #fff9e8;
+  color: #fff8ee;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(46px, 10vw, 122px);
+  font-size: clamp(50px, 10vw, 130px);
   font-style: italic;
-  line-height: 0.98;
+  line-height: 0.95;
   letter-spacing: 0.06em;
-  text-shadow: 0 0 32px rgba(245, 196, 94, 0.75), 0 18px 70px rgba(242, 95, 76, 0.34);
+  text-shadow: 0 0 34px rgba(255, 61, 90, 0.82), 0 18px 70px rgba(255, 211, 106, 0.25);
 }
 
 .brand p {
   color: var(--muted);
   font-size: 12px;
   font-weight: 900;
-  letter-spacing: 0.42em;
+  letter-spacing: 0.4em;
   text-transform: uppercase;
 }
 
@@ -339,7 +387,7 @@ button {
 .modal button {
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: rgba(13, 15, 24, 0.72);
+  background: rgba(12, 14, 22, 0.74);
   color: var(--ink);
   transition: transform 120ms ease, border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
 }
@@ -351,7 +399,7 @@ button {
   padding: 11px 17px;
   font-size: 12px;
   font-weight: 900;
-  letter-spacing: 0.17em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
@@ -360,13 +408,13 @@ button {
 .mode:hover,
 .mode.selected,
 .sidepick button.on {
-  border-color: var(--gold);
-  background: rgba(245, 196, 94, 0.13);
-  box-shadow: 0 0 24px rgba(245, 196, 94, 0.24);
+  border-color: var(--red);
+  background: rgba(255, 61, 90, 0.14);
+  box-shadow: 0 0 24px rgba(255, 61, 90, 0.24);
 }
 
 main {
-  width: min(1120px, 100%);
+  width: min(1180px, 100%);
   margin: 0 auto;
 }
 
@@ -379,7 +427,6 @@ main {
 }
 
 .modes,
-.grid,
 .cards,
 .settings {
   display: grid;
@@ -388,7 +435,7 @@ main {
 }
 
 .mode {
-  min-height: 132px;
+  min-height: 134px;
   padding: 18px;
   text-align: left;
 }
@@ -405,7 +452,7 @@ main {
 .mode span,
 .cards p,
 #fighter-detail p,
-#pads {
+#gamepad-list {
   color: var(--muted);
   font-size: 14px;
   line-height: 1.5;
@@ -417,9 +464,9 @@ main {
 
 .primary {
   border-color: var(--gold) !important;
-  background: linear-gradient(135deg, #ffe89b, #f0854e) !important;
-  color: #160e08 !important;
-  box-shadow: 0 0 24px rgba(245, 196, 94, 0.28);
+  background: linear-gradient(135deg, #ffe59b, #ff3d5a) !important;
+  color: #170909 !important;
+  box-shadow: 0 0 24px rgba(255, 61, 90, 0.3);
 }
 
 .primary:hover,
@@ -430,12 +477,6 @@ main {
 
 [data-omenly-ad] {
   pointer-events: auto;
-}
-
-[data-omenly-badge].omenly-badge {
-  min-height: 40px;
-  border-radius: 8px;
-  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
 }
 
 .pickbar {
@@ -451,12 +492,18 @@ main {
   text-transform: uppercase;
 }
 
+.roster {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  gap: 10px;
+}
+
 .fighter {
-  min-height: 184px;
-  padding: 10px;
+  min-height: 172px;
+  padding: 9px;
   border: 1px solid var(--line);
-  border-radius: 10px;
-  background: rgba(13, 15, 24, 0.74);
+  border-radius: 8px;
+  background: rgba(12, 14, 22, 0.76);
   color: var(--ink);
   overflow: hidden;
   text-align: left;
@@ -465,43 +512,46 @@ main {
 .fighter:hover,
 .fighter.p1,
 .fighter.p2 {
-  border-color: var(--gold);
-  box-shadow: 0 0 24px rgba(245, 196, 94, 0.22);
+  border-color: var(--red);
+  box-shadow: 0 0 24px rgba(255, 61, 90, 0.22);
 }
 
 .portrait {
   position: relative;
-  height: 104px;
-  margin-bottom: 10px;
+  height: 92px;
+  margin-bottom: 9px;
   overflow: hidden;
-  border-radius: 8px;
-  background: var(--bg);
+  border-radius: 7px;
+  background:
+    radial-gradient(circle at 50% 22%, var(--accent), transparent 32%),
+    linear-gradient(145deg, rgba(255,255,255,.12), rgba(0,0,0,.36)),
+    var(--color);
 }
 
 .portrait::before {
   content: "";
   position: absolute;
   left: 50%;
-  bottom: -10px;
-  width: 66px;
-  height: 94px;
+  bottom: -8px;
+  width: 58px;
+  height: 82px;
   transform: translateX(-50%);
-  border-radius: 42% 42% 14px 14px;
+  border-radius: 44% 44% 12px 12px;
   background: linear-gradient(180deg, var(--accent), var(--color));
-  box-shadow: 0 0 30px var(--glow), inset 0 -20px 34px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 0 26px var(--glow), inset 0 -20px 34px rgba(0, 0, 0, 0.28);
 }
 
 .portrait::after {
   content: "";
   position: absolute;
   left: 50%;
-  bottom: 62px;
-  width: 29px;
-  height: 31px;
+  bottom: 54px;
+  width: 26px;
+  height: 28px;
   transform: translateX(-50%);
   border-radius: 50%;
-  background: #d9a57f;
-  box-shadow: -12px -7px 0 -7px #11131b, 12px -7px 0 -7px #11131b;
+  background: #dca078;
+  box-shadow: -12px -6px 0 -7px #10131b, 12px -6px 0 -7px #10131b;
 }
 
 .fighter b,
@@ -514,22 +564,22 @@ main {
 
 .fighter b {
   display: block;
-  font-size: 19px;
+  font-size: 18px;
 }
 
 .fighter span {
   display: block;
-  margin-top: 3px;
+  margin-top: 2px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 900;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
 .tags {
   min-height: 18px;
-  margin-top: 8px;
+  margin-top: 7px;
   display: flex;
   gap: 5px;
   flex-wrap: wrap;
@@ -538,8 +588,8 @@ main {
 .tags i {
   padding: 3px 6px;
   border-radius: 4px;
-  background: rgba(245, 196, 94, 0.16);
-  color: var(--gold);
+  background: rgba(255, 61, 90, 0.18);
+  color: var(--red);
   font-size: 9px;
   font-style: normal;
   font-weight: 900;
@@ -548,11 +598,11 @@ main {
 #fighter-detail,
 .cards article,
 .settings label,
-#pads {
+#gamepad-list {
   padding: 16px;
   border: 1px solid var(--line);
-  border-radius: 10px;
-  background: rgba(13, 15, 24, 0.74);
+  border-radius: 8px;
+  background: rgba(12, 14, 22, 0.76);
 }
 
 #fighter-detail {
@@ -560,12 +610,12 @@ main {
 }
 
 #fighter-detail h2 {
-  font-size: clamp(28px, 4vw, 42px);
+  font-size: clamp(28px, 4vw, 44px);
 }
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(116px, 1fr));
   gap: 8px;
   margin-top: 14px;
 }
@@ -575,7 +625,7 @@ main {
   margin-bottom: 4px;
   color: var(--muted);
   font-size: 10px;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
 }
 
@@ -591,7 +641,7 @@ main {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--blue), var(--gold));
+  background: linear-gradient(90deg, var(--cyan), var(--red), var(--gold));
 }
 
 .cards h2 {
@@ -633,18 +683,18 @@ main {
   height: 19px;
 }
 
-#pads {
+#gamepad-list {
   margin-top: 12px;
 }
 
 .modal {
   position: fixed;
   inset: 0;
-  z-index: 42;
+  z-index: 44;
   display: grid;
   place-items: center;
   padding: 18px;
-  background: rgba(4, 5, 8, 0.68);
+  background: rgba(4, 5, 8, 0.72);
   backdrop-filter: blur(8px);
 }
 
@@ -652,17 +702,17 @@ main {
   width: min(500px, 100%);
   padding: 28px;
   border: 1px solid var(--line);
-  border-radius: 12px;
-  background: rgba(9, 11, 18, 0.94);
+  border-radius: 10px;
+  background: rgba(9, 11, 18, 0.95);
   text-align: center;
-  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.58);
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.6);
 }
 
 .modal h2 {
   margin: 7px 0 10px;
-  color: #fff9e8;
+  color: #fff8ee;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(36px, 7vw, 70px);
+  font-size: clamp(36px, 7vw, 72px);
   font-style: italic;
 }
 
@@ -675,7 +725,7 @@ main {
 #touch {
   position: fixed;
   inset: 0;
-  z-index: 14;
+  z-index: 15;
   display: none;
   pointer-events: none;
 }
@@ -684,67 +734,71 @@ body.touch #touch {
   display: block;
 }
 
-#stick {
+#touch-stick {
   position: absolute;
   left: max(18px, env(safe-area-inset-left));
   bottom: max(34px, env(safe-area-inset-bottom));
   width: 128px;
   height: 128px;
-  border: 2px solid rgba(245, 196, 94, 0.38);
+  border: 2px solid rgba(255, 61, 90, 0.42);
   border-radius: 50%;
-  background: rgba(245, 196, 94, 0.07);
+  background: rgba(255, 61, 90, 0.08);
   pointer-events: auto;
 }
 
-#stick i {
+#touch-stick i {
   position: absolute;
   top: 50%;
   left: 50%;
   width: 54px;
   height: 54px;
   margin: -27px 0 0 -27px;
-  border: 2px solid var(--gold);
+  border: 2px solid var(--red);
   border-radius: 50%;
-  background: rgba(245, 196, 94, 0.24);
-  box-shadow: 0 0 18px rgba(245, 196, 94, 0.5);
+  background: rgba(255, 61, 90, 0.24);
+  box-shadow: 0 0 18px rgba(255, 61, 90, 0.52);
 }
 
 .touch-buttons {
   position: absolute;
-  right: max(16px, env(safe-area-inset-right));
-  bottom: max(30px, env(safe-area-inset-bottom));
+  right: max(12px, env(safe-area-inset-right));
+  bottom: max(24px, env(safe-area-inset-bottom));
   display: grid;
-  grid-template-columns: repeat(3, 60px);
+  grid-template-columns: repeat(4, 56px);
   gap: 8px;
   pointer-events: auto;
 }
 
 .touch-buttons button {
-  width: 60px;
-  height: 60px;
-  border: 2px solid rgba(245, 196, 94, 0.72);
+  width: 56px;
+  height: 56px;
+  border: 2px solid rgba(255, 211, 106, 0.72);
   border-radius: 50%;
-  background: rgba(8, 10, 16, 0.72);
+  background: rgba(7, 8, 13, 0.76);
   color: var(--ink);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 900;
 }
 
 .touch-buttons button:active {
   background: var(--gold);
-  color: #160e08;
+  color: #170909;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 740px) {
   #hud {
     gap: 7px;
     padding-left: 8px;
     padding-right: 8px;
   }
 
-  .name {
+  .tag span {
     font-size: 12px;
     letter-spacing: 0.08em;
+  }
+
+  .tag i {
+    display: none;
   }
 
   .bar {
@@ -760,7 +814,7 @@ body.touch #touch {
     letter-spacing: 0.02em;
   }
 
-  .grid {
+  .roster {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -770,11 +824,11 @@ body.touch #touch {
   }
 
   .touch-buttons {
-    grid-template-columns: repeat(3, 54px);
+    grid-template-columns: repeat(4, 50px);
   }
 
   .touch-buttons button {
-    width: 54px;
-    height: 54px;
+    width: 50px;
+    height: 50px;
   }
 }

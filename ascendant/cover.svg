@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="sky" cx="50%" cy="24%" r="82%">
+      <stop offset="0%" stop-color="#ff3d5a" stop-opacity="0.5"/>
+      <stop offset="42%" stop-color="#171428"/>
+      <stop offset="100%" stop-color="#050609"/>
+    </radialGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#252033"/>
+      <stop offset="100%" stop-color="#07080e"/>
+    </linearGradient>
+    <linearGradient id="red" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff805d"/>
+      <stop offset="100%" stop-color="#9b1732"/>
+    </linearGradient>
+    <linearGradient id="cyan" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#68e8ff"/>
+      <stop offset="100%" stop-color="#252a8a"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="600" height="400" fill="url(#sky)"/>
+  <path d="M0 258 C150 224 242 238 300 224 C402 200 500 220 600 196 L600 400 L0 400 Z" fill="url(#floor)"/>
+  <g opacity="0.34" stroke="#68e8ff" fill="none">
+    <ellipse cx="300" cy="292" rx="244" ry="58" stroke-width="3"/>
+    <ellipse cx="300" cy="292" rx="172" ry="39" stroke-width="2"/>
+    <ellipse cx="300" cy="292" rx="92" ry="22" stroke-width="2"/>
+  </g>
+  <g opacity="0.46">
+    <path d="M52 262 L74 158 L96 262 Z" fill="#20162c"/>
+    <path d="M502 260 L532 140 L562 260 Z" fill="#20162c"/>
+    <path d="M120 248 L143 172 L166 248 Z" fill="#1a2030"/>
+    <path d="M430 252 L456 164 L482 252 Z" fill="#1a2030"/>
+  </g>
+  <g stroke="#050507" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M184 270 L168 314 M214 270 L245 313 M190 202 L174 248 M214 204 L276 180 M202 164 L202 204" fill="none"/>
+    <path d="M398 270 L380 314 M424 270 L456 312 M404 204 L344 186 M428 204 L460 244 M416 164 L416 204" fill="none"/>
+  </g>
+  <g>
+    <path d="M168 314 L184 270 L214 270 L245 313" fill="none" stroke="#6f1426" stroke-width="14" stroke-linecap="round"/>
+    <path d="M174 248 L190 202 L214 204 L276 180" fill="none" stroke="url(#red)" stroke-width="15" stroke-linecap="round"/>
+    <path d="M186 202 Q203 178 224 202 L224 260 Q204 278 184 260 Z" fill="url(#red)" stroke="#050507" stroke-width="4"/>
+    <circle cx="202" cy="164" r="23" fill="#d99b72" stroke="#050507" stroke-width="4"/>
+    <path d="M176 156 Q203 116 234 157 Q206 144 196 174" fill="#161016" stroke="#050507" stroke-width="3"/>
+  </g>
+  <g>
+    <path d="M380 314 L398 270 L424 270 L456 312" fill="none" stroke="#111a52" stroke-width="14" stroke-linecap="round"/>
+    <path d="M344 186 L404 204 L428 204 L460 244" fill="none" stroke="url(#cyan)" stroke-width="15" stroke-linecap="round"/>
+    <path d="M397 204 Q416 178 438 204 L438 260 Q416 278 396 260 Z" fill="url(#cyan)" stroke="#050507" stroke-width="4"/>
+    <circle cx="416" cy="164" r="23" fill="#d8a07a" stroke="#050507" stroke-width="4"/>
+    <path d="M390 156 Q416 116 446 157 Q420 144 408 174" fill="#07111a" stroke="#050507" stroke-width="3"/>
+  </g>
+  <g filter="url(#glow)">
+    <path d="M300 150 L314 208 L300 268 L286 208 Z" fill="#ff3d5a" opacity="0.92"/>
+    <path d="M242 208 L300 194 L358 208 L300 222 Z" fill="#68e8ff" opacity="0.82"/>
+    <circle cx="300" cy="208" r="9" fill="#ffd36a"/>
+  </g>
+  <g font-family="Georgia,serif" text-anchor="middle">
+    <text x="300" y="66" font-size="62" font-style="italic" letter-spacing="5" fill="#fff3e7">ASCENDANT</text>
+    <text x="300" y="96" font-family="Arial,sans-serif" font-size="11" font-weight="700" letter-spacing="7" fill="#68e8ff">ANIME BRUTAL FIGHTER</text>
+  </g>
+</svg>

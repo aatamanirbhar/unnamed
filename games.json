@@ -1,126 +1,168 @@
-{
-  "title": "OMENLY",
-  "tagline": "A small arcade. Made by hand. Play in a browser.",
-  "games": [
-    {
-      "id": "echo",
-      "title": "ECHO",
-      "blurb": "The lights are gone. Ping to listen — run when they ping back. Five things hunt you in the dark: a stalker, a howler, a hunter, a tank, a whisperer. Manage your battery, descend deeper.",
-      "tags": ["arcade", "survival", "sonar", "horror", "stealth"],
-      "minutes": 10,
-      "accent": "#7fffd4",
-      "background": "linear-gradient(135deg, #000507, #001a1f)",
-      "cover": "echo/cover.svg",
-      "href": "echo/",
-      "controls": "WASD + click + F/X (desktop) · joystick + PING + FLASH/EMP (mobile)"
-    },
-    {
-      "id": "porchlight",
-      "title": "Porchlight",
-      "blurb": "One Halloween. Six porches. A small American street, a half-full pillowcase, and a few small choices that stay with you.",
-      "tags": ["narrative", "halloween", "americana", "cozy"],
-      "minutes": 15,
-      "accent": "#ff8c42",
-      "background": "linear-gradient(135deg, #050817, #1a0e22)",
-      "cover": "porchlight/cover.svg",
-      "href": "porchlight/",
-      "controls": "click / tap"
-    },
-    {
-      "id": "ashenreach",
-      "title": "Ashenreach",
-      "blurb": "Twenty-three years after the fire, you walk back into the valley. Five names to find. One altar. Things in the dark that did not leave.",
-      "tags": ["adventure", "action", "exploration", "combat", "atmospheric"],
-      "minutes": 35,
-      "accent": "#ff7a2e",
-      "background": "linear-gradient(135deg, #15101e, #3a1a14)",
-      "cover": "ashenreach/cover.svg",
-      "href": "ashenreach/",
-      "controls": "WASD + J/K/E (desktop) · joystick + buttons (mobile)"
-    },
-    {
-      "id": "stillhunt",
-      "title": "Stillhunt",
-      "blurb": "Dawn on the ridge. Mist in the hollows. Six shells in your pocket. A bolt-action hunting shooter in pseudo-3D.",
-      "tags": ["arcade", "shooter", "3d", "hunting", "atmospheric"],
-      "minutes": 5,
-      "accent": "#ffc878",
-      "background": "linear-gradient(135deg, #0a0d18, #2b2418)",
-      "cover": "stillhunt/cover.svg",
-      "href": "stillhunt/",
-      "controls": "mouse + click / SPACE (desktop) · joystick + FIRE button (mobile)"
-    },
-    {
-      "id": "carve",
-      "title": "Carve",
-      "blurb": "One blade. One road. They come up the road and they do not stop. A short, hot, pseudo-3D arcade slash.",
-      "tags": ["arcade", "action", "3d", "combat", "endless"],
-      "minutes": 3,
-      "accent": "#ff7a2e",
-      "background": "linear-gradient(135deg, #06030a, #3a0e1a)",
-      "cover": "carve/cover.svg",
-      "href": "carve/",
-      "controls": "click + A/D (desktop) · tap to slash, tap edges to step (mobile)"
-    },
-    {
-      "id": "blacksite",
-      "title": "Blacksite",
-      "blurb": "A CIA ghost in a hostile facility. Steal the intel. Stay out of the cones. Crouch and they don't hear you — usually.",
-      "tags": ["arcade", "stealth", "spy", "top-down"],
-      "minutes": 8,
-      "accent": "#7fffd4",
-      "background": "linear-gradient(135deg, #050a08, #0e1f17)",
-      "cover": "blacksite/cover.svg",
-      "href": "blacksite/",
-      "controls": "WASD + SHIFT (desktop) · joystick + CROUCH (mobile)"
-    },
-    {
-      "id": "raccoon",
-      "title": "Raccoon",
-      "blurb": "Raccoon City, after dark. An RPD operative with a handgun, a small map, and a lot of zombies in the way. Third-person 3D survival.",
-      "tags": ["3d", "survival horror", "shooter", "zombies", "third-person"],
-      "minutes": 10,
-      "accent": "#c8503a",
-      "background": "linear-gradient(135deg, #0a0604, #2a1208)",
-      "cover": "raccoon/cover.svg",
-      "href": "raccoon/",
-      "controls": "WASD + mouse + click (desktop) · joystick + look + FIRE (mobile)"
-    },
-    {
-      "id": "siteline",
-      "title": "Siteline",
-      "blurb": "A 5v5 bombsite FPS in your browser. Three maps — office, dust, dust 2. Handguns, AK, bullpup. HE, flash, smoke. Paste a code to join a friend. Up to 50 players, or play solo against CPU bots.",
-      "tags": ["3d", "fps", "shooter", "multiplayer", "tactical", "counter-strike"],
-      "minutes": 20,
-      "accent": "#ffd089",
-      "background": "linear-gradient(135deg, #1a0f08, #3a2614)",
-      "cover": "siteline/cover.svg",
-      "href": "siteline/",
-      "controls": "WASD + mouse + click + R/G/F/B (desktop) · joystick + FIRE + side buttons (mobile)"
-    },
-    {
-      "id": "clash",
-      "title": "Girth of The Wild",
-      "blurb": "A cel-shaded 3D anime arena fighter with real depth movement, heavy wild kicks, throws, specials, supers, arcade ladder, CPU battle, training, local versus, keyboard, gamepad, and touch controls.",
-      "tags": ["3d", "fighting", "anime", "tekken", "versus", "arcade"],
-      "minutes": 15,
-      "accent": "#ffd089",
-      "background": "linear-gradient(135deg, #0a0610, #1a0e22)",
-      "cover": "clash/cover.svg",
-      "href": "clash/",
-      "controls": "WASD + J/K/L/I/O/P (desktop) · gamepad · joystick + on-screen buttons (mobile)"
-    },
-    {
-      "id": "nocturne",
-      "title": "Nocturne",
-      "blurb": "A pixel-noir whodunit. One apartment floor. Five neighbours. One killer. Knock, listen, watch what they do through the keyhole. Lock three tells in your notebook and accuse before dawn.",
-      "tags": ["narrative", "mystery", "detective", "noir", "pixel"],
-      "minutes": 5,
-      "accent": "#9fd9ff",
-      "background": "linear-gradient(135deg, #04060e, #0a1228)",
-      "cover": "nocturne/cover.svg",
-      "href": "nocturne/",
-      "controls": "click / tap"
-    }
-  ]
+﻿{
+    "title":  "OMENLY",
+    "tagline":  "A small arcade. Made by hand. Play in a browser.",
+    "games":  [
+                  {
+                      "id":  "echo",
+                      "title":  "ECHO",
+                      "blurb":  "The lights are gone. Ping to listen â€” run when they ping back. Five things hunt you in the dark: a stalker, a howler, a hunter, a tank, a whisperer. Manage your battery, descend deeper.",
+                      "tags":  [
+                                   "arcade",
+                                   "survival",
+                                   "sonar",
+                                   "horror",
+                                   "stealth"
+                               ],
+                      "minutes":  10,
+                      "accent":  "#7fffd4",
+                      "background":  "linear-gradient(135deg, #000507, #001a1f)",
+                      "cover":  "echo/cover.svg",
+                      "href":  "echo/",
+                      "controls":  "WASD + click + F/X (desktop) Â· joystick + PING + FLASH/EMP (mobile)"
+                  },
+                  {
+                      "id":  "porchlight",
+                      "title":  "Porchlight",
+                      "blurb":  "One Halloween. Six porches. A small American street, a half-full pillowcase, and a few small choices that stay with you.",
+                      "tags":  [
+                                   "narrative",
+                                   "halloween",
+                                   "americana",
+                                   "cozy"
+                               ],
+                      "minutes":  15,
+                      "accent":  "#ff8c42",
+                      "background":  "linear-gradient(135deg, #050817, #1a0e22)",
+                      "cover":  "porchlight/cover.svg",
+                      "href":  "porchlight/",
+                      "controls":  "click / tap"
+                  },
+                  {
+                      "id":  "ashenreach",
+                      "title":  "Ashenreach",
+                      "blurb":  "Twenty-three years after the fire, you walk back into the valley. Five names to find. One altar. Things in the dark that did not leave.",
+                      "tags":  [
+                                   "adventure",
+                                   "action",
+                                   "exploration",
+                                   "combat",
+                                   "atmospheric"
+                               ],
+                      "minutes":  35,
+                      "accent":  "#ff7a2e",
+                      "background":  "linear-gradient(135deg, #15101e, #3a1a14)",
+                      "cover":  "ashenreach/cover.svg",
+                      "href":  "ashenreach/",
+                      "controls":  "WASD + J/K/E (desktop) Â· joystick + buttons (mobile)"
+                  },
+                  {
+                      "id":  "stillhunt",
+                      "title":  "Stillhunt",
+                      "blurb":  "Dawn on the ridge. Mist in the hollows. Six shells in your pocket. A bolt-action hunting shooter in pseudo-3D.",
+                      "tags":  [
+                                   "arcade",
+                                   "shooter",
+                                   "3d",
+                                   "hunting",
+                                   "atmospheric"
+                               ],
+                      "minutes":  5,
+                      "accent":  "#ffc878",
+                      "background":  "linear-gradient(135deg, #0a0d18, #2b2418)",
+                      "cover":  "stillhunt/cover.svg",
+                      "href":  "stillhunt/",
+                      "controls":  "mouse + click / SPACE (desktop) Â· joystick + FIRE button (mobile)"
+                  },
+                  {
+                      "id":  "blacksite",
+                      "title":  "Blacksite",
+                      "blurb":  "A CIA ghost in a hostile facility. Steal the intel. Stay out of the cones. Crouch and they don\u0027t hear you â€” usually.",
+                      "tags":  [
+                                   "arcade",
+                                   "stealth",
+                                   "spy",
+                                   "top-down"
+                               ],
+                      "minutes":  8,
+                      "accent":  "#7fffd4",
+                      "background":  "linear-gradient(135deg, #050a08, #0e1f17)",
+                      "cover":  "blacksite/cover.svg",
+                      "href":  "blacksite/",
+                      "controls":  "WASD + SHIFT (desktop) Â· joystick + CROUCH (mobile)"
+                  },
+                  {
+                      "id":  "raccoon",
+                      "title":  "Raccoon",
+                      "blurb":  "Raccoon City, after dark. An RPD operative with a handgun, a small map, and a lot of zombies in the way. Third-person 3D survival.",
+                      "tags":  [
+                                   "3d",
+                                   "survival horror",
+                                   "shooter",
+                                   "zombies",
+                                   "third-person"
+                               ],
+                      "minutes":  10,
+                      "accent":  "#c8503a",
+                      "background":  "linear-gradient(135deg, #0a0604, #2a1208)",
+                      "cover":  "raccoon/cover.svg",
+                      "href":  "raccoon/",
+                      "controls":  "WASD + mouse + click (desktop) Â· joystick + look + FIRE (mobile)"
+                  },
+                  {
+                      "id":  "siteline",
+                      "title":  "Siteline",
+                      "blurb":  "A 5v5 bombsite FPS in your browser. Three maps â€” office, dust, dust 2. Handguns, AK, bullpup. HE, flash, smoke. Paste a code to join a friend. Up to 50 players, or play solo against CPU bots.",
+                      "tags":  [
+                                   "3d",
+                                   "fps",
+                                   "shooter",
+                                   "multiplayer",
+                                   "tactical",
+                                   "counter-strike"
+                               ],
+                      "minutes":  20,
+                      "accent":  "#ffd089",
+                      "background":  "linear-gradient(135deg, #1a0f08, #3a2614)",
+                      "cover":  "siteline/cover.svg",
+                      "href":  "siteline/",
+                      "controls":  "WASD + mouse + click + R/G/F/B (desktop) Â· joystick + FIRE + side buttons (mobile)"
+                  },
+                  {
+                      "id":  "ascendant",
+                      "title":  "Ascendant",
+                      "blurb":  "An original anime-style 3D browser fighting game with twelve playable fighters, frame-data combat, throws, motion specials, supers, brutal finishers, arcade, survival, local versus, gamepad support, and mobile touch controls.",
+                      "tags":  [
+                                   "3d",
+                                   "fighting",
+                                   "anime",
+                                   "versus",
+                                   "gamepad",
+                                   "mobile"
+                               ],
+                      "minutes":  18,
+                      "accent":  "#ff3d5a",
+                      "background":  "linear-gradient(135deg, #050609, #22111d)",
+                      "cover":  "ascendant/cover.svg",
+                      "href":  "ascendant/",
+                      "controls":  "WASD + J/K/L/I/O/P/U (desktop) Â· gamepad Â· mobile joystick + attack buttons"
+                  },
+                  {
+                      "id":  "nocturne",
+                      "title":  "Nocturne",
+                      "blurb":  "A pixel-noir whodunit. One apartment floor. Five neighbours. One killer. Knock, listen, watch what they do through the keyhole. Lock three tells in your notebook and accuse before dawn.",
+                      "tags":  [
+                                   "narrative",
+                                   "mystery",
+                                   "detective",
+                                   "noir",
+                                   "pixel"
+                               ],
+                      "minutes":  5,
+                      "accent":  "#9fd9ff",
+                      "background":  "linear-gradient(135deg, #04060e, #0a1228)",
+                      "cover":  "nocturne/cover.svg",
+                      "href":  "nocturne/",
+                      "controls":  "click / tap"
+                  }
+              ]
 }
