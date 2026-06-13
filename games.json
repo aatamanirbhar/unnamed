@@ -127,25 +127,7 @@
                       "href":  "siteline/",
                       "controls":  "WASD + mouse + click + R/G/F/B (desktop) Â· joystick + FIRE + side buttons (mobile)"
                   },
-                  {
-                      "id":  "ascendant",
-                      "title":  "Ascendant",
-                      "blurb":  "An original anime-style 3D browser fighting game with twelve playable fighters, frame-data combat, throws, motion specials, supers, brutal finishers, arcade, survival, local versus, gamepad support, and mobile touch controls.",
-                      "tags":  [
-                                   "3d",
-                                   "fighting",
-                                   "anime",
-                                   "versus",
-                                   "gamepad",
-                                   "mobile"
-                               ],
-                      "minutes":  18,
-                      "accent":  "#ff3d5a",
-                      "background":  "linear-gradient(135deg, #050609, #22111d)",
-                      "cover":  "ascendant/cover.svg",
-                      "href":  "ascendant/",
-                      "controls":  "WASD + J/K/L/I/O/P/U (desktop) Â· gamepad Â· mobile joystick + attack buttons"
-                  },
+                  
                   {
                       "id":  "nocturne",
                       "title":  "Nocturne",
