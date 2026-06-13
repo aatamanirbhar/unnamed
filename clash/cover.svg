@@ -1,53 +1,64 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice">
   <defs>
-    <radialGradient id="sky" cx="50%" cy="35%" r="90%">
-      <stop offset="0%" stop-color="#ffd089" stop-opacity="0.35"/>
-      <stop offset="40%" stop-color="#3a1a4a"/>
-      <stop offset="100%" stop-color="#06030a"/>
+    <radialGradient id="sky" cx="50%" cy="28%" r="90%">
+      <stop offset="0%" stop-color="#f5c45e" stop-opacity="0.45"/>
+      <stop offset="38%" stop-color="#21314a"/>
+      <stop offset="100%" stop-color="#06070a"/>
     </radialGradient>
     <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#2a1238"/>
-      <stop offset="55%" stop-color="#100618"/>
-      <stop offset="100%" stop-color="#020108"/>
+      <stop offset="0%" stop-color="#2c5d3f"/>
+      <stop offset="65%" stop-color="#121923"/>
+      <stop offset="100%" stop-color="#050609"/>
     </linearGradient>
-    <linearGradient id="redFigure" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#ff4d6d"/>
-      <stop offset="100%" stop-color="#7a1530"/>
+    <linearGradient id="red" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff775d"/>
+      <stop offset="100%" stop-color="#9a261e"/>
     </linearGradient>
-    <linearGradient id="blueFigure" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#7fffd4"/>
-      <stop offset="100%" stop-color="#1a5a4a"/>
+    <linearGradient id="blue" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#66d9ff"/>
+      <stop offset="100%" stop-color="#24306f"/>
     </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
   <rect width="600" height="400" fill="url(#sky)"/>
-  <rect y="240" width="600" height="160" fill="url(#ground)"/>
-  <!-- arena ring outline -->
-  <ellipse cx="300" cy="280" rx="260" ry="38" fill="none" stroke="#ffd089" stroke-opacity="0.35" stroke-width="2"/>
-  <ellipse cx="300" cy="280" rx="220" ry="30" fill="none" stroke="#ff7a2e" stroke-opacity="0.25" stroke-width="1"/>
-  <!-- two silhouette fighters facing off -->
-  <g fill="url(#redFigure)" opacity="0.95">
-    <rect x="160" y="180" width="40" height="80" rx="6"/>
-    <circle cx="180" cy="160" r="22"/>
-    <rect x="140" y="190" width="20" height="55" rx="5"/>
-    <rect x="200" y="190" width="20" height="55" rx="5"/>
-    <rect x="158" y="255" width="18" height="50" rx="4"/>
-    <rect x="184" y="255" width="18" height="50" rx="4"/>
+  <path d="M0 250 C130 218 205 236 300 222 C410 205 500 220 600 195 L600 400 L0 400 Z" fill="url(#ground)"/>
+  <ellipse cx="300" cy="286" rx="255" ry="55" fill="none" stroke="#f5c45e" stroke-opacity="0.36" stroke-width="3"/>
+  <ellipse cx="300" cy="286" rx="190" ry="38" fill="none" stroke="#66d9ff" stroke-opacity="0.24" stroke-width="2"/>
+  <g opacity="0.42">
+    <path d="M70 238 L98 162 L126 238" fill="#183f37"/>
+    <path d="M510 236 L544 148 L578 236" fill="#183f37"/>
+    <path d="M28 252 L58 180 L88 252" fill="#244b2d"/>
+    <path d="M430 245 L462 170 L494 245" fill="#244b2d"/>
   </g>
-  <g fill="url(#blueFigure)" opacity="0.95">
-    <rect x="400" y="180" width="40" height="80" rx="6"/>
-    <circle cx="420" cy="160" r="22"/>
-    <rect x="380" y="190" width="20" height="55" rx="5"/>
-    <rect x="440" y="190" width="20" height="55" rx="5"/>
-    <rect x="398" y="255" width="18" height="50" rx="4"/>
-    <rect x="424" y="255" width="18" height="50" rx="4"/>
+  <g stroke="#050507" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M190 266 L174 308 M212 266 L242 307 M194 202 L178 246 M218 204 L274 184 M203 164 L203 204" fill="none"/>
+    <path d="M400 266 L384 307 M424 266 L456 305 M404 204 L352 190 M428 204 L456 244 M416 164 L416 204" fill="none"/>
   </g>
-  <!-- spark between -->
-  <g fill="#ffd089" opacity="0.85">
-    <circle cx="300" cy="210" r="6"/>
-    <polygon points="300,180 305,210 300,240 295,210"/>
-    <polygon points="270,210 300,205 330,210 300,215"/>
+  <g>
+    <path d="M176 306 L190 266 L211 267 L243 306" fill="none" stroke="#7a1724" stroke-width="13" stroke-linecap="round"/>
+    <path d="M180 246 L194 202 L218 204 L274 184" fill="none" stroke="url(#red)" stroke-width="14" stroke-linecap="round"/>
+    <path d="M188 202 Q203 180 222 202 L222 258 Q204 274 184 258 Z" fill="url(#red)" stroke="#050507" stroke-width="4"/>
+    <circle cx="203" cy="162" r="23" fill="#d79a72" stroke="#050507" stroke-width="4"/>
+    <path d="M178 154 Q204 118 232 156 Q208 143 196 172" fill="#1a1210" stroke="#050507" stroke-width="3"/>
   </g>
-  <!-- title -->
-  <text x="300" y="62" font-family="Georgia,serif" font-style="italic" font-size="62" letter-spacing="6" fill="#ffd089" text-anchor="middle" filter="url(#none)">CLASH</text>
-  <text x="300" y="92" font-family="Helvetica,sans-serif" font-size="11" letter-spacing="8" fill="#ff7a2e" text-anchor="middle">SEVEN FIGHTERS · ONE RING</text>
+  <g>
+    <path d="M384 307 L400 266 L424 266 L456 305" fill="none" stroke="#111a46" stroke-width="13" stroke-linecap="round"/>
+    <path d="M352 190 L404 204 L428 204 L456 244" fill="none" stroke="url(#blue)" stroke-width="14" stroke-linecap="round"/>
+    <path d="M397 203 Q416 178 436 203 L435 258 Q416 274 396 258 Z" fill="url(#blue)" stroke="#050507" stroke-width="4"/>
+    <circle cx="416" cy="162" r="23" fill="#d8a07a" stroke="#050507" stroke-width="4"/>
+    <path d="M390 154 Q416 116 444 156 Q420 143 408 172" fill="#07111a" stroke="#050507" stroke-width="3"/>
+  </g>
+  <g filter="url(#glow)">
+    <circle cx="300" cy="202" r="8" fill="#f5c45e"/>
+    <path d="M300 154 L310 202 L300 250 L290 202 Z" fill="#f5c45e" opacity="0.92"/>
+    <path d="M252 202 L300 192 L348 202 L300 212 Z" fill="#66d9ff" opacity="0.86"/>
+  </g>
+  <text x="300" y="62" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="45" letter-spacing="2" fill="#fff7e5">Girth of The Wild</text>
+  <text x="300" y="92" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="700" letter-spacing="7" fill="#66d9ff">3D ANIME ARENA FIGHTER</text>
 </svg>

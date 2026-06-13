@@ -3,27 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Clash - 3D Browser Fighting Game | Omenly</title>
-<meta name="description" content="Clash is a 3D browser fighting game with procedural WebGL fighters, frame-data combat, arcade mode, local versus, CPU battle, training, survival, keyboard, touch, and gamepad support.">
-<meta name="theme-color" content="#08060d">
+<title>Girth of The Wild - 3D Anime Arena Fighter | Omenly</title>
+<meta name="description" content="Girth of The Wild is a high-impact 3D anime arena fighting game with cel-shaded fighters, real depth movement, frame-based attacks, throws, supers, arcade mode, local versus, CPU battle, training, and gamepad support.">
+<meta name="theme-color" content="#06070a">
 <link rel="canonical" href="https://omenly.vercel.app/clash/">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Clash - 3D browser fighter">
-<meta property="og:description" content="Seven fighters. Real frame data. One ring.">
+<meta property="og:title" content="Girth of The Wild - 3D anime arena fighter">
+<meta property="og:description" content="Cel-shaded fighters, real depth movement, heavy kicks, wild supers.">
 <meta property="og:url" content="https://omenly.vercel.app/clash/">
 <meta property="og:image" content="https://omenly.vercel.app/clash/cover.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Clash - 3D browser fighting">
-<meta name="twitter:description" content="Seven fighters with unique specials, supers, and combat styles.">
+<meta name="twitter:title" content="Girth of The Wild - 3D anime arena fighter">
+<meta name="twitter:description" content="Cel-shaded fighters, real depth movement, heavy kicks, wild supers.">
 <meta name="twitter:image" content="https://omenly.vercel.app/clash/cover.svg">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "VideoGame",
-  "name": "Clash",
+  "name": "Girth of The Wild",
   "url": "https://omenly.vercel.app/clash/",
-  "description": "A 3D browser fighting game with procedural WebGL fighters, frame-data combat, arcade, versus, CPU, training, and survival modes.",
+  "description": "A 3D anime arena fighting game with cel-shaded fighters, real depth movement, frame-based combat, arcade, local versus, CPU, and training modes.",
   "genre": ["fighting", "3D", "arcade", "action"],
   "playMode": ["SinglePlayer", "MultiPlayer"],
   "gamePlatform": ["Web browser"],
@@ -38,12 +38,12 @@
 <script>
   window.OMENLY_CONFIG = {
     game: 'clash',
-    gameTitle: 'Clash',
+    gameTitle: 'Girth of The Wild',
     price: 3,
     isHub: false,
     donateUrl: 'https://www.paypal.me/vikas117/3',
     allAccessDonateUrl: 'https://www.paypal.me/vikas117/10',
-    theme: { accent: '#ffd089' }
+    theme: { accent: '#f5c45e' }
   };
 </script>
 <script src="omenly.js" defer></script>
@@ -52,193 +52,171 @@
 <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
 </head>
 <body>
-<canvas id="scene" aria-label="Clash 3D arena"></canvas>
-<div id="screen-flash"></div>
+<canvas id="scene" aria-label="Girth of The Wild 3D arena"></canvas>
+<div id="flash"></div>
 
-<section id="hud" class="hidden" aria-label="Match HUD">
-  <div class="hud-side">
-    <div class="hud-name" id="p1-name">P1</div>
-    <div class="health shell"><span id="p1-health"></span><i id="p1-chip"></i></div>
-    <div class="meter shell"><span id="p1-meter"></span></div>
-    <div class="round-pips" id="p1-rounds"></div>
+<section id="hud" class="hidden">
+  <div class="side left">
+    <div class="name" id="p1-name">P1</div>
+    <div class="bar hp"><span id="p1-hp"></span><i id="p1-white"></i></div>
+    <div class="bar meter"><span id="p1-meter"></span></div>
+    <div class="rounds" id="p1-rounds"></div>
   </div>
-  <div class="hud-center">
+  <div class="center">
     <div id="round-label">ROUND 1</div>
     <div id="timer">99</div>
     <div id="mode-label">ARCADE</div>
   </div>
-  <div class="hud-side right">
-    <div class="hud-name" id="p2-name">P2</div>
-    <div class="health shell right"><span id="p2-health"></span><i id="p2-chip"></i></div>
-    <div class="meter shell right"><span id="p2-meter"></span></div>
-    <div class="round-pips" id="p2-rounds"></div>
+  <div class="side right">
+    <div class="name" id="p2-name">P2</div>
+    <div class="bar hp right"><span id="p2-hp"></span><i id="p2-white"></i></div>
+    <div class="bar meter right"><span id="p2-meter"></span></div>
+    <div class="rounds" id="p2-rounds"></div>
   </div>
 </section>
 
-<div id="combo-readout"></div>
-<div id="announce"></div>
+<div id="combo"></div>
+<div id="banner"></div>
+<button id="pause-button" class="hidden icon" type="button" aria-label="Pause">II</button>
 
-<button id="pause-button" class="icon-button hidden" type="button" aria-label="Pause">II</button>
-
-<section id="menu" class="menu-shell">
-  <div class="menu-top">
-    <div class="kicker">OMENLY FIGHTING CIRCUIT</div>
-    <h1>CLASH</h1>
-    <div class="menu-sub">3D ARENA FIGHTER</div>
+<section id="menu">
+  <div class="brand">
+    <span>OMENLY WILD CIRCUIT</span>
+    <h1>Girth of The Wild</h1>
+    <p>3D anime arena fighting</p>
   </div>
 
-  <nav class="menu-tabs" aria-label="Menu">
-    <button class="on" type="button" data-screen="play">Play</button>
-    <button type="button" data-screen="fighters">Fighters</button>
-    <button type="button" data-screen="settings">Settings</button>
-    <button type="button" data-screen="controls">Controls</button>
+  <nav class="tabs">
+    <button class="on" type="button" data-tab="play">Play</button>
+    <button type="button" data-tab="fighters">Fighters</button>
+    <button type="button" data-tab="controls">Controls</button>
+    <button type="button" data-tab="settings">Settings</button>
   </nav>
 
-  <main class="menu-panels">
-    <section class="menu-panel on" id="screen-play">
-      <div class="mode-grid">
-        <button class="mode-card featured" type="button" data-mode="arcade">
+  <main>
+    <section class="panel on" id="panel-play">
+      <div class="modes">
+        <button class="mode selected" type="button" data-mode="arcade">
           <b>Arcade</b>
-          <span>Ladder, rivals, best of three</span>
+          <span>Best of three, rotating rivals, wild finals.</span>
         </button>
-        <button class="mode-card" type="button" data-mode="versus">
-          <b>VS Local</b>
-          <span>Keyboard, gamepad, or touch</span>
-        </button>
-        <button class="mode-card" type="button" data-mode="cpu">
+        <button class="mode" type="button" data-mode="cpu">
           <b>CPU Battle</b>
-          <span>Single match with difficulty</span>
+          <span>Fight one AI at the selected difficulty.</span>
         </button>
-        <button class="mode-card" type="button" data-mode="training">
+        <button class="mode" type="button" data-mode="versus">
+          <b>VS Local</b>
+          <span>Two players on keyboard or gamepads.</span>
+        </button>
+        <button class="mode" type="button" data-mode="training">
           <b>Training</b>
-          <span>Infinite timer and dummy reset</span>
-        </button>
-        <button class="mode-card" type="button" data-mode="survival">
-          <b>Survival</b>
-          <span>Carry health through the roster</span>
+          <span>Infinite meter, no timer, instant reset.</span>
         </button>
       </div>
-      <div class="quick-row">
-        <button id="start-featured" class="primary-action" type="button">Start Fight</button>
+      <div class="actions">
+        <button id="start-button" class="primary" type="button">Start Fight</button>
         <span data-omenly-badge></span>
-        <button data-omenly-cta type="button">Support Clash</button>
+        <button data-omenly-cta type="button">Support Game</button>
       </div>
       <div data-omenly-ad></div>
     </section>
 
-    <section class="menu-panel" id="screen-fighters">
-      <div class="select-head">
-        <div class="side-pick" role="group" aria-label="Select side">
-          <button class="on" type="button" data-select-side="p1">P1</button>
-          <button type="button" data-select-side="p2">P2</button>
+    <section class="panel" id="panel-fighters">
+      <div class="pickbar">
+        <div class="sidepick">
+          <button class="on" type="button" data-side="p1">P1</button>
+          <button type="button" data-side="p2">P2</button>
         </div>
-        <div class="selection-names">
-          <span id="selected-p1">P1: Kael</span>
-          <span id="selected-p2">P2: Nyx</span>
-        </div>
+        <div id="pick-summary">P1: Rowan | P2: Kaia</div>
       </div>
-      <div class="fighter-grid" id="fighter-grid"></div>
-      <article class="fighter-detail" id="fighter-detail"></article>
+      <div class="grid" id="fighter-grid"></div>
+      <article id="fighter-detail"></article>
     </section>
 
-    <section class="menu-panel" id="screen-settings">
-      <div class="settings-grid">
-        <label>
-          Difficulty
-          <select id="setting-difficulty">
+    <section class="panel" id="panel-controls">
+      <div class="cards">
+        <article>
+          <h2>Player 1</h2>
+          <p>A/D move forward and back</p>
+          <p>W/S sidestep through depth</p>
+          <p>J/K/L light, heavy, wild kick</p>
+          <p>I/O/P special, throw, super</p>
+          <p>U blocks, or hold away</p>
+        </article>
+        <article>
+          <h2>Player 2</h2>
+          <p>Arrow left/right move forward and back</p>
+          <p>Arrow up/down sidestep</p>
+          <p>Numpad 1/2/3 light, heavy, wild kick</p>
+          <p>Numpad 4/5/6 special, throw, super</p>
+          <p>Numpad 0 blocks, or hold away</p>
+        </article>
+        <article>
+          <h2>Gamepad</h2>
+          <p>Left stick moves on the arena plane</p>
+          <p>Face buttons attack</p>
+          <p>Shoulders throw and super</p>
+          <p>Triggers block</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-settings">
+      <div class="settings">
+        <label>Difficulty
+          <select id="difficulty">
             <option value="easy">Easy</option>
             <option value="medium">Medium</option>
             <option value="hard">Hard</option>
             <option value="nightmare">Nightmare</option>
           </select>
         </label>
-        <label>
-          Round Timer
-          <select id="setting-timer">
+        <label>Round Timer
+          <select id="round-time">
             <option value="60">60</option>
-            <option value="75">75</option>
+            <option value="90">90</option>
             <option value="99">99</option>
             <option value="0">Infinite</option>
           </select>
         </label>
-        <label>
-          Gamepad Deadzone
-          <input id="setting-deadzone" type="range" min="0.08" max="0.35" step="0.01">
+        <label>Gamepad Deadzone
+          <input id="deadzone" type="range" min="0.08" max="0.35" step="0.01">
         </label>
-        <label>
-          Controller Profile
-          <select id="setting-profile">
-            <option value="arcade">Arcade</option>
-            <option value="pad">Pad Default</option>
-            <option value="southpaw">Southpaw</option>
-          </select>
-        </label>
-        <label class="check-row"><input id="setting-shake" type="checkbox"> Screen Shake</label>
-        <label class="check-row"><input id="setting-vibration" type="checkbox"> Controller Vibration</label>
-        <label class="check-row"><input id="setting-music" type="checkbox"> Music</label>
-        <label class="check-row"><input id="setting-sfx" type="checkbox"> SFX</label>
+        <label class="check"><input id="shake" type="checkbox"> Camera shake</label>
+        <label class="check"><input id="rumble" type="checkbox"> Controller rumble</label>
+        <label class="check"><input id="sound" type="checkbox"> Sound</label>
       </div>
-      <div class="device-list" id="device-list"></div>
-    </section>
-
-    <section class="menu-panel" id="screen-controls">
-      <div class="control-grid">
-        <article>
-          <h2>Player 1</h2>
-          <p>Move: WASD</p>
-          <p>Light / Medium / Heavy: J / K / L</p>
-          <p>Special / Throw / Super: I / O / P</p>
-          <p>Block: hold away or U</p>
-        </article>
-        <article>
-          <h2>Player 2</h2>
-          <p>Move: Arrow keys</p>
-          <p>Light / Medium / Heavy: Numpad 1 / 2 / 3</p>
-          <p>Special / Throw / Super: Numpad 4 / 5 / 6</p>
-          <p>Block: hold away or Numpad 0</p>
-        </article>
-        <article>
-          <h2>Motions</h2>
-          <p>QCF + punch: Special 1</p>
-          <p>QCB + kick: Special 2</p>
-          <p>DP + punch or charge back then forward: Special 3</p>
-          <p>Super: full meter + P / Numpad 6</p>
-        </article>
-      </div>
+      <div id="pads"></div>
     </section>
   </main>
 </section>
 
-<section id="round-end" class="modal hidden" aria-live="polite">
-  <div class="modal-card">
-    <div class="kicker" id="round-end-kicker">ROUND OVER</div>
-    <h2 id="round-end-title">KO</h2>
-    <p id="round-end-copy"></p>
-    <div class="modal-actions">
-      <button id="round-next" class="primary-action" type="button">Continue</button>
-      <button id="round-menu" type="button">Menu</button>
-    </div>
+<section id="round-end" class="modal hidden">
+  <div>
+    <span id="end-kicker">ROUND OVER</span>
+    <h2 id="end-title">KO</h2>
+    <p id="end-copy"></p>
+    <button id="continue-button" class="primary" type="button">Continue</button>
+    <button id="menu-button" type="button">Menu</button>
   </div>
 </section>
 
-<section id="pause-menu" class="modal hidden">
-  <div class="modal-card">
-    <div class="kicker">PAUSED</div>
-    <h2>Clash</h2>
-    <div class="modal-actions">
-      <button id="resume-button" class="primary-action" type="button">Resume</button>
-      <button id="restart-button" type="button">Restart</button>
-      <button id="pause-menu-button" type="button">Menu</button>
-    </div>
+<section id="pause" class="modal hidden">
+  <div>
+    <span>PAUSED</span>
+    <h2>Girth of The Wild</h2>
+    <button id="resume-button" class="primary" type="button">Resume</button>
+    <button id="restart-button" type="button">Restart</button>
+    <button id="pause-menu-button" type="button">Menu</button>
   </div>
 </section>
 
-<div id="touch-controls" aria-label="Touch controls">
-  <div id="touch-stick"><span></span></div>
+<div id="touch">
+  <div id="stick"><i></i></div>
   <div class="touch-buttons">
     <button type="button" data-touch="light">L</button>
-    <button type="button" data-touch="medium">M</button>
     <button type="button" data-touch="heavy">H</button>
+    <button type="button" data-touch="kick">K</button>
     <button type="button" data-touch="special">SP</button>
     <button type="button" data-touch="throw">TH</button>
     <button type="button" data-touch="super">SU</button>
