@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#102018">
+<title>Girth - Fertile Log Garden Gag | Omenly</title>
+<meta name="description" content="Girth is a silly first-person browser gag game about rubbing a magic log, building friction, splashing water, and growing a ridiculous garden.">
+<link rel="canonical" href="https://omenly.vercel.app/girth/">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Girth - Fertile Log Garden Gag">
+<meta property="og:description" content="Rub the magic log, splash the garden, grow flowers, and try not to laugh when the screen gets fertile.">
+<meta property="og:url" content="https://omenly.vercel.app/girth/">
+<meta property="og:image" content="https://omenly.vercel.app/girth/cover.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Girth - Fertile Log Garden Gag">
+<meta name="twitter:description" content="A tiny silly browser gag about a magic log, water, and suspiciously energetic flowers.">
+<meta name="twitter:image" content="https://omenly.vercel.app/girth/cover.svg">
+<script type="application/ld+json">
+{ "@context":"https://schema.org","@type":"VideoGame","name":"Girth","url":"https://omenly.vercel.app/girth/","description":"A playful first-person garden gag game about rubbing a magic log until water splashes out and flowers grow.","genre":["arcade","comedy","clicker","gardening"],"playMode":"SinglePlayer","gamePlatform":["Web browser"],"applicationCategory":"Game","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@type":"Organization","name":"Omenly"} }
+</script>
+<link rel="stylesheet" href="omenly.css">
+<script>
+  window.OMENLY_CONFIG = {
+    game: 'girth',
+    gameTitle: 'Girth',
+    price: 3,
+    isHub: false,
+    donateUrl: 'https://www.paypal.me/vikas117/3',
+    allAccessDonateUrl: 'https://www.paypal.me/vikas117/10',
+    theme: { accent: '#9bd877' }
+  };
+</script>
+<script src="omenly.js" defer></script>
+<script defer src="/_vercel/insights/script.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #102018; color: #fff8df; font-family: Inter, ui-sans-serif, system-ui, sans-serif; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; touch-action: none; }
+  body { position: fixed; inset: 0; }
+  canvas { display: block; width: 100vw; height: 100vh; height: 100dvh; background: #102018; cursor: grab; }
+  canvas.rubbing { cursor: grabbing; }
+  .hidden { display: none !important; }
+  #title { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 18px; background:
+    radial-gradient(circle at 50% 28%, rgba(255,232,128,.18), transparent 26%),
+    radial-gradient(circle at 18% 62%, rgba(155,216,119,.16), transparent 28%),
+    radial-gradient(circle at 84% 68%, rgba(72,169,255,.18), transparent 30%),
+    linear-gradient(180deg, rgba(16,32,24,.96), rgba(6,18,13,.98)); }
+  .panel { width: min(620px, 96vw); text-align: center; border: 1px solid rgba(255,248,223,.22); background: rgba(12,24,18,.82); padding: clamp(18px, 4vw, 34px); box-shadow: 0 20px 80px rgba(0,0,0,.45); backdrop-filter: blur(10px); border-radius: 8px; }
+  .eyebrow { color: #9bd877; font-size: 11px; font-weight: 900; letter-spacing: .28em; text-transform: uppercase; }
+  h1 { margin: 8px 0 10px; font-family: Georgia, serif; font-size: clamp(54px, 14vw, 118px); font-style: italic; letter-spacing: .06em; line-height: .9; color: #fff8df; text-shadow: 0 0 30px rgba(155,216,119,.5); }
+  .panel p { max-width: 520px; margin: 0 auto 16px; color: rgba(255,248,223,.76); line-height: 1.55; font-weight: 700; }
+  .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 16px; }
+  button, a.btn { border: 1px solid rgba(255,248,223,.32); background: rgba(255,248,223,.07); color: #fff8df; padding: 12px 16px; border-radius: 7px; font: inherit; font-size: 12px; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; cursor: pointer; text-decoration: none; }
+  button:hover, button:focus-visible, a.btn:hover, a.btn:focus-visible { border-color: #9bd877; background: rgba(155,216,119,.18); outline: none; box-shadow: 0 0 20px rgba(155,216,119,.24); }
+  #hud { position: fixed; z-index: 10; inset: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) auto max(12px, env(safe-area-inset-left)); display: grid; grid-template-columns: minmax(120px,1fr) auto minmax(120px,1fr); align-items: start; gap: 12px; pointer-events: none; text-shadow: 0 2px 12px #000; }
+  .stat { display: grid; gap: 5px; min-width: 0; }
+  .stat.right { justify-items: end; text-align: right; }
+  .label { color: rgba(255,248,223,.58); font-size: 10px; font-weight: 900; letter-spacing: .22em; text-transform: uppercase; }
+  .value { color: #fff8df; font-family: Georgia, serif; font-size: clamp(24px, 5vw, 50px); font-style: italic; line-height: .9; }
+  .meter { width: min(34vw, 360px); height: 12px; border: 1px solid rgba(255,248,223,.24); background: rgba(0,0,0,.35); overflow: hidden; border-radius: 999px; }
+  .meter span { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, #9bd877, #ffe880, #48a9ff); box-shadow: 0 0 18px rgba(155,216,119,.6); }
+  #message { position: fixed; z-index: 12; left: 50%; top: 36%; transform: translate(-50%,-50%) scale(.96); width: min(860px, 94vw); text-align: center; pointer-events: none; opacity: 0; color: #fff8df; font-family: Georgia, serif; font-size: clamp(44px, 10vw, 118px); font-style: italic; letter-spacing: .06em; text-shadow: 0 5px 24px #000, 0 0 30px rgba(255,232,128,.75); transition: opacity .16s, transform .16s; }
+  #message.on { opacity: 1; transform: translate(-50%,-50%) scale(1.02); }
+  #help { position: fixed; z-index: 9; left: 50%; bottom: max(14px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(720px, calc(100vw - 24px)); text-align: center; color: rgba(255,248,223,.72); font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; pointer-events: none; text-shadow: 0 2px 8px #000; }
+  #donate { position: fixed; z-index: 25; right: max(12px, env(safe-area-inset-right)); bottom: max(12px, env(safe-area-inset-bottom)); }
+  #donate button { pointer-events: auto; }
+  @media (max-width: 650px) {
+    #hud { grid-template-columns: 1fr 1fr; }
+    #hud .stat.center { display: none; }
+    .meter { width: 42vw; }
+    #help { font-size: 9px; letter-spacing: .12em; }
+  }
+</style>
+</head>
+<body>
+<canvas id="game" aria-label="Girth garden gag game"></canvas>
+<section id="hud" class="hidden">
+  <div class="stat">
+    <div class="label">Friction</div>
+    <div class="meter"><span id="friction-fill"></span></div>
+    <div class="value" id="friction-val">0%</div>
+  </div>
+  <div class="stat center">
+    <div class="label">Fertility</div>
+    <div class="value" id="score">0</div>
+  </div>
+  <div class="stat right">
+    <div class="label">Flowers</div>
+    <div class="value" id="flowers">0</div>
+  </div>
+</section>
+<div id="message"></div>
+<div id="help" class="hidden">Drag left-right on the log. Keep rhythm. Release the garden hose energy.</div>
+<section id="title">
+  <div class="panel">
+    <div class="eyebrow">Omenly after-hours garden department</div>
+    <h1>GIRTH</h1>
+    <p>A deeply unserious first-person nature ritual. Rub the suspiciously majestic log, build friction, splash the soil, and make the flowers believe in tomorrow.</p>
+    <div class="actions">
+      <button id="start" type="button">Start Rubbing</button>
+      <span data-omenly-badge></span>
+      <button data-omenly-cta type="button">Support Game</button>
+    </div>
+    <div data-omenly-ad style="margin-top:18px;"></div>
+  </div>
+</section>
+<div id="donate">
+  <button data-omenly-cta type="button">SUPPORT THE DEV</button>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const title = document.getElementById('title');
+  const hud = document.getElementById('hud');
+  const help = document.getElementById('help');
+  const message = document.getElementById('message');
+  const frictionFill = document.getElementById('friction-fill');
+  const frictionVal = document.getElementById('friction-val');
+  const scoreEl = document.getElementById('score');
+  const flowersEl = document.getElementById('flowers');
+
+  let W = 1, H = 1, DPR = 1;
+  let running = false;
+  let pointerDown = false;
+  let lastX = 0;
+  let friction = 0;
+  let score = 0;
+  let flowerCount = 0;
+  let t = 0;
+  let burstCooldown = 0;
+  let shake = 0;
+  let showUntil = 0;
+  const drops = [];
+  const flowers = [];
+  const sparkles = [];
+  const ripples = [];
+
+  function resize() {
+    DPR = Math.min(devicePixelRatio || 1, 2);
+    W = Math.max(320, Math.round(innerWidth));
+    H = Math.max(320, Math.round(innerHeight));
+    canvas.width = Math.round(W * DPR);
+    canvas.height = Math.round(H * DPR);
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  addEventListener('resize', resize, { passive: true });
+  resize();
+
+  let audioCtx = null;
+  function audio() {
+    if (!audioCtx) {
+      try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (_) {}
+    }
+    if (audioCtx?.state === 'suspended') audioCtx.resume();
+  }
+  function tone(freq, dur, type = 'sine', vol = .08) {
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, now);
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.exponentialRampToValueAtTime(vol, now + .01);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(now);
+    osc.stop(now + dur + .04);
+  }
+  function noise(dur = .25, vol = .12) {
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+    const buffer = audioCtx.createBuffer(1, Math.max(1, audioCtx.sampleRate * dur), audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+    const src = audioCtx.createBufferSource();
+    const gain = audioCtx.createGain();
+    const filter = audioCtx.createBiquadFilter();
+    src.buffer = buffer;
+    filter.type = 'lowpass';
+    filter.frequency.value = 900;
+    gain.gain.setValueAtTime(vol, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+    src.connect(filter);
+    filter.connect(gain);
+    gain.connect(audioCtx.destination);
+    src.start(now);
+    src.stop(now + dur + .04);
+  }
+
+  function start() {
+    running = true;
+    title.classList.add('hidden');
+    hud.classList.remove('hidden');
+    help.classList.remove('hidden');
+    audio();
+    tone(220, .12, 'triangle', .09);
+    tone(330, .18, 'triangle', .07);
+  }
+  document.getElementById('start').addEventListener('click', start);
+
+  function addFlower(x, y, scale = 1) {
+    const petals = 5 + ((Math.random() * 4) | 0);
+    const hue = [48, 112, 178, 306, 12][(Math.random() * 5) | 0];
+    flowers.push({
+      x, y,
+      h: 0,
+      target: (42 + Math.random() * 78) * scale,
+      sway: Math.random() * Math.PI * 2,
+      petals,
+      hue,
+      age: 0
+    });
+    flowerCount++;
+    flowersEl.textContent = flowerCount;
+  }
+
+  function burst() {
+    if (burstCooldown > 0) return;
+    burstCooldown = .45;
+    friction = Math.max(0, friction - 62);
+    score += 100 + flowerCount * 7;
+    scoreEl.textContent = score;
+    shake = .45;
+    showMessage("WHOA, THAT'S FERTILE");
+    noise(.55, .25);
+    tone(740, .08, 'sine', .12);
+    setTimeout(() => tone(980, .12, 'sine', .10), 70);
+
+    const cx = W * .5;
+    const cy = H * .58;
+    for (let i = 0; i < 72; i++) {
+      const a = -Math.PI * .5 + (Math.random() - .5) * 1.55;
+      const sp = 260 + Math.random() * 640;
+      drops.push({
+        x: cx + (Math.random() - .5) * W * .18,
+        y: cy - Math.random() * 28,
+        vx: Math.cos(a) * sp + (Math.random() - .5) * 160,
+        vy: Math.sin(a) * sp - Math.random() * 80,
+        r: 2 + Math.random() * 5,
+        life: 1.2 + Math.random() * .7,
+        max: 1.7
+      });
+    }
+    for (let i = 0; i < 12; i++) {
+      addFlower(W * (.14 + Math.random() * .72), H * (.77 + Math.random() * .14), .8 + Math.random() * .8);
+    }
+    for (let i = 0; i < 24; i++) {
+      sparkles.push({ x: cx + (Math.random() - .5) * W * .45, y: cy + (Math.random() - .5) * H * .25, vx: (Math.random() - .5) * 90, vy: -40 - Math.random() * 90, life: .8 + Math.random() * .8 });
+    }
+  }
+
+  function showMessage(text) {
+    message.textContent = text;
+    message.classList.add('on');
+    showUntil = performance.now() + 1350;
+  }
+
+  function pointerStart(x) {
+    if (!running) return;
+    audio();
+    pointerDown = true;
+    lastX = x;
+    canvas.classList.add('rubbing');
+  }
+  function pointerMove(x) {
+    if (!running || !pointerDown) return;
+    const dx = x - lastX;
+    lastX = x;
+    const gain = Math.min(9, Math.abs(dx) * .22);
+    if (gain > .25) {
+      friction = Math.min(100, friction + gain);
+      if (Math.random() < .25) tone(90 + friction * 4, .025, 'triangle', .025);
+      const logY = H * .53;
+      sparkles.push({ x: W * .5 + (Math.random() - .5) * W * .28, y: logY + (Math.random() - .5) * 45, vx: dx * 1.5, vy: -30 - Math.random() * 70, life: .35 + Math.random() * .35 });
+      if (friction >= 100) burst();
+    }
+  }
+  function pointerEnd() {
+    pointerDown = false;
+    canvas.classList.remove('rubbing');
+  }
+  canvas.addEventListener('pointerdown', e => { canvas.setPointerCapture?.(e.pointerId); pointerStart(e.clientX); });
+  canvas.addEventListener('pointermove', e => pointerMove(e.clientX));
+  canvas.addEventListener('pointerup', pointerEnd);
+  canvas.addEventListener('pointercancel', pointerEnd);
+  canvas.addEventListener('lostpointercapture', pointerEnd);
+
+  addEventListener('keydown', e => {
+    if (!running && (e.key === 'Enter' || e.key === ' ')) start();
+    if (!running) return;
+    if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') pointerMove(lastX - 34);
+    if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') pointerMove(lastX + 34);
+    if (e.key === ' ') burst();
+  });
+
+  function drawSky() {
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#12352b');
+    g.addColorStop(.42, '#1d5b52');
+    g.addColorStop(.72, '#344425');
+    g.addColorStop(1, '#162016');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = 'rgba(255,232,128,.9)';
+    ctx.beginPath();
+    ctx.arc(W * .78, H * .15, Math.min(W, H) * .07, 0, Math.PI * 2);
+    ctx.fill();
+    for (let i = 0; i < 8; i++) {
+      const x = (i * 181 + t * 18) % (W + 160) - 80;
+      const y = H * (.12 + (i % 3) * .08);
+      ctx.fillStyle = 'rgba(255,248,223,.12)';
+      ellipse(x, y, 82, 20);
+      ellipse(x + 44, y + 2, 54, 16);
+    }
+  }
+
+  function ellipse(x, y, rx, ry) {
+    ctx.beginPath();
+    ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function drawGarden() {
+    const ground = ctx.createLinearGradient(0, H * .65, 0, H);
+    ground.addColorStop(0, '#48652e');
+    ground.addColorStop(1, '#152013');
+    ctx.fillStyle = ground;
+    ctx.beginPath();
+    ctx.moveTo(0, H * .66);
+    ctx.bezierCurveTo(W * .25, H * .61, W * .66, H * .70, W, H * .64);
+    ctx.lineTo(W, H);
+    ctx.lineTo(0, H);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,248,223,.08)';
+    for (let i = 0; i < 16; i++) {
+      const y = H * (.70 + i * .022);
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.quadraticCurveTo(W * .5, y + Math.sin(t + i) * 10, W, y - 8);
+      ctx.stroke();
+    }
+  }
+
+  function drawLog() {
+    const cx = W * .5;
+    const cy = H * .53 + Math.sin(t * 7) * (pointerDown ? 4 : 1);
+    const len = Math.min(W * .72, 720);
+    const thick = Math.min(H * .18, 138);
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(Math.sin(t * 1.7) * .015);
+    const logGrad = ctx.createLinearGradient(-len / 2, -thick / 2, len / 2, thick / 2);
+    logGrad.addColorStop(0, '#3d2111');
+    logGrad.addColorStop(.36, '#7a4826');
+    logGrad.addColorStop(.72, '#b06a36');
+    logGrad.addColorStop(1, '#4b2a17');
+    ctx.fillStyle = logGrad;
+    roundRect(-len / 2, -thick / 2, len, thick, thick * .45);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,232,128,.28)';
+    ctx.lineWidth = 3;
+    for (let i = 0; i < 9; i++) {
+      const y = -thick * .36 + i * thick * .09 + Math.sin(t * 3 + i) * 2;
+      ctx.beginPath();
+      ctx.moveTo(-len * .42, y);
+      ctx.bezierCurveTo(-len * .16, y - 8, len * .11, y + 7, len * .42, y - 4);
+      ctx.stroke();
+    }
+    ctx.fillStyle = 'rgba(255,248,223,.12)';
+    ellipse(-len * .22, -thick * .18, len * .18, thick * .08);
+    ctx.fillStyle = '#2b170d';
+    ellipse(-len / 2 + thick * .36, 0, thick * .34, thick * .42);
+    ctx.strokeStyle = 'rgba(255,232,128,.22)';
+    ctx.lineWidth = 2;
+    for (let r = .12; r < .38; r += .08) {
+      ctx.beginPath();
+      ctx.ellipse(-len / 2 + thick * .36, 0, thick * r, thick * r * 1.16, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    const handY = H * .72;
+    drawHand(W * .28 + Math.sin(t * 8) * (pointerDown ? 18 : 3), handY, -0.18);
+    drawHand(W * .72 - Math.sin(t * 8) * (pointerDown ? 18 : 3), handY, 0.18);
+  }
+
+  function roundRect(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+
+  function drawHand(x, y, rot) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(rot + Math.sin(t * 5) * .03);
+    ctx.fillStyle = '#d79b6d';
+    roundRect(-44, -30, 88, 62, 28);
+    ctx.fill();
+    ctx.fillStyle = '#c58359';
+    for (let i = 0; i < 4; i++) {
+      roundRect(-36 + i * 20, -52, 16, 38, 8);
+      ctx.fill();
+    }
+    ctx.fillStyle = '#36533a';
+    roundRect(-52, 20, 104, 34, 12);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawFlowers(dt) {
+    for (const f of flowers) {
+      f.age += dt;
+      f.h += (f.target - f.h) * Math.min(1, dt * 3.8);
+      const sway = Math.sin(t * 2.2 + f.sway) * 7;
+      ctx.strokeStyle = '#6bd05f';
+      ctx.lineWidth = Math.max(2, 4 * (f.h / f.target));
+      ctx.beginPath();
+      ctx.moveTo(f.x, f.y);
+      ctx.quadraticCurveTo(f.x + sway * .6, f.y - f.h * .48, f.x + sway, f.y - f.h);
+      ctx.stroke();
+      const bloomX = f.x + sway;
+      const bloomY = f.y - f.h;
+      ctx.fillStyle = `hsl(${f.hue}, 78%, 65%)`;
+      for (let p = 0; p < f.petals; p++) {
+        const a = p / f.petals * Math.PI * 2 + t * .2;
+        ellipse(bloomX + Math.cos(a) * 11, bloomY + Math.sin(a) * 9, 9, 6);
+      }
+      ctx.fillStyle = '#ffe880';
+      ellipse(bloomX, bloomY, 7, 7);
+    }
+  }
+
+  function updateParticles(dt) {
+    for (let i = drops.length - 1; i >= 0; i--) {
+      const d = drops[i];
+      d.life -= dt;
+      d.vy += 720 * dt;
+      d.x += d.vx * dt;
+      d.y += d.vy * dt;
+      if (d.y > H * .74) {
+        ripples.push({ x: d.x, y: d.y, r: 5, life: .45 });
+        if (Math.random() < .34) addFlower(d.x + (Math.random() - .5) * 18, Math.min(H * .91, d.y + 18), .55 + Math.random() * .35);
+        drops.splice(i, 1);
+        continue;
+      }
+      if (d.life <= 0) drops.splice(i, 1);
+    }
+    for (let i = sparkles.length - 1; i >= 0; i--) {
+      const s = sparkles[i];
+      s.life -= dt;
+      s.vy += 90 * dt;
+      s.x += s.vx * dt;
+      s.y += s.vy * dt;
+      if (s.life <= 0) sparkles.splice(i, 1);
+    }
+    for (let i = ripples.length - 1; i >= 0; i--) {
+      const r = ripples[i];
+      r.life -= dt;
+      r.r += 90 * dt;
+      if (r.life <= 0) ripples.splice(i, 1);
+    }
+  }
+
+  function drawParticles() {
+    for (const r of ripples) {
+      ctx.strokeStyle = `rgba(144,210,255,${Math.max(0, r.life * 1.4)})`;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.ellipse(r.x, r.y, r.r, r.r * .28, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    for (const d of drops) {
+      ctx.fillStyle = `rgba(120,205,255,${Math.max(0, d.life / d.max)})`;
+      ellipse(d.x, d.y, d.r * .7, d.r * 1.5);
+    }
+    for (const s of sparkles) {
+      ctx.fillStyle = `rgba(255,232,128,${Math.max(0, s.life)})`;
+      ctx.fillRect(s.x - 2, s.y - 2, 4, 4);
+    }
+  }
+
+  function updateHud() {
+    frictionFill.style.width = Math.round(friction) + '%';
+    frictionVal.textContent = Math.round(friction) + '%';
+  }
+
+  let last = performance.now();
+  function loop(now) {
+    const dt = Math.min(.05, (now - last) / 1000);
+    last = now;
+    t += dt;
+    if (running) {
+      friction = Math.max(0, friction - dt * (pointerDown ? 8 : 18));
+      burstCooldown = Math.max(0, burstCooldown - dt);
+      updateParticles(dt);
+      updateHud();
+    }
+    if (showUntil && now > showUntil) {
+      message.classList.remove('on');
+      showUntil = 0;
+    }
+    const sx = shake > 0 ? (Math.random() - .5) * shake * 22 : 0;
+    const sy = shake > 0 ? (Math.random() - .5) * shake * 18 : 0;
+    shake = Math.max(0, shake - dt * 1.7);
+    ctx.save();
+    ctx.translate(sx, sy);
+    drawSky();
+    drawGarden();
+    drawFlowers(dt);
+    drawLog();
+    drawParticles();
+    ctx.restore();
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Girth cover art</title>
+  <desc id="desc">A playful magic log in a garden splashing water that makes flowers grow.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#12352b"/>
+      <stop offset=".55" stop-color="#1d5b52"/>
+      <stop offset="1" stop-color="#162016"/>
+    </linearGradient>
+    <linearGradient id="log" x1="0" x2="1">
+      <stop offset="0" stop-color="#3b2011"/>
+      <stop offset=".35" stop-color="#7b4725"/>
+      <stop offset=".7" stop-color="#b06a36"/>
+      <stop offset="1" stop-color="#4c2a17"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="9" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="1200" height="630" fill="url(#sky)"/>
+  <circle cx="920" cy="112" r="70" fill="#ffe880" opacity=".9"/>
+  <path d="M0 420 C250 350 480 440 720 390 C930 350 1080 385 1200 360 L1200 630 L0 630 Z" fill="#48652e"/>
+  <path d="M0 475 C220 430 505 490 740 458 C920 434 1082 460 1200 430 L1200 630 L0 630 Z" fill="#1b2d18"/>
+  <g opacity=".28" fill="#fff8df">
+    <ellipse cx="190" cy="116" rx="112" ry="24"/>
+    <ellipse cx="265" cy="124" rx="78" ry="19"/>
+    <ellipse cx="760" cy="180" rx="132" ry="25"/>
+    <ellipse cx="855" cy="187" rx="72" ry="18"/>
+  </g>
+  <g transform="translate(600 330) rotate(-2)">
+    <rect x="-380" y="-82" width="760" height="164" rx="76" fill="url(#log)" stroke="#ffd089" stroke-opacity=".28" stroke-width="6"/>
+    <ellipse cx="-312" cy="0" rx="62" ry="73" fill="#2b170d"/>
+    <g fill="none" stroke="#ffd089" stroke-opacity=".27" stroke-width="5">
+      <ellipse cx="-312" cy="0" rx="22" ry="28"/>
+      <ellipse cx="-312" cy="0" rx="42" ry="52"/>
+      <path d="M-230 -42 C-60 -72 110 -20 270 -44"/>
+      <path d="M-245 0 C-92 -28 102 24 284 -6"/>
+      <path d="M-215 42 C-35 18 122 64 274 33"/>
+    </g>
+    <ellipse cx="-100" cy="-34" rx="155" ry="22" fill="#fff8df" opacity=".13"/>
+  </g>
+  <g filter="url(#glow)" fill="none" stroke-linecap="round">
+    <path d="M520 250 C500 165 430 115 350 72" stroke="#82d6ff" stroke-width="15"/>
+    <path d="M585 248 C600 150 680 100 780 55" stroke="#82d6ff" stroke-width="11"/>
+    <path d="M645 255 C690 182 780 160 900 134" stroke="#82d6ff" stroke-width="8"/>
+    <path d="M560 260 C540 205 488 178 425 155" stroke="#b6edff" stroke-width="6"/>
+  </g>
+  <g>
+    <circle cx="344" cy="72" r="10" fill="#b6edff"/>
+    <circle cx="783" cy="55" r="8" fill="#b6edff"/>
+    <circle cx="903" cy="134" r="6" fill="#b6edff"/>
+    <circle cx="428" cy="155" r="6" fill="#b6edff"/>
+  </g>
+  <g stroke="#6bd05f" stroke-width="8" stroke-linecap="round">
+    <path d="M190 560 C190 510 205 475 218 430"/>
+    <path d="M295 574 C285 520 300 490 322 450"/>
+    <path d="M860 570 C845 525 855 493 880 454"/>
+    <path d="M985 560 C996 518 990 485 970 438"/>
+    <path d="M715 585 C704 530 724 490 750 442"/>
+  </g>
+  <g>
+    <g transform="translate(218 430)">
+      <circle r="13" fill="#ffe880"/>
+      <g fill="#ff6ea8"><ellipse cx="0" cy="-23" rx="14" ry="22"/><ellipse cx="22" cy="-7" rx="14" ry="22" transform="rotate(72)"/><ellipse cx="14" cy="18" rx="14" ry="22" transform="rotate(144)"/><ellipse cx="-14" cy="18" rx="14" ry="22" transform="rotate(216)"/><ellipse cx="-22" cy="-7" rx="14" ry="22" transform="rotate(288)"/></g>
+    </g>
+    <g transform="translate(322 450) scale(.85)">
+      <circle r="13" fill="#ffe880"/>
+      <g fill="#9bd877"><ellipse cx="0" cy="-23" rx="14" ry="22"/><ellipse cx="22" cy="-7" rx="14" ry="22" transform="rotate(72)"/><ellipse cx="14" cy="18" rx="14" ry="22" transform="rotate(144)"/><ellipse cx="-14" cy="18" rx="14" ry="22" transform="rotate(216)"/><ellipse cx="-22" cy="-7" rx="14" ry="22" transform="rotate(288)"/></g>
+    </g>
+    <g transform="translate(880 454)">
+      <circle r="13" fill="#ffe880"/>
+      <g fill="#48a9ff"><ellipse cx="0" cy="-23" rx="14" ry="22"/><ellipse cx="22" cy="-7" rx="14" ry="22" transform="rotate(72)"/><ellipse cx="14" cy="18" rx="14" ry="22" transform="rotate(144)"/><ellipse cx="-14" cy="18" rx="14" ry="22" transform="rotate(216)"/><ellipse cx="-22" cy="-7" rx="14" ry="22" transform="rotate(288)"/></g>
+    </g>
+    <g transform="translate(970 438) scale(1.08)">
+      <circle r="13" fill="#ffe880"/>
+      <g fill="#ff8f48"><ellipse cx="0" cy="-23" rx="14" ry="22"/><ellipse cx="22" cy="-7" rx="14" ry="22" transform="rotate(72)"/><ellipse cx="14" cy="18" rx="14" ry="22" transform="rotate(144)"/><ellipse cx="-14" cy="18" rx="14" ry="22" transform="rotate(216)"/><ellipse cx="-22" cy="-7" rx="14" ry="22" transform="rotate(288)"/></g>
+    </g>
+  </g>
+  <text x="600" y="117" text-anchor="middle" fill="#fff8df" font-family="Georgia, serif" font-style="italic" font-size="106" letter-spacing="10" filter="url(#glow)">GIRTH</text>
+  <text x="600" y="190" text-anchor="middle" fill="#9bd877" font-family="Arial, sans-serif" font-size="28" font-weight="900" letter-spacing="9">WHOA, THAT'S FERTILE</text>
+</svg>

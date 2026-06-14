@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Siteline — Free 5v5 Counter-Strike Style FPS in Browser · Multiplayer Shooter · No Download</title>
-<meta name="description" content="Play Siteline — a free 5v5 bombsite FPS in your browser. Three classic maps (office, dust, dust 2), pistol, AK-47, bullpup rifles, HE / flashbang / smoke grenades. Paste a 6-character room code to play with friends — up to 50 players. Counter-Strike style multiplayer shooter with CPU bots (easy, medium, hard). No download, no install, no signup. Works on desktop and mobile.">
+<meta name="description" content="Play Siteline — a free 5v5 bombsite FPS in your browser. Three classic maps, 28 buyable weapons, knife, armor, and six grenade types including HE, flashbang, smoke, molotov, incendiary, and decoy. Paste a 6-character room code to play with friends — up to 50 players. No download, no signup.">
 <meta name="keywords" content="browser shooter, browser fps, online fps, multiplayer shooter, counter strike browser, cs browser, free fps, free shooter game, no download shooter, 5v5 shooter, bombsite fps, tactical shooter browser, web shooter, html5 fps, three.js fps, dust 2 browser, ak47 game, multiplayer browser game, free online multiplayer, peer to peer fps, room code shooter, friends shooter, play with friends shooter, csgo browser, cs2 browser, mobile fps, mobile shooter, free pvp game">
 <meta name="author" content="Omenly">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
@@ -20,7 +20,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Omenly">
 <meta property="og:title" content="Siteline — Free 5v5 FPS in Your Browser · Multiplayer Counter-Strike Style Shooter">
-<meta property="og:description" content="Three maps. Three weapons. Three grenades. Paste a room code to play with friends — up to 50 players — or fight CPU bots solo. Free, no download.">
+<meta property="og:description" content="Three maps. 28 weapons. Six grenade types. Paste a room code to play with friends — up to 50 players — or fight CPU bots solo. Free, no download.">
 <meta property="og:url" content="https://omenly.vercel.app/siteline/">
 <meta property="og:image" content="https://omenly.vercel.app/siteline/cover.svg">
 <meta property="og:image:alt" content="Siteline bombsite shooter — desert map with crosshair">
@@ -28,7 +28,7 @@
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Siteline — Free Browser FPS · 5v5 Bombsite Shooter">
-<meta name="twitter:description" content="Office, dust, dust 2. Pistol, AK-47, bullpup. HE, flash, smoke. Paste a code, fight your friends. Up to 50 players. Free, no download.">
+<meta name="twitter:description" content="Office, dust, dust 2. Pistols, SMGs, rifles, snipers, shotguns, LMGs, armor, and six grenade types. Paste a code, fight friends.">
 <meta name="twitter:image" content="https://omenly.vercel.app/siteline/cover.svg">
 <meta name="twitter:image:alt" content="Siteline cover art">
 
@@ -43,7 +43,7 @@
       "alternateName": ["Siteline FPS", "Siteline Browser Shooter", "Siteline 5v5"],
       "url": "https://omenly.vercel.app/siteline/",
       "image": "https://omenly.vercel.app/siteline/cover.svg",
-      "description": "Siteline is a free 5v5 bombsite first-person shooter that runs in any modern web browser. Three maps — office, dust, dust 2 — three weapons (pistol, AK-47, bullpup), three grenades (HE, flashbang, smoke), CPU bots with three difficulties, and peer-to-peer multiplayer via 6-character room codes supporting up to 50 players. Counter-Strike inspired tactical gameplay with no download, no install, and no signup.",
+      "description": "Siteline is a free 5v5 bombsite first-person shooter that runs in any modern web browser. Three maps — office, dust, dust 2 — 28 buyable weapons, knife, armor, six grenade types, CPU bots with three difficulties, and peer-to-peer multiplayer via 6-character room codes supporting up to 50 players. Counter-Strike inspired tactical gameplay with no download, no install, and no signup.",
       "genre": ["First-Person Shooter", "FPS", "Tactical Shooter", "Multiplayer Shooter", "Online Shooter", "Action", "3D", "Browser Game", "PvP", "Team-Based Shooter"],
       "keywords": "browser shooter, FPS, multiplayer, counter-strike style, bombsite, 5v5, dust 2, free online shooter, no download FPS",
       "playMode": ["SinglePlayer", "MultiPlayer", "CoOp"],
@@ -107,7 +107,7 @@
         {
           "@type": "Question",
           "name": "What weapons can I use?",
-          "acceptedAnswer": { "@type": "Answer", "text": "There are three primary weapons — a pistol (handgun), an AK-47 assault rifle, and a bullpup rifle — plus three grenades: an HE grenade, a flashbang, and a smoke grenade. You buy them in the buy menu at the start of each round." }
+          "acceptedAnswer": { "@type": "Answer", "text": "The buy menu has 28 weapons: pistols, SMGs, rifles, scoped rifles, snipers, shotguns, LMGs, plus a knife, armor, full ammo, and HE, flashbang, smoke, molotov, incendiary, and decoy grenades." }
         },
         {
           "@type": "Question",
@@ -117,7 +117,7 @@
         {
           "@type": "Question",
           "name": "Does Siteline work on mobile?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Yes. Siteline has full touch controls — virtual sticks for movement and looking, plus on-screen FIRE, RELOAD, SWAP, NADE, and BUY buttons." }
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes. Siteline has full touch controls — virtual sticks for movement and looking, plus on-screen FIRE, RELOAD, SWAP, NADE, SCOPE, and USE buttons." }
         },
         {
           "@type": "Question",
@@ -202,6 +202,11 @@
   #crosshair::before { top: 50%; left: 0; right: 0; height: 1px; transform: translateY(-50%); }
   #crosshair::after  { left: 50%; top: 0; bottom: 0; width: 1px; transform: translateX(-50%); }
   #crosshair .dot { position: absolute; top: 50%; left: 50%; width: 3px; height: 3px; margin: -1.5px 0 0 -1.5px; background: #ffd089; border-radius: 50%; }
+  #scope-overlay { position: fixed; inset: 0; z-index: 8; pointer-events: none; opacity: 0; transition: opacity 0.12s; background: radial-gradient(circle at center, transparent 0 27vh, rgba(0,0,0,0.88) 27.3vh 100%); }
+  #scope-overlay.on { opacity: 1; }
+  #scope-overlay::before, #scope-overlay::after { content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); pointer-events: none; }
+  #scope-overlay::before { width: 54vh; height: 54vh; max-width: 86vw; max-height: 86vw; border: 2px solid rgba(232,216,200,0.92); border-radius: 50%; box-shadow: 0 0 0 2px rgba(0,0,0,0.7), inset 0 0 24px rgba(0,0,0,0.55); }
+  #scope-overlay::after { width: min(54vh, 86vw); height: min(54vh, 86vw); background: linear-gradient(90deg, transparent calc(50% - 1px), rgba(232,216,200,0.86) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px)), linear-gradient(0deg, transparent calc(50% - 1px), rgba(232,216,200,0.86) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px)); border-radius: 50%; }
 
   #hit-marker { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 28px; height: 28px; z-index: 7; pointer-events: none; opacity: 0; transition: opacity 0.15s; }
   #hit-marker.on { opacity: 1; }
@@ -253,6 +258,12 @@
   .panel .err { color: #ff8060; font-size: 11px; letter-spacing: 2px; min-height: 14px; }
   .panel .map-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0 16px; }
   .panel .map-grid button { padding: 12px 8px; font-size: 11px; letter-spacing: 2px; }
+  .panel .loadout-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 10px 0 16px; }
+  .panel .loadout-grid button { min-height: 58px; padding: 10px 8px; font-size: 10px; letter-spacing: 1.5px; line-height: 1.3; }
+  .panel .loadout-grid button small { display: block; margin-top: 4px; opacity: 0.68; font-size: 9px; letter-spacing: 1px; }
+  @media (max-width: 520px) {
+    .panel .loadout-grid { grid-template-columns: 1fr; }
+  }
   .panel .lobby-list { background: rgba(255,208,137,0.05); border: 1px solid rgba(255,208,137,0.25); padding: 10px; margin: 10px 0; max-height: 140px; overflow-y: auto; font-size: 11px; letter-spacing: 2px; text-align: left; }
   .panel .lobby-list .row-p { display: flex; justify-content: space-between; padding: 4px 4px; border-bottom: 1px dashed rgba(255,208,137,0.15); }
   .panel .lobby-list .row-p:last-child { border-bottom: none; }
@@ -263,6 +274,7 @@
   #buy { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); background: rgba(10,6,4,0.9); border: 1px solid rgba(255,208,137,0.35); padding: 20px; z-index: 40; min-width: 520px; max-width: 92vw; max-height: 88vh; display: flex; flex-direction: column; }
   #buy h3 { font-family: Georgia, serif; font-style: italic; color: #ffd089; letter-spacing: 6px; text-align: center; margin-bottom: 14px; font-size: 18px; }
   #buy .buy-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; overflow-y: auto; max-height: 60vh; padding-right: 4px; }
+  #buy .buy-section { grid-column: 1 / -1; margin-top: 6px; padding: 5px 2px 2px; border-top: 1px solid rgba(255,208,137,0.18); color: rgba(255,208,137,0.65); font-size: 9px; letter-spacing: 3px; text-transform: uppercase; }
   #buy button { background: transparent; border: 1px solid rgba(255,208,137,0.4); color: #ffd089; padding: 9px 10px; font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 2px; cursor: pointer; transition: all 0.15s; text-align: left; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
   #buy button:hover:not(:disabled) { background: rgba(255,208,137,0.15); border-color: #ffd089; }
   #buy button:disabled { opacity: 0.35; cursor: not-allowed; }
@@ -293,6 +305,7 @@
   #fire-btn:active { background: rgba(255,208,137,0.4); transform: scale(0.96); }
   #side-btns { position: absolute; right: max(28px, env(safe-area-inset-right, 0px) + 18px); bottom: max(195px, env(safe-area-inset-bottom, 0px) + 180px); display: flex; flex-direction: column; gap: 6px; pointer-events: auto; }
   #side-btns button { width: 76px; padding: 8px 0; background: rgba(255,208,137,0.08); border: 1px solid #ffd089; color: #ffd089; font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 2px; }
+  #side-btns button.on { background: rgba(255,208,137,0.28); box-shadow: 0 0 12px rgba(255,208,137,0.55); }
   @media (max-width: 480px) {
     #stick-move, #stick-look { width: 110px; height: 110px; }
     .knob { width: 48px; height: 48px; margin: -24px 0 0 -24px; }
@@ -401,14 +414,14 @@
   <p>To play with friends, click <strong>HOST</strong> to generate a unique six-character <strong>room code</strong>. Share that code with anyone — Discord, text, voice, paste it anywhere. Your friends click <strong>JOIN</strong>, paste the code, and they are in. A single Siteline room supports up to <strong>50 simultaneous players</strong>. Connections are peer-to-peer over WebRTC, so there is no central server to wait for. If a friend cannot connect, empty slots are filled with <strong>CPU bots</strong> at your chosen difficulty.</p>
   <h2>Three classic-style maps: office, dust, and dust 2</h2>
   <p>Siteline ships with three handcrafted maps designed in the <strong>Counter-Strike tradition</strong>. The <strong>office</strong> is a tight indoor map with cubicles, server racks, and fluorescent lighting. <strong>Dust</strong> is a sun-drenched desert village with mudbrick walls and tower cover. <strong>Dust 2</strong> is the larger two-bombsite map every CS player remembers — long sightlines, mid catwalks, A and B sites at opposite corners. Each map has dynamic point lights, soft shadows, sun lighting, fog, and bombsite markers.</p>
-  <h2>Three weapons and three grenades</h2>
-  <p>Your loadout includes a <strong>pistol (handgun)</strong>, the <strong>AK-47 assault rifle</strong>, and a <strong>bullpup rifle</strong> — each with its own damage, recoil, fire rate, and spread. Grenades include the classic <strong>HE grenade</strong> (high-explosive area damage), the <strong>flashbang</strong> (blinds enemies who look at it), and the <strong>smoke grenade</strong> (renders a visual smoke cloud that blocks line-of-sight for sixteen seconds).</p>
+  <h2>28 weapons and six grenade types</h2>
+  <p>The buy menu covers pistols, SMGs, rifles, scoped rifles, snipers, shotguns, LMGs, armor, full ammo, and a knife. Grenades include <strong>HE</strong>, <strong>flashbang</strong>, <strong>smoke</strong>, <strong>molotov</strong>, <strong>incendiary</strong>, and <strong>decoy</strong> utility, each with distinct damage, line-of-sight, zoning, or bait behavior.</p>
   <h2>Solo mode with three bot difficulties</h2>
   <p>If you do not have friends online, play solo against <strong>CPU terrorists or counter-terrorists</strong>. Choose <strong>easy</strong>, <strong>medium</strong>, or <strong>hard</strong> bots. Hard bots react in 0.14 seconds, easy bots wander the map and miss. Team sizes are configurable: 3v3, 5v5, or 8v8 in solo, and up to 25v25 in multiplayer.</p>
   <h2>Counter-Strike inspired economy and round system</h2>
-  <p>Every round starts with a 15-second <strong>buy menu</strong> phase. Earn money by winning rounds and getting kills. Spend it on weapons, kevlar armor, and grenades. First team to win 8 rounds takes the match. The classic <strong>5v5 bombsite</strong> format is preserved: CT and T spawns at opposite ends, A and B bombsites marked on the ground, win by eliminating the other team.</p>
+  <p>Choose your <strong>loadout once</strong> on the play setup page, then every round starts fast with that kit. Each weapon has different damage, recoil, range, spread, magazine size, and fire rate. First team to win 8 rounds takes the match. The classic <strong>5v5 bombsite</strong> format is preserved: CT and T spawns at opposite ends, A and B bombsites marked on the ground, win by eliminating the other team.</p>
   <h2>Desktop and mobile — same game, full controls</h2>
-  <p>On desktop you get <strong>WASD movement, mouse aim, click to fire, R to reload, 1 and 2 to swap weapons, G to cycle grenades, F to throw, B for buy menu, TAB for scoreboard, ENTER for chat, SPACE to jump, SHIFT to walk silently</strong>. On mobile, full touch controls — virtual movement and look sticks, plus dedicated FIRE, RELOAD, SWAP, NADE, and BUY buttons.</p>
+  <p>On desktop you get <strong>WASD movement, mouse aim, click to fire, right click to scope snipers, R to reload, 1 and 2 to swap weapons, G to cycle grenades, F to throw, TAB for scoreboard, ENTER for chat, SPACE to jump, SHIFT to walk silently</strong>. On mobile, full touch controls — virtual movement and look sticks, plus dedicated FIRE, SCOPE, RELOAD, SWAP, NADE, and USE buttons.</p>
   <h2>What is Siteline?</h2>
   <p>Siteline is a tribute to and small reimagining of competitive <strong>tactical shooters</strong> like <strong>Counter-Strike (CS), CS:GO, CS2, Valorant, Rainbow Six Siege</strong>, and the long lineage of <strong>5v5 round-based first-person shooters</strong>. It is not affiliated with any of these. It is a single-page HTML5 game built with Three.js for rendering and PeerJS for multiplayer signaling. Source is open in your browser — view source any time. Free to play, free to host, free to share. No ads in-game. The dev accepts tips via the SUPPORT THE DEV button.</p>
   <h2>Why play in a browser?</h2>
@@ -457,6 +470,9 @@
   <div id="g-he" data-n="0">HE</div>
   <div id="g-fl" data-n="0">FL</div>
   <div id="g-sm" data-n="0">SM</div>
+  <div id="g-mo" data-n="0">MO</div>
+  <div id="g-in" data-n="0">IN</div>
+  <div id="g-de" data-n="0">DE</div>
 </div>
 
 <!-- HUD top-right (K/D + room) -->
@@ -479,6 +495,7 @@
 <!-- Crosshair / hit marker -->
 <div id="crosshair" class="hidden"><div class="dot"></div></div>
 <div id="hit-marker"></div>
+<div id="scope-overlay"></div>
 
 <!-- Center message (round result) -->
 <div id="center-msg" class="center-msg"></div>
@@ -488,7 +505,7 @@
   <div class="card">
     <div class="crown">— OMENLY · BOMBSITE FPS —</div>
     <h1>SITELINE</h1>
-    <p>FIVE ON FIVE. THREE MAPS. THREE WEAPONS. THREE GRENADES.<br>PLAY ALONE AGAINST BOTS, OR PASTE A CODE TO JOIN A FRIEND.</p>
+    <p>FIVE ON FIVE. THREE MAPS. 28 WEAPONS. SIX GRENADE TYPES.<br>PLAY ALONE AGAINST BOTS, OR PASTE A CODE TO JOIN A FRIEND.</p>
     <div class="row">
       <button id="btn-solo">SOLO · VS BOTS</button>
       <button id="btn-host">HOST · GET A CODE</button>
@@ -535,6 +552,13 @@
       <button class="size-pick" data-size="5">5 v 5</button>
       <button class="size-pick" data-size="8">8 v 8</button>
     </div>
+    <p style="opacity:0.7;">STARTING LOADOUT</p>
+    <div class="loadout-grid">
+      <button class="loadout-pick" data-loadout="rifle">RIFLEMAN<small>AK-47 / M4A1 + HE + FLASH</small></button>
+      <button class="loadout-pick" data-loadout="sniper">SNIPER<small>AWP + DEAGLE + SMOKE</small></button>
+      <button class="loadout-pick" data-loadout="shotgun">BREACHER<small>XM1014 + P250 + FLASH</small></button>
+      <button class="loadout-pick" data-loadout="rush">RUSH<small>P90 + TEC-9 + MOLOTOV</small></button>
+    </div>
     <div class="row">
       <button id="btn-solo-start">START MATCH</button>
       <button id="btn-solo-back" style="opacity:0.7;">BACK</button>
@@ -570,6 +594,13 @@
       <button class="size-pick-h" data-size="5">5</button>
       <button class="size-pick-h" data-size="10">10</button>
       <button class="size-pick-h" data-size="25">25</button>
+    </div>
+    <p style="opacity:0.7;">HOST STARTING LOADOUT</p>
+    <div class="loadout-grid">
+      <button class="loadout-pick-h" data-loadout="rifle">RIFLEMAN<small>AK-47 / M4A1 + HE + FLASH</small></button>
+      <button class="loadout-pick-h" data-loadout="sniper">SNIPER<small>AWP + DEAGLE + SMOKE</small></button>
+      <button class="loadout-pick-h" data-loadout="shotgun">BREACHER<small>XM1014 + P250 + FLASH</small></button>
+      <button class="loadout-pick-h" data-loadout="rush">RUSH<small>P90 + TEC-9 + MOLOTOV</small></button>
     </div>
     <div class="lobby-list" id="host-lobby"></div>
     <div class="row">
@@ -614,7 +645,7 @@
 <div id="howto" class="panel hidden">
   <div class="card" style="text-align:left;">
     <h2 style="text-align:center;">HOW TO PLAY</h2>
-    <p><strong>DESKTOP:</strong> WASD move · MOUSE look · CLICK fire · R reload · 1/2 weapon · G cycle grenade · F throw grenade · B buy menu · TAB scoreboard · SHIFT walk · SPACE jump · ENTER chat</p>
+    <p><strong>DESKTOP:</strong> WASD move · MOUSE look · CLICK fire · R reload · 1/2 weapons · 3 knife · G cycle grenade · F throw grenade · B buy menu · TAB scoreboard · SHIFT walk · SPACE jump · ENTER chat</p>
     <p><strong>MOBILE:</strong> Left stick move · right stick look · FIRE button · side buttons for reload / weapon / grenade.</p>
     <p><strong>RULES:</strong> Eliminate the other team to win the round. First to 8 rounds wins the match. CT spawn defends. T spawn attacks. Buy menu opens for 15 seconds at the start of each round.</p>
     <p><strong>MULTIPLAYER:</strong> HOST a game to get a 6-character code, then your friends paste it under JOIN. Up to 50 players per room. Empty slots fill with CPU bots — easy, medium, or hard.</p>
@@ -627,7 +658,7 @@
   <h3>BUY MENU</h3>
   <div class="buy-grid" id="buy-grid"><!-- populated from WEAPONS at runtime --></div>
   <div class="footer"><span>MONEY: $ <span id="buy-money">0</span></span><span id="buy-timer">15</span></div>
-  <div class="hint">B TO CLOSE · TAP SECTION TABS</div>
+  <div class="hint">B TO CLOSE · 28 WEAPONS · 6 GRENADE TYPES</div>
 </div>
 
 <!-- ── SCOREBOARD (TAB) ── -->
@@ -659,7 +690,7 @@
     <button id="btn-weap">SWAP</button>
     <button id="btn-gren">NADE</button>
     <button id="btn-use">USE</button>
-    <button id="btn-buy">BUY</button>
+    <button id="btn-scope">SCOPE</button>
   </div>
 </div>
 
@@ -1403,6 +1434,12 @@
     g3sg1:    { name: 'G3SG1',     slot: 2, mag: 20, reserve: 90, cycle: 0.30, dmg: 80,  spread: 0.004, recoil: 0.18, autofire: false, range: 180,   headMul: 4.0, sfx: 'sniper',  cost: 5000, family: 'sniper' }
   };
   const ITEM_COSTS = { armor: 650, he: 300, flash: 200, smoke: 300, molotov: 400, decoy: 50, incgren: 600, ammo: 150 };
+  const LOADOUTS = {
+    rifle:   { slot1: 'pistol', slot2: 'ak47',   armor: 100, gren: { he: 1, flash: 1, smoke: 1 }, activeGren: 'he' },
+    sniper:  { slot1: 'deagle', slot2: 'awp',    armor: 100, gren: { he: 1, smoke: 2, flash: 1 }, activeGren: 'smoke' },
+    shotgun: { slot1: 'p250',   slot2: 'xm1014', armor: 100, gren: { he: 1, flash: 2, smoke: 1 }, activeGren: 'flash' },
+    rush:    { slot1: 'tec9',   slot2: 'p90',    armor: 100, gren: { he: 1, flash: 1, smoke: 1, molotov: 1 }, activeGren: 'molotov' }
+  };
 
   // ── grenade defs ──
   const GREN = {
@@ -1699,6 +1736,15 @@
     $('g-he').classList.toggle('active', p.activeGren === 'he');
     $('g-fl').classList.toggle('active', p.activeGren === 'flash');
     $('g-sm').classList.toggle('active', p.activeGren === 'smoke');
+    $('g-mo').setAttribute('data-n', p.gren.molotov || 0);
+    $('g-in').setAttribute('data-n', p.gren.incgren || 0);
+    $('g-de').setAttribute('data-n', p.gren.decoy || 0);
+    $('g-mo').classList.toggle('has', (p.gren.molotov || 0) > 0);
+    $('g-in').classList.toggle('has', (p.gren.incgren || 0) > 0);
+    $('g-de').classList.toggle('has', (p.gren.decoy || 0) > 0);
+    $('g-mo').classList.toggle('active', p.activeGren === 'molotov');
+    $('g-in').classList.toggle('active', p.activeGren === 'incgren');
+    $('g-de').classList.toggle('active', p.activeGren === 'decoy');
   }
   function setScores() {
     $('score-ct').textContent = scoreCT;
@@ -1784,6 +1830,45 @@
     if (!isAuto && now - p.lastFireT < w.cycle) return;
     if (isAuto && !w.autofire) return;
     if (now - p.lastFireT < w.cycle) return;
+    if (w.family === 'knife') {
+      p.lastFireT = now;
+      if (p.isLocal) SFX[w.sfx]?.();
+      else if (distLocal(p) < 80) SFX[w.sfx]?.();
+      if (p.isLocal && viewmodel.gun) {
+        viewmodel.gun.rotation.x = -0.55;
+        viewmodel.kickT = 0.08;
+        setTimeout(() => { if (viewmodel.gun) viewmodel.gun.rotation.x = 0; }, 90);
+      }
+      let originX, originY, originZ, dirX, dirY, dirZ;
+      if (p.isLocal) {
+        const o = new THREE.Vector3();
+        const d = new THREE.Vector3();
+        camera.getWorldPosition(o);
+        camera.getWorldDirection(d);
+        originX = o.x; originY = o.y; originZ = o.z;
+        dirX = d.x; dirY = d.y; dirZ = d.z;
+      } else {
+        originX = p.x; originY = 1.55; originZ = p.z;
+        dirX = -Math.sin(p.yaw); dirY = 0; dirZ = -Math.cos(p.yaw);
+      }
+      const hit = rayCastWorld(originX, originY, originZ, dirX, dirY, dirZ, w.range, p);
+      if (hit?.player) {
+        let dmg = w.dmg;
+        const tfx = -Math.sin(hit.player.yaw), tfz = -Math.cos(hit.player.yaw);
+        const dot = (dirX * tfx + dirZ * tfz);
+        if (dot > 0.5 && w.stealthMul) {
+          dmg = Math.floor(w.dmg * w.stealthMul);
+          if (p.isLocal) tacticalCallout('stealth_kill');
+        }
+        dealDamage(hit.player, dmg, p, w.name, false);
+        if (p.isLocal) {
+          hitMarker.classList.add('on');
+          setTimeout(() => hitMarker.classList.remove('on'), 130);
+        }
+      }
+      if (p.isLocal) setHud(p);
+      return;
+    }
     if (p.ammo <= 0) { if (p.isLocal) SFX.empty(); return; }
     p.ammo--; p.lastFireT = now;
     if (p.isLocal) SFX[w.sfx]?.();
@@ -1997,6 +2082,38 @@
       if (p.mesh && p.mesh.rifle) {
         p.mesh.rifle.scale.set(weapKey === 'pistol' ? 0.5 : 1, weapKey === 'pistol' ? 0.5 : 1, weapKey === 'pistol' ? 0.5 : 1);
       }
+    }
+  }
+  function cycleWeapon(p) {
+    if (!p) return;
+    saveAmmoForSlot(p);
+    let next;
+    if (p.weap === p.slot1) next = p.slot2 || p.melee;
+    else if (p.weap === p.slot2) next = p.melee || p.slot1;
+    else next = p.slot1;
+    switchWeapon(p, next);
+    return next;
+  }
+  function applyLoadout(p, key) {
+    const loadout = LOADOUTS[key] || LOADOUTS.rifle;
+    p.slot1 = loadout.slot1;
+    p.slot2 = loadout.slot2;
+    p.weap = p.slot2 || p.slot1;
+    p.armor = loadout.armor || 0;
+    p.gren = { he: 0, flash: 0, smoke: 0, molotov: 0, incgren: 0, decoy: 0, ...(loadout.gren || {}) };
+    p.activeGren = loadout.activeGren || Object.keys(loadout.gren || {})[0] || 'he';
+    p.ammoBySlot = {};
+    for (const key of [p.slot1, p.slot2, p.melee]) {
+      const w = WEAPONS[key];
+      if (w) p.ammoBySlot[key] = { ammo: w.mag, reserve: w.reserve };
+    }
+    const w = WEAPONS[p.weap];
+    p.ammo = w ? w.mag : 0;
+    p.reserve = w ? w.reserve : 0;
+    p.reloading = false;
+    if (p.isLocal) {
+      buildViewmodel(p);
+      setHud(p);
     }
   }
   function saveAmmoForSlot(p) {
@@ -2353,14 +2470,20 @@
     p.pitch = 0;
     p.hp = 100;
     p.alive = true;
-    p.ammo = WEAPONS[p.weap || 'pistol'].mag;
-    p.reserve = WEAPONS[p.weap || 'pistol'].reserve;
     p.reloading = false;
     p.flashUntil = 0;
-    if (!p.weap) p.weap = 'pistol';
     if (!p.slot1) p.slot1 = 'pistol';
-    saveAmmoForSlot(p);
+    if (!p.weap || !WEAPONS[p.weap] || p.weap === p.melee) p.weap = p.slot2 || p.slot1;
+    p.ammoBySlot = {};
+    for (const key of [p.slot1, p.slot2, p.melee]) {
+      const w = WEAPONS[key];
+      if (w) p.ammoBySlot[key] = { ammo: w.mag, reserve: w.reserve };
+    }
+    const w = WEAPONS[p.weap] || WEAPONS.pistol;
+    p.ammo = p.ammoBySlot[p.weap]?.ammo ?? w.mag;
+    p.reserve = p.ammoBySlot[p.weap]?.reserve ?? w.reserve;
     if (p.mesh) p.mesh.visible = true;
+    if (p.isLocal) buildViewmodel(p);
   }
 
   // ── HOSTAGE MODE ──
@@ -2546,17 +2669,26 @@
     roundIndex++;
     roundPhase = 'buy';
     roundTime = 15;
-    for (const p of players.values()) spawnPlayer(p);
+    for (const p of players.values()) {
+      spawnPlayer(p);
+      if (p.isBot) autoBuyForBot(p);
+    }
     spawnHostages();
-    showCenter('ROUND ' + roundIndex + (gameMode === 'hostage' ? ' · RESCUE' : ''), 1400);
-    if (players.get(localId)?.isLocal) setHud(players.get(localId));
+    const me = players.get(localId);
+    if (me?.isLocal) {
+      player.yaw = me.yaw;
+      player.pitch = 0;
+      setHud(me);
+    }
+    showCenter('ROUND ' + roundIndex + ' · BUY TIME' + (gameMode === 'hostage' ? ' · RESCUE' : ''), 1400);
     setScores();
-    closeBuyMenu();
+    if (me?.isLocal) setTimeout(() => openBuyMenu(), 150);
   }
   function liveRound() {
     roundPhase = 'live';
     roundTime = 1 * 60 + 45;
     closeBuyMenu();
+    showCenter('LIVE', 900);
     if (players.get(localId)?.isLocal && pointerWanted) tryLockPointer();
     setTimeout(() => tacticalCallout('push'), 250);
   }
@@ -2600,30 +2732,38 @@
 
   // ── BUY ──
   let buyOpen = false;
+  function buyGroupForWeapon(w) {
+    if (w.family === 'pistol') return 'Pistols';
+    if (w.family === 'sniper') return 'Snipers / scoped rifles';
+    if (w.family === 'shotgun') return 'Shotguns';
+    if (w.name === 'M249' || w.name === 'NEGEV') return 'LMGs';
+    if (['MP5', 'MAC-10', 'UMP-45', 'P90'].includes(w.name)) return 'SMGs';
+    return 'Rifles';
+  }
   function buyCatalog() {
     // Order: pistols, smgs, rifles, snipers, shotguns, lmgs, then grenades/utility.
     const order = [
-      'pistol','usp','p250','fiveseven','dualies','deagle',
+      'pistol','usp','p250','fiveseven','dualies','tec9','cz75','deagle',
       'mp5','mac10','ump','p90',
       'famas','galil','ak47','m4a1','bullpup','aug','sg553',
-      'ssg','awp','scar',
+      'ssg','awp','scar','g3sg1',
       'nova','mag7','xm1014',
       'm249','negev'
     ];
     const list = [];
     for (const k of order) {
       const w = WEAPONS[k]; if (!w) continue;
-      list.push({ key: k, label: w.name, cost: w.cost, kind: 'weap' });
+      list.push({ key: k, label: w.name, cost: w.cost, kind: 'weap', group: buyGroupForWeapon(w) });
     }
     list.push(
-      { key: 'armor',   label: 'KEVLAR',     cost: ITEM_COSTS.armor,   kind: 'item' },
-      { key: 'he',      label: 'HE GRENADE', cost: ITEM_COSTS.he,      kind: 'gren' },
-      { key: 'flash',   label: 'FLASHBANG',  cost: ITEM_COSTS.flash,   kind: 'gren' },
-      { key: 'smoke',   label: 'SMOKE',      cost: ITEM_COSTS.smoke,   kind: 'gren' },
-      { key: 'molotov', label: 'MOLOTOV',    cost: ITEM_COSTS.molotov, kind: 'gren' },
-      { key: 'incgren', label: 'INCENDIARY', cost: ITEM_COSTS.incgren, kind: 'gren' },
-      { key: 'decoy',   label: 'DECOY',      cost: ITEM_COSTS.decoy,   kind: 'gren' },
-      { key: 'ammo',    label: 'FULL AMMO',  cost: ITEM_COSTS.ammo,    kind: 'item' }
+      { key: 'armor',   label: 'KEVLAR',     cost: ITEM_COSTS.armor,   kind: 'item', group: 'Utility / grenades' },
+      { key: 'he',      label: 'HE GRENADE', cost: ITEM_COSTS.he,      kind: 'gren', group: 'Utility / grenades' },
+      { key: 'flash',   label: 'FLASHBANG',  cost: ITEM_COSTS.flash,   kind: 'gren', group: 'Utility / grenades' },
+      { key: 'smoke',   label: 'SMOKE',      cost: ITEM_COSTS.smoke,   kind: 'gren', group: 'Utility / grenades' },
+      { key: 'molotov', label: 'MOLOTOV',    cost: ITEM_COSTS.molotov, kind: 'gren', group: 'Utility / grenades' },
+      { key: 'incgren', label: 'INCENDIARY', cost: ITEM_COSTS.incgren, kind: 'gren', group: 'Utility / grenades' },
+      { key: 'decoy',   label: 'DECOY',      cost: ITEM_COSTS.decoy,   kind: 'gren', group: 'Utility / grenades' },
+      { key: 'ammo',    label: 'FULL AMMO',  cost: ITEM_COSTS.ammo,    kind: 'item', group: 'Utility / grenades' }
     );
     return list;
   }
@@ -2631,11 +2771,19 @@
     const grid = $('buy-grid');
     if (!grid || grid.dataset.populated === '1') return;
     grid.innerHTML = '';
+    let group = '';
     for (const it of buyCatalog()) {
+      if (it.group && it.group !== group) {
+        group = it.group;
+        const h = document.createElement('div');
+        h.className = 'buy-section';
+        h.textContent = group;
+        grid.appendChild(h);
+      }
       const b = document.createElement('button');
       b.dataset.buy = it.key;
       b.innerHTML = `${it.label} <span class="cost">$${it.cost}</span>`;
-      b.addEventListener('click', () => buyItem(it.key));
+      b.addEventListener('click', () => requestBuyItem(it.key));
       grid.appendChild(b);
     }
     grid.dataset.populated = '1';
@@ -2693,6 +2841,13 @@
     setHud(p); updateBuyMenu();
   }
 
+  function requestBuyItem(item) {
+    if (isMultiplayer && !isHost && myConn) {
+      try { myConn.send({ t: 'buy', item }); } catch (_) {}
+    }
+    buyItem(item);
+  }
+
   // give bots a basic loadout each round
   function autoBuyForBot(p) {
     p.money = Math.min(16000, p.money);
@@ -2734,13 +2889,13 @@
     const k = e.key.toLowerCase();
     if (e.repeat) return;
     keys[k] = true;
-    if (k === 'r') { const p = players.get(localId); if (p) startReload(p); }
+    if (k === 'r') { const p = players.get(localId); if (p) requestReload(p); }
     if (k === 'b') { if (buyOpen) closeBuyMenu(); else openBuyMenu(); }
-    if (k === '1') { const p = players.get(localId); if (p && p.slot1) { saveAmmoForSlot(p); switchWeapon(p, p.slot1); } }
-    if (k === '2') { const p = players.get(localId); if (p && p.slot2) { saveAmmoForSlot(p); switchWeapon(p, p.slot2); } }
-    if (k === '3') { const p = players.get(localId); if (p && p.melee) { saveAmmoForSlot(p); switchWeapon(p, p.melee); } }
+    if (k === '1') { const p = players.get(localId); if (p && p.slot1) requestSwitch(p, p.slot1); }
+    if (k === '2') { const p = players.get(localId); if (p && p.slot2) requestSwitch(p, p.slot2); }
+    if (k === '3') { const p = players.get(localId); if (p && p.melee) requestSwitch(p, p.melee); }
     if (k === 'g') { const p = players.get(localId); if (p) cycleGren(p); }
-    if (k === 'f') { const p = players.get(localId); if (p) throwGrenade(p, p.activeGren); }
+    if (k === 'f') { const p = players.get(localId); if (p) requestThrowGrenade(p, p.activeGren); }
     if (k === 'e') { tryUseHostage(); }
     if (k === 'tab') { e.preventDefault(); openScoreboard(); }
     if (k === 'enter') { chatInput.classList.add('on'); chatInput.focus(); }
@@ -2752,6 +2907,34 @@
     if (k === 'tab') closeScoreboard();
   });
   window.addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
+
+  function requestReload(p) {
+    if (!p) return;
+    if (isMultiplayer && !isHost && myConn) myInput._reload = true;
+    startReload(p);
+  }
+  function requestSwitch(p, weapKey) {
+    if (!p || !weapKey) return;
+    saveAmmoForSlot(p);
+    switchWeapon(p, weapKey);
+    if (isMultiplayer && !isHost && myConn) myInput._switch = weapKey;
+  }
+  function requestCycleWeapon(p) {
+    const next = cycleWeapon(p);
+    if (next && isMultiplayer && !isHost && myConn) myInput._switch = next;
+  }
+  function requestThrowGrenade(p, kind) {
+    if (!p || !kind) return;
+    if (isMultiplayer && !isHost && myConn) myInput._nade = kind;
+    throwGrenade(p, kind);
+  }
+  function requestFire(p, now, isAuto = false) {
+    if (!p) return;
+    if (isMultiplayer && !isHost && myConn) {
+      if (!isAuto) myInput._fireTap = true;
+    }
+    tryFire(p, now, isAuto);
+  }
 
   function cycleGren(p) {
     const order = ['he', 'flash', 'smoke', 'molotov', 'incgren', 'decoy'];
@@ -2778,7 +2961,7 @@
       if (!pointerLocked && !isTouch) { tryLockPointer(); return; }
       if (e.button === 0) {
         const p = players.get(localId);
-        if (p) tryFire(p, performance.now() / 1000, false);
+        if (p) requestFire(p, performance.now() / 1000, false);
       }
     }
   });
@@ -2823,29 +3006,27 @@
   makeStick($('stick-move'), $('stick-move').querySelector('.knob'), stickMoveVec);
   makeStick($('stick-look'), $('stick-look').querySelector('.knob'), stickLookVec);
   let mFireDeb = 0;
+  let touchFireDown = false;
   $('fire-btn').addEventListener('pointerdown', e => {
     e.preventDefault(); ensureAudio();
     const now = performance.now();
     if (now - mFireDeb < 60) return; mFireDeb = now;
     const p = players.get(localId);
-    if (p) tryFire(p, now / 1000, false);
+    touchFireDown = true;
+    if (p) requestFire(p, now / 1000, false);
   });
-  $('btn-reload').addEventListener('pointerdown', e => { e.preventDefault(); const p = players.get(localId); if (p) startReload(p); });
+  $('fire-btn').addEventListener('pointerup', e => { e.preventDefault(); touchFireDown = false; });
+  $('fire-btn').addEventListener('pointercancel', e => { e.preventDefault(); touchFireDown = false; });
+  $('btn-reload').addEventListener('pointerdown', e => { e.preventDefault(); const p = players.get(localId); if (p) requestReload(p); });
   $('btn-weap').addEventListener('pointerdown', e => {
     e.preventDefault();
     const p = players.get(localId); if (!p) return;
-    saveAmmoForSlot(p);
-    // Cycle: slot1 → slot2 → melee → slot1 …
-    let next;
-    if (p.weap === p.slot1) next = p.slot2 || p.melee;
-    else if (p.weap === p.slot2) next = p.melee || p.slot1;
-    else next = p.slot1;
-    switchWeapon(p, next);
+    requestCycleWeapon(p);
   });
   $('btn-gren').addEventListener('pointerdown', e => {
     e.preventDefault();
     const p = players.get(localId); if (!p) return;
-    if (p.gren[p.activeGren] > 0) throwGrenade(p, p.activeGren);
+    if (p.gren[p.activeGren] > 0) requestThrowGrenade(p, p.activeGren);
     else cycleGren(p);
   });
   $('btn-buy').addEventListener('pointerdown', e => { e.preventDefault(); if (buyOpen) closeBuyMenu(); else openBuyMenu(); });
@@ -2896,7 +3077,16 @@
         conns.set(cid, { conn, playerId: remoteP.id });
         conn.on('data', d => onHostData(cid, d));
         conn.on('close', () => onClientLeave(cid));
-        conn.send({ t: 'welcome', id: remoteP.id, mapName: currentMap, scoreCT, scoreT, perSide, botDifficulty, gameMode });
+        conn.send({
+          t: 'welcome',
+          id: remoteP.id,
+          mapName: currentMap || hostPicks.map,
+          scoreCT,
+          scoreT,
+          perSide,
+          botDifficulty,
+          gameMode: gameMode || hostPicks.mode || 'bomb'
+        });
         updateHostLobby();
       });
     });
@@ -2934,10 +3124,11 @@
       p.yaw = d.yaw; p.pitch = d.pitch;
       p._mx = d.mx; p._mz = d.mz;
       p._fire = d.fire; p._sprint = d.sprint; p._walk = d.walk;
-      p._wantSwitch = d.switchTo;
-      p._wantReload = d.reload;
-      p._wantNade = d.nade;
-      p._wantUse = !!d.use;
+      if (d.fireTap) p._fireTap = true;
+      if (d.switchTo) p._wantSwitch = d.switchTo;
+      if (d.reload) p._wantReload = true;
+      if (d.nade) p._wantNade = d.nade;
+      if (d.use) p._wantUse = true;
     } else if (d.t === 'buy') {
       // mimic local buy
       const oldLocal = localId;
@@ -3000,7 +3191,7 @@
       botDifficulty = d.botDifficulty;
       gameMode = d.gameMode || 'bomb';
       // make a local "ghost" player object
-      buildMap(d.mapName);
+      buildMap(d.mapName || 'dust2');
       const me = makePlayer({ id: d.id, name: ($('nick').value || 'PLAYER').slice(0, 12), team: 'CT', isLocal: true });
       // pick team via menu
       teamPanel.classList.remove('hidden');
@@ -3049,6 +3240,10 @@
         if (p.mesh) scene.remove(p.mesh);
         players.delete(p.id);
       }
+    }
+    if (snap.mapName && snap.mapName !== currentMap) {
+      buildMap(snap.mapName);
+      clearHostages();
     }
     roundPhase = snap.phase;
     roundTime = snap.roundT;
@@ -3106,7 +3301,7 @@
       });
     }
     const hArr = hostages.map(h => ({ id: h.id, x: h.x, z: h.z, yaw: h.yaw, rescued: h.rescued, carried: !!h.carriedBy }));
-    return { t: 'snap', players: arr, phase: roundPhase, roundT: roundTime, scoreCT, scoreT, mode: gameMode, hostages: hArr };
+    return { t: 'snap', players: arr, phase: roundPhase, roundT: roundTime, scoreCT, scoreT, mode: gameMode, mapName: currentMap, hostages: hArr };
   }
   function hostBroadcastSnap() {
     if (!isHost || conns.size === 0) return;
@@ -3120,13 +3315,14 @@
         t: 'in',
         yaw: player.yaw, pitch: player.pitch,
         mx: myInput.mx, mz: myInput.mz,
-        fire: !!myInput.fire,
+        fire: !!myInput.fire || touchFireDown || (mouseDown && pointerLocked) || !!(window.OmenlyGamepad && window.OmenlyGamepad.button('rt')),
+        fireTap: !!myInput._fireTap,
         sprint: !!myInput.sprint, walk: !!myInput.walk,
         reload: !!myInput._reload, nade: myInput._nade || null,
         switchTo: myInput._switch || null,
         use: !!myInput._use
       });
-      myInput._reload = false; myInput._nade = null; myInput._switch = null; myInput._use = false;
+      myInput._reload = false; myInput._nade = null; myInput._switch = null; myInput._use = false; myInput._fireTap = false;
     } catch (_) {}
   }
   function sendChat(msg) {
@@ -3192,8 +3388,8 @@
     if (gameMode === 'hostage') $('hostage-hud').classList.remove('hidden');
     else $('hostage-hud').classList.add('hidden');
   }
-  let soloPicks = { map: 'dust2', side: 'CT', diff: 'medium', size: 5, mode: 'bomb' };
-  let hostPicks = { map: 'dust2', diff: 'medium', size: 5, mode: 'bomb' };
+  let soloPicks = { map: 'dust2', side: 'CT', diff: 'medium', size: 5, mode: 'bomb', loadout: 'rifle' };
+  let hostPicks = { map: 'dust2', diff: 'medium', size: 5, mode: 'bomb', loadout: 'rifle' };
 
   document.querySelectorAll('.map-pick').forEach(b => b.addEventListener('click', () => { soloPicks.map = b.dataset.map; markSelected('.map-pick', b); }));
   document.querySelectorAll('.side-pick').forEach(b => b.addEventListener('click', () => { soloPicks.side = b.dataset.side; markSelected('.side-pick', b); }));
@@ -3204,6 +3400,8 @@
   document.querySelectorAll('.size-pick-h').forEach(b => b.addEventListener('click', () => { hostPicks.size = +b.dataset.size; markSelected('.size-pick-h', b); }));
   document.querySelectorAll('.mode-pick').forEach(b => b.addEventListener('click', () => { soloPicks.mode = b.dataset.mode; markSelected('.mode-pick', b); }));
   document.querySelectorAll('.mode-pick-h').forEach(b => b.addEventListener('click', () => { hostPicks.mode = b.dataset.mode; markSelected('.mode-pick-h', b); }));
+  document.querySelectorAll('.loadout-pick').forEach(b => b.addEventListener('click', () => { soloPicks.loadout = b.dataset.loadout; markSelected('.loadout-pick', b); }));
+  document.querySelectorAll('.loadout-pick-h').forEach(b => b.addEventListener('click', () => { hostPicks.loadout = b.dataset.loadout; markSelected('.loadout-pick-h', b); }));
   function markSelected(sel, btn) {
     document.querySelectorAll(sel).forEach(b => b.classList.remove('sel'));
     btn.classList.add('sel');
@@ -3219,6 +3417,8 @@
     document.querySelector('.size-pick-h[data-size="5"]')?.classList.add('sel');
     document.querySelector('.mode-pick[data-mode="bomb"]')?.classList.add('sel');
     document.querySelector('.mode-pick-h[data-mode="bomb"]')?.classList.add('sel');
+    document.querySelector('.loadout-pick[data-loadout="rifle"]')?.classList.add('sel');
+    document.querySelector('.loadout-pick-h[data-loadout="rifle"]')?.classList.add('sel');
   }, 50);
 
   $('btn-solo').addEventListener('click', () => { ensureAudio(); hideAllPanels(['solo-setup']); soloPanel.classList.remove('hidden'); });
@@ -3279,13 +3479,12 @@
     players.clear();
     const me = makePlayer({ id: 'local', name: ($('nick').value || 'PLAYER').slice(0, 12), team: myTeam, isLocal: true });
     localId = 'local';
-    buildViewmodel(me);
+    applyLoadout(me, soloPicks.loadout);
     fillBots();
     hideAllPanels([]);
     showHud();
     scoreCT = 0; scoreT = 0; roundIndex = 0;
     startRound();
-    setTimeout(() => liveRound(), 15000);
     tryLockPointer();
   }
   function startHost() {
@@ -3299,7 +3498,7 @@
     // local player
     const me = makePlayer({ id: 'host_' + Math.random().toString(36).slice(2, 6), name: ($('nick').value || 'PLAYER').slice(0, 12), team: myTeam, isLocal: true });
     localId = me.id;
-    buildViewmodel(me);
+    applyLoadout(me, hostPicks.loadout);
     // rebuild remote players to apply new team balance
     fillBots();
     hideAllPanels([]);
@@ -3307,7 +3506,6 @@
     scoreCT = 0; scoreT = 0; roundIndex = 0;
     $('room-code-hud').textContent = 'ROOM ' + hostCode;
     startRound();
-    setTimeout(() => liveRound(), 15000);
     tryLockPointer();
   }
   function fillBots() {
@@ -3480,6 +3678,7 @@
       const sp = p._walk ? 2.6 : 4.4;
       const [nx, nz] = clipMove(p.x, p.z, wx * sp * dt, wz * sp * dt, 0.4);
       p.x = nx; p.z = nz;
+      if (p._fireTap) { tryFire(p, now, false); p._fireTap = false; }
       if (p._fire) tryFire(p, now, true);
       if (p._wantReload) { startReload(p); p._wantReload = false; }
       if (p._wantSwitch) { saveAmmoForSlot(p); switchWeapon(p, p._wantSwitch); p._wantSwitch = null; }
@@ -3647,9 +3846,7 @@
         if (GP.button('a')) keys[' '] = true;
         if (GP.pressed('b')) startReload(me);
         if (GP.pressed('x')) {
-          // swap weapon
-          saveAmmoForSlot(me);
-          switchWeapon(me, me.weap === me.slot1 ? (me.slot2 || me.slot1) : me.slot1);
+          cycleWeapon(me);
         }
         if (GP.pressed('y')) throwGrenade(me, me.activeGren);
         if (GP.pressed('rb')) cycleGren(me);
@@ -3671,14 +3868,11 @@
         }
         if (buyOpen) updateBuyMenu();
       } else if (roundPhase === 'live') {
-        if (roundTime <= 0) endRound('CT'); // time out = CT default
+        if (roundTime <= 0) endRound(gameMode === 'hostage' ? 'T' : 'CT');
         checkRoundEnd();
       } else if (roundPhase === 'ended') {
         if (roundTime <= 0) {
-          // auto-buy for bots
-          for (const p of players.values()) if (p.isBot) autoBuyForBot(p);
           startRound();
-          setTimeout(() => { if (roundPhase === 'buy') liveRound(); }, 15000);
         }
       }
       setTimer(roundTime);

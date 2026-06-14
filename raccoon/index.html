@@ -4,18 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Raccoon — A 3D zombie shooter with rocket launcher · Omenly</title>
-<meta name="description" content="Raccoon City under a hot evening sun. An RPD operative with a handgun and a shoulder-fired rocket launcher. Bigger map. More zombies. Blood splatter. Third-person 3D action horror in your browser. Free.">
+<meta name="description" content="Raccoon City expands into a larger staged third-person 3D survival route with knife and katana stealth kills, rockets, jungle trails, animals, waterfalls, vehicle cover, fuse-relay puzzles, and cinematic extraction.">
 <meta name="theme-color" content="#3a2010">
 <link rel="canonical" href="https://omenly.vercel.app/raccoon/">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Raccoon — 3D zombie survival in your browser">
-<meta property="og:description" content="Raccoon City, after dark. One handgun. A lot of zombies. Third-person 3D survival horror.">
+<meta property="og:description" content="Knife, katana, rockets, jungle stages, stealth kills, relay puzzles, waterfalls, animals, vehicles, and zombie extraction.">
 <meta property="og:url" content="https://omenly.vercel.app/raccoon/">
 <meta property="og:image" content="https://omenly.vercel.app/raccoon/cover.svg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Raccoon — 3D zombie survival horror">
-<meta name="twitter:description" content="One night. One handgun. A small map and a lot of teeth.">
+<meta name="twitter:description" content="A larger staged 3D zombie survival run with stealth kills, jungle trails, puzzles, waterfalls, animals, and extraction.">
 <meta name="twitter:image" content="https://omenly.vercel.app/raccoon/cover.svg">
 <script type="application/ld+json">
 { "@context":"https://schema.org","@type":"VideoGame","name":"Raccoon","url":"https://omenly.vercel.app/raccoon/","description":"A third-person 3D zombie survival shooter set in Raccoon City.","genre":["3D","survival horror","shooter","zombies"],"playMode":"SinglePlayer","gamePlatform":["Web browser"],"applicationCategory":"Game","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@type":"Organization","name":"Omenly"} }
@@ -50,6 +50,7 @@
   #hud .val { color: #ffb070; font-weight: bold; }
   #hud .hp-bar { display: inline-block; width: 110px; height: 8px; background: rgba(200,80,58,0.18); vertical-align: middle; margin-left: 6px; border: 1px solid rgba(200,80,58,0.4); }
   #hud .hp-fill { height: 100%; background: #c8503a; box-shadow: 0 0 8px #c8503a; transition: width 0.15s; }
+  #hud .objective { max-width: 340px; line-height: 1.35; color: #ffd089; text-shadow: 0 0 6px #c8503a; }
   #wave { position: fixed; top: 14px; right: 14px; font-size: 13px; letter-spacing: 3px; text-shadow: 0 0 6px #c8503a; z-index: 10; opacity: 0.9; }
   #crosshair { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 22px; height: 22px; z-index: 5; pointer-events: none; }
   #crosshair::before, #crosshair::after { content: ''; position: absolute; background: rgba(232,216,200,0.7); }
@@ -173,6 +174,8 @@
   <div class="row"><span class="label" id="weap-label">PISTOL</span> <span id="ammo" class="val">15</span> / <span id="ammo-reserve" class="val">45</span></div>
   <div class="row"><span class="label">ROCKETS</span> <span id="rockets" class="val">3</span></div>
   <div class="row"><span class="label">KILLS</span> <span id="kills" class="val">0</span></div>
+  <div class="row"><span class="label">STAGE</span> <span id="stage-name" class="val">RPD OUTSKIRTS</span></div>
+  <div class="row objective"><span class="label">OBJECTIVE</span> <span id="objective-text" class="val">Find fuse relays, cross the jungle trail, reach extraction.</span></div>
   <div class="row" id="weap-strip" style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap;max-width:300px;"></div>
 </div>
 <div id="slowmo-tint" style="position:fixed;inset:0;pointer-events:none;z-index:7;background:radial-gradient(ellipse at center, rgba(200,80,58,0) 35%, rgba(20,4,2,0.55) 100%);opacity:0;transition:opacity 0.18s;mix-blend-mode:multiply;"></div>
@@ -181,8 +184,8 @@
 <div id="title">
   <div class="crown">— RACCOON CITY · SEPT 1998 —</div>
   <h1>RACCOON</h1>
-  <p>HANDGUN. ROCKET LAUNCHER. ONE EXTRACTION POINT.</p>
-  <p>FIGHT YOUR WAY TO THE HELIPAD. THE CHOPPER IS INBOUND.</p>
+  <p>KNIFE. ROCKET LAUNCHER. JUNGLE STAGES. STEALTH KILLS.</p>
+  <p>RESTORE THE RELAYS, CROSS THE WATERFALL TRAIL, REACH EXTRACTION.</p>
   <div id="opts" style="margin-top:18px;pointer-events:auto;display:flex;flex-direction:column;gap:10px;align-items:center;">
     <div class="opt-row" data-group="time">
       <span class="opt-label">TIME OF DAY</span>
@@ -213,10 +216,10 @@
 </div>
 
 <div id="controls">
-  <div>WASD — MOVE · MOUSE — LOOK</div>
-  <div>CLICK — FIRE · R — RELOAD</div>
-  <div>1-9 — WEAPONS · Q/E — CYCLE</div>
-  <div>SHIFT — SPRINT</div>
+  <div>WASD - MOVE · MOUSE - LOOK</div>
+  <div>CLICK - FIRE / SLASH · R - RELOAD</div>
+  <div>F - STEALTH KILL · 1-9 - WEAPONS · Q/E - CYCLE</div>
+  <div>SHIFT - SPRINT</div>
 </div>
 
 <div id="touch-controls">
@@ -224,6 +227,7 @@
   <div id="stick-look"><div class="knob"></div></div>
   <button id="fire-btn" type="button">FIRE</button>
   <button id="reload-btn" type="button">RELOAD</button>
+  <button id="use-btn" type="button" style="position:absolute; bottom: max(190px, env(safe-area-inset-bottom, 0px) + 180px); right: max(106px, env(safe-area-inset-right, 0px) + 96px); width: 70px; height: 50px; border-radius: 8px; background: rgba(200,80,58,0.08); border: 1px solid #c8503a; color: #c8503a; font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 2px; text-shadow: 0 0 6px #c8503a; pointer-events: auto; touch-action: manipulation;">USE</button>
   <button id="weap-btn" type="button" style="position:absolute; bottom: max(260px, env(safe-area-inset-bottom, 0px) + 250px); right: max(28px, env(safe-area-inset-right, 0px) + 18px); width: 70px; height: 50px; border-radius: 8px; background: rgba(200,80,58,0.08); border: 1px solid #c8503a; color: #c8503a; font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 2px; text-shadow: 0 0 6px #c8503a; pointer-events: auto; touch-action: manipulation;">SWAP</button>
 </div>
 
@@ -251,6 +255,8 @@
   const crosshair = document.getElementById('crosshair');
   const damageVignette = document.getElementById('damage-vignette');
   const bloodSplatterEl = document.getElementById('blood-splatter');
+  const stageNameEl = document.getElementById('stage-name');
+  const objectiveTextEl = document.getElementById('objective-text');
   const touchControls = document.getElementById('touch-controls');
   const stickMove = document.getElementById('stick-move');
   const stickLook = document.getElementById('stick-look');
@@ -258,6 +264,7 @@
   const knobLook = stickLook.querySelector('.knob');
   const fireBtn = document.getElementById('fire-btn');
   const reloadBtn = document.getElementById('reload-btn');
+  const useBtn = document.getElementById('use-btn');
   const controlsEl = document.getElementById('controls');
 
   const isTouch =
@@ -333,10 +340,12 @@
     pixelRatio: lowEnd ? 1 : Math.min(window.devicePixelRatio, 2),
     shadows: !lowEnd,
     shadowMapSize: lowEnd ? 0 : 2048,
-    cityBuildings: lowEnd ? 14 : 28,
-    wrecks: lowEnd ? 2 : 4,
-    crates: lowEnd ? 4 : 8,
-    cars: lowEnd ? 8 : 16,
+    cityBuildings: lowEnd ? 18 : 36,
+    wrecks: lowEnd ? 3 : 6,
+    crates: lowEnd ? 6 : 12,
+    cars: lowEnd ? 10 : 22,
+    jungleTrees: lowEnd ? 36 : 96,
+    animals: lowEnd ? 4 : 10,
     lampStride: lowEnd ? 30 : 18,
     fogNear: lowEnd ? 35 : 60,
     fogFar: lowEnd ? 140 : 240,
@@ -447,6 +456,9 @@
 
   // ── textures (defined first so map setup can use them) ──
   const colliders = []; // { x, z, halfW, halfD }
+  const interactables = [];
+  const animals = [];
+  let gateCollider = null;
   // Generate a brick texture once and reuse the material everywhere so we don't
   // create dozens of materials. Canvas-based, no network fetches.
   const brickTex = (() => {
@@ -499,7 +511,7 @@
 
   // ── ground / map ──
   // Smaller map on low-end devices: fewer colliders, draw calls, particles.
-  const MAP_RADIUS = lowEnd ? 70 : 100;
+  const MAP_RADIUS = lowEnd ? 95 : 145;
   const groundTex = concreteTex.clone();
   groundTex.needsUpdate = true;
   groundTex.repeat.set(MAP_RADIUS / 4, MAP_RADIUS / 4);
@@ -685,7 +697,153 @@
     colliders.push({ x, z, halfW: 1.6, halfD: 2.4 });
   }
 
+  const campaign = {
+    relays: 0,
+    totalRelays: 3,
+    stage: 'RPD OUTSKIRTS',
+    gateOpen: false
+  };
+  let objectiveHintT = 0;
+
+  function objective(msg, ms = 2400) {
+    objectiveHintT = ms / 1000;
+    if (objectiveTextEl) objectiveTextEl.textContent = msg;
+    const c = document.getElementById('callout');
+    if (c) {
+      c.textContent = msg.toUpperCase();
+      c.style.opacity = '1';
+      clearTimeout(objective._t);
+      objective._t = setTimeout(() => c.style.opacity = '0', ms);
+    }
+  }
+
+  function setStage(name) {
+    if (campaign.stage === name) return;
+    campaign.stage = name;
+    if (stageNameEl) stageNameEl.textContent = name;
+    objective(stageObjective());
+  }
+
+  function stageObjective() {
+    if (campaign.relays < campaign.totalRelays) return `Restore fuse relays ${campaign.relays}/${campaign.totalRelays}. Press F near a relay.`;
+    if (!campaign.gateOpen) return 'Gate unlocked. Push through the jungle checkpoint.';
+    return 'Extraction route open. Reach the helipad.';
+  }
+
+  function addTree(x, z, scale = 1) {
+    const g = new THREE.Group();
+    const trunk = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.18 * scale, 0.32 * scale, 2.6 * scale, 7),
+      new THREE.MeshStandardMaterial({ color: 0x4a2a12, roughness: 0.95 })
+    );
+    trunk.position.y = 1.3 * scale;
+    const leafMat = new THREE.MeshStandardMaterial({ color: 0x174c25, roughness: 0.9 });
+    for (let i = 0; i < 3; i++) {
+      const crown = new THREE.Mesh(new THREE.ConeGeometry((1.15 - i * 0.18) * scale, 1.9 * scale, 9), leafMat);
+      crown.position.y = (2.4 + i * 0.72) * scale;
+      crown.rotation.y = i * 0.7;
+      g.add(crown);
+    }
+    g.add(trunk);
+    g.position.set(x, 0, z);
+    scene.add(g);
+    colliders.push({ x, z, halfW: 0.55 * scale, halfD: 0.55 * scale });
+  }
+
+  function addWaterfall(x, z) {
+    const rockMat = new THREE.MeshStandardMaterial({ color: 0x2a2b25, roughness: 0.92 });
+    const waterMat = new THREE.MeshBasicMaterial({ color: 0x88cfff, transparent: true, opacity: 0.58, side: THREE.DoubleSide });
+    const cliff = new THREE.Mesh(new THREE.BoxGeometry(10, 8, 2.6), rockMat);
+    cliff.position.set(x, 4, z + 1.4);
+    scene.add(cliff);
+    colliders.push({ x, z: z + 1.4, halfW: 5.2, halfD: 1.5 });
+    const falls = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 7.2), waterMat);
+    falls.position.set(x, 4.1, z - 0.02);
+    scene.add(falls);
+    flickerObjs.push({ userData: { update: (dt) => {
+      falls.material.opacity = 0.48 + Math.sin(performance.now() * 0.006) * 0.12;
+      falls.position.y = 4.1 + Math.sin(performance.now() * 0.004) * 0.08;
+    }}});
+    const pool = new THREE.Mesh(
+      new THREE.CircleGeometry(5, 32),
+      new THREE.MeshBasicMaterial({ color: 0x285f73, transparent: true, opacity: 0.5 })
+    );
+    pool.rotation.x = -Math.PI / 2;
+    pool.position.set(x, 0.025, z - 3.4);
+    scene.add(pool);
+  }
+
+  function addAnimal(x, z, color = 0x9a6a42) {
+    const g = new THREE.Group();
+    const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.8 });
+    const body = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.34, 0.28), mat);
+    body.position.y = 0.38;
+    const head = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.22, 0.2), mat);
+    head.position.set(0.45, 0.5, 0);
+    const tail = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.38, 6), mat);
+    tail.rotation.z = Math.PI / 2;
+    tail.position.set(-0.48, 0.48, 0);
+    g.add(body, head, tail);
+    g.position.set(x, 0, z);
+    scene.add(g);
+    animals.push({ mesh: g, homeX: x, homeZ: z, phase: Math.random() * Math.PI * 2, speed: 0.45 + Math.random() * 0.35 });
+  }
+
+  function addRelay(x, z, idx) {
+    const g = new THREE.Group();
+    const post = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.25, 0.35), new THREE.MeshStandardMaterial({ color: 0x16100c, roughness: 0.75 }));
+    post.position.y = 0.65;
+    const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 8), new THREE.MeshBasicMaterial({ color: 0xff5030 }));
+    bulb.position.set(0, 1.42, 0.22);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.72, 0.035, 6, 28), new THREE.MeshBasicMaterial({ color: 0xff5030, transparent: true, opacity: 0.52 }));
+    ring.rotation.x = Math.PI / 2;
+    ring.position.y = 0.04;
+    g.add(post, bulb, ring);
+    g.position.set(x, 0, z);
+    scene.add(g);
+    interactables.push({ type: 'relay', idx, mesh: g, bulb, done: false, x, z });
+  }
+
+  function addPuzzleGate() {
+    const z = -MAP_RADIUS * 0.46;
+    const g = new THREE.Group();
+    const mat = new THREE.MeshStandardMaterial({ color: 0x241713, roughness: 0.85, metalness: 0.25 });
+    for (const x of [-2.4, 0, 2.4]) {
+      const bar = new THREE.Mesh(new THREE.BoxGeometry(0.28, 3.4, 0.36), mat);
+      bar.position.set(x, 1.7, 0);
+      g.add(bar);
+    }
+    const top = new THREE.Mesh(new THREE.BoxGeometry(6.2, 0.28, 0.36), mat);
+    top.position.set(0, 3.25, 0);
+    g.add(top);
+    g.position.set(0, 0, z);
+    scene.add(g);
+    gateCollider = { x: 0, z, halfW: 4.0, halfD: 0.7, gate: g };
+    colliders.push(gateCollider);
+  }
+
+  function buildJungleExpansion() {
+    const sides = [-1, 1];
+    for (let i = 0; i < PERF.jungleTrees; i++) {
+      const side = sides[(Math.random() * 2) | 0];
+      const x = side * (18 + Math.random() * (MAP_RADIUS - 26));
+      const z = -MAP_RADIUS + 10 + Math.random() * (MAP_RADIUS * 2 - 20);
+      addTree(x, z, 0.75 + Math.random() * 0.8);
+    }
+    addWaterfall(-MAP_RADIUS * 0.52, -MAP_RADIUS * 0.23);
+    addWaterfall(MAP_RADIUS * 0.48, MAP_RADIUS * 0.18);
+    addRelay(-14, MAP_RADIUS * 0.45, 1);
+    addRelay(17, MAP_RADIUS * 0.04, 2);
+    addRelay(-11, -MAP_RADIUS * 0.38, 3);
+    addPuzzleGate();
+    for (let i = 0; i < PERF.animals; i++) {
+      const side = Math.random() < 0.5 ? -1 : 1;
+      addAnimal(side * (24 + Math.random() * 42), -MAP_RADIUS + 22 + Math.random() * (MAP_RADIUS * 2 - 44), Math.random() < 0.5 ? 0x8a6038 : 0x4f4a35);
+    }
+  }
+
   buildCity();
+  buildJungleExpansion();
 
   // ── extraction point: a labeled helipad far down the road ──
   // The H is a recognizable helipad marker. A glowing yellow border ring
@@ -1369,7 +1527,6 @@
   let muzzleFlashTimer = 0;
   let pendingZombies = 0;
   let waveDelay = 0;
-
   const keys = Object.create(null);
   const stickMoveVec = { x: 0, y: 0 };
   const stickLookVec = { x: 0, y: 0 };
@@ -1398,6 +1555,128 @@
     if (rEl) rEl.textContent = player.rockets;
     const wlbl = document.getElementById('weap-label');
     if (wlbl) wlbl.textContent = W.name;
+    if (stageNameEl) stageNameEl.textContent = campaign.stage;
+    if (objectiveTextEl && !objectiveHintT) objectiveTextEl.textContent = stageObjective();
+  }
+
+  function resetCampaign() {
+    campaign.relays = 0;
+    campaign.stage = 'RPD OUTSKIRTS';
+    campaign.gateOpen = false;
+    if (stageNameEl) stageNameEl.textContent = campaign.stage;
+    if (objectiveTextEl) objectiveTextEl.textContent = stageObjective();
+    for (const it of interactables) {
+      if (it.type !== 'relay') continue;
+      it.done = false;
+      if (it.bulb) it.bulb.material.color.setHex(0xff5030);
+      if (it.mesh) it.mesh.scale.setScalar(1);
+    }
+    if (gateCollider && gateCollider.gate) {
+      gateCollider.gate.position.y = 0;
+      if (!colliders.includes(gateCollider)) colliders.push(gateCollider);
+    }
+  }
+
+  function openGate() {
+    if (campaign.gateOpen) return;
+    campaign.gateOpen = true;
+    if (gateCollider) {
+      const i = colliders.indexOf(gateCollider);
+      if (i >= 0) colliders.splice(i, 1);
+      if (gateCollider.gate) gateCollider.gate.position.y = 3.8;
+    }
+    unlockWeapon('shotgun');
+    unlockWeapon('blade');
+    objective('Checkpoint gate open. Shotgun and katana recovered.');
+  }
+
+  function interactOrStealth() {
+    if (!alive) return;
+    if (tryStealthKill()) return;
+    let best = null;
+    let bestD = Infinity;
+    for (const it of interactables) {
+      if (it.done) continue;
+      const d = Math.hypot(player.pos.x - it.x, player.pos.z - it.z);
+      if (d < bestD) { bestD = d; best = it; }
+    }
+    if (best && bestD < 2.7) {
+      best.done = true;
+      campaign.relays++;
+      if (best.bulb) best.bulb.material.color.setHex(0x7dff80);
+      if (best.mesh) best.mesh.scale.setScalar(1.18);
+      SFX.powerup();
+      if (campaign.relays === 1) unlockWeapon('blade');
+      if (campaign.relays === 2) unlockWeapon('uzi');
+      objective(`Fuse relay ${campaign.relays}/${campaign.totalRelays} restored.`);
+      if (campaign.relays >= campaign.totalRelays) openGate();
+      updateHUD();
+      return;
+    }
+    objective(stageObjective(), 1200);
+  }
+
+  function tryStealthKill() {
+    let target = null;
+    let best = Infinity;
+    for (const z of zombies) {
+      if (z.userData.dead) continue;
+      const d = Math.hypot(z.position.x - player.pos.x, z.position.z - player.pos.z);
+      if (d < best && d < 2.35) { best = d; target = z; }
+    }
+    if (!target) return false;
+    const sprinting = keys['shift'];
+    if (sprinting && best > 1.35) {
+      objective('Too loud. Walk in close for a stealth kill.', 1200);
+      return true;
+    }
+    const dir = new THREE.Vector3(
+      target.position.x - player.pos.x,
+      0,
+      target.position.z - player.pos.z
+    ).normalize();
+    target.userData.hp = 0;
+    target.userData.dead = true;
+    target.userData.deathTimer = 0;
+    kills++;
+    spawnBlood(new THREE.Vector3(target.position.x, 1.3, target.position.z), dir, 34);
+    spawnBloodPool(target.position.x, target.position.z);
+    showLensSplatter();
+    SFX.slash();
+    shakeCamera(0.28, 0.2);
+    startSloMo(520, 0.26);
+    objective('Silent execution.');
+    updateHUD();
+    return true;
+  }
+
+  function tickCampaign(dt) {
+    if (objectiveHintT > 0) objectiveHintT = Math.max(0, objectiveHintT - dt);
+    const z = player.pos.z;
+    if (z > MAP_RADIUS * 0.35) setStage('RPD OUTSKIRTS');
+    else if (z > -MAP_RADIUS * 0.12) setStage('JUNGLE CHECKPOINT');
+    else if (z > -MAP_RADIUS * 0.58) setStage('WATERFALL TRAIL');
+    else setStage('EXTRACTION RIDGE');
+
+    for (const it of interactables) {
+      if (it.type !== 'relay') continue;
+      it.mesh.rotation.y += dt * 0.8;
+      if (it.bulb && !it.done) it.bulb.scale.setScalar(1 + Math.sin(performance.now() * 0.006 + it.idx) * 0.18);
+      const near = !it.done && Math.hypot(player.pos.x - it.x, player.pos.z - it.z) < 2.7;
+      if (near && objectiveTextEl && objectiveHintT <= 0) objectiveTextEl.textContent = `Press F to restore fuse relay ${it.idx}.`;
+    }
+    if (!campaign.gateOpen && gateCollider) {
+      const dg = Math.hypot(player.pos.x - gateCollider.x, player.pos.z - gateCollider.z);
+      if (dg < 6 && objectiveTextEl) objectiveTextEl.textContent = stageObjective();
+    }
+    for (const a of animals) {
+      a.phase += dt * a.speed;
+      const flee = Math.hypot(player.pos.x - a.mesh.position.x, player.pos.z - a.mesh.position.z) < 7;
+      const amp = flee ? 5.5 : 2.3;
+      a.mesh.position.x = a.homeX + Math.sin(a.phase) * amp;
+      a.mesh.position.z = a.homeZ + Math.cos(a.phase * 0.7) * amp;
+      a.mesh.rotation.y = Math.atan2(Math.cos(a.phase), Math.sin(a.phase * 0.7));
+    }
   }
 
   function startWave(n) {
@@ -1573,6 +1852,7 @@
     player.vel.set(0, 0, 0);
     player.rockets = 3;
     player.rocketCool = 0;
+    resetCampaign();
     ammo = magSize;
     ammoReserve = 45;
     kills = 0;
@@ -2891,6 +3171,7 @@
     if (!alive && (k === ' ' || k === 'enter')) { start(); return; }
     keys[k] = true;
     if (k === 'r') reload();
+    if (k === 'f') interactOrStealth();
     if (/^[1-9]$/.test(k)) {
       const idx = parseInt(k, 10) - 1;
       const target = HOTBAR[idx];
@@ -3016,6 +3297,20 @@
   reloadBtn.addEventListener('pointerdown', doReload);
   reloadBtn.addEventListener('touchstart', doReload, { passive: false });
   reloadBtn.addEventListener('contextmenu', e => e.preventDefault());
+
+  function doUse(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    ensureAudio();
+    if (!started) { start(); return; }
+    if (!alive) { start(); return; }
+    interactOrStealth();
+  }
+  if (useBtn) {
+    useBtn.addEventListener('pointerdown', doUse);
+    useBtn.addEventListener('touchstart', doUse, { passive: false });
+    useBtn.addEventListener('contextmenu', e => e.preventDefault());
+  }
 
   // weapon swap button (mobile)
   let weapDebounce = 0;
@@ -3184,7 +3479,10 @@
     // on standby; killing the horde is optional. Reaching the pad starts the
     // pickup cinematic immediately.
     const dGoal = Math.hypot(player.pos.x - goal.position.x, player.pos.z - goal.position.z);
-    if (dGoal < 5) { win(); return; }
+    if (dGoal < 5) {
+      if (campaign.relays < campaign.totalRelays) objective(stageObjective(), 1300);
+      else { win(); return; }
+    }
     // wave management runs in parallel
     if (waveDelay > 0) {
       waveDelay -= dt;
@@ -3356,6 +3654,7 @@
     tickLimbs(dt);
     tickWeather(dt);
     tickPickups(dt);
+    tickCampaign(dt);
     for (const f of flickerObjs) if (f.userData.update) f.userData.update(dt);
 
     // shake decay

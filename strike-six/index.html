@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Strike Six - 3D Arena Fighter | Omenly</title>
+<meta name="description" content="Strike Six is an original 3D browser arena fighting game with anime-style fighters, sidestep movement, combos, specials, supers, CPU battles, keyboard, gamepad, and mobile touch controls.">
+<meta name="theme-color" content="#07090d">
+<link rel="canonical" href="https://omenly.vercel.app/strike-six/">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Strike Six - 3D arena fighter">
+<meta property="og:description" content="Original 3D fighting game with sidesteps, combos, specials, supers, CPU AI, keyboard, gamepad, and touch controls.">
+<meta property="og:url" content="https://omenly.vercel.app/strike-six/">
+<meta property="og:image" content="https://omenly.vercel.app/strike-six/cover.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Strike Six - 3D arena fighter">
+<meta name="twitter:description" content="Sidestep, combo, launch, and land cinematic supers in a browser-based 3D arena fighter.">
+<meta name="twitter:image" content="https://omenly.vercel.app/strike-six/cover.svg">
+<script type="application/ld+json">
+{ "@context":"https://schema.org","@type":"VideoGame","name":"Strike Six","url":"https://omenly.vercel.app/strike-six/","description":"An original 3D browser arena fighting game with anime-style fighters, sidestep movement, combos, specials, supers, CPU battles, gamepad support, and mobile controls.","genre":["3D","fighting","anime","arcade","action"],"playMode":["SinglePlayer"],"gamePlatform":["Web browser"],"applicationCategory":"Game","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@type":"Organization","name":"Omenly"} }
+</script>
+<link rel="stylesheet" href="omenly.css">
+<script>
+  window.OMENLY_CONFIG = {
+    game: 'strike-six',
+    gameTitle: 'Strike Six',
+    price: 3,
+    isHub: false,
+    donateUrl: 'https://www.paypal.me/vikas117/3',
+    allAccessDonateUrl: 'https://www.paypal.me/vikas117/10',
+    theme: { accent: '#7df5ff' }
+  };
+</script>
+<script src="omenly.js" defer></script>
+<script src="/gamepad.js" defer></script>
+<script defer src="/_vercel/insights/script.js"></script>
+<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #07090d; color: #f7efe4; font-family: Inter, ui-sans-serif, system-ui, sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; touch-action: none; position: fixed; inset: 0; }
+  #scene { display: block; width: 100vw; height: 100vh; height: 100dvh; background: #07090d; }
+  .hidden { display: none !important; }
+  #hud { position: fixed; z-index: 12; top: max(12px, env(safe-area-inset-top)); left: max(12px, env(safe-area-inset-left)); right: max(12px, env(safe-area-inset-right)); display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); gap: clamp(8px, 2vw, 24px); pointer-events: none; }
+  .side { min-width: 0; display: grid; gap: 6px; }
+  .side.right { text-align: right; justify-items: end; }
+  .name { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-family: Georgia, serif; font-size: clamp(16px, 2.6vw, 30px); font-style: italic; letter-spacing: .08em; text-shadow: 0 0 18px rgba(125,245,255,.8); }
+  .role { color: rgba(247,239,228,.62); font-size: 9px; font-weight: 900; letter-spacing: .22em; text-transform: uppercase; }
+  .bar { position: relative; width: min(42vw, 520px); height: clamp(17px, 2.2vw, 25px); overflow: hidden; border: 1px solid rgba(247,239,228,.22); background: rgba(0,0,0,.56); box-shadow: inset 0 0 24px rgba(255,255,255,.05); }
+  .bar.small { height: 8px; }
+  .bar span { position: absolute; inset: 0 auto 0 0; width: 100%; background: linear-gradient(90deg, #35e889, #ffe56f 55%, #ff395b); }
+  .bar.meter span { width: 0; background: linear-gradient(90deg, #7df5ff, #7dff9f, #ffe56f); box-shadow: 0 0 18px rgba(125,245,255,.7); }
+  .right .bar span { right: 0; left: auto; transform-origin: right center; }
+  #mid { display: grid; justify-items: center; align-content: start; min-width: 92px; text-align: center; }
+  #timer { font-family: Georgia, serif; font-size: clamp(40px, 6.4vw, 76px); line-height: .9; color: #fff7df; text-shadow: 0 0 24px rgba(255,229,111,.75); }
+  #round { color: rgba(247,239,228,.7); font-size: 10px; font-weight: 900; letter-spacing: .22em; text-transform: uppercase; }
+  #banner, #combo { position: fixed; z-index: 18; left: 50%; transform: translateX(-50%); pointer-events: none; text-align: center; text-shadow: 0 5px 20px #000, 0 0 30px rgba(125,245,255,.8); }
+  #banner { top: 42%; opacity: 0; color: #fff7df; font-family: Georgia, serif; font-size: clamp(42px, 9vw, 120px); font-style: italic; letter-spacing: .1em; white-space: nowrap; transition: opacity .18s, transform .18s; }
+  #banner.on { opacity: 1; transform: translateX(-50%) scale(1.02); }
+  #combo { top: 28%; opacity: 0; color: #ffe56f; font-family: Georgia, serif; font-size: clamp(32px, 6vw, 76px); font-style: italic; letter-spacing: .08em; transition: opacity .14s, transform .14s; }
+  #combo.on { opacity: 1; transform: translate(-50%, -6px); }
+  #combo small { display: block; color: #7df5ff; font-family: Inter, sans-serif; font-size: 11px; font-style: normal; font-weight: 900; letter-spacing: .24em; text-transform: uppercase; }
+  #menu { position: fixed; inset: 0; z-index: 30; display: grid; grid-template-rows: auto minmax(0,1fr); gap: 18px; overflow-y: auto; padding: max(24px, env(safe-area-inset-top)) clamp(14px, 4vw, 52px) max(20px, env(safe-area-inset-bottom)); background: linear-gradient(90deg, rgba(125,245,255,.09) 1px, transparent 1px), linear-gradient(0deg, rgba(255,229,111,.08) 1px, transparent 1px), radial-gradient(circle at 50% 16%, rgba(255,57,91,.2), transparent 28%), radial-gradient(circle at 20% 38%, rgba(125,255,159,.14), transparent 26%), radial-gradient(circle at 82% 36%, rgba(125,245,255,.16), transparent 26%), linear-gradient(180deg, rgba(7,9,13,.9), rgba(8,13,18,.97)); background-size: 46px 46px, 46px 46px, auto, auto, auto, auto; backdrop-filter: blur(8px); }
+  .brand { text-align: center; }
+  .brand span { color: #7df5ff; font-size: 11px; font-weight: 900; letter-spacing: .3em; text-transform: uppercase; }
+  .brand h1 { color: #fff7df; font-family: Georgia, serif; font-size: clamp(48px, 10vw, 128px); font-style: italic; line-height: .95; letter-spacing: .06em; text-shadow: 0 0 34px rgba(125,245,255,.72), 0 18px 70px rgba(255,229,111,.25); }
+  .brand p { color: rgba(247,239,228,.72); font-size: 12px; font-weight: 900; letter-spacing: .36em; text-transform: uppercase; }
+  main { width: min(1160px, 100%); margin: 0 auto; display: grid; gap: 14px; }
+  .modes, .roster, .help { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+  button, select { font: inherit; }
+  button { cursor: pointer; border: 1px solid rgba(247,239,228,.22); border-radius: 8px; background: rgba(11,15,23,.78); color: #f7efe4; }
+  .mode, .fighter, .help article { min-height: 120px; padding: 14px; text-align: left; }
+  .mode.on, .fighter.on, button:hover { border-color: #7df5ff; background: rgba(125,245,255,.12); box-shadow: 0 0 24px rgba(125,245,255,.22); }
+  .mode b, .fighter b, .help h2 { display: block; margin-bottom: 8px; color: #ffe56f; font-family: Georgia, serif; font-size: 24px; font-style: italic; }
+  .mode span, .fighter span, .help p { color: rgba(247,239,228,.68); font-size: 13px; line-height: 1.45; }
+  .fighter .portrait { height: 86px; margin-bottom: 9px; border-radius: 7px; background: radial-gradient(circle at 50% 25%, var(--accent), transparent 34%), linear-gradient(145deg, rgba(255,255,255,.16), rgba(0,0,0,.42)), var(--color); position: relative; overflow: hidden; }
+  .fighter .portrait::before { content: ""; position: absolute; left: 50%; bottom: -12px; width: 62px; height: 86px; transform: translateX(-50%); border-radius: 45% 45% 10px 10px; background: linear-gradient(180deg, var(--accent), var(--color)); box-shadow: 0 0 30px var(--accent); }
+  .actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; }
+  .primary { padding: 13px 22px; border-color: #ffe56f; background: linear-gradient(135deg, #ffe56f, #7df5ff); color: #100d08; font-size: 13px; font-weight: 900; letter-spacing: .18em; text-transform: uppercase; }
+  .secondary { padding: 12px 16px; font-size: 12px; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; }
+  #touch { position: fixed; inset: 0; z-index: 15; display: none; pointer-events: none; }
+  body.touch #touch { display: block; }
+  #stick { position: absolute; left: max(18px, env(safe-area-inset-left)); bottom: max(28px, env(safe-area-inset-bottom)); width: 126px; height: 126px; border: 2px solid rgba(125,245,255,.42); border-radius: 50%; background: rgba(125,245,255,.08); pointer-events: auto; }
+  #stick i { position: absolute; left: 50%; top: 50%; width: 54px; height: 54px; margin: -27px 0 0 -27px; border: 2px solid #7df5ff; border-radius: 50%; background: rgba(125,245,255,.24); }
+  .touchBtns { position: absolute; right: max(12px, env(safe-area-inset-right)); bottom: max(22px, env(safe-area-inset-bottom)); display: grid; grid-template-columns: repeat(3, 56px); gap: 8px; pointer-events: auto; }
+  .touchBtns button { width: 56px; height: 56px; border-radius: 50%; border: 2px solid rgba(255,229,111,.7); font-size: 11px; font-weight: 900; }
+  #pause { position: fixed; z-index: 22; top: max(12px, env(safe-area-inset-top)); right: max(12px, env(safe-area-inset-right)); width: 42px; height: 42px; font-weight: 900; }
+  #donate { position: fixed; z-index: 40; left: max(12px, env(safe-area-inset-left)); bottom: max(12px, env(safe-area-inset-bottom)); }
+  @media (max-width: 720px) {
+    #hud { gap: 6px; left: 8px; right: 8px; }
+    .role { display: none; }
+    .bar { width: 35vw; }
+    .brand h1 { letter-spacing: .02em; }
+    .touchBtns { grid-template-columns: repeat(3, 50px); }
+    .touchBtns button { width: 50px; height: 50px; }
+  }
+</style>
+</head>
+<body>
+<canvas id="scene" aria-label="Strike Six 3D fighting arena"></canvas>
+<section id="hud" class="hidden">
+  <div class="side">
+    <div class="name" id="p1-name">Rook</div>
+    <div class="role" id="p1-role">Flux Boxer</div>
+    <div class="bar"><span id="p1-hp"></span></div>
+    <div class="bar small meter"><span id="p1-meter"></span></div>
+  </div>
+  <div id="mid"><div id="round">ROUND 1</div><div id="timer">99</div></div>
+  <div class="side right">
+    <div class="name" id="p2-name">Vanta</div>
+    <div class="role" id="p2-role">Void Kicker</div>
+    <div class="bar"><span id="p2-hp"></span></div>
+    <div class="bar small meter"><span id="p2-meter"></span></div>
+  </div>
+</section>
+<button id="pause" class="hidden" type="button" aria-label="Pause">II</button>
+<div id="combo"></div>
+<div id="banner"></div>
+
+<section id="menu">
+  <header class="brand">
+    <span>OMENLY ORIGINAL 3D FIGHT CIRCUIT</span>
+    <h1>STRIKE SIX</h1>
+    <p>3D sidestep arena fighter</p>
+  </header>
+  <main>
+    <div class="modes">
+      <button class="mode on" type="button" data-mode="arcade"><b>Arcade</b><span>Six-round ladder against escalating CPU rivals.</span></button>
+      <button class="mode" type="button" data-mode="duel"><b>Duel</b><span>One high-intensity CPU fight with your chosen opponent.</span></button>
+      <button class="mode" type="button" data-mode="training"><b>Training</b><span>Infinite meter, no timer, dummy blocks after contact.</span></button>
+    </div>
+    <div class="roster" id="roster"></div>
+    <div class="help">
+      <article><h2>Controls</h2><p>WASD move in 3D. Q/E sidestep. J light, K heavy, L kick, I special, O throw, P super, U block.</p></article>
+      <article><h2>Combos</h2><p>Chain light into heavy, launch with kick, cancel into special, spend full meter on a cinematic super.</p></article>
+      <article><h2>Gamepad</h2><p>Left stick moves, face buttons attack, shoulders throw/super, triggers block. Mobile uses stick plus attack buttons.</p></article>
+    </div>
+    <div class="actions">
+      <button id="start" class="primary" type="button">Fight</button>
+      <button id="random" class="secondary" type="button">Random Rival</button>
+      <span data-omenly-badge></span>
+      <button data-omenly-cta type="button">Support Game</button>
+    </div>
+    <div data-omenly-ad></div>
+  </main>
+</section>
+
+<div id="touch">
+  <div id="stick"><i></i></div>
+  <div class="touchBtns">
+    <button type="button" data-touch="light">L</button>
+    <button type="button" data-touch="heavy">H</button>
+    <button type="button" data-touch="kick">K</button>
+    <button type="button" data-touch="special">SP</button>
+    <button type="button" data-touch="throw">TH</button>
+    <button type="button" data-touch="super">SU</button>
+    <button type="button" data-touch="block">BL</button>
+  </div>
+</div>
+
+<div id="donate">
+  <button data-omenly-cta type="button">SUPPORT THE DEV</button>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>
