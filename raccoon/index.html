@@ -102,6 +102,12 @@
   #fire-btn { position: absolute; bottom: max(80px, env(safe-area-inset-bottom, 0px) + 70px); right: max(28px, env(safe-area-inset-right, 0px) + 18px); width: 100px; height: 100px; border-radius: 50%; background: rgba(200,80,58,0.15); border: 2px solid #c8503a; color: #ffd089; font-family: 'Courier New', monospace; font-size: 14px; font-weight: bold; letter-spacing: 3px; text-shadow: 0 0 8px #c8503a; box-shadow: 0 0 18px rgba(200,80,58,0.3); pointer-events: auto; touch-action: manipulation; }
   #fire-btn:active { background: rgba(200,80,58,0.4); transform: scale(0.95); }
   #reload-btn { position: absolute; bottom: max(190px, env(safe-area-inset-bottom, 0px) + 180px); right: max(28px, env(safe-area-inset-right, 0px) + 18px); width: 70px; height: 50px; border-radius: 8px; background: rgba(200,80,58,0.08); border: 1px solid #c8503a; color: #c8503a; font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 2px; text-shadow: 0 0 6px #c8503a; pointer-events: auto; touch-action: manipulation; }
+  .touch-tool-btn { position: absolute; width: 70px; height: 50px; border-radius: 8px; background: rgba(200,80,58,0.08); border: 1px solid #c8503a; color: #c8503a; font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 2px; text-shadow: 0 0 6px #c8503a; pointer-events: auto; touch-action: manipulation; }
+  .touch-tool-btn:active { background: rgba(200,80,58,0.28); color: #ffd089; transform: scale(0.96); }
+  #use-btn { bottom: max(190px, env(safe-area-inset-bottom, 0px) + 180px); right: max(106px, env(safe-area-inset-right, 0px) + 96px); }
+  #weap-btn { bottom: max(260px, env(safe-area-inset-bottom, 0px) + 250px); right: max(28px, env(safe-area-inset-right, 0px) + 18px); }
+  #knife-btn { bottom: max(260px, env(safe-area-inset-bottom, 0px) + 250px); right: max(106px, env(safe-area-inset-right, 0px) + 96px); }
+  #katana-btn { bottom: max(330px, env(safe-area-inset-bottom, 0px) + 320px); right: max(106px, env(safe-area-inset-right, 0px) + 96px); }
   /* Title-screen options (time of day + weather) */
   #opts .opt-row { display:flex; align-items:center; gap:6px; flex-wrap:wrap; justify-content:center; }
   #opts .opt-label { font-size:10px; letter-spacing:3px; color:#c8503a; min-width:90px; text-align:right; opacity:0.85; }
@@ -148,6 +154,11 @@
     .knob { width: 44px; height: 44px; margin: -22px 0 0 -22px; }
     #fire-btn { width: 78px; height: 78px; font-size: 11px; }
     #reload-btn { width: 60px; height: 42px; bottom: max(170px, env(safe-area-inset-bottom, 0px) + 160px); }
+    .touch-tool-btn { width: 62px; height: 42px; font-size: 9px; }
+    #use-btn { bottom: max(170px, env(safe-area-inset-bottom, 0px) + 160px); right: max(86px, env(safe-area-inset-right, 0px) + 78px); }
+    #weap-btn { bottom: max(218px, env(safe-area-inset-bottom, 0px) + 206px); right: max(18px, env(safe-area-inset-right, 0px) + 10px); }
+    #knife-btn { bottom: max(218px, env(safe-area-inset-bottom, 0px) + 206px); right: max(86px, env(safe-area-inset-right, 0px) + 78px); }
+    #katana-btn { bottom: max(266px, env(safe-area-inset-bottom, 0px) + 252px); right: max(86px, env(safe-area-inset-right, 0px) + 78px); }
     #stick-move { bottom: max(40px, env(safe-area-inset-bottom, 0px) + 30px); left: max(18px, env(safe-area-inset-left, 0px) + 10px); }
     #stick-look { bottom: max(40px, env(safe-area-inset-bottom, 0px) + 30px); right: max(120px, env(safe-area-inset-right, 0px) + 110px); }
     #fire-btn { bottom: max(40px, env(safe-area-inset-bottom, 0px) + 30px); right: max(18px, env(safe-area-inset-right, 0px) + 10px); }
@@ -200,6 +211,11 @@
       <button class="opt-btn" data-weather="snow">SNOW</button>
       <button class="opt-btn" data-weather="autumn">AUTUMN</button>
     </div>
+    <div class="opt-row" data-group="route">
+      <span class="opt-label">MAP</span>
+      <button class="opt-btn" data-route="city">CITY ROUTE</button>
+      <button class="opt-btn" data-route="forest">FOREST MAP</button>
+    </div>
   </div>
   <p class="start" style="margin-top:16px;">— CLICK / TAP TO BEGIN —</p>
   <div data-omenly-ad style="margin-top: 18px; pointer-events: auto;"></div>
@@ -227,8 +243,10 @@
   <div id="stick-look"><div class="knob"></div></div>
   <button id="fire-btn" type="button">FIRE</button>
   <button id="reload-btn" type="button">RELOAD</button>
-  <button id="use-btn" type="button" style="position:absolute; bottom: max(190px, env(safe-area-inset-bottom, 0px) + 180px); right: max(106px, env(safe-area-inset-right, 0px) + 96px); width: 70px; height: 50px; border-radius: 8px; background: rgba(200,80,58,0.08); border: 1px solid #c8503a; color: #c8503a; font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 2px; text-shadow: 0 0 6px #c8503a; pointer-events: auto; touch-action: manipulation;">USE</button>
-  <button id="weap-btn" type="button" style="position:absolute; bottom: max(260px, env(safe-area-inset-bottom, 0px) + 250px); right: max(28px, env(safe-area-inset-right, 0px) + 18px); width: 70px; height: 50px; border-radius: 8px; background: rgba(200,80,58,0.08); border: 1px solid #c8503a; color: #c8503a; font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 2px; text-shadow: 0 0 6px #c8503a; pointer-events: auto; touch-action: manipulation;">SWAP</button>
+  <button id="use-btn" class="touch-tool-btn" type="button">USE</button>
+  <button id="weap-btn" class="touch-tool-btn" type="button">SWAP</button>
+  <button id="knife-btn" class="touch-tool-btn" type="button">KNIFE</button>
+  <button id="katana-btn" class="touch-tool-btn" type="button">KATANA</button>
 </div>
 
 <div id="donate">
@@ -265,6 +283,8 @@
   const fireBtn = document.getElementById('fire-btn');
   const reloadBtn = document.getElementById('reload-btn');
   const useBtn = document.getElementById('use-btn');
+  const knifeBtn = document.getElementById('knife-btn');
+  const katanaBtn = document.getElementById('katana-btn');
   const controlsEl = document.getElementById('controls');
 
   const isTouch =
@@ -996,6 +1016,7 @@
   const slowmoTint = document.getElementById('slowmo-tint');
 
   const hero = new THREE.Group();
+  hero.scale.setScalar(1.16);
   scene.add(hero);
   function buildHero() {
     const skin = new THREE.MeshStandardMaterial({ color: 0xe8c89a, roughness: 0.7 });
@@ -1560,20 +1581,23 @@
   }
 
   function resetCampaign() {
-    campaign.relays = 0;
-    campaign.stage = 'RPD OUTSKIRTS';
-    campaign.gateOpen = false;
+    const forestRoute = OPTS.route === 'forest';
+    campaign.relays = forestRoute ? campaign.totalRelays : 0;
+    campaign.stage = forestRoute ? 'FOREST MAP' : 'RPD OUTSKIRTS';
+    campaign.gateOpen = forestRoute;
     if (stageNameEl) stageNameEl.textContent = campaign.stage;
     if (objectiveTextEl) objectiveTextEl.textContent = stageObjective();
     for (const it of interactables) {
       if (it.type !== 'relay') continue;
-      it.done = false;
-      if (it.bulb) it.bulb.material.color.setHex(0xff5030);
-      if (it.mesh) it.mesh.scale.setScalar(1);
+      it.done = forestRoute;
+      if (it.bulb) it.bulb.material.color.setHex(forestRoute ? 0x80ff80 : 0xff5030);
+      if (it.mesh) it.mesh.scale.setScalar(forestRoute ? 0.9 : 1);
     }
     if (gateCollider && gateCollider.gate) {
-      gateCollider.gate.position.y = 0;
-      if (!colliders.includes(gateCollider)) colliders.push(gateCollider);
+      gateCollider.gate.position.y = forestRoute ? 3.2 : 0;
+      const gateIndex = colliders.indexOf(gateCollider);
+      if (forestRoute && gateIndex >= 0) colliders.splice(gateIndex, 1);
+      if (!forestRoute && gateIndex < 0) colliders.push(gateCollider);
     }
   }
 
@@ -1687,7 +1711,7 @@
   }
 
   // ── OPTIONS (time of day + weather), chosen on the title screen ──
-  const OPTS = { time: 'day', weather: 'clear' };
+  const OPTS = { time: 'day', weather: 'clear', route: 'city' };
 
   // Weather particles + ground tint live in this group so we can swap or clear them.
   const weatherGroup = new THREE.Group();
@@ -1836,6 +1860,20 @@
       document.querySelectorAll('#opts .opt-btn[data-weather]').forEach(b => b.classList.toggle('on', b.dataset.weather === OPTS.weather));
     });
   });
+  document.querySelectorAll('#opts .opt-btn[data-route]').forEach(btn => {
+    if (btn.dataset.route === OPTS.route) btn.classList.add('on');
+    btn.addEventListener('click', (e) => {
+      e.preventDefault(); e.stopPropagation();
+      OPTS.route = btn.dataset.route;
+      if (OPTS.route === 'forest') {
+        OPTS.time = 'dusk';
+        OPTS.weather = 'rain';
+        document.querySelectorAll('#opts .opt-btn[data-time]').forEach(b => b.classList.toggle('on', b.dataset.time === OPTS.time));
+        document.querySelectorAll('#opts .opt-btn[data-weather]').forEach(b => b.classList.toggle('on', b.dataset.weather === OPTS.weather));
+      }
+      document.querySelectorAll('#opts .opt-btn[data-route]').forEach(b => b.classList.toggle('on', b.dataset.route === OPTS.route));
+    });
+  });
 
   function start() {
     titleEl.classList.add('hidden');
@@ -1846,7 +1884,8 @@
     alive = true;
     started = true;
     player.hp = 100;
-    player.pos.set(0, 0, MAP_RADIUS - 8);
+    const forestRoute = OPTS.route === 'forest';
+    player.pos.set(forestRoute ? -8 : 0, 0, forestRoute ? -MAP_RADIUS * 0.16 : MAP_RADIUS - 8);
     player.yaw = Math.PI;
     player.pitch = 0;
     player.vel.set(0, 0, 0);
@@ -2628,6 +2667,35 @@
   }
 
   // ── MELEE SWING (blade / knife) ──
+  function forceHeadSever(z, dir) {
+    let head = null;
+    z.traverse(o => {
+      if (!head && o.isMesh && o.visible && (o.userData.bodyPart === 'head' || o.userData.isHead)) head = o;
+    });
+    if (head) return detachBodyPart(z, head, dir);
+    const point = new THREE.Vector3(z.position.x, 1.92, z.position.z);
+    spawnLimbChunk(point, dir, 'head');
+    return true;
+  }
+
+  function spawnSlashThrough(z, dir, wide) {
+    const center = new THREE.Vector3(z.position.x, 1.35, z.position.z);
+    const side = new THREE.Vector3(-dir.z, 0, dir.x).normalize();
+    const len = wide ? 2.6 : 1.6;
+    const pts = [
+      center.clone().addScaledVector(side, -len * 0.5).add(new THREE.Vector3(0, 0.5, 0)),
+      center.clone().addScaledVector(side, len * 0.5).add(new THREE.Vector3(0, -0.45, 0))
+    ];
+    const mat = new THREE.LineBasicMaterial({ color: 0xff2b1e, transparent: true, opacity: 1 });
+    const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), mat);
+    scene.add(line);
+    setTimeout(() => {
+      scene.remove(line);
+      line.geometry.dispose();
+      mat.dispose();
+    }, 180);
+  }
+
   function meleeSwing(W) {
     if (fireCool > 0) return;
     fireCool = W.cycle;
@@ -2641,6 +2709,8 @@
     camera.getWorldPosition(origin);
     const dir = new THREE.Vector3();
     camera.getWorldDirection(dir);
+    const isKatana = player.weapon === 'blade';
+    const isKnife = player.weapon === 'knife';
     let hitOne = false;
     for (const z of zombies) {
       if (z.userData.dead) continue;
@@ -2653,24 +2723,34 @@
       hitOne = true;
       const hitPoint = new THREE.Vector3(z.position.x, 1.4, z.position.z);
       // Pick the closest body mesh to slice off — prefer head when very close.
+      spawnSlashThrough(z, dir, isKatana);
       const bodyParts = [];
       z.traverse(o => { if (o.isMesh && o.visible && o.userData.bodyPart) bodyParts.push(o); });
       if (bodyParts.length) {
-        const target = bodyParts[(Math.random() * bodyParts.length) | 0];
-        detachBodyPart(z, target, dir);
+        const head = bodyParts.find(o => o.userData.bodyPart === 'head');
+        const finishing = z.userData.hp - W.dmg <= 0;
+        if (head && (isKatana || finishing || (isKnife && dist < 1.25))) forceHeadSever(z, dir);
+        else {
+          const limbs = bodyParts.filter(o => !['torso', 'hips', 'head'].includes(o.userData.bodyPart));
+          const target = limbs.length ? limbs[(Math.random() * limbs.length) | 0] : bodyParts[(Math.random() * bodyParts.length) | 0];
+          detachBodyPart(z, target, dir);
+        }
       }
       z.userData.hp -= W.dmg;
       z.userData.hurtFlash = 0.15;
-      spawnBlood(hitPoint, dir, 22);
+      spawnBlood(hitPoint, dir, isKatana ? 46 : 34);
       if (z.userData.hp <= 0 && !z.userData.dead) {
         z.userData.dead = true;
         z.userData.deathTimer = 0;
         kills++;
         killsEl.textContent = kills;
         SFX.death();
+        forceHeadSever(z, dir);
+        spawnSlashThrough(z, dir, true);
+        spawnBlood(hitPoint, dir, isKatana ? 70 : 52);
         spawnBloodPool(z.position.x, z.position.z);
         showLensSplatter();
-        sayCallout('headshot');
+        sayCallout(isKatana ? 'execution' : 'headshot');
         startSloMo(550, 0.28);
       }
     }
@@ -3329,6 +3409,28 @@
     weapBtn.addEventListener('pointerdown', doSwap);
     weapBtn.addEventListener('touchstart', doSwap, { passive: false });
     weapBtn.addEventListener('contextmenu', e => e.preventDefault());
+  }
+
+  function doSelectMelee(kind, e) {
+    e.preventDefault();
+    e.stopPropagation();
+    ensureAudio();
+    if (!started) { start(); return; }
+    if (!alive) { start(); return; }
+    if (ammoState[kind]?.unlocked) {
+      setWeapon(kind);
+      objective(kind === 'blade' ? 'Katana selected. Tap FIRE to slash through zombies.' : 'Knife selected. Tap FIRE for close kills.', 1300);
+    }
+  }
+  if (knifeBtn) {
+    knifeBtn.addEventListener('pointerdown', e => doSelectMelee('knife', e));
+    knifeBtn.addEventListener('touchstart', e => doSelectMelee('knife', e), { passive: false });
+    knifeBtn.addEventListener('contextmenu', e => e.preventDefault());
+  }
+  if (katanaBtn) {
+    katanaBtn.addEventListener('pointerdown', e => doSelectMelee('blade', e));
+    katanaBtn.addEventListener('touchstart', e => doSelectMelee('blade', e), { passive: false });
+    katanaBtn.addEventListener('contextmenu', e => e.preventDefault());
   }
 
   // ── collision ──

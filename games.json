@@ -109,6 +109,24 @@
                       "controls":  "WASD + mouse + click + F stealth/use (desktop) Â· joystick + look + FIRE/USE (mobile)"
                   },
                   {
+                      "id":  "dinorift",
+                      "title":  "Dinorift",
+                      "blurb":  "A bloody dinosaur survival shooter in a jungle rift. Fight raptors, armored trikes, spitters, and tyrant rex waves with spear launcher, rifle, grenades, and rockets.",
+                      "tags":  [
+                                   "arcade",
+                                   "shooter",
+                                   "survival",
+                                   "dinosaurs",
+                                   "action"
+                               ],
+                      "minutes":  8,
+                      "accent":  "#f04a3a",
+                      "background":  "linear-gradient(135deg, #07110c, #3a2414)",
+                      "cover":  "dinorift/cover.svg",
+                      "href":  "dinorift/",
+                      "controls":  "WASD + mouse + click + 1-4 + R (desktop) Â· dual sticks + FIRE + weapon buttons (mobile)"
+                  },
+                  {
                       "id":  "siteline",
                       "title":  "Siteline",
                       "blurb":  "A 5v5 bombsite FPS in your browser. Three maps, 28 buyable weapons, knife, armor, HE, flash, smoke, molotov, incendiary, decoy, room-code multiplayer up to 50 players, or solo CPU bots.",
@@ -145,44 +163,8 @@
                       "href":  "girth/",
                       "controls":  "drag left-right / tap and rub (mobile) Â· A/D or arrows (desktop)"
                   },
-                  {
-                      "id":  "strike-six",
-                      "title":  "Strike Six",
-                      "blurb":  "An original 3D browser arena fighting game with anime-style fighters, sidestep movement, combo chains, launchers, throws, specials, cinematic supers, CPU battles, gamepad support, and mobile touch controls.",
-                      "tags":  [
-                                   "3d",
-                                   "fighting",
-                                   "anime",
-                                   "arena",
-                                   "combos",
-                                   "gamepad"
-                               ],
-                      "minutes":  12,
-                      "accent":  "#7df5ff",
-                      "background":  "linear-gradient(135deg, #07090d, #14232a)",
-                      "cover":  "strike-six/cover.svg",
-                      "href":  "strike-six/",
-                      "controls":  "WASD + J/K/L/I/O/P/U + Q/E sidestep (desktop) Â· gamepad Â· mobile stick + attack buttons"
-                  },
-                  {
-                      "id":  "ascendant",
-                      "title":  "Ascendant",
-                      "blurb":  "An original anime-style 3D browser fighting game with twelve playable fighters, frame-data combat, throws, motion specials, supers, brutal finishers, arcade, survival, local versus, gamepad support, and mobile touch controls.",
-                      "tags":  [
-                                   "3d",
-                                   "fighting",
-                                   "anime",
-                                   "versus",
-                                   "gamepad",
-                                   "mobile"
-                               ],
-                      "minutes":  18,
-                      "accent":  "#ff3d5a",
-                      "background":  "linear-gradient(135deg, #050609, #22111d)",
-                      "cover":  "ascendant/cover.svg",
-                      "href":  "ascendant/",
-                      "controls":  "WASD + J/K/L/I/O/P/U (desktop) Â· gamepad Â· mobile joystick + attack buttons"
-                  },
+                  
+                  
                   {
                       "id":  "nocturne",
                       "title":  "Nocturne",
