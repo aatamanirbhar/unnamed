@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Rent Simulator</title>
+<meta name="description" content="A browser rent simulator about surviving bills, work shifts, inspections, repairs, landlord pressure, and police consequences for terrible choices.">
+<meta name="theme-color" content="#111714">
+<link rel="canonical" href="https://omenly.vercel.app/rentsim/">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="../omenly.css">
+<script>
+  window.OMENLY_CONFIG = {
+    game: 'rentsim',
+    gameTitle: 'Rent Simulator',
+    price: 3,
+    isHub: false,
+    donateUrl: 'https://www.paypal.me/vikas117/3',
+    allAccessDonateUrl: 'https://www.paypal.me/vikas117/10',
+    theme: { accent: '#f2c14e' }
+  };
+</script>
+<script src="../omenly.js" defer></script>
+<style>
+  :root {
+    --bg: #101512;
+    --panel: #172019;
+    --panel-2: #202a22;
+    --ink: #f5f0df;
+    --muted: rgba(245,240,223,0.68);
+    --line: rgba(245,240,223,0.14);
+    --rent: #f2c14e;
+    --good: #70d68a;
+    --bad: #ff5d5d;
+    --blue: #82b7ff;
+    --shadow: rgba(0,0,0,0.42);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--ink); font-family: Arial, Helvetica, sans-serif; }
+  body { overflow-x: hidden; }
+  button { font: inherit; }
+  .app { min-height: 100vh; display: grid; grid-template-rows: auto 1fr; }
+  header {
+    position: sticky; top: 0; z-index: 3; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 12px clamp(14px, 3vw, 28px); background: rgba(16,21,18,0.92); border-bottom: 1px solid var(--line);
+    backdrop-filter: blur(10px);
+  }
+  h1 { margin: 0; font-size: clamp(20px, 4vw, 34px); letter-spacing: 0; font-weight: 800; color: var(--rent); }
+  .month { color: var(--muted); font-size: 13px; line-height: 1.35; text-align: right; }
+  main { width: min(1180px, 100%); margin: 0 auto; padding: clamp(14px, 3vw, 28px); display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 18px; }
+  .board, .side, .modal-card { background: var(--panel); border: 1px solid var(--line); box-shadow: 0 18px 60px var(--shadow); }
+  .board { min-height: 620px; display: grid; grid-template-rows: auto 1fr auto; }
+  .stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border-bottom: 1px solid var(--line); }
+  .stat { padding: 14px 12px; border-right: 1px solid var(--line); min-width: 0; }
+  .stat:last-child { border-right: 0; }
+  .label { display: block; color: var(--muted); font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase; margin-bottom: 5px; }
+  .value { display: block; font-size: clamp(18px, 2.8vw, 28px); font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .value.good { color: var(--good); }
+  .value.bad { color: var(--bad); }
+  .scene { position: relative; min-height: 380px; overflow: hidden; background: linear-gradient(#242f28 0 46%, #121915 46%); }
+  .wall { position: absolute; inset: 0 0 44%; background:
+    linear-gradient(90deg, transparent 0 79px, rgba(255,255,255,0.035) 80px 81px, transparent 82px),
+    linear-gradient(#2e3c31, #202b23); background-size: 120px 100%; }
+  .floor { position: absolute; inset: 46% 0 0; background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 70px),
+    linear-gradient(160deg, #202217, #111612); }
+  .window { position: absolute; left: 8%; top: 12%; width: 22%; aspect-ratio: 1.2; border: 8px solid #5c4f37; background: linear-gradient(#b8d8ff, #f5cd7d); box-shadow: inset 0 -22px 0 rgba(0,0,0,0.08); }
+  .window::before, .window::after { content: ''; position: absolute; background: #5c4f37; }
+  .window::before { left: 50%; top: 0; bottom: 0; width: 6px; transform: translateX(-50%); }
+  .window::after { left: 0; right: 0; top: 50%; height: 6px; transform: translateY(-50%); }
+  .sofa { position: absolute; left: 9%; bottom: 16%; width: 30%; height: 18%; background: #6b5a93; border-radius: 8px 8px 2px 2px; box-shadow: inset 0 -18px 0 rgba(0,0,0,0.16); }
+  .sofa::before { content: ''; position: absolute; left: -5%; right: -5%; bottom: -25%; height: 45%; background: #544674; border-radius: 5px; }
+  .desk { position: absolute; right: 12%; bottom: 20%; width: 28%; height: 8%; background: #8a653f; }
+  .desk::before, .desk::after { content: ''; position: absolute; top: 100%; width: 8%; height: 170%; background: #60442c; }
+  .desk::before { left: 9%; }
+  .desk::after { right: 9%; }
+  .laptop { position: absolute; right: 20%; bottom: 29%; width: 11%; height: 7%; background: #202a33; border: 2px solid #8eb7ff; border-bottom-width: 5px; }
+  .door { position: absolute; right: 8%; top: 10%; width: 16%; height: 42%; background: #553c27; border: 6px solid #2d241b; }
+  .door::after { content: ''; position: absolute; right: 13%; top: 48%; width: 9px; height: 9px; border-radius: 50%; background: var(--rent); }
+  .person { position: absolute; left: 47%; bottom: 16%; width: 58px; height: 138px; transform: translateX(-50%); transition: left 0.28s, transform 0.28s; }
+  .head { position: absolute; left: 15px; top: 0; width: 28px; height: 32px; border-radius: 50%; background: #d5a878; }
+  .body { position: absolute; left: 9px; top: 34px; width: 40px; height: 58px; background: #334e7a; border-radius: 12px 12px 4px 4px; }
+  .leg { position: absolute; top: 88px; width: 14px; height: 48px; background: #24272d; }
+  .leg.a { left: 13px; }
+  .leg.b { right: 13px; }
+  .landlord, .cop { position: absolute; right: 10%; bottom: 16%; width: 58px; height: 138px; opacity: 0; transform: translateX(30px); transition: opacity 0.3s, transform 0.3s; }
+  .landlord.on, .cop.on { opacity: 1; transform: translateX(0); }
+  .landlord .body { background: #6b2f2f; }
+  .cop { right: 22%; }
+  .cop .body { background: #1d4d83; }
+  .siren { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: linear-gradient(90deg, rgba(255,0,0,0.22), transparent, rgba(0,80,255,0.22)); }
+  .siren.on { opacity: 1; animation: flash 0.35s steps(2) infinite; }
+  @keyframes flash { 50% { filter: hue-rotate(120deg); opacity: 0.4; } }
+  .ticker { padding: 13px 16px; border-top: 1px solid var(--line); background: #111713; color: var(--muted); min-height: 54px; line-height: 1.45; }
+  .side { display: grid; grid-template-rows: auto 1fr; min-height: 620px; }
+  .panel-title { padding: 14px 16px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .panel-title strong { color: var(--rent); }
+  .actions { padding: 14px; display: grid; gap: 10px; align-content: start; overflow: auto; }
+  .action {
+    width: 100%; text-align: left; border: 1px solid var(--line); background: var(--panel-2); color: var(--ink);
+    padding: 12px; cursor: pointer; display: grid; gap: 4px; border-radius: 6px; transition: border-color 0.16s, transform 0.16s, background 0.16s;
+  }
+  .action:hover, .action:focus-visible { border-color: var(--rent); outline: none; transform: translateY(-1px); }
+  .action.danger { border-color: rgba(255,93,93,0.45); }
+  .action.danger:hover, .action.danger:focus-visible { border-color: var(--bad); background: #331f1f; }
+  .action b { font-size: 14px; }
+  .action span { color: var(--muted); font-size: 12px; line-height: 1.35; }
+  .action:disabled { opacity: 0.42; cursor: not-allowed; transform: none; }
+  .log { padding: 0 14px 14px; display: grid; gap: 8px; }
+  .entry { border-left: 3px solid var(--line); padding: 8px 10px; color: var(--muted); background: rgba(255,255,255,0.025); font-size: 12px; line-height: 1.35; }
+  .entry.bad { border-color: var(--bad); color: #ffd7d7; }
+  .entry.good { border-color: var(--good); color: #ddffe4; }
+  .modal { position: fixed; inset: 0; z-index: 10; display: none; align-items: center; justify-content: center; padding: 18px; background: rgba(0,0,0,0.72); }
+  .modal.on { display: flex; }
+  .modal-card { max-width: 560px; width: 100%; padding: 26px; }
+  .modal-card h2 { margin: 0 0 10px; color: var(--rent); font-size: clamp(24px, 6vw, 42px); }
+  .modal-card p { color: var(--muted); line-height: 1.55; margin: 0 0 18px; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .primary { border: 1px solid var(--rent); background: var(--rent); color: #17130a; padding: 10px 14px; border-radius: 4px; cursor: pointer; font-weight: 800; }
+  .secondary { border: 1px solid var(--line); background: transparent; color: var(--ink); padding: 10px 14px; border-radius: 4px; cursor: pointer; }
+  #donate { position: fixed; right: 14px; bottom: 14px; z-index: 8; }
+  #donate a { display: inline-block; padding: 8px 12px; color: var(--rent); border: 1px solid var(--rent); background: rgba(16,21,18,0.72); text-decoration: none; font-size: 11px; letter-spacing: 2px; }
+  @media (max-width: 860px) {
+    main { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .stat { border-bottom: 1px solid var(--line); }
+    .board, .side { min-height: auto; }
+    .scene { min-height: 330px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Rent Simulator</h1>
+    <div class="month"><span id="monthLabel">Month 1</span><br><span id="dayLabel">Day 1 of 30</span></div>
+  </header>
+  <main>
+    <section class="board" aria-label="Apartment scene">
+      <div class="stats">
+        <div class="stat"><span class="label">Cash</span><span class="value" id="cash">$0</span></div>
+        <div class="stat"><span class="label">Rent Due</span><span class="value" id="rent">$0</span></div>
+        <div class="stat"><span class="label">Stress</span><span class="value" id="stress">0%</span></div>
+        <div class="stat"><span class="label">Energy</span><span class="value" id="energy">0%</span></div>
+        <div class="stat"><span class="label">Eviction</span><span class="value" id="eviction">0</span></div>
+      </div>
+      <div class="scene">
+        <div class="wall"></div>
+        <div class="floor"></div>
+        <div class="window"></div>
+        <div class="door"></div>
+        <div class="sofa"></div>
+        <div class="desk"></div>
+        <div class="laptop"></div>
+        <div class="person" id="tenant"><div class="head"></div><div class="body"></div><div class="leg a"></div><div class="leg b"></div></div>
+        <div class="landlord" id="landlord"><div class="head"></div><div class="body"></div><div class="leg a"></div><div class="leg b"></div></div>
+        <div class="cop" id="cop"><div class="head"></div><div class="body"></div><div class="leg a"></div><div class="leg b"></div></div>
+        <div class="siren" id="siren"></div>
+      </div>
+      <div class="ticker" id="ticker">Rent is due in 30 days. Survive three months without eviction.</div>
+    </section>
+    <aside class="side">
+      <div class="panel-title"><strong>Actions</strong><span id="shiftLabel">2 actions left today</span></div>
+      <div>
+        <div class="actions" id="actions"></div>
+        <div class="log" id="log"></div>
+      </div>
+    </aside>
+  </main>
+</div>
+<div id="donate"><a href="https://www.paypal.me/vikas117/3" target="_blank" rel="noopener" data-omenly-cta>SUPPORT</a></div>
+<div class="modal on" id="modal">
+  <div class="modal-card">
+    <h2 id="modalTitle">Rent Simulator</h2>
+    <p id="modalText">Pay rent, keep your energy up, handle random apartment disasters, and survive three months. Some choices solve problems. Some create bigger ones.</p>
+    <div class="row">
+      <button class="primary" id="startBtn">Start Month 1</button>
+      <button class="secondary" id="howBtn">How it works</button>
+    </div>
+  </div>
+</div>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const state = {
+    month: 1,
+    day: 1,
+    actions: 2,
+    cash: 420,
+    rent: 1200,
+    stress: 28,
+    energy: 72,
+    eviction: 0,
+    paidThisMonth: false,
+    repairs: 0,
+    ended: false
+  };
+  const logs = [];
+  const actions = [
+    { id: 'work', title: 'Work a double shift', desc: '+$210, -28 energy, +10 stress. The classic.', run: () => tick({ cash: 210, energy: -28, stress: 10 }, 'You work a brutal double shift and count tips under fluorescent lights.', 'good') },
+    { id: 'gig', title: 'Take gig jobs', desc: '+$115, -16 energy, +7 stress.', run: () => tick({ cash: 115, energy: -16, stress: 7 }, 'You deliver food, assemble a chair, and pretend the app is not laughing at you.', 'good') },
+    { id: 'rest', title: 'Sleep and reset', desc: '+32 energy, -16 stress.', run: () => tick({ energy: 32, stress: -16 }, 'You sleep through twelve alarms. The apartment stops spinning.', 'good') },
+    { id: 'repair', title: 'Fix apartment problem', desc: '-$75, -1 repair issue, -8 stress.', run: repair },
+    { id: 'negotiate', title: 'Negotiate with landlord', desc: 'Chance to lower pressure. Costs stress.', run: negotiate },
+    { id: 'pay', title: 'Pay rent', desc: 'Pay the full rent before the month ends.', run: payRent },
+    { id: 'murder', title: 'Murder the landlord', desc: 'A terrible choice. Police arrive immediately.', danger: true, run: murderLandlord }
+  ];
+
+  $('startBtn').addEventListener('click', () => {
+    $('modal').classList.remove('on');
+    addLog('Month 1 begins. Rent is due in 30 days.', 'good');
+    render();
+  });
+  $('howBtn').addEventListener('click', () => {
+    $('modalTitle').textContent = 'How it works';
+    $('modalText').textContent = 'Each day gives two actions. Make cash, manage stress and energy, repair problems, and pay rent before day 30. If eviction hits 3, you lose. Survive month 3 to win.';
+  });
+
+  function render() {
+    $('monthLabel').textContent = `Month ${state.month}`;
+    $('dayLabel').textContent = `Day ${state.day} of 30`;
+    setValue('cash', `$${state.cash}`, state.cash >= state.rent ? 'good' : '');
+    setValue('rent', state.paidThisMonth ? 'Paid' : `$${state.rent}`, state.paidThisMonth ? 'good' : '');
+    setValue('stress', `${state.stress}%`, state.stress > 80 ? 'bad' : state.stress < 35 ? 'good' : '');
+    setValue('energy', `${state.energy}%`, state.energy < 25 ? 'bad' : state.energy > 70 ? 'good' : '');
+    setValue('eviction', `${state.eviction}/3`, state.eviction >= 2 ? 'bad' : '');
+    $('shiftLabel').textContent = `${state.actions} action${state.actions === 1 ? '' : 's'} left today`;
+    $('tenant').style.left = `${42 + Math.sin((state.day + state.month) * 0.6) * 6}%`;
+    $('landlord').classList.toggle('on', state.day > 23 && !state.paidThisMonth && !state.ended);
+    renderActions();
+    renderLog();
+  }
+
+  function setValue(id, text, cls) {
+    const el = $(id);
+    el.textContent = text;
+    el.className = `value ${cls || ''}`;
+  }
+
+  function renderActions() {
+    $('actions').innerHTML = '';
+    for (const a of actions) {
+      const btn = document.createElement('button');
+      btn.className = `action ${a.danger ? 'danger' : ''}`;
+      btn.type = 'button';
+      btn.disabled = state.ended || state.actions <= 0 || (a.id === 'repair' && state.repairs <= 0) || (a.id === 'pay' && state.paidThisMonth);
+      btn.innerHTML = `<b>${a.title}</b><span>${a.desc}</span>`;
+      btn.addEventListener('click', a.run);
+      $('actions').appendChild(btn);
+    }
+  }
+
+  function tick(delta, msg, kind) {
+    if (state.ended || state.actions <= 0) return;
+    state.cash += delta.cash || 0;
+    state.energy = clamp(state.energy + (delta.energy || 0), 0, 100);
+    state.stress = clamp(state.stress + (delta.stress || 0), 0, 100);
+    state.actions--;
+    addLog(msg, kind);
+    if (state.energy <= 0) {
+      state.stress = clamp(state.stress + 15, 0, 100);
+      addLog('You crash from exhaustion. Tomorrow starts rough.', 'bad');
+      endDay();
+    } else if (state.actions <= 0) {
+      endDay();
+    } else {
+      render();
+    }
+  }
+
+  function repair() {
+    if (state.repairs <= 0) return;
+    if (state.cash < 75) {
+      tick({ stress: 9, energy: -5 }, 'You try to fix it without parts. It gets louder.', 'bad');
+      return;
+    }
+    state.repairs--;
+    tick({ cash: -75, stress: -8, energy: -8 }, 'You buy parts and fix one apartment problem before it becomes a fee.', 'good');
+  }
+
+  function negotiate() {
+    if (state.actions <= 0) return;
+    const success = Math.random() < (0.42 + (state.stress < 55 ? 0.18 : 0));
+    if (success) {
+      state.rent = Math.max(900, state.rent - 80);
+      state.eviction = Math.max(0, state.eviction - 1);
+      tick({ stress: 12, energy: -6 }, 'The landlord agrees to a smaller payment plan. It still feels expensive.', 'good');
+    } else {
+      state.eviction = Math.min(3, state.eviction + 1);
+      tick({ stress: 18, energy: -6 }, 'Negotiation fails. A notice appears under the door.', 'bad');
+    }
+  }
+
+  function payRent() {
+    if (state.paidThisMonth) return;
+    if (state.cash < state.rent) {
+      tick({ stress: 15, energy: -3 }, 'You try to pay rent, but the account comes up short.', 'bad');
+      return;
+    }
+    state.cash -= state.rent;
+    state.paidThisMonth = true;
+    state.eviction = Math.max(0, state.eviction - 1);
+    tick({ stress: -22 }, 'Rent paid. The receipt feels like a boss fight reward.', 'good');
+  }
+
+  function murderLandlord() {
+    state.ended = true;
+    $('landlord').classList.add('on');
+    $('cop').classList.add('on');
+    $('siren').classList.add('on');
+    addLog('You attack the landlord. Sirens arrive immediately. Police enter, arrest you, and the lease becomes the least of your problems.', 'bad');
+    showEnd('Arrested', 'Police arrive immediately. There is no payout, no shortcut, and no heroic ending. You lose.');
+    render();
+  }
+
+  function endDay() {
+    if (state.ended) return;
+    state.day++;
+    state.actions = 2;
+    state.energy = clamp(state.energy + 16, 0, 100);
+    state.stress = clamp(state.stress + (state.paidThisMonth ? -2 : 3), 0, 100);
+    if (Math.random() < 0.22) randomEvent();
+    if (state.stress >= 100) {
+      state.ended = true;
+      showEnd('Burned Out', 'Stress hits 100%. You miss shifts, miss calls, and lose the apartment.');
+      render();
+      return;
+    }
+    if (state.day > 30) closeMonth();
+    render();
+  }
+
+  function closeMonth() {
+    if (!state.paidThisMonth) {
+      state.eviction++;
+      addLog('Month ended without rent paid. Eviction pressure rises.', 'bad');
+    } else {
+      addLog(`Month ${state.month} cleared. The landlord has to find a new complaint.`, 'good');
+    }
+    if (state.eviction >= 3) {
+      state.ended = true;
+      showEnd('Evicted', 'Three notices stack up. You lose the apartment.');
+      return;
+    }
+    if (state.month >= 3 && state.paidThisMonth) {
+      state.ended = true;
+      showEnd('Lease Survived', `You survive three months with $${state.cash} left. It is not glamorous, but it counts.`);
+      return;
+    }
+    state.month++;
+    state.day = 1;
+    state.actions = 2;
+    state.paidThisMonth = false;
+    state.rent += 90;
+    state.energy = clamp(state.energy + 20, 0, 100);
+    state.stress = clamp(state.stress + 8, 0, 100);
+    addLog(`Month ${state.month} starts. Rent rises to $${state.rent}.`, 'bad');
+  }
+
+  function randomEvent() {
+    const events = [
+      () => { state.repairs++; state.stress = clamp(state.stress + 10, 0, 100); addLog('The sink starts leaking. Repair issue added.', 'bad'); },
+      () => { state.cash = Math.max(0, state.cash - 55); addLog('A surprise utility fee hits the account.', 'bad'); },
+      () => { state.cash += 70; addLog('A neighbor pays you to help move a couch.', 'good'); },
+      () => { state.energy = clamp(state.energy - 12, 0, 100); addLog('Upstairs drums at 2 AM. Energy drops.', 'bad'); }
+    ];
+    events[Math.floor(Math.random() * events.length)]();
+  }
+
+  function addLog(msg, kind) {
+    logs.unshift({ msg, kind: kind || '' });
+    logs.splice(7);
+    $('ticker').textContent = msg;
+  }
+
+  function renderLog() {
+    $('log').innerHTML = logs.map(l => `<div class="entry ${l.kind}">${escapeHTML(l.msg)}</div>`).join('');
+  }
+
+  function showEnd(title, text) {
+    $('modalTitle').textContent = title;
+    $('modalText').textContent = text;
+    $('startBtn').textContent = 'Restart';
+    $('startBtn').onclick = () => location.reload();
+    $('howBtn').style.display = 'none';
+    $('modal').classList.add('on');
+  }
+
+  function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+  function escapeHTML(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>

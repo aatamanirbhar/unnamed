@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#101512"/>
+      <stop offset="60%" stop-color="#243021"/>
+      <stop offset="100%" stop-color="#0b0f0c"/>
+    </linearGradient>
+    <linearGradient id="rent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f2c14e"/>
+      <stop offset="100%" stop-color="#ff5d5d"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#bg)"/>
+  <rect x="44" y="56" width="512" height="288" rx="8" fill="#172019" stroke="#f5f0df" stroke-opacity="0.15"/>
+  <rect x="84" y="98" width="152" height="112" fill="#b8d8ff" stroke="#60442c" stroke-width="10"/>
+  <path d="M160 98v112M84 154h152" stroke="#60442c" stroke-width="8"/>
+  <rect x="360" y="86" width="96" height="190" fill="#553c27" stroke="#2d241b" stroke-width="8"/>
+  <circle cx="438" cy="184" r="8" fill="#f2c14e"/>
+  <rect x="108" y="250" width="176" height="46" rx="8" fill="#6b5a93"/>
+  <rect x="92" y="286" width="208" height="40" rx="5" fill="#544674"/>
+  <rect x="318" y="260" width="150" height="18" fill="#8a653f"/>
+  <rect x="334" y="278" width="12" height="56" fill="#60442c"/>
+  <rect x="444" y="278" width="12" height="56" fill="#60442c"/>
+  <g transform="translate(300 185)">
+    <circle cx="0" cy="-42" r="20" fill="#d5a878"/>
+    <rect x="-26" y="-18" width="52" height="70" rx="13" fill="#334e7a"/>
+    <rect x="-20" y="46" width="15" height="58" fill="#24272d"/>
+    <rect x="5" y="46" width="15" height="58" fill="#24272d"/>
+  </g>
+  <g font-family="Arial,Helvetica,sans-serif" text-anchor="middle">
+    <text x="300" y="48" font-size="42" font-weight="900" fill="#f2c14e">Rent Simulator</text>
+    <text x="300" y="374" font-size="14" letter-spacing="4" fill="#f5f0df" opacity="0.75">BILLS - STRESS - LANDLORD - POLICE</text>
+  </g>
+  <text x="300" y="230" font-family="Arial,Helvetica,sans-serif" font-size="48" font-weight="900" text-anchor="middle" fill="url(#rent)">$1200</text>
+</svg>

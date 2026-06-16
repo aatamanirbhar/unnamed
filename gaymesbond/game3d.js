@@ -20,23 +20,15 @@
   const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0 || matchMedia('(pointer: coarse)').matches;
   if (isTouch) document.body.classList.add('touch');
 
-  const legacySource = $('legacy2d-source')?.textContent || '';
-  const rawMissions = parseMissions(legacySource);
-  if (!rawMissions.length) {
-    title.classList.remove('hidden');
-    $('missionPreview').innerHTML = '<div><strong>01 - LOAD ERROR</strong><small>Could not read the mission campaign.</small></div>';
-    throw new Error('Gaymes Bond missions could not be parsed.');
-  }
-
   const SCALE = 0.02;
-  const MISSIONS = rawMissions.map(scaleMission);
+  const MISSIONS = createSunlitMissions();
   const COMMS = [
-    'HQ: The tuxedo is still a valid tactical asset.',
-    'HQ: Try to look less like a secret and more like a rumor.',
-    'Villain PA: Sir, the spy is again being dramatic in the hallway.',
-    'HQ: If caught, deny everything except the hat.',
-    'Bond: I came for intelligence and stayed for the terrible lighting.',
-    'HQ: Your cufflinks are not supposed to be emotionally supportive.'
+    'HQ: The island is public-facing. Smile like you belong there.',
+    'HQ: Cameras are wired through the marina office. One hack buys a quiet minute.',
+    'Felix: Guests, guards, yachts, sunshine. Try not to start a diplomatic incident.',
+    'Pilot: Helipad extraction is hot once the gate relay is open.',
+    'Bond: Sunlight, champagne, and a villain with terrible perimeter planning.',
+    'HQ: Your cufflinks are still government property.'
   ];
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
@@ -44,21 +36,21 @@
   renderer.setSize(window.innerWidth, window.innerHeight, false);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.0;
+  renderer.toneMappingExposure = 1.34;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x060814);
-  scene.fog = new THREE.Fog(0x060814, 8, 70);
+  scene.background = new THREE.Color(0x9edcff);
+  scene.fog = new THREE.Fog(0x9edcff, 24, 105);
   const camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, 0.1, 220);
   camera.position.set(0, 3, 5);
 
-  const hemi = new THREE.HemisphereLight(0xffffff, 0x182030, 1.3);
+  const hemi = new THREE.HemisphereLight(0xffffff, 0xbdd78f, 2.15);
   scene.add(hemi);
-  const sun = new THREE.DirectionalLight(0xffe0b0, 1.5);
-  sun.position.set(10, 18, 8);
+  const sun = new THREE.DirectionalLight(0xfff1c2, 2.7);
+  sun.position.set(16, 28, 10);
   scene.add(sun);
-  const fill = new THREE.DirectionalLight(0x7db7ff, 0.55);
-  fill.position.set(-8, 8, -10);
+  const fill = new THREE.DirectionalLight(0x88ccff, 0.9);
+  fill.position.set(-12, 10, -12);
   scene.add(fill);
 
   const worldRoot = new THREE.Group();
@@ -80,6 +72,7 @@
     walls: [],
     objectives: [],
     guards: [],
+    civilians: [],
     cameras: [],
     lasers: [],
     decoys: [],
@@ -111,6 +104,9 @@
     moveTouchId: null, lookTouchId: null
   };
   const keys = Object.create(null);
+  const textureLoader = new THREE.TextureLoader();
+  let playerPortraitTexture = null;
+  loadPlayerPortrait();
   let last = performance.now();
   let toastTimer = 0;
   let mouseLocked = false;
@@ -122,35 +118,73 @@
   if (isTouch) setupTouch();
   requestAnimationFrame(loop);
 
-  function parseMissions(src) {
-    const startToken = 'const MISSIONS =';
-    const start = src.indexOf(startToken);
-    if (start < 0) return [];
-    const arrStart = src.indexOf('[', start);
-    if (arrStart < 0) return [];
-    let depth = 0;
-    let inStr = false;
-    let str = '';
-    let esc = false;
-    for (let i = arrStart; i < src.length; i++) {
-      const ch = src[i];
-      if (inStr) {
-        if (esc) esc = false;
-        else if (ch === '\\') esc = true;
-        else if (ch === str) inStr = false;
-        continue;
-      }
-      if (ch === '"' || ch === '\'' || ch === '`') { inStr = true; str = ch; continue; }
-      if (ch === '[') depth++;
-      else if (ch === ']') {
-        depth--;
-        if (depth === 0) {
-          const literal = src.slice(arrStart, i + 1);
-          try { return Function('"use strict"; return (' + literal + ');')(); } catch (_) { return []; }
-        }
-      }
-    }
-    return [];
+  function createSunlitMissions() {
+    return [
+      scaleMission({
+        name: 'Sunbreak Protocol',
+        place: 'Azure Crown Island Resort',
+        palette: ['#9edcff', '#4fbf7a', '#ffd166'],
+        brief: 'Baron Beige is auctioning a satellite key at a public island resort. Cross the open grounds, blend through the crowds, steal the yacht ledger, open the villa relay, photograph the auction, and escape by helicopter.',
+        ops: [
+          'Start at the beach pier and cross the whole island in daylight.',
+          'Hack the marina office to quiet the camera grid.',
+          'Steal the yacht ledger, open the villa relay, and photograph the auction table.',
+          'Use crowds, hedges, umbrellas, darts, decoys, smoke, and charm to reach the helipad extraction.'
+        ],
+        w: 2480,
+        h: 1760,
+        start: [180, 1540],
+        exit: [2210, 170, 150, 150],
+        objectives: [
+          [520, 1230, 'Marina camera office', 'You loop the resort cameras through a sunscreen advert.'],
+          [1040, 840, 'Yacht ledger', 'The ledger names every buyer, yacht, and fake accent.'],
+          [1520, 590, 'Villa gate relay', 'The relay pops open with a cufflink and one rude spark.'],
+          [1930, 1110, 'Auction photo', 'You photograph the satellite key beside a very small quiche.']
+        ],
+        guards: [
+          [[420, 1320], [780, 1320], [780, 1050], [430, 1030]],
+          [[910, 940], [1280, 900], [1280, 650], [900, 680]],
+          [[1390, 430], [1710, 430], [1730, 690], [1400, 710]],
+          [[1800, 980], [2190, 980], [2190, 1260], [1810, 1260]],
+          [[1900, 320], [2250, 320], [2250, 560], [1900, 560]],
+          [[620, 520], [950, 500], [960, 310], [650, 330]]
+        ],
+        civilians: [
+          [[330, 1450], [560, 1460], [560, 1330], [330, 1340]],
+          [[720, 1220], [900, 1130], [820, 980], [650, 1030]],
+          [[1050, 1190], [1330, 1190], [1320, 1030], [1040, 1030]],
+          [[470, 740], [700, 710], [780, 610], [520, 600]],
+          [[1040, 500], [1260, 520], [1240, 330], [1020, 350]],
+          [[1530, 900], [1760, 910], [1720, 1050], [1500, 1040]],
+          [[1990, 1420], [2240, 1390], [2260, 1510], [2010, 1550]],
+          [[1940, 710], [2210, 700], [2220, 850], [1940, 860]],
+          [[1340, 1420], [1600, 1370], [1640, 1530], [1380, 1580]],
+          [[760, 1560], [1040, 1530], [1040, 1390], [760, 1400]],
+          [[1550, 250], [1750, 260], [1740, 360], [1550, 350]],
+          [[380, 390], [550, 390], [570, 250], [390, 260]]
+        ],
+        cameras: [
+          [560, 1120, 0.4],
+          [1210, 760, -0.6],
+          [1680, 610, 2.5],
+          [2070, 1020, -2.7],
+          [2080, 370, 2.8]
+        ],
+        lasers: [
+          [1420, 520, 1780, 520],
+          [1810, 900, 2220, 900],
+          [2140, 400, 2140, 710]
+        ],
+        walls: [
+          [0, 0, 2480, 30], [0, 1730, 2480, 30], [0, 0, 30, 1760], [2450, 0, 30, 1760],
+          [250, 1220, 360, 28], [760, 1220, 250, 28], [1180, 1010, 420, 28], [1800, 880, 450, 28],
+          [1320, 380, 28, 340], [1780, 380, 28, 340], [2050, 420, 28, 290],
+          [470, 620, 28, 360], [720, 620, 28, 230], [1020, 250, 360, 28],
+          [350, 250, 270, 28], [560, 250, 28, 190], [1840, 1340, 430, 28],
+          [1820, 1340, 28, 250], [2260, 1320, 28, 300], [1450, 1230, 28, 330]
+        ]
+      })
+    ];
   }
 
   function scaleMission(m) {
@@ -166,6 +200,7 @@
       exit: [m.exit[0] * SCALE, m.exit[1] * SCALE, m.exit[2] * SCALE, m.exit[3] * SCALE],
       objectives: m.objectives.map(o => [o[0] * SCALE, o[1] * SCALE, o[2], o[3]]),
       guards: m.guards.map(route => route.map(p => [p[0] * SCALE, p[1] * SCALE])),
+      civilians: (m.civilians || []).map(route => route.map(p => [p[0] * SCALE, p[1] * SCALE])),
       cameras: m.cameras.map(c => [c[0] * SCALE, c[1] * SCALE, Math.PI / 2 - c[2]]),
       lasers: m.lasers.map(l => [l[0] * SCALE, l[1] * SCALE, l[2] * SCALE, l[3] * SCALE]),
       walls: m.walls.map(r => [r[0] * SCALE, r[1] * SCALE, r[2] * SCALE, r[3] * SCALE])
@@ -304,8 +339,12 @@
       const r = lookPad.getBoundingClientRect();
       const cx = r.left + r.width / 2;
       const cy = r.top + r.height / 2;
-      const ox = clamp(e.clientX - cx, -38, 38);
-      const oy = clamp(e.clientY - cy, -38, 38);
+      const rawOx = e.clientX - cx;
+      const rawOy = e.clientY - cy;
+      const len = Math.hypot(rawOx, rawOy);
+      const cap = len > 38 ? 38 / len : 1;
+      const ox = rawOx * cap;
+      const oy = rawOy * cap;
       lookKnob.style.transform = `translate(${ox}px, ${oy}px)`;
     });
     lookPad.addEventListener('pointerup', e => {
@@ -363,6 +402,7 @@
     state.walls = [];
     state.objectives = [];
     state.guards = [];
+    state.civilians = [];
     state.cameras = [];
     state.lasers = [];
     state.worldBounds = { w: state.mission.w, h: state.mission.h };
@@ -395,12 +435,15 @@
     const bg = new THREE.Color(m.palette[0]);
     scene.background = bg;
     scene.fog.color.copy(bg);
-    scene.fog.near = 8;
-    scene.fog.far = Math.max(55, Math.max(m.w, m.h) * 1.1);
-    hemi.color.copy(new THREE.Color(m.palette[2]));
-    hemi.groundColor.copy(new THREE.Color(m.palette[0]));
-    sun.color.copy(new THREE.Color(m.palette[2]));
-    fill.color.copy(new THREE.Color(m.palette[1]));
+    scene.fog.near = 32;
+    scene.fog.far = Math.max(88, Math.max(m.w, m.h) * 1.55);
+    hemi.intensity = 2.15;
+    sun.intensity = 2.75;
+    fill.intensity = 0.95;
+    hemi.color.copy(new THREE.Color(0xffffff));
+    hemi.groundColor.copy(new THREE.Color(0x9bcf7a));
+    sun.color.copy(new THREE.Color(0xfff1c2));
+    fill.color.copy(new THREE.Color(0x8fd3ff));
 
     const world = new THREE.Group();
     worldRoot.add(world);
@@ -408,27 +451,27 @@
 
     const floor = new THREE.Mesh(
       new THREE.PlaneGeometry(m.w, m.h, 1, 1),
-      new THREE.MeshStandardMaterial({ color: new THREE.Color(m.palette[1]).multiplyScalar(0.32), roughness: 1, metalness: 0 })
+      new THREE.MeshStandardMaterial({ color: 0x74c96b, roughness: 0.92, metalness: 0 })
     );
     floor.rotation.x = -Math.PI / 2;
     floor.position.set(m.w / 2, 0, m.h / 2);
     world.add(floor);
 
-    const grid = new THREE.GridHelper(Math.max(m.w, m.h), Math.ceil(Math.max(m.w, m.h) / 2), 0x223048, 0x111824);
+    const grid = new THREE.GridHelper(Math.max(m.w, m.h), Math.ceil(Math.max(m.w, m.h) / 2), 0xf7e1a0, 0xffffff);
     grid.position.set(m.w / 2, 0.02, m.h / 2);
     grid.material.transparent = true;
-    grid.material.opacity = 0.22;
+    grid.material.opacity = 0.14;
     world.add(grid);
 
     state.walls = m.walls.map((r, idx) => {
       const wall = {
         x: r[0], z: r[1], w: r[2], h: r[3],
         mesh: new THREE.Mesh(
-          new THREE.BoxGeometry(r[2], 2.6, r[3]),
-          new THREE.MeshStandardMaterial({ color: idx % 2 ? 0x171b27 : 0x20283a, roughness: 0.95, metalness: 0.02, transparent: true, opacity: 0.98 })
+          new THREE.BoxGeometry(r[2], 1.2, r[3]),
+          new THREE.MeshStandardMaterial({ color: idx < 4 ? 0xd9c394 : (idx % 2 ? 0x3d8f58 : 0xf3e7bc), roughness: 0.88, metalness: 0.02 })
         )
       };
-      wall.mesh.position.set(r[0] + r[2] / 2, 1.3, r[1] + r[3] / 2);
+      wall.mesh.position.set(r[0] + r[2] / 2, 0.6, r[1] + r[3] / 2);
       world.add(wall.mesh);
       return wall;
     });
@@ -462,6 +505,12 @@
       return g;
     });
 
+    state.civilians = m.civilians.map((route, idx) => {
+      const c = makeCivilian(route, idx);
+      world.add(c.mesh);
+      return c;
+    });
+
     state.cameras = m.cameras.map((c, idx) => {
       const cam = makeCameraNode(c[0], c[1], c[2], idx, m.palette);
       world.add(cam.mesh);
@@ -483,53 +532,159 @@
   }
 
   function addMissionProps(world, mission) {
-    const accent = new THREE.Color(mission.palette[2]).getHex();
-    const dark = new THREE.Color(mission.palette[0]).multiplyScalar(0.7).getHex();
-    const mid = new THREE.Color(mission.palette[1]).multiplyScalar(0.65).getHex();
-    const propMat = new THREE.MeshStandardMaterial({ color: dark, roughness: 0.82, metalness: 0.08 });
-    const trimMat = new THREE.MeshStandardMaterial({ color: accent, emissive: accent, emissiveIntensity: 0.18, roughness: 0.38, metalness: 0.16 });
-    const carpetMat = new THREE.MeshStandardMaterial({ color: mid, roughness: 1, metalness: 0 });
+    const sandMat = new THREE.MeshStandardMaterial({ color: 0xf1d99d, roughness: 1, metalness: 0 });
+    const pathMat = new THREE.MeshStandardMaterial({ color: 0xe9e0c8, roughness: 0.86, metalness: 0 });
+    const waterMat = new THREE.MeshStandardMaterial({ color: 0x3dbce8, roughness: 0.65, metalness: 0.02, transparent: true, opacity: 0.86 });
+    const hedgeMat = new THREE.MeshStandardMaterial({ color: 0x2f934e, roughness: 0.95, metalness: 0 });
+    const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8f3df, roughness: 0.78, metalness: 0 });
+    const terracottaMat = new THREE.MeshStandardMaterial({ color: 0xd9894c, roughness: 0.82, metalness: 0 });
+    const glassMat = new THREE.MeshStandardMaterial({ color: 0x8ed7ff, roughness: 0.24, metalness: 0.02, transparent: true, opacity: 0.55 });
 
-    const carpet = new THREE.Mesh(new THREE.PlaneGeometry(mission.w * 0.72, Math.min(2.2, mission.h * 0.22)), carpetMat);
-    carpet.rotation.x = -Math.PI / 2;
-    carpet.position.set(mission.w * 0.5, 0.035, mission.h * 0.5);
-    world.add(carpet);
+    addGroundPatch(world, mission.w * 0.5, mission.h - 2.0, mission.w * 0.92, 3.7, sandMat);
+    addGroundPatch(world, mission.w * 0.08, mission.h * 0.5, 2.2, mission.h * 0.84, sandMat);
+    addGroundPatch(world, mission.w * 0.52, mission.h * 0.61, mission.w * 0.68, 1.25, pathMat);
+    addGroundPatch(world, mission.w * 0.67, mission.h * 0.35, 1.15, mission.h * 0.44, pathMat);
+    addGroundPatch(world, mission.w * 0.86, mission.h * 0.78, 2.3, 2.6, waterMat);
+    addGroundPatch(world, mission.w * 0.14, mission.h * 0.2, 2.1, 2.6, waterMat);
 
-    const count = 9 + Math.min(9, mission.objectives.length + mission.guards.length);
-    for (let i = 0; i < count; i++) {
-      const x = 1.5 + ((i * 4.7) % Math.max(2, mission.w - 3));
-      const z = 1.5 + ((i * 3.1 + mission.place.length * 0.2) % Math.max(2, mission.h - 3));
-      if (!isFreeSpot(x, z, 0.45)) continue;
-      const table = new THREE.Group();
-      const top = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.09, 0.42), propMat);
-      top.position.y = 0.48;
-      table.add(top);
-      for (const sx of [-0.25, 0.25]) for (const sz of [-0.14, 0.14]) {
-        const leg = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.45, 0.06), propMat);
-        leg.position.set(sx, 0.24, sz);
-        table.add(leg);
-      }
-      const lamp = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.09, 0.22, 10), trimMat);
-      lamp.position.set(0.16, 0.63, 0.02);
-      table.add(lamp);
-      table.position.set(x, 0, z);
-      table.rotation.y = (i % 4) * Math.PI / 2 + 0.2;
-      world.add(table);
+    addVilla(world, 31.0, 7.7, 4.5, 3.3, whiteMat, terracottaMat, glassMat);
+    addVilla(world, 9.2, 6.9, 3.3, 2.6, whiteMat, terracottaMat, glassMat);
+    addVilla(world, 40.8, 24.8, 4.9, 2.7, whiteMat, terracottaMat, glassMat);
+    addYacht(world, 6.9, 29.0);
+    addYacht(world, 42.2, 30.1);
+    addHelipad(world, 45.5, 3.9, mission.palette[2]);
+
+    const umbrellas = [
+      [5.8, 29.1, 0xe95464], [9.4, 28.5, 0x31a7e0], [14.6, 25.0, 0xffd166],
+      [21.5, 21.4, 0xe95464], [30.2, 21.1, 0x31a7e0], [39.8, 18.4, 0xffd166],
+      [35.6, 28.2, 0xe95464], [16.2, 30.8, 0x31a7e0], [25.4, 28.8, 0xffd166]
+    ];
+    for (const u of umbrellas) if (isFreeSpot(u[0], u[1], 0.46)) world.add(makeUmbrella(u[2], u[0], u[1]));
+
+    const palms = [
+      [3.4, 27.2], [4.8, 20.1], [7.7, 13.4], [11.5, 4.8], [18.0, 31.9],
+      [22.4, 14.5], [28.0, 28.7], [32.7, 4.8], [38.4, 8.9], [44.8, 14.6],
+      [46.8, 27.4], [16.2, 8.0], [26.8, 5.4], [34.7, 24.2]
+    ];
+    for (const p of palms) if (isFreeSpot(p[0], p[1], 0.55)) world.add(makePalm(p[0], p[1]));
+
+    const hedges = [
+      [12.5, 21.2, 4.6, 0.34], [19.5, 19.0, 5.5, 0.34], [26.2, 16.4, 0.34, 5.6],
+      [35.8, 13.6, 0.34, 5.0], [38.9, 17.2, 5.7, 0.34], [9.5, 9.9, 0.34, 4.2],
+      [14.5, 7.9, 5.2, 0.34], [30.4, 25.2, 0.34, 4.2]
+    ];
+    for (const h of hedges) {
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(h[2], 0.72, h[3]), hedgeMat);
+      mesh.position.set(h[0], 0.36, h[1]);
+      world.add(mesh);
     }
 
+    const tablePositions = [[10.8, 24.2], [12.9, 24.4], [22.7, 22.7], [31.0, 23.2], [38.5, 22.2], [40.2, 15.5], [30.8, 10.7], [20.5, 9.4]];
+    for (let i = 0; i < tablePositions.length; i++) {
+      const [x, z] = tablePositions[i];
+      if (!isFreeSpot(x, z, 0.5)) continue;
+      world.add(makeCafeTable(i, x, z));
+    }
+  }
+
+  function addGroundPatch(world, x, z, w, h, material) {
+    const patch = new THREE.Mesh(new THREE.PlaneGeometry(w, h), material);
+    patch.rotation.x = -Math.PI / 2;
+    patch.position.set(x, 0.025, z);
+    world.add(patch);
+  }
+
+  function addVilla(world, x, z, w, h, wallMat, roofMat, glassMat) {
+    const group = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.BoxGeometry(w, 1.7, h), wallMat);
+    body.position.y = 0.85;
+    const roof = new THREE.Mesh(new THREE.BoxGeometry(w + 0.35, 0.26, h + 0.35), roofMat);
+    roof.position.y = 1.84;
+    const door = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.9, 0.06), glassMat);
+    door.position.set(0, 0.52, h / 2 + 0.04);
+    const windowA = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.44, 0.06), glassMat);
+    const windowB = windowA.clone();
+    windowA.position.set(-w * 0.28, 1.02, h / 2 + 0.05);
+    windowB.position.set(w * 0.28, 1.02, h / 2 + 0.05);
+    group.add(body, roof, door, windowA, windowB);
+    group.position.set(x, 0, z);
+    world.add(group);
+  }
+
+  function addYacht(world, x, z) {
+    const group = new THREE.Group();
+    const hull = new THREE.Mesh(new THREE.BoxGeometry(2.9, 0.38, 0.72), new THREE.MeshStandardMaterial({ color: 0xf7f7f0, roughness: 0.52, metalness: 0.04 }));
+    hull.position.y = 0.28;
+    const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.44, 0.52), new THREE.MeshStandardMaterial({ color: 0x92d7ff, roughness: 0.2, transparent: true, opacity: 0.78 }));
+    cabin.position.set(0.25, 0.7, 0);
+    const stripe = new THREE.Mesh(new THREE.BoxGeometry(2.7, 0.08, 0.04), new THREE.MeshStandardMaterial({ color: 0xff5fa2, emissive: 0xff5fa2, emissiveIntensity: 0.12 }));
+    stripe.position.set(0, 0.38, 0.39);
+    group.add(hull, cabin, stripe);
+    group.position.set(x, 0.02, z);
+    group.rotation.y = -0.14;
+    world.add(group);
+  }
+
+  function addHelipad(world, x, z, accent) {
+    const padMat = new THREE.MeshStandardMaterial({ color: 0x2d343b, roughness: 0.7, metalness: 0.06 });
+    const lineMat = new THREE.MeshStandardMaterial({ color: accent, emissive: accent, emissiveIntensity: 0.25, roughness: 0.35 });
+    const pad = new THREE.Mesh(new THREE.CylinderGeometry(1.35, 1.35, 0.08, 32), padMat);
+    pad.position.set(x, 0.06, z);
+    world.add(pad);
+    const h1 = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.04, 0.18), lineMat);
+    const h2 = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.04, 1.25), lineMat);
+    h1.position.set(x, 0.13, z);
+    h2.position.set(x, 0.14, z);
+    world.add(h1, h2);
+  }
+
+  function makeUmbrella(color, x, z) {
+    const group = new THREE.Group();
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.85, 8), new THREE.MeshStandardMaterial({ color: 0xf8f3df, roughness: 0.5 }));
+    pole.position.y = 0.42;
+    const shade = new THREE.Mesh(new THREE.ConeGeometry(0.62, 0.36, 18), new THREE.MeshStandardMaterial({ color, roughness: 0.68, metalness: 0.02 }));
+    shade.position.y = 1.0;
+    group.add(pole, shade);
+    group.position.set(x, 0, z);
+    return group;
+  }
+
+  function makePalm(x, z) {
+    const group = new THREE.Group();
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x9c6a3d, roughness: 0.95 });
+    const leafMat = new THREE.MeshStandardMaterial({ color: 0x247d40, roughness: 0.92 });
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.16, 1.9, 9), trunkMat);
+    trunk.position.y = 0.95;
+    trunk.rotation.z = 0.08;
+    group.add(trunk);
     for (let i = 0; i < 6; i++) {
-      const x = mission.w * (0.18 + i * 0.12);
-      const z = i % 2 ? mission.h * 0.2 : mission.h * 0.8;
-      if (!isFreeSpot(x, z, 0.6)) continue;
-      const statue = new THREE.Group();
-      const base = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.28, 0.2, 12), propMat);
-      base.position.y = 0.1;
-      const body = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.9, 8), trimMat);
-      body.position.y = 0.65;
-      statue.add(base, body);
-      statue.position.set(x, 0, z);
-      world.add(statue);
+      const leaf = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.04, 1.18), leafMat);
+      leaf.position.y = 1.88;
+      leaf.position.z = 0.43;
+      leaf.rotation.y = i * Math.PI / 3;
+      leaf.rotation.x = 0.42;
+      group.add(leaf);
     }
+    group.position.set(x, 0, z);
+    return group;
+  }
+
+  function makeCafeTable(idx, x, z) {
+    const group = new THREE.Group();
+    const tableMat = new THREE.MeshStandardMaterial({ color: idx % 2 ? 0xffffff : 0xffd166, roughness: 0.72 });
+    const metalMat = new THREE.MeshStandardMaterial({ color: 0x56606a, roughness: 0.5, metalness: 0.28 });
+    const top = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.06, 16), tableMat);
+    top.position.y = 0.55;
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.5, 8), metalMat);
+    stem.position.y = 0.28;
+    const chairA = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.22, 0.28), tableMat);
+    const chairB = chairA.clone();
+    chairA.position.set(-0.58, 0.26, 0);
+    chairB.position.set(0.58, 0.26, 0);
+    group.add(top, stem, chairA, chairB);
+    group.position.set(x, 0, z);
+    group.rotation.y = (idx % 3) * 0.4;
+    return group;
   }
 
   function isFreeSpot(x, z, r) {
@@ -565,9 +720,55 @@
     armR.position.set(0.31, 1.08, 0.02);
     const cuff = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.08, 0.06), tie);
     cuff.position.set(0.37, 0.92, 0.03);
-    g.add(jacket, torso, head, shirtBox, tieBox, legL, legR, armL, armR, cuff);
+    const portrait = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.38, 0.52),
+      new THREE.MeshBasicMaterial({ map: playerPortraitTexture, color: 0xffffff, transparent: true, side: THREE.DoubleSide })
+    );
+    portrait.position.set(0, 1.72, 0.185);
+    portrait.rotation.y = 0;
+    portrait.visible = !!playerPortraitTexture;
+    const badge = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.34, 0.46),
+      new THREE.MeshBasicMaterial({ map: playerPortraitTexture, color: 0xffffff, transparent: true, side: THREE.DoubleSide })
+    );
+    badge.position.set(0, 1.16, 0.205);
+    badge.visible = !!playerPortraitTexture;
+    g.add(jacket, torso, head, shirtBox, tieBox, legL, legR, armL, armR, cuff, portrait, badge);
+    g.userData.portrait = portrait;
+    g.userData.badge = badge;
     g.position.y = 0;
     return g;
+  }
+
+  async function loadPlayerPortrait() {
+    const src = await firstExistingAsset(['model.webp', 'model.jpg']);
+    if (!src) return;
+    textureLoader.load(src, tex => {
+      tex.colorSpace = THREE.SRGBColorSpace;
+      playerPortraitTexture = tex;
+      tex.needsUpdate = true;
+      applyPlayerPortraitTexture(tex);
+    });
+  }
+
+  async function firstExistingAsset(paths) {
+    for (const path of paths) {
+      try {
+        const res = await fetch(path, { method: 'HEAD', cache: 'no-store' });
+        if (res.ok) return path;
+      } catch (_) {}
+    }
+    return null;
+  }
+
+  function applyPlayerPortraitTexture(tex) {
+    if (!player.mesh) return;
+    for (const part of [player.mesh.userData.portrait, player.mesh.userData.badge]) {
+      if (!part?.material) continue;
+      part.material.map = tex;
+      part.visible = true;
+      part.material.needsUpdate = true;
+    }
   }
 
   function makeGuard(route, idx) {
@@ -589,6 +790,28 @@
       vision: makeVisionCone((300 + (idx % 2) * 25) * SCALE, 0.72, 0xffd166, 0.16)
     };
     return guard;
+  }
+
+  function makeCivilian(route, idx) {
+    const p = route[0];
+    const q = route[1] || route[0];
+    const palette = [
+      [0xffffff, 0x31a7e0, 0xffd166],
+      [0xffe2a8, 0xe95464, 0xffffff],
+      [0x91d18b, 0xf8f3df, 0x31a7e0],
+      [0xf7b4cf, 0x2e6f95, 0xffd166]
+    ][idx % 4];
+    return {
+      x: p[0],
+      z: p[1],
+      route: route.map(v => ({ x: v[0], z: v[1] })),
+      idx: route.length > 1 ? 1 : 0,
+      angle: Math.atan2(q[0] - p[0], q[1] - p[1]),
+      speed: (38 + (idx % 5) * 4) * SCALE,
+      radius: 0.18,
+      phase: idx * 0.8,
+      mesh: makeNpc(palette[0], palette[1], palette[2], true)
+    };
   }
 
   function makeCameraNode(x, z, base, idx, palette) {
@@ -614,14 +837,14 @@
     return { x1, z1, x2, z2, off: false, pulse: idx * 0.8, mesh };
   }
 
-  function makeNpc(body, tie, glow) {
+  function makeNpc(body, tie, glow, casual = false) {
     const g = new THREE.Group();
     const suit = new THREE.MeshStandardMaterial({ color: body, roughness: 0.92, metalness: 0.02 });
     const skin = new THREE.MeshStandardMaterial({ color: 0xd0ad8a, roughness: 0.96 });
     const accent = new THREE.MeshStandardMaterial({ color: tie, emissive: glow, emissiveIntensity: 0.24, roughness: 0.6 });
     const torso = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.72, 0.24), suit);
     torso.position.y = 1.1;
-    const jacket = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.76, 0.28), new THREE.MeshStandardMaterial({ color: 0x131722, roughness: 0.88 }));
+    const jacket = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.76, 0.28), new THREE.MeshStandardMaterial({ color: casual ? body : 0x131722, roughness: 0.88 }));
     jacket.position.y = 1.07;
     const head = new THREE.Mesh(new THREE.SphereGeometry(0.16, 16, 16), skin);
     head.position.y = 1.68;
@@ -633,9 +856,11 @@
     const arm2 = arm.clone();
     arm.position.set(-0.28, 1.04, 0);
     arm2.position.set(0.28, 1.04, 0.01);
-    const tieBox = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.22, 0.04), accent);
-    tieBox.position.set(0.02, 1.02, 0.16);
-    g.add(jacket, torso, head, leg, leg2, arm, arm2, tieBox);
+    const tieBox = new THREE.Mesh(new THREE.BoxGeometry(casual ? 0.2 : 0.05, casual ? 0.12 : 0.22, 0.04), accent);
+    tieBox.position.set(0.02, casual ? 1.2 : 1.02, 0.16);
+    const hat = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.2, 0.08, 14), new THREE.MeshStandardMaterial({ color: casual ? tie : 0x222734, roughness: 0.7 }));
+    hat.position.y = 1.86;
+    g.add(jacket, torso, head, leg, leg2, arm, arm2, tieBox, hat);
     return g;
   }
 
@@ -750,6 +975,7 @@
       player.yaw = lerpAngle(player.yaw, cameraYaw, 0.06);
     }
     updateGuards(dt);
+    updateCivilians(dt);
     updateCameras(dt);
     updateLasers(dt);
     updateEffects(dt);
@@ -786,6 +1012,12 @@
       } else {
         g.mesh.rotation.z = 0;
       }
+    }
+    for (const c of state.civilians) {
+      c.mesh.position.set(c.x, 0, c.z);
+      c.mesh.rotation.y = c.angle;
+      const bob = Math.sin(state.time * 5 + c.phase) * 0.025;
+      c.mesh.position.y = bob;
     }
     for (const c of state.cameras) {
       c.mesh.position.set(c.x, 0, c.z);
@@ -835,6 +1067,14 @@
       } else if (g.state === 'alert' && dist(g.x, g.z, player.x, player.z) > g.cone * 1.4) {
         g.state = 'patrol';
       }
+    }
+  }
+
+  function updateCivilians(dt) {
+    for (const c of state.civilians) {
+      const target = c.route[c.idx];
+      moveNpc(c, target.x, target.z, dt, 0.72);
+      if (dist(c.x, c.z, target.x, target.z) < 0.2) c.idx = (c.idx + 1) % c.route.length;
     }
   }
 
@@ -966,24 +1206,36 @@
   function updateCamera(dt) {
     const sin = Math.sin(cameraYaw);
     const cos = Math.cos(cameraYaw);
-    const back = 3.9;
+    const back = 5.15;
     const shoulder = 0.72;
-    const height = 2.05 + cameraPitch;
-    const targetX = player.x - sin * back + cos * shoulder;
+    const height = 2.7 + cameraPitch;
+    const margin = 0.45;
+    const targetX = clamp(player.x - sin * back + cos * shoulder, margin, state.worldBounds.w - margin);
     const targetY = height;
-    const targetZ = player.z - cos * back - sin * shoulder;
+    const targetZ = clamp(player.z - cos * back - sin * shoulder, margin, state.worldBounds.h - margin);
     const t = 1 - Math.pow(0.0008, dt);
     camera.position.x += (targetX - camera.position.x) * t;
     camera.position.y += (targetY - camera.position.y) * t;
     camera.position.z += (targetZ - camera.position.z) * t;
-    camera.lookAt(player.x + Math.sin(cameraYaw) * 5, 1.35 - cameraPitch * 1.4, player.z + Math.cos(cameraYaw) * 5);
+    const lookX = clamp(player.x + Math.sin(cameraYaw) * 4.8, 0.4, state.worldBounds.w - 0.4);
+    const lookZ = clamp(player.z + Math.cos(cameraYaw) * 4.8, 0.4, state.worldBounds.h - 0.4);
+    camera.lookAt(lookX, 1.25 - cameraPitch * 1.25, lookZ);
   }
 
   function snapCamera() {
     const sin = Math.sin(cameraYaw);
     const cos = Math.cos(cameraYaw);
-    camera.position.set(player.x - sin * 3.9 + cos * 0.72, 2.05 + cameraPitch, player.z - cos * 3.9 - sin * 0.72);
-    camera.lookAt(player.x + Math.sin(cameraYaw) * 5, 1.35 - cameraPitch * 1.4, player.z + Math.cos(cameraYaw) * 5);
+    const margin = 0.45;
+    camera.position.set(
+      clamp(player.x - sin * 5.15 + cos * 0.72, margin, state.worldBounds.w - margin),
+      2.7 + cameraPitch,
+      clamp(player.z - cos * 5.15 - sin * 0.72, margin, state.worldBounds.h - margin)
+    );
+    camera.lookAt(
+      clamp(player.x + Math.sin(cameraYaw) * 4.8, 0.4, state.worldBounds.w - 0.4),
+      1.25 - cameraPitch * 1.25,
+      clamp(player.z + Math.cos(cameraYaw) * 4.8, 0.4, state.worldBounds.h - 0.4)
+    );
   }
 
   function updateHud() {
@@ -1008,6 +1260,8 @@
     for (const o of state.objectives) if (!o.done) miniCtx.fillRect(o.x * sx - 2, o.z * sy - 2, 4, 4);
     miniCtx.fillStyle = '#ff4d6d';
     for (const g of state.guards) if (g.stun <= 0) miniCtx.fillRect(g.x * sx - 2, g.z * sy - 2, 4, 4);
+    miniCtx.fillStyle = '#ffffff';
+    for (const c of state.civilians) miniCtx.fillRect(c.x * sx - 1.5, c.z * sy - 1.5, 3, 3);
     miniCtx.fillStyle = '#7fffd4';
     miniCtx.fillRect(player.x * sx - 3, player.z * sy - 3, 6, 6);
   }

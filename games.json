@@ -1,207 +1,150 @@
-﻿{
-    "title":  "OMENLY",
-    "tagline":  "A small arcade. Made by hand. Play in a browser.",
-    "games":  [
-                  {
-                      "id":  "echo",
-                      "title":  "ECHO",
-                      "blurb":  "The lights are gone. Ping to listen â€” run when they ping back. Five things hunt you in the dark: a stalker, a howler, a hunter, a tank, a whisperer. Manage your battery, descend deeper.",
-                      "tags":  [
-                                   "arcade",
-                                   "survival",
-                                   "sonar",
-                                   "horror",
-                                   "stealth"
-                               ],
-                      "minutes":  10,
-                      "accent":  "#7fffd4",
-                      "background":  "linear-gradient(135deg, #000507, #001a1f)",
-                      "cover":  "echo/cover.svg",
-                      "href":  "echo/",
-                      "controls":  "WASD + click + F/X (desktop) Â· joystick + PING + FLASH/EMP (mobile)"
-                  },
-                  {
-                      "id":  "porchlight",
-                      "title":  "Porchlight",
-                      "blurb":  "One Halloween. Six porches. A small American street, a half-full pillowcase, and a few small choices that stay with you.",
-                      "tags":  [
-                                   "narrative",
-                                   "halloween",
-                                   "americana",
-                                   "cozy"
-                               ],
-                      "minutes":  15,
-                      "accent":  "#ff8c42",
-                      "background":  "linear-gradient(135deg, #050817, #1a0e22)",
-                      "cover":  "porchlight/cover.svg",
-                      "href":  "porchlight/",
-                      "controls":  "click / tap"
-                  },
-                  {
-                      "id":  "ashenreach",
-                      "title":  "Ashenreach",
-                      "blurb":  "Twenty-three years after the fire, you walk back into the valley. Five names to find. One altar. Things in the dark that did not leave.",
-                      "tags":  [
-                                   "adventure",
-                                   "action",
-                                   "exploration",
-                                   "combat",
-                                   "atmospheric"
-                               ],
-                      "minutes":  35,
-                      "accent":  "#ff7a2e",
-                      "background":  "linear-gradient(135deg, #15101e, #3a1a14)",
-                      "cover":  "ashenreach/cover.svg",
-                      "href":  "ashenreach/",
-                      "controls":  "WASD + J/K/E (desktop) Â· joystick + buttons (mobile)"
-                  },
-                  {
-                      "id":  "stillhunt",
-                      "title":  "Stillhunt",
-                      "blurb":  "Dawn on the ridge. Mist in the hollows. Six shells in your pocket. A bolt-action hunting shooter in pseudo-3D.",
-                      "tags":  [
-                                   "arcade",
-                                   "shooter",
-                                   "3d",
-                                   "hunting",
-                                   "atmospheric"
-                               ],
-                      "minutes":  5,
-                      "accent":  "#ffc878",
-                      "background":  "linear-gradient(135deg, #0a0d18, #2b2418)",
-                      "cover":  "stillhunt/cover.svg",
-                      "href":  "stillhunt/",
-                      "controls":  "mouse + click / SPACE (desktop) Â· joystick + FIRE button (mobile)"
-                  },
-                  {
-                      "id":  "blacksite",
-                      "title":  "Blacksite",
-                      "blurb":  "A CIA ghost in a hostile facility. Steal the intel. Stay out of the cones. Crouch and they don\u0027t hear you â€” usually.",
-                      "tags":  [
-                                   "arcade",
-                                   "stealth",
-                                   "spy",
-                                   "top-down"
-                               ],
-                      "minutes":  8,
-                      "accent":  "#7fffd4",
-                      "background":  "linear-gradient(135deg, #050a08, #0e1f17)",
-                      "cover":  "blacksite/cover.svg",
-                      "href":  "blacksite/",
-                      "controls":  "WASD + SHIFT (desktop) Â· joystick + CROUCH (mobile)"
-                  },
-                  {
-                      "id":  "gaymesbond",
-                      "title":  "Gaymes Bond",
-                      "blurb":  "A big third-person 3D stealth comedy spy parody. Sneak through ten ridiculous missions, dodge guards, cameras, and lasers, then use darts, glitter decoys, smoke, charm, hacks, and velvet takedowns to steal classified nonsense.",
-                      "tags":  [
-                                   "stealth",
-                                   "spy",
-                                   "comedy",
-                                   "parody",
-                                   "3d",
-                                   "third-person",
-                                   "campaign"
-                               ],
-                      "minutes":  25,
-                      "accent":  "#ff5fa2",
-                      "background":  "linear-gradient(135deg, #060814, #251038)",
-                      "cover":  "gaymesbond/cover.svg",
-                      "href":  "gaymesbond/",
-                      "controls":  "WASD + mouse + SHIFT + E/F/Q/SPACE/C/M (desktop) Â· joystick + look + ACT/DART/DECOY/SMOKE/CHARM (mobile)"
-                  },
-                  {
-                      "id":  "raccoon",
-                      "title":  "Raccoon",
-                      "blurb":  "Raccoon City opens into a larger staged survival route: knife and katana stealth kills, guns, rockets, jungle trails, animals, waterfalls, vehicles, fuse-relay puzzles, and a cinematic extraction.",
-                      "tags":  [
-                                   "3d",
-                                   "survival horror",
-                                   "shooter",
-                                   "zombies",
-                                   "third-person"
-                               ],
-                      "minutes":  10,
-                      "accent":  "#c8503a",
-                      "background":  "linear-gradient(135deg, #0a0604, #2a1208)",
-                      "cover":  "raccoon/cover.svg",
-                      "href":  "raccoon/",
-                      "controls":  "WASD + mouse + click + F stealth/use (desktop) Â· joystick + look + FIRE/USE (mobile)"
-                  },
-                  {
-                      "id":  "dinorift",
-                      "title":  "Dinorift",
-                      "blurb":  "A bloody dinosaur survival shooter in a jungle rift. Fight raptors, armored trikes, spitters, and tyrant rex waves with spear launcher, rifle, grenades, and rockets.",
-                      "tags":  [
-                                   "arcade",
-                                   "shooter",
-                                   "survival",
-                                   "dinosaurs",
-                                   "action"
-                               ],
-                      "minutes":  8,
-                      "accent":  "#f04a3a",
-                      "background":  "linear-gradient(135deg, #07110c, #3a2414)",
-                      "cover":  "dinorift/cover.svg",
-                      "href":  "dinorift/",
-                      "controls":  "WASD + mouse + click + 1-4 + R (desktop) Â· dual sticks + FIRE + weapon buttons (mobile)"
-                  },
-                  {
-                      "id":  "siteline",
-                      "title":  "Siteline",
-                      "blurb":  "A 5v5 bombsite FPS in your browser. Three maps, 28 buyable weapons, knife, armor, HE, flash, smoke, molotov, incendiary, decoy, room-code multiplayer up to 50 players, or solo CPU bots.",
-                      "tags":  [
-                                   "3d",
-                                   "fps",
-                                   "shooter",
-                                   "multiplayer",
-                                   "tactical",
-                                   "counter-strike"
-                               ],
-                      "minutes":  20,
-                      "accent":  "#ffd089",
-                      "background":  "linear-gradient(135deg, #1a0f08, #3a2614)",
-                      "cover":  "siteline/cover.svg",
-                      "href":  "siteline/",
-                      "controls":  "WASD + mouse + click + R/G/F/B (desktop) Â· joystick + FIRE + side buttons (mobile)"
-                  },
-                  {
-                      "id":  "girth",
-                      "title":  "Girth",
-                      "blurb":  "A ridiculous first-person garden gag: rub the magic log, build friction, splash water, grow flowers, and get the big fertile payoff.",
-                      "tags":  [
-                                   "arcade",
-                                   "comedy",
-                                   "clicker",
-                                   "gardening",
-                                   "gag"
-                               ],
-                      "minutes":  3,
-                      "accent":  "#9bd877",
-                      "background":  "linear-gradient(135deg, #102018, #1d5b52)",
-                      "cover":  "girth/cover.svg",
-                      "href":  "girth/",
-                      "controls":  "drag left-right / tap and rub (mobile) Â· A/D or arrows (desktop)"
-                  },
-                  
-                  
-                  {
-                      "id":  "nocturne",
-                      "title":  "Nocturne",
-                      "blurb":  "A pixel-noir whodunit. One apartment floor. Five neighbours. One killer. Knock, listen, watch what they do through the keyhole. Lock three tells in your notebook and accuse before dawn.",
-                      "tags":  [
-                                   "narrative",
-                                   "mystery",
-                                   "detective",
-                                   "noir",
-                                   "pixel"
-                               ],
-                      "minutes":  5,
-                      "accent":  "#9fd9ff",
-                      "background":  "linear-gradient(135deg, #04060e, #0a1228)",
-                      "cover":  "nocturne/cover.svg",
-                      "href":  "nocturne/",
-                      "controls":  "click / tap"
-                  }
-              ]
+{
+  "title": "OMENLY",
+  "tagline": "A small arcade. Made by hand. Play in a browser.",
+  "games": [
+    {
+      "id": "echo",
+      "title": "ECHO",
+      "blurb": "The lights are gone. Ping to listen and run when they ping back. Five things hunt you in the dark: a stalker, a howler, a hunter, a tank, a whisperer. Manage your battery, descend deeper.",
+      "tags": ["arcade", "survival", "sonar", "horror", "stealth"],
+      "minutes": 10,
+      "accent": "#7fffd4",
+      "background": "linear-gradient(135deg, #000507, #001a1f)",
+      "cover": "echo/cover.svg",
+      "href": "echo/",
+      "controls": "WASD + click + F/X (desktop) - joystick + PING + FLASH/EMP (mobile)"
+    },
+    {
+      "id": "porchlight",
+      "title": "Porchlight",
+      "blurb": "One Halloween. Six porches. A small American street, a half-full pillowcase, and a few small choices that stay with you.",
+      "tags": ["narrative", "halloween", "americana", "cozy"],
+      "minutes": 15,
+      "accent": "#ff8c42",
+      "background": "linear-gradient(135deg, #050817, #1a0e22)",
+      "cover": "porchlight/cover.svg",
+      "href": "porchlight/",
+      "controls": "click / tap"
+    },
+    {
+      "id": "ashenreach",
+      "title": "Ashenreach",
+      "blurb": "Twenty-three years after the fire, you walk back into the valley. Five names to find. One altar. Things in the dark that did not leave.",
+      "tags": ["adventure", "action", "exploration", "combat", "atmospheric"],
+      "minutes": 35,
+      "accent": "#ff7a2e",
+      "background": "linear-gradient(135deg, #15101e, #3a1a14)",
+      "cover": "ashenreach/cover.svg",
+      "href": "ashenreach/",
+      "controls": "WASD + J/K/E (desktop) - joystick + buttons (mobile)"
+    },
+    {
+      "id": "stillhunt",
+      "title": "Stillhunt",
+      "blurb": "Dawn on the ridge. Mist in the hollows. Six shells in your pocket. A bolt-action hunting shooter in pseudo-3D.",
+      "tags": ["arcade", "shooter", "3d", "hunting", "atmospheric"],
+      "minutes": 5,
+      "accent": "#ffc878",
+      "background": "linear-gradient(135deg, #0a0d18, #2b2418)",
+      "cover": "stillhunt/cover.svg",
+      "href": "stillhunt/",
+      "controls": "mouse + click / SPACE (desktop) - joystick + FIRE button (mobile)"
+    },
+    {
+      "id": "blacksite",
+      "title": "Blacksite",
+      "blurb": "A CIA ghost in a hostile facility. Steal the intel. Stay out of the cones. Crouch and they do not hear you, usually.",
+      "tags": ["arcade", "stealth", "spy", "top-down"],
+      "minutes": 8,
+      "accent": "#7fffd4",
+      "background": "linear-gradient(135deg, #050a08, #0e1f17)",
+      "cover": "blacksite/cover.svg",
+      "href": "blacksite/",
+      "controls": "WASD + SHIFT (desktop) - joystick + CROUCH (mobile)"
+    },
+    {
+      "id": "gaymesbond",
+      "title": "gaymesbond: last darkness",
+      "blurb": "A third-person 3D stealth comedy spy parody rebuilt around one large sunlit open-island mission. Blend through crowds, dodge guards, cameras, and lasers, then use darts, glitter decoys, smoke, charm, hacks, and velvet takedowns to steal classified nonsense.",
+      "tags": ["stealth", "spy", "comedy", "parody", "3d", "third-person", "open-world"],
+      "minutes": 25,
+      "accent": "#ff5fa2",
+      "background": "linear-gradient(135deg, #060814, #251038)",
+      "cover": "gaymesbond/cover.svg",
+      "href": "gaymesbond/",
+      "controls": "WASD + mouse + SHIFT + E/F/Q/SPACE/C/M (desktop) - joystick + look + ACT/DART/DECOY/SMOKE/CHARM (mobile)"
+    },
+    {
+      "id": "raccoon",
+      "title": "Raccoon",
+      "blurb": "Raccoon City opens into a larger staged survival route: knife and katana stealth kills, guns, rockets, jungle trails, animals, waterfalls, vehicles, fuse-relay puzzles, and a cinematic extraction.",
+      "tags": ["3d", "survival horror", "shooter", "zombies", "third-person"],
+      "minutes": 10,
+      "accent": "#c8503a",
+      "background": "linear-gradient(135deg, #0a0604, #2a1208)",
+      "cover": "raccoon/cover.svg",
+      "href": "raccoon/",
+      "controls": "WASD + mouse + click + F stealth/use (desktop) - joystick + look + FIRE/USE (mobile)"
+    },
+    {
+      "id": "dinorift",
+      "title": "Dinorift",
+      "blurb": "A bloody dinosaur survival shooter in a jungle rift. Fight raptors, armored trikes, spitters, and tyrant rex waves with spear launcher, rifle, grenades, and rockets.",
+      "tags": ["arcade", "shooter", "survival", "dinosaurs", "action"],
+      "minutes": 8,
+      "accent": "#f04a3a",
+      "background": "linear-gradient(135deg, #07110c, #3a2414)",
+      "cover": "dinorift/cover.svg",
+      "href": "dinorift/",
+      "controls": "WASD + mouse + click + 1-4 + R (desktop) - dual sticks + FIRE + weapon buttons (mobile)"
+    },
+    {
+      "id": "siteline",
+      "title": "Siteline",
+      "blurb": "A 5v5 bombsite FPS in your browser. Three maps, 28 buyable weapons, knife, armor, HE, flash, smoke, molotov, incendiary, decoy, room-code multiplayer up to 50 players, or solo CPU bots.",
+      "tags": ["3d", "fps", "shooter", "multiplayer", "tactical", "counter-strike"],
+      "minutes": 20,
+      "accent": "#ffd089",
+      "background": "linear-gradient(135deg, #1a0f08, #3a2614)",
+      "cover": "siteline/cover.svg",
+      "href": "siteline/",
+      "controls": "WASD + mouse + click + R/G/F/B (desktop) - joystick + FIRE + side buttons (mobile)"
+    },
+    {
+      "id": "girth",
+      "title": "Girth",
+      "blurb": "A ridiculous first-person garden gag: rub the magic log, build friction, splash water, grow flowers, and get the big fertile payoff.",
+      "tags": ["arcade", "comedy", "clicker", "gardening", "gag"],
+      "minutes": 3,
+      "accent": "#9bd877",
+      "background": "linear-gradient(135deg, #102018, #1d5b52)",
+      "cover": "girth/cover.svg",
+      "href": "girth/",
+      "controls": "drag left-right / tap and rub (mobile) - A/D or arrows (desktop)"
+    },
+    {
+      "id": "nocturne",
+      "title": "Nocturne",
+      "blurb": "A pixel-noir whodunit. One apartment floor. Five neighbours. One killer. Knock, listen, watch what they do through the keyhole. Lock three tells in your notebook and accuse before dawn.",
+      "tags": ["narrative", "mystery", "detective", "noir", "pixel"],
+      "minutes": 5,
+      "accent": "#9fd9ff",
+      "background": "linear-gradient(135deg, #04060e, #0a1228)",
+      "cover": "nocturne/cover.svg",
+      "href": "nocturne/",
+      "controls": "click / tap"
+    },
+    {
+      "id": "rentsim",
+      "title": "Rent Simulator",
+      "blurb": "A month-by-month apartment survival sim. Work shifts, juggle stress and energy, pay rent, negotiate, handle repairs, and learn that attacking the landlord brings police fast.",
+      "tags": ["simulation", "management", "comedy", "life", "choices"],
+      "minutes": 8,
+      "accent": "#f2c14e",
+      "background": "linear-gradient(135deg, #101512, #2c3020)",
+      "cover": "rentsim/cover.svg",
+      "href": "rentsim/",
+      "controls": "click / tap"
+    }
+  ]
 }
