@@ -91,6 +91,26 @@
                       "controls":  "WASD + SHIFT (desktop) Â· joystick + CROUCH (mobile)"
                   },
                   {
+                      "id":  "gaymesbond",
+                      "title":  "Gaymes Bond",
+                      "blurb":  "A big third-person 3D stealth comedy spy parody. Sneak through ten ridiculous missions, dodge guards, cameras, and lasers, then use darts, glitter decoys, smoke, charm, hacks, and velvet takedowns to steal classified nonsense.",
+                      "tags":  [
+                                   "stealth",
+                                   "spy",
+                                   "comedy",
+                                   "parody",
+                                   "3d",
+                                   "third-person",
+                                   "campaign"
+                               ],
+                      "minutes":  25,
+                      "accent":  "#ff5fa2",
+                      "background":  "linear-gradient(135deg, #060814, #251038)",
+                      "cover":  "gaymesbond/cover.svg",
+                      "href":  "gaymesbond/",
+                      "controls":  "WASD + mouse + SHIFT + E/F/Q/SPACE/C/M (desktop) Â· joystick + look + ACT/DART/DECOY/SMOKE/CHARM (mobile)"
+                  },
+                  {
                       "id":  "raccoon",
                       "title":  "Raccoon",
                       "blurb":  "Raccoon City opens into a larger staged survival route: knife and katana stealth kills, guns, rockets, jungle trails, animals, waterfalls, vehicles, fuse-relay puzzles, and a cinematic extraction.",

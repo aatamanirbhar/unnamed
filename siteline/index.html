@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Siteline — Free 5v5 Counter-Strike Style FPS in Browser · Multiplayer Shooter · No Download</title>
-<meta name="description" content="Play Siteline — a free 5v5 bombsite FPS in your browser. Three classic maps, 28 buyable weapons, knife, armor, and six grenade types including HE, flashbang, smoke, molotov, incendiary, and decoy. Paste a 6-character room code to play with friends — up to 50 players. No download, no signup.">
+<meta name="description" content="Play Siteline — a free 5v5 bombsite FPS in your browser. Three classic maps and six buy-menu weapon categories: shotguns, sub machine guns, rifles, snipers, handguns, and knives. Paste a 6-character room code to play with friends — up to 50 players. No download, no signup.">
 <meta name="keywords" content="browser shooter, browser fps, online fps, multiplayer shooter, counter strike browser, cs browser, free fps, free shooter game, no download shooter, 5v5 shooter, bombsite fps, tactical shooter browser, web shooter, html5 fps, three.js fps, dust 2 browser, ak47 game, multiplayer browser game, free online multiplayer, peer to peer fps, room code shooter, friends shooter, play with friends shooter, csgo browser, cs2 browser, mobile fps, mobile shooter, free pvp game">
 <meta name="author" content="Omenly">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
@@ -20,7 +20,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Omenly">
 <meta property="og:title" content="Siteline — Free 5v5 FPS in Your Browser · Multiplayer Counter-Strike Style Shooter">
-<meta property="og:description" content="Three maps. 28 weapons. Six grenade types. Paste a room code to play with friends — up to 50 players — or fight CPU bots solo. Free, no download.">
+<meta property="og:description" content="Three maps. Six weapon categories. Paste a room code to play with friends — up to 50 players — or fight CPU bots solo. Free, no download.">
 <meta property="og:url" content="https://omenly.vercel.app/siteline/">
 <meta property="og:image" content="https://omenly.vercel.app/siteline/cover.svg">
 <meta property="og:image:alt" content="Siteline bombsite shooter — desert map with crosshair">
@@ -28,7 +28,7 @@
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Siteline — Free Browser FPS · 5v5 Bombsite Shooter">
-<meta name="twitter:description" content="Office, dust, dust 2. Pistols, SMGs, rifles, snipers, shotguns, LMGs, armor, and six grenade types. Paste a code, fight friends.">
+<meta name="twitter:description" content="Office, dust, dust 2. Shotguns, SMGs, rifles, snipers, handguns, and knives. Paste a code, fight friends.">
 <meta name="twitter:image" content="https://omenly.vercel.app/siteline/cover.svg">
 <meta name="twitter:image:alt" content="Siteline cover art">
 
@@ -43,7 +43,7 @@
       "alternateName": ["Siteline FPS", "Siteline Browser Shooter", "Siteline 5v5"],
       "url": "https://omenly.vercel.app/siteline/",
       "image": "https://omenly.vercel.app/siteline/cover.svg",
-      "description": "Siteline is a free 5v5 bombsite first-person shooter that runs in any modern web browser. Three maps — office, dust, dust 2 — 28 buyable weapons, knife, armor, six grenade types, CPU bots with three difficulties, and peer-to-peer multiplayer via 6-character room codes supporting up to 50 players. Counter-Strike inspired tactical gameplay with no download, no install, and no signup.",
+      "description": "Siteline is a free 5v5 bombsite first-person shooter that runs in any modern web browser. Three maps — office, dust, dust 2 — six buy-menu weapon categories, CPU bots with three difficulties, and peer-to-peer multiplayer via 6-character room codes supporting up to 50 players. Counter-Strike inspired tactical gameplay with no download, no install, and no signup.",
       "genre": ["First-Person Shooter", "FPS", "Tactical Shooter", "Multiplayer Shooter", "Online Shooter", "Action", "3D", "Browser Game", "PvP", "Team-Based Shooter"],
       "keywords": "browser shooter, FPS, multiplayer, counter-strike style, bombsite, 5v5, dust 2, free online shooter, no download FPS",
       "playMode": ["SinglePlayer", "MultiPlayer", "CoOp"],
@@ -107,7 +107,7 @@
         {
           "@type": "Question",
           "name": "What weapons can I use?",
-          "acceptedAnswer": { "@type": "Answer", "text": "The buy menu has 28 weapons: pistols, SMGs, rifles, scoped rifles, snipers, shotguns, LMGs, plus a knife, armor, full ammo, and HE, flashbang, smoke, molotov, incendiary, and decoy grenades." }
+          "acceptedAnswer": { "@type": "Answer", "text": "The buy menu has six weapon categories: shotguns, sub machine guns, rifles, snipers, handguns, and knives." }
         },
         {
           "@type": "Question",
@@ -184,6 +184,8 @@
   #hud-tr .kd { font-size: 14px; color: #ffd089; text-shadow: 0 0 6px #ffd089; margin-bottom: 4px; }
   #hud-tr .roomcode { font-size: 11px; color: #ffd089; opacity: 0.6; }
   #voice-status.on { opacity: 1 !important; }
+  #voice-btn { position: fixed; top: max(52px, env(safe-area-inset-top, 0px) + 44px); left: max(14px, env(safe-area-inset-left, 0px) + 8px); z-index: 12; background: rgba(10,6,4,0.72); border: 1px solid rgba(184,224,112,0.75); color: #b8e070; padding: 7px 12px; font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 2px; cursor: pointer; pointer-events: auto; text-shadow: 0 0 6px rgba(184,224,112,0.45); }
+  #voice-btn:hover, #voice-btn.on { background: rgba(184,224,112,0.18); border-color: #b8e070; box-shadow: 0 0 10px rgba(184,224,112,0.35); }
 
   #killfeed { position: fixed; top: 90px; left: 14px; font-size: 11px; letter-spacing: 2px; z-index: 10; pointer-events: none; max-width: 320px; }
   #killfeed div { margin-bottom: 4px; background: rgba(10,6,4,0.55); padding: 4px 8px; border-left: 2px solid #ffd089; opacity: 0; transform: translateX(-6px); transition: all 0.3s; }
@@ -416,8 +418,8 @@
   <p>To play with friends, click <strong>HOST</strong> to generate a unique six-character <strong>room code</strong>. Share that code with anyone — Discord, text, voice, paste it anywhere. Your friends click <strong>JOIN</strong>, paste the code, and they are in. A single Siteline room supports up to <strong>50 simultaneous players</strong>. Connections are peer-to-peer over WebRTC, so there is no central server to wait for. If a friend cannot connect, empty slots are filled with <strong>CPU bots</strong> at your chosen difficulty.</p>
   <h2>Three classic-style maps: office, dust, and dust 2</h2>
   <p>Siteline ships with three handcrafted maps designed in the <strong>Counter-Strike tradition</strong>. The <strong>office</strong> is a tight indoor map with cubicles, server racks, and fluorescent lighting. <strong>Dust</strong> is a sun-drenched desert village with mudbrick walls and tower cover. <strong>Dust 2</strong> is the larger two-bombsite map every CS player remembers — long sightlines, mid catwalks, A and B sites at opposite corners. Each map has dynamic point lights, soft shadows, sun lighting, fog, and bombsite markers.</p>
-  <h2>28 weapons and six grenade types</h2>
-  <p>The buy menu covers pistols, SMGs, rifles, scoped rifles, snipers, shotguns, LMGs, armor, full ammo, and a knife. Grenades include <strong>HE</strong>, <strong>flashbang</strong>, <strong>smoke</strong>, <strong>molotov</strong>, <strong>incendiary</strong>, and <strong>decoy</strong> utility, each with distinct damage, line-of-sight, zoning, or bait behavior.</p>
+  <h2>Six weapon categories</h2>
+  <p>The buy menu covers shotguns, sub machine guns, rifles, snipers, handguns, and knives. Each weapon has different damage, recoil, accuracy, range, magazine size, fire rate, sound, and first-person model.</p>
   <h2>Solo mode with three bot difficulties</h2>
   <p>If you do not have friends online, play solo against <strong>CPU terrorists or counter-terrorists</strong>. Choose <strong>easy</strong>, <strong>medium</strong>, or <strong>hard</strong> bots. Hard bots react in 0.14 seconds, easy bots wander the map and miss. Team sizes are configurable: 3v3, 5v5, or 8v8 in solo, and up to 25v25 in multiplayer.</p>
   <h2>Counter-Strike inspired economy and round system</h2>
@@ -483,6 +485,7 @@
   <div class="roomcode" id="room-code-hud"></div>
 </div>
 <div id="voice-status" class="hidden" style="position:fixed;left:50%;top:max(52px,env(safe-area-inset-top,0px)+44px);transform:translateX(-50%);z-index:10;pointer-events:none;color:rgba(184,224,112,0.9);font-size:10px;letter-spacing:3px;text-shadow:0 0 8px rgba(184,224,112,0.55);opacity:0;transition:opacity 0.18s;">VOICE CONNECTING</div>
+<button id="voice-btn" class="hidden" type="button">VOICE OFF</button>
 
 <!-- Kill feed -->
 <div id="killfeed" class="hidden"></div>
@@ -508,7 +511,7 @@
   <div class="card">
     <div class="crown">— OMENLY · BOMBSITE FPS —</div>
     <h1>SITELINE</h1>
-    <p>FIVE ON FIVE. THREE MAPS. 28 WEAPONS. SIX GRENADE TYPES.<br>PLAY ALONE AGAINST BOTS, OR PASTE A CODE TO JOIN A FRIEND.</p>
+    <p>FIVE ON FIVE. THREE MAPS. SIX WEAPON CATEGORIES.<br>PLAY ALONE AGAINST BOTS, OR PASTE A CODE TO JOIN A FRIEND.</p>
     <div class="row">
       <button id="btn-solo">SOLO · VS BOTS</button>
       <button id="btn-host">HOST · GET A CODE</button>
@@ -555,13 +558,6 @@
       <button class="size-pick" data-size="5">5 v 5</button>
       <button class="size-pick" data-size="8">8 v 8</button>
     </div>
-    <p style="opacity:0.7;">STARTING LOADOUT</p>
-    <div class="loadout-grid">
-      <button class="loadout-pick" data-loadout="rifle">RIFLEMAN<small>AK-47 / M4A1 + HE + FLASH</small></button>
-      <button class="loadout-pick" data-loadout="sniper">SNIPER<small>AWP + DEAGLE + SMOKE</small></button>
-      <button class="loadout-pick" data-loadout="shotgun">BREACHER<small>XM1014 + P250 + FLASH</small></button>
-      <button class="loadout-pick" data-loadout="rush">RUSH<small>P90 + TEC-9 + MOLOTOV</small></button>
-    </div>
     <div class="row">
       <button id="btn-solo-start">START MATCH</button>
       <button id="btn-solo-back" style="opacity:0.7;">BACK</button>
@@ -597,13 +593,6 @@
       <button class="size-pick-h" data-size="5">5</button>
       <button class="size-pick-h" data-size="10">10</button>
       <button class="size-pick-h" data-size="25">25</button>
-    </div>
-    <p style="opacity:0.7;">HOST STARTING LOADOUT</p>
-    <div class="loadout-grid">
-      <button class="loadout-pick-h" data-loadout="rifle">RIFLEMAN<small>AK-47 / M4A1 + HE + FLASH</small></button>
-      <button class="loadout-pick-h" data-loadout="sniper">SNIPER<small>AWP + DEAGLE + SMOKE</small></button>
-      <button class="loadout-pick-h" data-loadout="shotgun">BREACHER<small>XM1014 + P250 + FLASH</small></button>
-      <button class="loadout-pick-h" data-loadout="rush">RUSH<small>P90 + TEC-9 + MOLOTOV</small></button>
     </div>
     <div class="lobby-list" id="host-lobby"></div>
     <div class="row">
@@ -661,7 +650,7 @@
   <h3>BUY MENU</h3>
   <div class="buy-grid" id="buy-grid"><!-- populated from WEAPONS at runtime --></div>
   <div class="footer"><span>MONEY: $ <span id="buy-money">0</span></span><span id="buy-timer">5</span></div>
-  <div class="hint">B TO CLOSE · 28 WEAPONS · 6 GRENADE TYPES</div>
+  <div class="hint">B TO CLOSE · 6 WEAPON CATEGORIES</div>
 </div>
 
 <!-- ── SCOREBOARD (TAB) ── -->
@@ -738,6 +727,7 @@
   const killfeed = $('killfeed');
   const minimap = $('minimap');
   const voiceStatus = $('voice-status');
+  const voiceBtn = $('voice-btn');
   const miniC = $('minimap-c');
   const miniCtx = miniC.getContext('2d');
   const touchControls = $('touch-controls');
@@ -850,12 +840,18 @@
   }
   const SFX = {
     pistol: () => { tone(720, 0.04, 'square', 0.18); noise(0.06, 0.12, 1400); tone(160, 0.07, 'sawtooth', 0.12); },
+    deagle: () => { tone(330, 0.055, 'square', 0.28); noise(0.11, 0.24, 650); tone(85, 0.12, 'sawtooth', 0.22); },
     ak:     () => { tone(420, 0.04, 'square', 0.22); noise(0.05, 0.16, 700); tone(120, 0.09, 'sawtooth', 0.18); },
     bullpup:() => { tone(520, 0.03, 'square', 0.18); noise(0.04, 0.13, 1000); tone(140, 0.06, 'sawtooth', 0.14); },
     smg:    () => { tone(620, 0.03, 'square', 0.16); noise(0.04, 0.10, 1200); tone(150, 0.05, 'sawtooth', 0.12); },
+    smg_heavy:() => { tone(480, 0.035, 'square', 0.18); noise(0.05, 0.13, 900); tone(120, 0.06, 'sawtooth', 0.13); },
     sniper: () => { tone(280, 0.08, 'square', 0.26); noise(0.16, 0.30, 400); tone(60, 0.30, 'sawtooth', 0.28); },
+    autosniper:() => { tone(360, 0.045, 'square', 0.22); noise(0.08, 0.20, 520); tone(80, 0.13, 'sawtooth', 0.20); },
     shotgun:() => { noise(0.18, 0.42, 200); tone(90, 0.18, 'sawtooth', 0.30); tone(220, 0.10, 'square', 0.18); },
+    shotgun_auto:() => { noise(0.13, 0.34, 280); tone(120, 0.13, 'sawtooth', 0.24); tone(260, 0.07, 'square', 0.14); },
     knife:  () => { tone(1200, 0.04, 'sine', 0.10); tone(700, 0.04, 'sine', 0.08); },
+    knife_heavy:() => { tone(820, 0.05, 'triangle', 0.13); tone(380, 0.07, 'sine', 0.09); },
+    knife_flip:() => { tone(1500, 0.025, 'sine', 0.09); setTimeout(() => tone(980, 0.035, 'triangle', 0.08), 35); },
     reload: () => { tone(420, 0.05, 'square', 0.08); setTimeout(() => tone(330, 0.05, 'square', 0.08), 110); setTimeout(() => tone(520, 0.06, 'square', 0.1), 280); },
     empty:  () => { tone(180, 0.04, 'square', 0.08); },
     hit:    () => { tone(440, 0.05, 'square', 0.08); },
@@ -875,7 +871,7 @@
   // Uses the Web Speech API. Throttled so a chaotic firefight doesn't talk over
   // itself. Each `kind` is a pool of lines; we pick at random.
   const TAC_LINES = {
-    push:          ["Go go go!", "Push, push, push!", "Move up!", "On me!"],
+    push:          ["Move out!", "Push forward!", "Advance!", "On me!"],
     fire_in_hole:  ["Fire in the hole!", "Frag out!", "Grenade out!"],
     flashbang:     ["Flashbang out!", "Flash, flash, flash!", "Cover your eyes!"],
     smoke:         ["Smoke out!", "Smoking off!", "Throwing smoke."],
@@ -887,19 +883,20 @@
     hostage_save:  ["Hostage secured.", "I've got the hostage.", "Civilian safe!"],
     plant:         ["Bomb planted!", "C4's planted, hold the site!"],
     defuse:        ["Defusing!", "Cover me, I'm on it!"],
-    win:           ["Hooyah!", "Mission complete!", "That's how we do it!"],
-    lose:          ["We lost it.", "Hostiles took the site.", "Damn it."]
+    win:           ["Mission complete.", "Good work.", "Area secure."],
+    lose:          ["We lost it.", "Hostiles took the site.", "Regroup."]
   };
   const tts = { voice: null };
   function pickTacVoice() {
     if (!('speechSynthesis' in window)) return null;
     const voices = speechSynthesis.getVoices();
-    const prefer = [/Daniel/i, /Microsoft David/i, /Microsoft Mark/i, /Alex/i, /Google US English/i, /en-US/i, /English/i];
+    const avoid = /(zira|susan|samantha|victoria|karen|female|woman|girl)/i;
+    const prefer = [/Microsoft David/i, /Microsoft Mark/i, /Daniel/i, /Alex/i, /Google US English/i, /en-US/i, /English/i];
     for (const re of prefer) {
-      const v = voices.find(v => re.test(v.name) || re.test(v.lang));
+      const v = voices.find(v => (re.test(v.name) || re.test(v.lang)) && !avoid.test(v.name));
       if (v) return v;
     }
-    return voices[0] || null;
+    return voices.find(v => !avoid.test(v.name)) || null;
   }
   if ('speechSynthesis' in window) {
     speechSynthesis.onvoiceschanged = () => { tts.voice = pickTacVoice(); };
@@ -915,8 +912,9 @@
     if ('speechSynthesis' in window) {
       try {
         const u = new SpeechSynthesisUtterance(line);
-        if (tts.voice) u.voice = tts.voice;
-        u.rate = 1.05; u.pitch = 0.85; u.volume = 0.95;
+        if (!tts.voice) return;
+        u.voice = tts.voice;
+        u.rate = 0.96; u.pitch = 0.62; u.volume = 0.95;
         speechSynthesis.speak(u);
       } catch (_) {}
     }
@@ -955,31 +953,32 @@
     const me = players.get(localId);
     if (!me || !WEAPONS[me.weap] || WEAPONS[me.weap].family !== 'sniper') setScopeState(false);
   }
+  function showVoiceStatus(msg, ms = 1800) {
+    voiceStatus.classList.remove('hidden');
+    voiceStatus.textContent = msg;
+    voiceStatus.classList.add('on');
+    setTimeout(() => { voiceStatus.classList.remove('on'); voiceStatus.classList.add('hidden'); }, ms);
+  }
   async function ensureVoice() {
     if (voiceAttempted) return voiceStream;
     voiceAttempted = true;
     if (typeof Peer === 'undefined') {
       voiceSuppressed = true;
-      voiceStatus.classList.remove('hidden');
-      voiceStatus.textContent = 'VOICE UNAVAILABLE';
-      voiceStatus.classList.add('on');
-      setTimeout(() => { voiceStatus.classList.remove('on'); voiceStatus.classList.add('hidden'); }, 2400);
+      showVoiceStatus('VOICE UNAVAILABLE', 2400);
       return null;
     }
     try {
       voiceStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, video: false });
       voiceReady = true;
-      voiceStatus.classList.remove('hidden');
-      voiceStatus.textContent = 'VOICE READY';
-      voiceStatus.classList.add('on');
-      setTimeout(() => { voiceStatus.classList.remove('on'); voiceStatus.classList.add('hidden'); }, 1800);
+      voiceBtn?.classList.add('on');
+      if (voiceBtn) voiceBtn.textContent = 'VOICE ON';
+      showVoiceStatus('VOICE READY', 1800);
       return voiceStream;
     } catch (_) {
       voiceSuppressed = true;
-      voiceStatus.classList.remove('hidden');
-      voiceStatus.textContent = 'VOICE BLOCKED';
-      voiceStatus.classList.add('on');
-      setTimeout(() => { voiceStatus.classList.remove('on'); voiceStatus.classList.add('hidden'); }, 2400);
+      voiceBtn?.classList.remove('on');
+      if (voiceBtn) voiceBtn.textContent = 'VOICE OFF';
+      showVoiceStatus('VOICE BLOCKED', 2400);
       return null;
     }
   }
@@ -988,6 +987,34 @@
       try { call.close(); } catch (_) {}
     }
     voiceCalls.clear();
+  }
+  function stopVoice() {
+    closeVoiceCalls();
+    if (voiceStream) {
+      for (const track of voiceStream.getTracks()) track.stop();
+    }
+    voiceStream = null;
+    voiceReady = false;
+    voiceAttempted = false;
+    voiceSuppressed = false;
+    voiceBtn?.classList.remove('on');
+    if (voiceBtn) voiceBtn.textContent = 'VOICE OFF';
+    document.querySelectorAll('audio[id^="voice-"]').forEach(a => a.remove());
+    showVoiceStatus('VOICE OFF', 1200);
+  }
+  async function setVoiceEnabled(on) {
+    if (!on) { stopVoice(); return; }
+    if (!isMultiplayer) {
+      showVoiceStatus('VOICE IS MULTIPLAYER ONLY', 1800);
+      return;
+    }
+    const stream = await ensureVoice();
+    if (!stream) return;
+    if (isHost) {
+      for (const c of conns.values()) await startVoiceCall(c.conn);
+    } else if (myConn) {
+      await startVoiceCall(myConn);
+    }
   }
   async function startVoiceCall(conn) {
     if (!conn || voiceSuppressed) return;
@@ -1531,6 +1558,37 @@
   Object.assign(WEAPONS.bullpup, { dmg: 30, cycle: 0.085, recoil: 0.11, spread: 0.010, range: 125, reload: 2.5, moveMul: 0.96 });
   Object.assign(WEAPONS.ak47, { dmg: 36, cycle: 0.105, recoil: 0.22, spread: 0.024, range: 120, reload: 2.45, moveMul: 0.94 });
   Object.assign(WEAPONS.awp, { dmg: 128, cycle: 1.55, recoil: 0.38, spread: 0.0015, range: 220, reload: 3.0, moveMul: 0.82, scopedSpread: 0.0002 });
+  Object.assign(WEAPONS.knife, { name: 'TACTICAL KNIFE', skin: 'tactical', sfx: 'knife' });
+  WEAPONS.bayonet = { name: 'BAYONET', slot: 1, mag: 1, reserve: 0, cycle: 0.58, dmg: 68, spread: 0.001, recoil: 0.00, autofire: false, range: 2.25, headMul: 2.0, sfx: 'knife_heavy', cost: 450, family: 'knife', stealthMul: 4.3, skin: 'bayonet' };
+  WEAPONS.flipknife = { name: 'FLIP KNIFE', slot: 1, mag: 1, reserve: 0, cycle: 0.38, dmg: 48, spread: 0.001, recoil: 0.00, autofire: false, range: 1.9, headMul: 2.0, sfx: 'knife_flip', cost: 600, family: 'knife', stealthMul: 4.1, skin: 'flip', spin: true };
+  Object.assign(WEAPONS.pistol, { mag: 17, reserve: 51, dmg: 22, spread: 0.009, recoil: 0.05, range: 78, reload: 1.55, moveMul: 1.05, skin: 'glock' });
+  Object.assign(WEAPONS.usp, { dmg: 30, cycle: 0.20, spread: 0.006, recoil: 0.065, range: 92, reload: 1.7, moveMul: 1.03, skin: 'usp' });
+  Object.assign(WEAPONS.p250, { dmg: 26, cycle: 0.16, spread: 0.008, recoil: 0.07, range: 82, reload: 1.6, moveMul: 1.05, skin: 'p250' });
+  Object.assign(WEAPONS.tec9, { dmg: 23, cycle: 0.105, spread: 0.018, recoil: 0.09, range: 74, reload: 1.85, moveMul: 1.08, skin: 'tec9' });
+  Object.assign(WEAPONS.deagle, { name: 'DESERT EAGLE', dmg: 78, cycle: 0.34, recoil: 0.30, spread: 0.014, range: 115, reload: 1.9, moveMul: 1.0, sfx: 'deagle', skin: 'deagle' });
+  Object.assign(WEAPONS.mac10, { family: 'smg', dmg: 20, cycle: 0.062, spread: 0.032, recoil: 0.085, range: 72, reload: 1.85, moveMul: 1.16, skin: 'mac10' });
+  Object.assign(WEAPONS.mp5, { family: 'smg', dmg: 23, cycle: 0.075, spread: 0.019, recoil: 0.075, range: 90, reload: 2.0, moveMul: 1.10, skin: 'mp5' });
+  Object.assign(WEAPONS.ump, { family: 'smg', dmg: 29, cycle: 0.095, spread: 0.021, recoil: 0.11, range: 88, reload: 2.1, moveMul: 1.05, sfx: 'smg_heavy', skin: 'ump' });
+  Object.assign(WEAPONS.p90, { family: 'smg', dmg: 20, cycle: 0.055, spread: 0.030, recoil: 0.075, range: 78, reload: 2.2, moveMul: 1.12, skin: 'p90' });
+  WEAPONS.mp7 = { name: 'MP7', slot: 2, mag: 40, reserve: 120, cycle: 0.064, dmg: 21, spread: 0.017, recoil: 0.065, autofire: true, range: 86, headMul: 4.0, sfx: 'smg', cost: 1700, family: 'smg', reload: 2.05, moveMul: 1.13, skin: 'mp7' };
+  Object.assign(WEAPONS.galil, { dmg: 28, cycle: 0.092, spread: 0.024, recoil: 0.14, range: 100, reload: 2.35, moveMul: 0.98, skin: 'galil' });
+  Object.assign(WEAPONS.famas, { dmg: 27, cycle: 0.088, spread: 0.018, recoil: 0.11, range: 104, reload: 2.25, moveMul: 0.99, sfx: 'bullpup', skin: 'famas' });
+  Object.assign(WEAPONS.m4a1, { dmg: 30, cycle: 0.09, spread: 0.014, recoil: 0.12, range: 116, reload: 2.35, moveMul: 0.96, sfx: 'bullpup', skin: 'm4a1' });
+  Object.assign(WEAPONS.bullpup, { skin: 'bullpup' });
+  Object.assign(WEAPONS.ssg, { dmg: 82, cycle: 1.15, spread: 0.0020, recoil: 0.25, reserve: 50, reload: 2.5, moveMul: 0.9, scopedSpread: 0.00035, skin: 'ssg' });
+  Object.assign(WEAPONS.awp, { skin: 'awp' });
+  Object.assign(WEAPONS.scar, { name: 'SCAR-20 AUTO', dmg: 56, cycle: 0.22, spread: 0.006, recoil: 0.18, autofire: true, range: 180, reload: 3.1, moveMul: 0.82, scopedSpread: 0.0010, sfx: 'autosniper', skin: 'scar' });
+  Object.assign(WEAPONS.nova, { dmg: 26, spread: 0.060, recoil: 0.24, range: 35, reload: 0.62, moveMul: 0.97, skin: 'nova' });
+  Object.assign(WEAPONS.mag7, { dmg: 32, reserve: 30, spread: 0.050, recoil: 0.22, range: 32, reload: 0.70, moveMul: 0.98, skin: 'mag7' });
+  Object.assign(WEAPONS.xm1014, { dmg: 18, spread: 0.075, recoil: 0.17, autofire: true, reload: 0.55, moveMul: 0.95, sfx: 'shotgun_auto', skin: 'xm1014' });
+  const BUY_GROUPS = [
+    ['Shotguns', ['nova', 'mag7', 'xm1014']],
+    ['Sub machine guns', ['mac10', 'mp5', 'ump', 'p90', 'mp7']],
+    ['Rifles', ['galil', 'famas', 'ak47', 'm4a1', 'bullpup']],
+    ['Snipers', ['ssg', 'awp', 'scar']],
+    ['Handguns', ['pistol', 'usp', 'p250', 'tec9', 'deagle']],
+    ['Knives', ['knife', 'bayonet', 'flipknife']]
+  ];
   const LOADOUTS = {
     rifle:   { slot1: 'pistol', slot2: 'ak47',   armor: 100, gren: { he: 1, flash: 1, smoke: 1 }, activeGren: 'he' },
     sniper:  { slot1: 'deagle', slot2: 'awp',    armor: 100, gren: { he: 1, smoke: 2, flash: 1 }, activeGren: 'smoke' },
@@ -1791,6 +1849,89 @@
       scope.position.set(0, 0.10, -0.15); gun.add(scope);
       gun.position.set(0, 0, -0.12);
     }
+    const accentMat = new THREE.MeshStandardMaterial({ color: cols.secondary, roughness: 0.55, metalness: 0.35, emissive: cols.secondary, emissiveIntensity: 0.12 });
+    const tanMat = new THREE.MeshStandardMaterial({ color: 0x6a4a2c, roughness: 0.75, metalness: 0.1 });
+    const skinName = w?.skin || p.weap;
+    function addPart(mesh, x, y, z, rx = 0, ry = 0, rz = 0) {
+      mesh.position.set(x, y, z);
+      mesh.rotation.set(rx, ry, rz);
+      gun.add(mesh);
+      return mesh;
+    }
+    if (fam === 'pistol') {
+      if (skinName === 'deagle') {
+        gun.scale.set(1.28, 1.22, 1.25);
+        addPart(new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.035, 0.24), accentMat), 0, 0.105, -0.06);
+        addPart(new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.22, 10), metal), 0, 0.04, -0.38, Math.PI / 2);
+      } else if (skinName === 'usp') {
+        addPart(new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.28, 10), metal), 0, 0.04, -0.38, Math.PI / 2);
+      } else if (skinName === 'tec9') {
+        gun.scale.set(0.95, 1.0, 1.28);
+        addPart(new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.20, 0.10), metal), 0, -0.18, -0.05, 0.25, 0, 0);
+        addPart(new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.05, 0.20), accentMat), 0, 0.105, -0.08);
+      } else if (skinName === 'p250') {
+        gun.scale.set(0.95, 0.95, 0.92);
+        addPart(new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.03, 0.18), accentMat), 0, 0.095, -0.02);
+      }
+    } else if (fam === 'knife') {
+      if (skinName === 'bayonet') {
+        gun.scale.set(0.95, 1.1, 1.35);
+        addPart(new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.035, 0.08), metal), 0, 0, -0.02);
+      } else if (skinName === 'flip') {
+        gun.scale.set(0.9, 0.9, 1.08);
+        addPart(new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.07, 10), accentMat), 0, 0.005, 0.0, Math.PI / 2);
+        gun.rotation.z = 0.35;
+      }
+    } else if (fam === 'sniper') {
+      if (skinName === 'awp') {
+        gun.scale.set(1.12, 1.08, 1.18);
+        addPart(new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.40, 14), accentMat), 0, 0.135, -0.25, Math.PI / 2);
+      } else if (skinName === 'scar') {
+        gun.scale.set(1.06, 1.0, 1.02);
+        addPart(new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.16, 0.14), metal), 0, -0.12, -0.04, 0.18, 0, 0);
+        addPart(new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.035, 0.28), accentMat), 0, 0.08, -0.56);
+      } else if (skinName === 'ssg') {
+        gun.scale.set(0.9, 0.95, 0.98);
+        addPart(new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.28, 12), accentMat), 0, 0.12, -0.25, Math.PI / 2);
+      }
+    } else if (fam === 'shotgun') {
+      if (skinName === 'nova') {
+        addPart(new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.42, 10), tanMat), 0, -0.035, -0.44, Math.PI / 2);
+      } else if (skinName === 'mag7') {
+        gun.scale.set(1.08, 1.0, 0.82);
+        addPart(new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.20, 0.11), metal), 0, -0.14, -0.02, 0.15, 0, 0);
+      } else if (skinName === 'xm1014') {
+        gun.scale.set(1.0, 0.96, 1.08);
+        addPart(new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.026, 0.34, 10), accentMat), 0, -0.04, -0.44, Math.PI / 2);
+      }
+    } else if (fam === 'smg') {
+      gun.scale.set(0.92, 0.92, skinName === 'p90' ? 0.86 : 0.76);
+      if (skinName === 'p90') {
+        addPart(new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.08, 0.30), accentMat), 0, 0.08, -0.16);
+      } else if (skinName === 'ump') {
+        addPart(new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.20, 0.12), metal), 0, -0.17, -0.03, 0.16, 0, 0);
+      } else if (skinName === 'mp7') {
+        addPart(new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.14, 0.07), metal), 0, -0.16, -0.16);
+        addPart(new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.07, 0.18), accentMat), 0, 0.10, -0.12);
+      } else if (skinName === 'mac10') {
+        addPart(new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.22, 0.08), metal), 0, -0.18, 0.06);
+      }
+    } else if (fam === 'rifle') {
+      if (skinName === 'ak47') {
+        addPart(new THREE.Mesh(new THREE.BoxGeometry(0.065, 0.19, 0.11), metal), 0, -0.13, -0.06, 0.28, 0, 0);
+      } else if (skinName === 'm4a1') {
+        addPart(new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.026, 0.24, 10), metal), 0, 0.05, -0.72, Math.PI / 2);
+        addPart(new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.04, 0.22), accentMat), 0, 0.105, -0.23);
+      } else if (skinName === 'famas') {
+        addPart(new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.035, 0.36), accentMat), 0, 0.13, -0.14);
+      } else if (skinName === 'galil') {
+        gun.scale.set(1.0, 1.0, 1.08);
+        addPart(new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.11, 0.32), tanMat), 0, -0.03, 0.20);
+      } else if (skinName === 'bullpup') {
+        addPart(new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.17, 0.11), metal), 0, -0.12, 0.18);
+        addPart(new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 0.20), accentMat), 0, 0.105, -0.17);
+      }
+    }
     hand.add(gun);
     viewmodel.gun = gun;
     viewmodel.hand = hand;
@@ -2010,6 +2151,48 @@
       dirZ = dz / ll + (Math.random() - 0.5) * sp;
       const dl = Math.hypot(dirX, dirY, dirZ) || 1;
       dirX /= dl; dirY /= dl; dirZ /= dl;
+    }
+    if (w.pellets && w.pellets > 1) {
+      const baseDir = new THREE.Vector3(dirX, dirY, dirZ).normalize();
+      let hitPoint = null;
+      let anyPlayerHit = false;
+      let nearestT = Infinity;
+      for (let i = 0; i < w.pellets; i++) {
+        const pd = baseDir.clone();
+        const sp = w.spread * (i === 0 ? 0.25 : 1);
+        pd.x += (Math.random() - 0.5) * sp;
+        pd.y += (Math.random() - 0.5) * sp;
+        pd.z += (Math.random() - 0.5) * sp;
+        pd.normalize();
+        const hit = rayCastWorld(originX, originY, originZ, pd.x, pd.y, pd.z, w.range, p);
+        if (!hit) continue;
+        if (hit.t < nearestT) {
+          nearestT = hit.t;
+          hitPoint = hit.point;
+        }
+        if (hit.player) {
+          anyPlayerHit = true;
+          const dmg = Math.floor(w.dmg * (hit.head ? w.headMul : 1));
+          dealDamage(hit.player, dmg, p, w.name, hit.head);
+        }
+      }
+      const fromV = new THREE.Vector3(originX, originY, originZ);
+      let visualFrom = fromV;
+      if (p.isLocal && viewmodel.gun) {
+        visualFrom = new THREE.Vector3();
+        viewmodel.gun.getWorldPosition(visualFrom);
+      } else if (p.mesh && p.mesh.rifle) {
+        visualFrom = new THREE.Vector3();
+        p.mesh.rifle.getWorldPosition(visualFrom);
+      }
+      const toV = hitPoint || new THREE.Vector3(originX + dirX * w.range, originY + dirY * w.range, originZ + dirZ * w.range);
+      fireTracer(visualFrom, toV);
+      if (p.isLocal && anyPlayerHit) {
+        hitMarker.classList.add('on');
+        setTimeout(() => hitMarker.classList.remove('on'), 130);
+      }
+      if (p.isLocal) setHud(p);
+      return;
     }
     // raycast: against players + colliders
     const hit = rayCastWorld(originX, originY, originZ, dirX, dirY, dirZ, w.range, p);
@@ -2833,38 +3016,16 @@
   // ── BUY ──
   let buyOpen = false;
   function buyGroupForWeapon(w) {
-    if (w.family === 'pistol') return 'Pistols';
-    if (w.family === 'sniper') return 'Snipers / scoped rifles';
-    if (w.family === 'shotgun') return 'Shotguns';
-    if (w.name === 'M249' || w.name === 'NEGEV') return 'LMGs';
-    if (['MP5', 'MAC-10', 'UMP-45', 'P90'].includes(w.name)) return 'SMGs';
-    return 'Rifles';
+    return BUY_GROUPS.find(([, keys]) => keys.some(key => WEAPONS[key] === w))?.[0] || 'Rifles';
   }
   function buyCatalog() {
-    // Order: pistols, smgs, rifles, snipers, shotguns, lmgs, then grenades/utility.
-    const order = [
-      'pistol','usp','p250','fiveseven','dualies','tec9','cz75','deagle',
-      'mp5','mac10','ump','p90',
-      'famas','galil','ak47','m4a1','bullpup','aug','sg553',
-      'ssg','awp','scar','g3sg1',
-      'nova','mag7','xm1014',
-      'm249','negev'
-    ];
     const list = [];
-    for (const k of order) {
-      const w = WEAPONS[k]; if (!w) continue;
-      list.push({ key: k, label: w.name, cost: w.cost, kind: 'weap', group: buyGroupForWeapon(w) });
+    for (const [group, keys] of BUY_GROUPS) {
+      for (const k of keys) {
+        const w = WEAPONS[k]; if (!w) continue;
+        list.push({ key: k, label: w.name, cost: w.cost, kind: 'weap', group });
+      }
     }
-    list.push(
-      { key: 'armor',   label: 'KEVLAR',     cost: ITEM_COSTS.armor,   kind: 'item', group: 'Utility / grenades' },
-      { key: 'he',      label: 'HE GRENADE', cost: ITEM_COSTS.he,      kind: 'gren', group: 'Utility / grenades' },
-      { key: 'flash',   label: 'FLASHBANG',  cost: ITEM_COSTS.flash,   kind: 'gren', group: 'Utility / grenades' },
-      { key: 'smoke',   label: 'SMOKE',      cost: ITEM_COSTS.smoke,   kind: 'gren', group: 'Utility / grenades' },
-      { key: 'molotov', label: 'MOLOTOV',    cost: ITEM_COSTS.molotov, kind: 'gren', group: 'Utility / grenades' },
-      { key: 'incgren', label: 'INCENDIARY', cost: ITEM_COSTS.incgren, kind: 'gren', group: 'Utility / grenades' },
-      { key: 'decoy',   label: 'DECOY',      cost: ITEM_COSTS.decoy,   kind: 'gren', group: 'Utility / grenades' },
-      { key: 'ammo',    label: 'FULL AMMO',  cost: ITEM_COSTS.ammo,    kind: 'item', group: 'Utility / grenades' }
-    );
     return list;
   }
   function ensureBuyGrid() {
@@ -2922,7 +3083,9 @@
       if (p.money < w.cost) return;
       p.money -= w.cost;
       saveAmmoForSlot(p);
-      if (w.slot === 1) p.slot1 = item; else p.slot2 = item;
+      if (w.family === 'knife') p.melee = item;
+      else if (w.slot === 1) p.slot1 = item;
+      else p.slot2 = item;
       switchWeapon(p, item);
       p.ammoBySlot[p.weap] = { ammo: w.mag, reserve: w.reserve };
       p.ammo = w.mag; p.reserve = w.reserve;
@@ -3193,10 +3356,12 @@
           botDifficulty,
           gameMode: gameMode || hostPicks.mode || 'bomb'
         });
+        if (voiceReady) startVoiceCall(conn);
         updateHostLobby();
       });
     });
     peer.on('call', async call => {
+      if (!voiceReady) { try { call.close(); } catch (_) {} return; }
       const stream = await ensureVoice();
       if (!stream) { try { call.close(); } catch (_) {} return; }
       call.answer(stream);
@@ -3280,7 +3445,7 @@
       myConn = conn;
       conn.on('open', () => {
         conn.send({ t: 'join', name: ($('nick').value || 'PLAYER').slice(0, 12) });
-        startVoiceCall(conn);
+        if (voiceReady) startVoiceCall(conn);
         if (resolved) return; resolved = true;
         onReady(true, code);
       });
@@ -3298,6 +3463,7 @@
       }, 8000);
     });
     peer.on('call', async call => {
+      if (!voiceReady) { try { call.close(); } catch (_) {} return; }
       const stream = await ensureVoice();
       if (!stream) { try { call.close(); } catch (_) {} return; }
       call.answer(stream);
@@ -3353,7 +3519,7 @@
         // local: only accept HP and money/armor
         p.hp = ps.hp; p.armor = ps.armor; p.money = ps.money;
         p.ammo = ps.ammo; p.reserve = ps.reserve;
-        p.weap = ps.weap; p.slot1 = ps.slot1; p.slot2 = ps.slot2;
+        p.weap = ps.weap; p.slot1 = ps.slot1; p.slot2 = ps.slot2; p.melee = ps.melee || p.melee;
         p.gren = ps.gren; p.kills = ps.kills; p.deaths = ps.deaths;
         p.alive = ps.alive;
         setHud(p);
@@ -3422,7 +3588,7 @@
         id: p.id, name: p.name, team: p.team,
         x: p.x, z: p.z, yaw: p.yaw, pitch: p.pitch,
         hp: p.hp, armor: p.armor, money: p.money,
-        weap: p.weap, slot1: p.slot1, slot2: p.slot2,
+        weap: p.weap, slot1: p.slot1, slot2: p.slot2, melee: p.melee,
         ammo: p.ammo, reserve: p.reserve, gren: p.gren,
         kills: p.kills, deaths: p.deaths, alive: p.alive
       });
@@ -3512,6 +3678,7 @@
     minimap.classList.remove('hidden');
     crosshair.classList.remove('hidden');
     chatEl.classList.remove('hidden');
+    voiceBtn?.classList.remove('hidden');
     if (gameMode === 'hostage') $('hostage-hud').classList.remove('hidden');
     else $('hostage-hud').classList.add('hidden');
   }
@@ -3527,8 +3694,6 @@
   document.querySelectorAll('.size-pick-h').forEach(b => b.addEventListener('click', () => { hostPicks.size = +b.dataset.size; markSelected('.size-pick-h', b); }));
   document.querySelectorAll('.mode-pick').forEach(b => b.addEventListener('click', () => { soloPicks.mode = b.dataset.mode; markSelected('.mode-pick', b); }));
   document.querySelectorAll('.mode-pick-h').forEach(b => b.addEventListener('click', () => { hostPicks.mode = b.dataset.mode; markSelected('.mode-pick-h', b); }));
-  document.querySelectorAll('.loadout-pick').forEach(b => b.addEventListener('click', () => { soloPicks.loadout = b.dataset.loadout; markSelected('.loadout-pick', b); }));
-  document.querySelectorAll('.loadout-pick-h').forEach(b => b.addEventListener('click', () => { hostPicks.loadout = b.dataset.loadout; markSelected('.loadout-pick-h', b); }));
   function markSelected(sel, btn) {
     document.querySelectorAll(sel).forEach(b => b.classList.remove('sel'));
     btn.classList.add('sel');
@@ -3544,8 +3709,6 @@
     document.querySelector('.size-pick-h[data-size="5"]')?.classList.add('sel');
     document.querySelector('.mode-pick[data-mode="bomb"]')?.classList.add('sel');
     document.querySelector('.mode-pick-h[data-mode="bomb"]')?.classList.add('sel');
-    document.querySelector('.loadout-pick[data-loadout="rifle"]')?.classList.add('sel');
-    document.querySelector('.loadout-pick-h[data-loadout="rifle"]')?.classList.add('sel');
   }, 50);
 
   $('btn-solo').addEventListener('click', () => { ensureAudio(); hideAllPanels(['solo-setup']); soloPanel.classList.remove('hidden'); });
@@ -3569,8 +3732,9 @@
   $('btn-howto').addEventListener('click', () => { hideAllPanels(['howto']); howtoPanel.classList.remove('hidden'); });
   $('btn-howto-back').addEventListener('click', () => { hideAllPanels(['menu']); menuPanel.classList.remove('hidden'); });
   $('btn-solo-back').addEventListener('click', () => { hideAllPanels(['menu']); menuPanel.classList.remove('hidden'); });
-  $('btn-host-back').addEventListener('click', () => { closeVoiceCalls(); try { peer?.destroy(); } catch (_) {} hostCode = null; hideAllPanels(['menu']); menuPanel.classList.remove('hidden'); });
-  $('btn-join-back').addEventListener('click', () => { closeVoiceCalls(); try { peer?.destroy(); } catch (_) {} hideAllPanels(['menu']); menuPanel.classList.remove('hidden'); });
+  $('btn-host-back').addEventListener('click', () => { stopVoice(); try { peer?.destroy(); } catch (_) {} hostCode = null; hideAllPanels(['menu']); menuPanel.classList.remove('hidden'); });
+  $('btn-join-back').addEventListener('click', () => { stopVoice(); try { peer?.destroy(); } catch (_) {} hideAllPanels(['menu']); menuPanel.classList.remove('hidden'); });
+  voiceBtn?.addEventListener('click', () => setVoiceEnabled(!voiceReady));
 
   $('btn-solo-start').addEventListener('click', () => startSolo());
   $('btn-host-start').addEventListener('click', () => startHost());
@@ -3579,7 +3743,6 @@
 
   function doJoin() {
     const code = ($('join-code').value || '').trim().toUpperCase();
-    ensureVoice();
     if (code.length < 4) { $('join-err').textContent = 'CODE MUST BE 4–6 CHARS'; return; }
     $('join-err').textContent = '';
     $('join-status').textContent = 'CONNECTING TO ' + code + '…';
@@ -3617,7 +3780,6 @@
   }
   function startHost() {
     if (!hostCode) { $('host-err').textContent = 'NO CODE YET — WAIT FOR HOST INIT'; return; }
-    ensureVoice();
     isMultiplayer = true; isHost = true;
     botDifficulty = hostPicks.diff;
     perSide = hostPicks.size;
@@ -3771,6 +3933,7 @@
       viewmodel.hand.rotation.y = ry * 0.5;
     }
     if (viewmodel.kickT > 0) viewmodel.kickT -= dt;
+    if (viewmodel.gun && WEAPONS[me.weap]?.spin) viewmodel.gun.rotation.z += dt * 7.5;
     // muzzle visual fade
     if (viewmodel.flash) {
       viewmodel.flash.material.opacity *= Math.pow(0.001, dt);
@@ -4017,6 +4180,10 @@
       updateLocal(dt, nowSec);
       // autofire for held mouse
       if (me.alive && mouseDown && pointerLocked) {
+        const w = WEAPONS[me.weap];
+        if (w && w.autofire) tryFire(me, nowSec, true);
+      }
+      if (me.alive && touchFireDown) {
         const w = WEAPONS[me.weap];
         if (w && w.autofire) tryFire(me, nowSec, true);
       }

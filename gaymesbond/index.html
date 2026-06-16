@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Gaymes Bond - stealth spy parody comedy game in your browser</title>
+<meta name="description" content="Play Gaymes Bond, a big third-person 3D stealth comedy spy parody in your browser. Sneak through many missions, dodge guards, hack cameras, disable lasers, deploy glitter decoys, smoke bombs, charm gadgets, and escape with absurd classified loot.">
+<meta name="keywords" content="browser stealth game, spy parody game, comedy stealth game, third person stealth, 3d stealth game, gaymes bond, james bond parody, browser spy game, free stealth browser game, no download game">
+<meta name="author" content="Omenly">
+<meta name="theme-color" content="#0b1324">
+<link rel="canonical" href="https://omenly.vercel.app/gaymesbond/">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Omenly">
+<meta property="og:title" content="Gaymes Bond - stealth spy parody comedy">
+<meta property="og:description" content="A campy third-person 3D stealth spy parody with many missions, gadgets, guards, cameras, lasers, and classified nonsense.">
+<meta property="og:url" content="https://omenly.vercel.app/gaymesbond/">
+<meta property="og:image" content="https://omenly.vercel.app/gaymesbond/cover.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Gaymes Bond - browser stealth comedy">
+<meta name="twitter:description" content="Sneak, hack, charm, decoy, and escape through many absurd third-person spy missions.">
+<meta name="twitter:image" content="https://omenly.vercel.app/gaymesbond/cover.svg">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "Gaymes Bond",
+  "url": "https://omenly.vercel.app/gaymesbond/",
+  "description": "Gaymes Bond is a third-person 3D stealth comedy spy parody playable in a browser, with many missions, guard patrols, cameras, lasers, gadgets, objectives, and slapstick espionage.",
+  "genre": ["Stealth", "Comedy", "Spy", "Action", "Third-Person", "3D", "Browser Game"],
+  "playMode": "SinglePlayer",
+  "gamePlatform": ["Web browser", "HTML5", "WebGL", "Desktop", "Mobile"],
+  "applicationCategory": "Game",
+  "operatingSystem": "Web",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "publisher": { "@type": "Organization", "name": "Omenly" }
+}
+</script>
+<link rel="stylesheet" href="omenly.css">
+<script>
+  window.OMENLY_CONFIG = {
+    game: 'gaymesbond',
+    gameTitle: 'Gaymes Bond',
+    price: 3,
+    isHub: false,
+    donateUrl: 'https://www.paypal.me/vikas117/3',
+    allAccessDonateUrl: 'https://www.paypal.me/vikas117/10',
+    theme: { accent: '#ff5fa2' }
+  };
+</script>
+<script src="omenly.js" defer></script>
+<script defer src="/_vercel/insights/script.js"></script>
+<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+<style>
+  :root {
+    --bg: #060814;
+    --panel: rgba(8, 12, 26, 0.86);
+    --ink: #f8eef7;
+    --dim: rgba(248, 238, 247, 0.62);
+    --line: rgba(248, 238, 247, 0.16);
+    --pink: #ff5fa2;
+    --gold: #ffd166;
+    --aqua: #7fffd4;
+    --red: #ff4d6d;
+    --blue: #7db7ff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); color: var(--ink); font-family: "Courier New", monospace; touch-action: none; overscroll-behavior: none; }
+  body { position: fixed; inset: 0; }
+  #game { display: block; width: 100vw; height: 100vh; height: 100dvh; background: #060814; cursor: crosshair; }
+  .hidden { display: none !important; }
+
+  #title, #briefing, #gameover, #complete {
+    position: fixed; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center;
+    padding: 22px; background: radial-gradient(ellipse at 50% 35%, rgba(255,95,162,0.14), transparent 58%),
+    linear-gradient(145deg, rgba(4,5,12,0.95), rgba(13,20,40,0.96));
+  }
+  .card {
+    width: min(820px, 96vw); max-height: calc(100dvh - 28px); overflow-y: auto;
+    background: rgba(8, 12, 26, 0.92); border: 1px solid rgba(255,95,162,0.36);
+    box-shadow: 0 28px 90px rgba(0,0,0,0.58), 0 0 36px rgba(255,95,162,0.12);
+    padding: 28px; text-align: center;
+  }
+  .kicker { color: var(--gold); letter-spacing: 7px; font-size: 10px; text-transform: uppercase; margin-bottom: 12px; }
+  h1 { font-family: Georgia, serif; font-style: italic; font-size: clamp(42px, 9vw, 82px); letter-spacing: 5px; color: var(--ink); text-shadow: 0 0 22px rgba(255,95,162,0.45); line-height: 0.95; }
+  h1 span { color: var(--pink); }
+  h2 { font-family: Georgia, serif; font-style: italic; font-size: clamp(26px, 5vw, 42px); letter-spacing: 4px; color: var(--pink); margin-bottom: 10px; }
+  .sub { margin: 14px auto 20px; max-width: 680px; color: var(--dim); line-height: 1.65; font-size: 13px; letter-spacing: 1px; }
+  .btn {
+    background: transparent; color: var(--pink); border: 1px solid var(--pink); padding: 12px 20px;
+    font: 12px "Courier New", monospace; letter-spacing: 3px; cursor: pointer; text-transform: uppercase;
+    transition: background 0.18s, color 0.18s, box-shadow 0.18s, transform 0.18s;
+  }
+  .btn:hover, .btn:focus-visible, .btn:active { background: var(--pink); color: #080c1a; box-shadow: 0 0 18px rgba(255,95,162,0.65); outline: none; transform: translateY(-1px); }
+  .btn.secondary { border-color: var(--aqua); color: var(--aqua); }
+  .btn.secondary:hover, .btn.secondary:focus-visible, .btn.secondary:active { background: var(--aqua); color: #061015; box-shadow: 0 0 18px rgba(127,255,212,0.52); }
+  .row { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+  .mission-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 18px 0 22px; text-align: left; }
+  .mission-list div { border: 1px solid var(--line); padding: 10px; background: rgba(255,255,255,0.025); min-height: 72px; }
+  .mission-list strong { color: var(--gold); display: block; letter-spacing: 2px; font-size: 11px; margin-bottom: 5px; }
+  .mission-list small { color: var(--dim); line-height: 1.45; display: block; }
+  .brief-lines { text-align: left; margin: 16px 0 20px; display: grid; gap: 8px; }
+  .brief-lines div { padding: 10px 12px; border-left: 2px solid var(--pink); background: rgba(255,95,162,0.045); color: var(--dim); line-height: 1.5; }
+
+  #hud { position: fixed; left: 14px; top: 14px; z-index: 10; pointer-events: none; display: grid; gap: 7px; min-width: 260px; }
+  .hudbox { background: var(--panel); border: 1px solid var(--line); padding: 9px 11px; box-shadow: 0 10px 30px rgba(0,0,0,0.28); }
+  #missionName { color: var(--pink); font-weight: bold; letter-spacing: 3px; font-size: 12px; }
+  #hudStats { font-size: 11px; letter-spacing: 2px; color: var(--dim); line-height: 1.7; }
+  #hudStats b { color: var(--aqua); font-weight: normal; }
+  #objectives { display: grid; gap: 5px; font-size: 11px; line-height: 1.35; }
+  #objectives div { color: var(--dim); }
+  #objectives .done { color: var(--aqua); text-decoration: line-through; }
+  #alertMeter { height: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16); margin-top: 6px; }
+  #alertFill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--aqua), var(--gold), var(--red)); box-shadow: 0 0 12px rgba(255,77,109,0.45); transition: width 0.08s linear; }
+  #rightHud { position: fixed; top: 14px; right: 14px; z-index: 10; pointer-events: none; width: min(360px, 44vw); }
+  #comms { background: var(--panel); border: 1px solid rgba(255,209,102,0.26); padding: 10px 12px; min-height: 52px; color: var(--gold); font-size: 12px; line-height: 1.45; box-shadow: 0 10px 30px rgba(0,0,0,0.28); }
+  #toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 15; pointer-events: none; padding: 9px 15px; background: rgba(8,12,26,0.9); border: 1px solid rgba(127,255,212,0.45); color: var(--aqua); font-size: 11px; letter-spacing: 2px; opacity: 0; transition: opacity 0.16s; text-align: center; max-width: min(620px, 92vw); }
+  #toast.on { opacity: 1; }
+  #interact { position: fixed; left: 50%; top: 58%; transform: translate(-50%, -50%); z-index: 12; pointer-events: none; color: var(--aqua); border: 1px solid rgba(127,255,212,0.55); background: rgba(4,8,16,0.82); padding: 7px 11px; letter-spacing: 3px; font-size: 11px; opacity: 0; transition: opacity 0.12s; }
+  #interact.on { opacity: 1; }
+  #minimapWrap { position: fixed; right: 14px; bottom: 86px; width: 178px; height: 132px; z-index: 9; border: 1px solid rgba(127,255,212,0.35); background: rgba(4,8,16,0.75); opacity: 0; pointer-events: none; }
+  #minimapWrap.on { opacity: 1; }
+  #minimap { width: 100%; height: 100%; }
+  #donate { position: fixed; bottom: 16px; right: 16px; z-index: 31; }
+  #donate a { display: inline-block; padding: 8px 13px; border: 1px solid var(--pink); color: var(--pink); text-decoration: none; background: rgba(8,12,26,0.72); font-size: 10px; letter-spacing: 3px; }
+  #donate a:hover { background: var(--pink); color: #080c1a; }
+  [data-omenly-ad] { position: fixed; left: 50%; bottom: 62px; transform: translateX(-50%); z-index: 8; width: min(728px, 92vw); min-height: 1px; pointer-events: auto; }
+
+  #touch { position: fixed; inset: 0; z-index: 20; pointer-events: none; display: none; }
+  body.touch #touch { display: block; }
+  #stick { position: absolute; left: max(24px, env(safe-area-inset-left)); bottom: max(76px, env(safe-area-inset-bottom) + 62px); width: 134px; height: 134px; border-radius: 50%; border: 2px solid rgba(127,255,212,0.38); background: rgba(127,255,212,0.055); pointer-events: auto; touch-action: none; }
+  #knob { position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%; background: rgba(127,255,212,0.2); border: 2px solid var(--aqua); box-shadow: 0 0 14px rgba(127,255,212,0.55); }
+  #touchBtns { position: absolute; right: max(22px, env(safe-area-inset-right)); bottom: max(86px, env(safe-area-inset-bottom) + 72px); display: grid; grid-template-columns: repeat(2, 78px); gap: 7px; pointer-events: auto; }
+  #touchBtns button { min-height: 46px; background: rgba(8,12,26,0.78); color: var(--aqua); border: 1px solid rgba(127,255,212,0.58); font: 10px "Courier New", monospace; letter-spacing: 2px; }
+  #touchBtns button.hot { color: var(--pink); border-color: rgba(255,95,162,0.7); }
+  #touchBtns button.on { background: rgba(127,255,212,0.22); }
+  #lookPad { position: absolute; right: max(22px, env(safe-area-inset-right)); top: max(88px, env(safe-area-inset-top) + 30px); width: 132px; height: 132px; border-radius: 50%; border: 2px solid rgba(255,95,162,0.32); background: rgba(255,95,162,0.06); pointer-events: auto; touch-action: none; }
+  #lookKnob { position: absolute; left: 50%; top: 50%; width: 52px; height: 52px; margin: -26px 0 0 -26px; border-radius: 50%; background: rgba(255,95,162,0.18); border: 2px solid var(--pink); box-shadow: 0 0 14px rgba(255,95,162,0.5); }
+  #centerHint { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 14px; height: 14px; border: 1px solid rgba(255,255,255,0.75); border-radius: 50%; z-index: 11; pointer-events: none; box-shadow: 0 0 8px rgba(255,255,255,0.24); }
+  #centerHint::before, #centerHint::after { content: ''; position: absolute; background: rgba(255,255,255,0.72); }
+  #centerHint::before { left: 50%; top: -7px; width: 1px; height: 28px; transform: translateX(-50%); }
+  #centerHint::after { top: 50%; left: -7px; height: 1px; width: 28px; transform: translateY(-50%); }
+  #lockHint { position: fixed; left: 50%; top: calc(50% + 28px); transform: translateX(-50%); z-index: 11; pointer-events: none; color: rgba(248,238,247,0.78); font-size: 10px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.9; }
+
+  @media (max-width: 680px) {
+    .card { padding: 20px 14px; }
+    .mission-list { grid-template-columns: 1fr; }
+    #hud { min-width: 0; width: calc(100vw - 28px); }
+    #rightHud { top: auto; bottom: 16px; left: 14px; right: auto; width: calc(100vw - 170px); }
+    #comms { display: none; }
+    #minimapWrap { display: none; }
+    #donate { display: none; }
+    #centerHint, #lockHint { display: none; }
+  }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div id="hud" class="hidden">
+  <div class="hudbox">
+    <div id="missionName">MISSION</div>
+    <div id="hudStats"></div>
+    <div id="alertMeter"><div id="alertFill"></div></div>
+  </div>
+  <div class="hudbox"><div id="objectives"></div></div>
+</div>
+<div id="rightHud" class="hidden"><div id="comms"></div></div>
+<div id="interact">E TO INTERACT</div>
+<div id="toast"></div>
+<div id="minimapWrap"><canvas id="minimap" width="356" height="264"></canvas></div>
+<div id="centerHint"></div>
+<div id="lockHint" class="hidden">CLICK TO LOCK CAMERA</div>
+
+<div id="title">
+  <div class="card">
+    <div class="kicker">OMENLY PRESENTS - A VERY LEGALLY DISTINCT SPY FARCE</div>
+    <h1>GAYMES <span>BOND</span></h1>
+    <p class="sub">He is licensed to slay the room, misplace microfilm, flirt with danger, and leave every villain mildly confused. A stealth comedy campaign with guards, cameras, lasers, gadgets, disguises, and many ridiculous missions.</p>
+    <div class="mission-list" id="missionPreview"></div>
+    <div class="row">
+      <button id="startBtn" class="btn">Start Campaign</button>
+      <button id="skipBtn" class="btn secondary">Mission Select</button>
+    </div>
+    <p class="sub">Desktop: click to lock the third-person camera, mouse look, WASD move, SHIFT crouch, E interact, F dart, Q decoy, SPACE smoke, C charm, M minimap. Mobile: left stick move, right stick look, action buttons.</p>
+    <div data-omenly-ad style="margin-top:18px;"></div>
+  </div>
+</div>
+
+<div id="briefing" class="hidden">
+  <div class="card">
+    <div class="kicker" id="briefKicker">MISSION BRIEFING</div>
+    <h2 id="briefTitle"></h2>
+    <p class="sub" id="briefText"></p>
+    <div class="brief-lines" id="briefList"></div>
+    <div class="row">
+      <button id="briefStart" class="btn">Infiltrate</button>
+      <button id="briefBack" class="btn secondary">Back</button>
+    </div>
+  </div>
+</div>
+
+<div id="gameover" class="hidden">
+  <div class="card">
+    <div class="kicker">COVER BLOWN</div>
+    <h2 id="overTitle">MISSION FAILED</h2>
+    <p class="sub" id="overText"></p>
+    <div class="row">
+      <button id="retryBtn" class="btn">Retry Mission</button>
+      <button id="menuBtn" class="btn secondary">Menu</button>
+    </div>
+  </div>
+</div>
+
+<div id="complete" class="hidden">
+  <div class="card">
+    <div class="kicker">MISSION ACCOMPLISHED</div>
+    <h2 id="completeTitle">ESCAPE CLEAN</h2>
+    <p class="sub" id="completeText"></p>
+    <div class="row">
+      <button id="nextBtn" class="btn">Next Mission</button>
+      <button id="menuBtn2" class="btn secondary">Menu</button>
+    </div>
+  </div>
+</div>
+
+<div id="touch">
+  <div id="stick"><div id="knob"></div></div>
+  <div id="lookPad"><div id="lookKnob"></div></div>
+  <div id="touchBtns">
+    <button id="tbAct" class="hot">ACT</button>
+    <button id="tbCrouch">CROUCH</button>
+    <button id="tbDart">DART</button>
+    <button id="tbDecoy">DECOY</button>
+    <button id="tbSmoke">SMOKE</button>
+    <button id="tbCharm">CHARM</button>
+  </div>
+</div>
+
+<div id="donate"><a href="https://www.paypal.me/vikas117/3" target="_blank" rel="noopener" data-omenly-cta>SUPPORT</a></div>
+
+<script type="text/plain" id="legacy2d-source">
+(() => {
+  'use strict';
+
+  const $ = id => document.getElementById(id);
+  const canvas = $('game');
+  const ctx = canvas.getContext('2d');
+  const mini = $('minimap');
+  const miniCtx = mini.getContext('2d');
+  const hud = $('hud');
+  const rightHud = $('rightHud');
+  const title = $('title');
+  const briefing = $('briefing');
+  const gameover = $('gameover');
+  const complete = $('complete');
+  const interact = $('interact');
+  const toastEl = $('toast');
+  const minimapWrap = $('minimapWrap');
+  const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0 || matchMedia('(pointer: coarse)').matches;
+  if (isTouch) document.body.classList.add('touch');
+
+  let W = 1, H = 1, dpr = 1;
+  function resize() {
+    const vv = window.visualViewport;
+    W = Math.round(vv ? vv.width : innerWidth);
+    H = Math.round(vv ? vv.height : innerHeight);
+    dpr = Math.min(devicePixelRatio || 1, 2);
+    canvas.width = Math.max(1, Math.floor(W * dpr));
+    canvas.height = Math.max(1, Math.floor(H * dpr));
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  addEventListener('resize', resize);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', resize);
+  resize();
+
+  const MISSIONS = [
+    {
+      name: 'Tuxedo Optional', place: 'Velvet Embassy Gala', palette: ['#151827', '#2d1730', '#ff5fa2'],
+      brief: 'Recover the guest list before the ambassador notices everyone is wearing the same tiny sunglasses.',
+      ops: ['Steal the rhinestone guest list.', 'Hack the coat-check terminal.', 'Exit through the conservatory before the jazz trio loops again.'],
+      w: 1500, h: 980, start: [120, 820], exit: [1390, 120, 84, 92],
+      objectives: [[610, 190, 'Guest list', 'A guest list written in invisible ink and very visible glitter.'], [1210, 730, 'Coat-check terminal', 'You delete your name and add five aliases named Trevor.']],
+      guards: [[[250, 190], [710, 190], [710, 480], [250, 480]], [[910, 720], [1280, 720], [1280, 420], [930, 420]], [[420, 780], [920, 780]]],
+      cameras: [[1130, 210, 1.7], [760, 620, -1.1]], lasers: [[810, 95, 810, 330], [1120, 610, 1370, 610]],
+      walls: [[0,0,1500,34],[0,946,1500,34],[0,0,34,980],[1466,0,34,980],[250,330,620,28],[1010,330,300,28],[250,610,480,28],[900,610,470,28],[520,94,28,236],[520,638,28,218]]
+    },
+    {
+      name: 'Thunderballroom', place: 'Subterranean Disco Vault', palette: ['#101526', '#221040', '#7fffd4'],
+      brief: 'A villain has hidden launch codes inside a mirror ball. Obviously.',
+      ops: ['Swap the mirror-ball microfilm.', 'Disable two laser amplifiers.', 'Escape through the DJ booth while looking casual.'],
+      w: 1660, h: 1080, start: [120, 960], exit: [1510, 100, 92, 100],
+      objectives: [[820, 520, 'Mirror-ball microfilm', 'You swap it for a receipt from a suspiciously expensive brunch.'], [390, 260, 'Laser amp A', 'The bass line loses 40 percent menace.'], [1280, 820, 'Laser amp B', 'The villain will notice when the fog machine starts complimenting people.']],
+      guards: [[[260, 860], [650, 860], [650, 600], [260, 600]], [[900, 210], [1340, 210], [1340, 520], [900, 520]], [[1120, 920], [1460, 920], [1460, 680], [1120, 680]], [[660, 420], [1000, 420]]],
+      cameras: [[500, 180, 1.1], [1130, 610, 2.8], [1420, 360, 2.2]], lasers: [[760, 120, 760, 940], [940, 120, 940, 940], [1080, 650, 1510, 650]],
+      walls: [[0,0,1660,34],[0,1046,1660,34],[0,0,34,1080],[1626,0,34,1080],[230,350,430,28],[860,350,510,28],[230,705,330,28],[760,705,360,28],[1330,705,180,28],[700,160,28,300],[700,640,28,260],[1180,160,28,280]]
+    },
+    {
+      name: 'Dr. No Thank You', place: 'Polite Volcano Spa', palette: ['#180d14', '#3a1710', '#ffd166'],
+      brief: 'Dr. No Thank You threatens the world with mineral water that is almost room temperature.',
+      ops: ['Steal the lava-safe towel cipher.', 'Sabotage the spa thermostat.', 'Leave before anyone offers cucumber water.'],
+      w: 1760, h: 1120, start: [110, 1000], exit: [1600, 950, 92, 92],
+      objectives: [[420, 230, 'Towel cipher', 'Every towel says CONFIDENTIAL in tiny stitching.'], [930, 560, 'Thermostat', 'You set the evil volcano to pleasantly warm.'], [1410, 300, 'Mineral plan', 'The plan is mostly spa coupons.']],
+      guards: [[[250, 260], [650, 260], [650, 520], [250, 520]], [[850, 210], [1360, 210], [1360, 520], [850, 520]], [[1050, 900], [1510, 900], [1510, 640], [1050, 640]], [[520, 900], [820, 760], [520, 620], [260, 760]]],
+      cameras: [[720, 120, 1.4], [1220, 690, -2.8], [1500, 500, 2.9]], lasers: [[780, 420, 1160, 420], [1210, 600, 1210, 1010], [340, 720, 820, 720]],
+      walls: [[0,0,1760,34],[0,1086,1760,34],[0,0,34,1120],[1726,0,34,1120],[210,380,520,30],[920,380,570,30],[210,640,340,30],[730,640,300,30],[1250,640,260,30],[600,130,30,250],[600,700,30,260],[1080,130,30,320],[1080,760,30,270]]
+    },
+    {
+      name: 'Gold Lame Forever', place: 'Auction House of Bad Taste', palette: ['#16110a', '#3a2a12', '#ffd166'],
+      brief: 'The priceless gold tuxedo has been weaponized. Nobody asked how.',
+      ops: ['Photograph the gold tuxedo.', 'Pocket the auction paddle.', 'Hack the display plinth.', 'Exit through the gift shop.'],
+      w: 1720, h: 1060, start: [120, 900], exit: [1540, 120, 96, 96],
+      objectives: [[820, 220, 'Gold tuxedo photo', 'The camera refuses to focus out of principle.'], [420, 760, 'Auction paddle', 'You are now bidder 007.5.'], [1310, 650, 'Display plinth', 'The plinth admits everything was overpriced.']],
+      guards: [[[250, 160], [650, 160], [650, 420], [250, 420]], [[880, 760], [1380, 760], [1380, 410], [880, 410]], [[500, 900], [1050, 900]], [[1300, 240], [1560, 240], [1560, 530], [1300, 530]]],
+      cameras: [[1020, 150, 1.8], [330, 560, -0.2], [1460, 820, -2.4]], lasers: [[740, 100, 740, 500], [1160, 330, 1160, 900], [360, 610, 700, 610]],
+      walls: [[0,0,1720,34],[0,1026,1720,34],[0,0,34,1060],[1686,0,34,1060],[210,300,480,28],[870,300,600,28],[210,590,340,28],[730,590,390,28],[1320,590,210,28],[570,120,28,200],[570,620,28,260],[1230,120,28,260],[1230,720,28,220]]
+    },
+    {
+      name: 'Live and Let Dye', place: 'Underground Hair Dye Lab', palette: ['#161020', '#2c1232', '#ff4d6d'],
+      brief: 'A criminal stylist is tinting satellites mauve. Stop the rinse cycle.',
+      ops: ['Steal the formula.', 'Switch the dye vats to lavender-neutral.', 'Rescue the confused chemist.', 'Escape through shipping.'],
+      w: 1800, h: 1180, start: [130, 1030], exit: [1640, 100, 96, 96],
+      objectives: [[370, 260, 'Dye formula', 'The secret ingredient is confidence.'], [910, 860, 'Vat controls', 'You select delicate cycle.'], [1390, 500, 'Confused chemist', 'They were only here for toner.']],
+      guards: [[[260, 360], [690, 360], [690, 150], [260, 150]], [[760, 900], [1230, 900], [1230, 650], [760, 650]], [[1190, 240], [1600, 240], [1600, 620], [1190, 620]], [[480, 1010], [1030, 1010]], [[570, 560], [1000, 560]]],
+      cameras: [[760, 190, 1.2], [1190, 740, -2.4], [1530, 780, -2.6]], lasers: [[720, 520, 720, 1060], [1110, 120, 1110, 500], [1260, 690, 1660, 690]],
+      walls: [[0,0,1800,34],[0,1146,1800,34],[0,0,34,1180],[1766,0,34,1180],[220,490,520,30],[900,490,610,30],[220,760,310,30],[690,760,350,30],[1210,760,350,30],[610,120,30,260],[610,830,30,230],[1120,120,30,280],[1120,560,30,430]]
+    },
+    {
+      name: 'For Your Eyeshadow Only', place: 'Orbital Makeup Satellite', palette: ['#071125', '#152c46', '#7db7ff'],
+      brief: 'A low-orbit vanity platform is aiming contour beams at world capitals.',
+      ops: ['Steal the orbital compact.', 'Hack the blush thrusters.', 'Disable the mascara laser.', 'Reach the escape pod.'],
+      w: 1900, h: 1220, start: [130, 1080], exit: [1740, 1020, 98, 96],
+      objectives: [[430, 220, 'Orbital compact', 'It has more mirrors than the villain has friends.'], [930, 420, 'Blush thrusters', 'You re-route them to cheekbone stabilization.'], [1480, 720, 'Mascara laser', 'The beam stops clumping.']],
+      guards: [[[280, 260], [720, 260], [720, 520], [280, 520]], [[850, 200], [1320, 200], [1320, 520], [850, 520]], [[1150, 930], [1680, 930], [1680, 650], [1150, 650]], [[470, 1010], [1030, 1010]], [[690, 700], [1040, 700]]],
+      cameras: [[760, 150, 1.5], [1380, 360, 2.0], [1450, 950, -2.8], [440, 760, -0.2]], lasers: [[800, 100, 800, 590], [1160, 590, 1160, 1110], [1320, 610, 1780, 610], [330, 640, 680, 640]],
+      walls: [[0,0,1900,34],[0,1186,1900,34],[0,0,34,1220],[1866,0,34,1220],[230,360,520,28],[920,360,560,28],[230,630,420,28],[800,630,300,28],[1250,630,380,28],[650,110,28,260],[650,690,28,300],[1210,120,28,320],[1210,760,28,250]]
+    },
+    {
+      name: 'The Spy Who Brunched Me', place: 'Bottomless Mimosa Casino', palette: ['#170b17', '#32192b', '#ffd166'],
+      brief: 'An enemy accountant hid blackmail data inside the brunch reservation system.',
+      ops: ['Steal the reservation ledger.', 'Hack the roulette server.', 'Plant a glitter bug under table 12.', 'Escape via valet.'],
+      w: 1840, h: 1160, start: [110, 1030], exit: [1660, 160, 100, 98],
+      objectives: [[360, 260, 'Reservation ledger', 'Every alias is somehow Lance.'], [1010, 310, 'Roulette server', 'The wheel admits it was dramatic.'], [1410, 820, 'Glitter bug', 'A tiny microphone in a tiny bow tie.']],
+      guards: [[[250, 180], [650, 180], [650, 500], [250, 500]], [[820, 180], [1330, 180], [1330, 520], [820, 520]], [[1040, 900], [1580, 900], [1580, 610], [1040, 610]], [[480, 970], [880, 760], [480, 620], [250, 760]], [[690, 680], [1090, 680]]],
+      cameras: [[750, 120, 1.6], [1360, 520, 2.8], [1460, 980, -2.7]], lasers: [[750, 550, 750, 1040], [1160, 120, 1160, 560], [1240, 700, 1690, 700]],
+      walls: [[0,0,1840,34],[0,1126,1840,34],[0,0,34,1160],[1806,0,34,1160],[210,390,520,30],[900,390,540,30],[210,650,300,30],[680,650,410,30],[1260,650,330,30],[610,130,30,230],[610,720,30,250],[1110,130,30,290],[1110,720,30,280]]
+    },
+    {
+      name: 'On Her Majesty-ish Service', place: 'Alpine Chalet of Tiny Betrayals', palette: ['#081521', '#153044', '#dfe8ef'],
+      brief: 'The chalet staff are hiding a weather machine inside a fondue fountain.',
+      ops: ['Photograph the weather fondue.', 'Steal the ski-pass cipher.', 'Hack the avalanche karaoke console.', 'Exit by gondola.'],
+      w: 1880, h: 1180, start: [130, 1040], exit: [1710, 120, 96, 96],
+      objectives: [[430, 250, 'Weather fondue', 'It is bubbling with barometric betrayal.'], [900, 850, 'Ski-pass cipher', 'The code is printed on the back of a lift ticket.'], [1450, 460, 'Karaoke console', 'Avalanche mode replaced with power ballads.']],
+      guards: [[[280, 310], [720, 310], [720, 560], [280, 560]], [[830, 210], [1320, 210], [1320, 520], [830, 520]], [[1110, 900], [1620, 900], [1620, 650], [1110, 650]], [[460, 970], [930, 970]], [[620, 720], [1020, 720]]],
+      cameras: [[740, 170, 1.2], [1310, 630, -2.8], [1550, 760, 2.6], [430, 760, -0.2]], lasers: [[760, 610, 760, 1080], [1120, 110, 1120, 560], [1220, 620, 1700, 620]],
+      walls: [[0,0,1880,34],[0,1146,1880,34],[0,0,34,1180],[1846,0,34,1180],[230,430,510,28],[900,430,540,28],[230,690,350,28],[750,690,350,28],[1280,690,330,28],[620,130,28,270],[620,760,28,280],[1130,130,28,310],[1130,750,28,260]]
+    },
+    {
+      name: 'Casino Royally Awkward', place: 'Mega Yacht Poker Deck', palette: ['#061320', '#102d35', '#7fffd4'],
+      brief: 'A yacht full of villains is playing poker with nuclear launch coupons.',
+      ops: ['Steal the launch coupons.', 'Switch the marked cards.', 'Hack the anchor controls.', 'Escape on the speedboat.'],
+      w: 1940, h: 1240, start: [120, 1110], exit: [1760, 1040, 102, 100],
+      objectives: [[390, 270, 'Launch coupons', 'Expires Tuesday, not valid with other apocalypse.'], [920, 520, 'Marked cards', 'Every king has suspicious cheekbones.'], [1510, 730, 'Anchor controls', 'The yacht agrees to stop brooding.']],
+      guards: [[[260, 220], [730, 220], [730, 520], [260, 520]], [[850, 250], [1360, 250], [1360, 620], [850, 620]], [[1100, 950], [1700, 950], [1700, 670], [1100, 670]], [[490, 1030], [1000, 1030]], [[650, 720], [1060, 720]], [[1420, 280], [1690, 460], [1420, 620]]],
+      cameras: [[770, 150, 1.5], [1380, 360, 2.2], [1520, 960, -2.7], [430, 760, -0.3]], lasers: [[780, 610, 780, 1110], [1170, 130, 1170, 600], [1300, 650, 1810, 650], [340, 640, 680, 640]],
+      walls: [[0,0,1940,34],[0,1206,1940,34],[0,0,34,1240],[1906,0,34,1240],[230,390,530,30],[930,390,580,30],[230,660,380,30],[790,660,360,30],[1330,660,360,30],[650,130,30,260],[650,730,30,330],[1190,130,30,340],[1190,750,30,300]]
+    },
+    {
+      name: 'License to Spill Tea', place: 'Rainbow Lair Finale', palette: ['#130719', '#251038', '#ff5fa2'],
+      brief: 'The final villain, Baron Beige, plans to make the world less fabulous. This cannot stand.',
+      ops: ['Steal the Beige Ray core.', 'Hack the monologue teleprompter.', 'Disable the three taste dampeners.', 'Escape through the glitter elevator.'],
+      w: 2100, h: 1320, start: [120, 1180], exit: [1920, 110, 108, 110],
+      objectives: [[450, 260, 'Beige Ray core', 'It hums in a deeply unseasoned way.'], [1030, 330, 'Teleprompter', 'You replace the speech with brunch specials.'], [1450, 540, 'Taste dampener A', 'Color returns to the left side of the room.'], [570, 860, 'Taste dampener B', 'A rug becomes interesting again.'], [1600, 940, 'Taste dampener C', 'Baron Beige loses his power stance.']],
+      guards: [[[280, 250], [780, 250], [780, 560], [280, 560]], [[900, 190], [1420, 190], [1420, 570], [900, 570]], [[1240, 930], [1840, 930], [1840, 640], [1240, 640]], [[500, 1110], [1050, 1110], [1050, 760], [500, 760]], [[660, 650], [1120, 650]], [[1510, 250], [1890, 450], [1510, 610]], [[980, 960], [1450, 1120]]],
+      cameras: [[820, 140, 1.5], [1450, 360, 2.1], [1640, 1020, -2.7], [470, 720, -0.2], [1050, 790, -1.4]], lasers: [[840, 600, 840, 1190], [1230, 120, 1230, 590], [1320, 620, 1930, 620], [370, 710, 760, 710], [1110, 780, 1110, 1210]],
+      walls: [[0,0,2100,34],[0,1286,2100,34],[0,0,34,1320],[2066,0,34,1320],[240,400,560,30],[960,400,620,30],[240,690,390,30],[820,690,410,30],[1420,690,420,30],[700,130,30,270],[700,760,30,360],[1260,130,30,340],[1260,760,30,340],[1600,250,30,280]]
+    }
+  ];
+
+  const state = {
+    mode: 'menu',
+    missionIndex: 0,
+    mission: null,
+    walls: [],
+    objectives: [],
+    guards: [],
+    cameras: [],
+    lasers: [],
+    exit: null,
+    decoys: [],
+    smoke: [],
+    sparkles: [],
+    score: 0,
+    alert: 0,
+    time: 0,
+    mapSeen: false,
+    messageT: 0,
+    lastComms: '',
+    near: null
+  };
+
+  const player = {
+    x: 100, y: 100, r: 15, vx: 0, vy: 0, angle: 0,
+    crouch: false, disguised: false, darts: 4, decoys: 3, smoke: 2, charms: 2,
+    smokeTimer: 0, charmCd: 0, invuln: 0
+  };
+
+  const input = { up:false, down:false, left:false, right:false, shift:false, mouseX:0, mouseY:0, worldX:0, worldY:0, stickX:0, stickY:0 };
+  const keys = Object.create(null);
+  let camera = { x: 0, y: 0, zoom: 1 };
+  let last = performance.now();
+  let toastTimer = 0;
+
+  const randLines = [
+    'HQ: Try not to improvise near the explosives again.',
+    'Q: Your cufflinks are darts. The left one also files taxes.',
+    'HQ: Remember, elegance is just panic with better posture.',
+    'Villain PA: Please stop charming the security staff.',
+    'Bond: I came for the intel and stayed because the curtains were brave.',
+    'HQ: If seen, pretend you are modern art.'
+  ];
+
+  function previewMissions() {
+    $('missionPreview').innerHTML = MISSIONS.map((m, i) =>
+      `<div><strong>${String(i + 1).padStart(2, '0')} - ${escapeHTML(m.name)}</strong><small>${escapeHTML(m.place)}<br>${escapeHTML(m.brief)}</small></div>`
+    ).join('');
+  }
+  previewMissions();
+
+  function escapeHTML(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function showBriefing(i) {
+    state.mode = 'briefing';
+    state.missionIndex = clamp(i, 0, MISSIONS.length - 1);
+    const m = MISSIONS[state.missionIndex];
+    $('briefKicker').textContent = `MISSION ${state.missionIndex + 1} OF ${MISSIONS.length} - ${m.place}`;
+    $('briefTitle').textContent = m.name;
+    $('briefText').textContent = m.brief;
+    $('briefList').innerHTML = m.ops.map(op => `<div>${escapeHTML(op)}</div>`).join('');
+    title.classList.add('hidden');
+    gameover.classList.add('hidden');
+    complete.classList.add('hidden');
+    briefing.classList.remove('hidden');
+    hud.classList.add('hidden');
+    rightHud.classList.add('hidden');
+  }
+
+  function startMission(i) {
+    const m = MISSIONS[i];
+    state.mode = 'play';
+    state.mission = m;
+    state.walls = m.walls.map(r => ({ x:r[0], y:r[1], w:r[2], h:r[3] }));
+    state.objectives = m.objectives.map((o, idx) => ({ id: idx, x:o[0], y:o[1], label:o[2], text:o[3], done:false, r:22, t:0 }));
+    state.exit = { x:m.exit[0], y:m.exit[1], w:m.exit[2], h:m.exit[3] };
+    state.guards = m.guards.map((route, i) => makeGuard(route, i));
+    state.cameras = m.cameras.map((c, i) => ({ x:c[0], y:c[1], base:c[2], angle:c[2], sweep:0.72 + (i % 2) * 0.22, phase:i * 1.7, range:260 + (i % 3) * 30, fov:0.58, disabled:0 }));
+    state.lasers = m.lasers.map((l, i) => ({ x1:l[0], y1:l[1], x2:l[2], y2:l[3], off:false, pulse:i * 0.8 }));
+    state.decoys = [];
+    state.smoke = [];
+    state.sparkles = [];
+    state.alert = 0;
+    state.time = 0;
+    state.near = null;
+    state.mapSeen = false;
+    player.x = m.start[0]; player.y = m.start[1]; player.angle = 0;
+    player.darts = 4 + Math.floor(i / 3);
+    player.decoys = 3 + Math.floor(i / 4);
+    player.smoke = 2 + Math.floor(i / 5);
+    player.charms = 2 + Math.floor(i / 4);
+    player.crouch = false; player.smokeTimer = 0; player.charmCd = 0;
+    title.classList.add('hidden');
+    briefing.classList.add('hidden');
+    complete.classList.add('hidden');
+    gameover.classList.add('hidden');
+    hud.classList.remove('hidden');
+    rightHud.classList.remove('hidden');
+    minimapWrap.classList.remove('on');
+    setComms(`HQ: ${m.brief}`);
+    toast('Infiltration started. Try subtle. We rehearsed subtle.');
+  }
+
+  function makeGuard(route, i) {
+    const p = route[0];
+    const q = route[1] || route[0];
+    return {
+      x:p[0], y:p[1], route:route.map(v => ({x:v[0], y:v[1]})), idx:1 % route.length,
+      angle: Math.atan2(q[1] - p[1], q[0] - p[0]),
+      speed: 64 + (i % 3) * 9,
+      state:'patrol', stun:0, suspect:0, investigate:null, talk:0,
+      name: ['NIGEL', 'PIP', 'BRUNO', 'CLIVE', 'MARTA', 'SLOANE', 'VAL', 'OTTO'][i % 8],
+      cone: 300 + (i % 2) * 25, fov: 0.72
+    };
+  }
+
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function dist(a,b,c,d) { return Math.hypot(a-c, b-d); }
+  function normAngle(a) { while (a > Math.PI) a -= Math.PI * 2; while (a < -Math.PI) a += Math.PI * 2; return a; }
+  function rectContains(r, x, y) { return x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h; }
+  function circleRect(cx, cy, cr, r) {
+    const x = clamp(cx, r.x, r.x + r.w), y = clamp(cy, r.y, r.y + r.h);
+    return Math.hypot(cx - x, cy - y) < cr;
+  }
+  function lineRect(x1, y1, x2, y2, r) {
+    if (rectContains(r, x1, y1) || rectContains(r, x2, y2)) return true;
+    const edges = [[r.x,r.y,r.x+r.w,r.y],[r.x+r.w,r.y,r.x+r.w,r.y+r.h],[r.x+r.w,r.y+r.h,r.x,r.y+r.h],[r.x,r.y+r.h,r.x,r.y]];
+    return edges.some(e => segSeg(x1,y1,x2,y2,e[0],e[1],e[2],e[3]));
+  }
+  function segSeg(ax, ay, bx, by, cx, cy, dx, dy) {
+    const den = (ax-bx)*(cy-dy) - (ay-by)*(cx-dx);
+    if (Math.abs(den) < 0.00001) return false;
+    const t = ((ax-cx)*(cy-dy) - (ay-cy)*(cx-dx)) / den;
+    const u = -((ax-bx)*(ay-cy) - (ay-by)*(ax-cx)) / den;
+    return t >= 0 && t <= 1 && u >= 0 && u <= 1;
+  }
+  function los(x1, y1, x2, y2) {
+    for (const w of state.walls) if (lineRect(x1,y1,x2,y2,w)) return false;
+    return true;
+  }
+
+  function moveCircle(obj, dx, dy) {
+    let nx = obj.x + dx, ny = obj.y;
+    for (const w of state.walls) if (circleRect(nx, ny, obj.r || 13, w)) nx = obj.x;
+    obj.x = clamp(nx, obj.r || 13, state.mission.w - (obj.r || 13));
+    nx = obj.x; ny = obj.y + dy;
+    for (const w of state.walls) if (circleRect(nx, ny, obj.r || 13, w)) ny = obj.y;
+    obj.y = clamp(ny, obj.r || 13, state.mission.h - (obj.r || 13));
+  }
+
+  function update(dt) {
+    if (state.mode !== 'play') return;
+    state.time += dt;
+    if (toastTimer > 0) toastTimer -= dt; else toastEl.classList.remove('on');
+    player.smokeTimer = Math.max(0, player.smokeTimer - dt);
+    player.charmCd = Math.max(0, player.charmCd - dt);
+    const mx = (input.right?1:0) - (input.left?1:0) + input.stickX;
+    const my = (input.down?1:0) - (input.up?1:0) + input.stickY;
+    const len = Math.hypot(mx, my);
+    const crouch = input.shift || player.crouch;
+    const speed = (crouch ? 96 : 154) * (player.smokeTimer > 0 ? 1.08 : 1);
+    if (len > 0.05) {
+      moveCircle(player, mx / len * speed * dt, my / len * speed * dt);
+      player.angle = Math.atan2(my, mx);
+      if (!crouch) noiseAt(player.x, player.y, 145, 0.18);
+    }
+    updateAim();
+    updateGuards(dt);
+    updateCameras(dt);
+    updateLasers(dt);
+    updateEffects(dt);
+    updateNear();
+    updateAlert(dt);
+    updateCamera();
+    updateHud();
+  }
+
+  function updateAim() {
+    const wx = screenToWorld(input.mouseX, input.mouseY).x;
+    const wy = screenToWorld(input.mouseX, input.mouseY).y;
+    input.worldX = wx; input.worldY = wy;
+    if (!isTouch) player.angle = Math.atan2(wy - player.y, wx - player.x);
+  }
+
+  function updateGuards(dt) {
+    for (const g of state.guards) {
+      g.talk = Math.max(0, g.talk - dt);
+      if (g.stun > 0) { g.stun -= dt; continue; }
+      if (g.state === 'investigate' && g.investigate) {
+        moveGuardToward(g, g.investigate.x, g.investigate.y, dt, 1.15);
+        if (dist(g.x,g.y,g.investigate.x,g.investigate.y) < 18) { g.state = 'patrol'; g.investigate = null; guardQuip(g, 'Where is the tiny disco sound coming from?'); }
+      } else if (g.state === 'alert') {
+        moveGuardToward(g, player.x, player.y, dt, 1.38);
+      } else {
+        const target = g.route[g.idx];
+        moveGuardToward(g, target.x, target.y, dt, 1);
+        if (dist(g.x,g.y,target.x,target.y) < 16) g.idx = (g.idx + 1) % g.route.length;
+      }
+      if (canSeePlayer(g.x, g.y, g.angle, g.cone, g.fov)) {
+        g.state = 'alert';
+        state.alert += (player.smokeTimer > 0 ? 10 : 32) * dt;
+        if (g.talk <= 0) guardQuip(g, ['Intruder in formalwear!', 'That tuxedo is moving suspiciously!', 'Stop, charismatic trespasser!'][Math.floor(Math.random()*3)]);
+      }
+    }
+  }
+
+  function moveGuardToward(g, tx, ty, dt, mul) {
+    const dx = tx - g.x, dy = ty - g.y;
+    const l = Math.hypot(dx, dy) || 1;
+    g.angle = Math.atan2(dy, dx);
+    moveCircle({ x:g.x, y:g.y, r:13 }, dx/l * g.speed * mul * dt, dy/l * g.speed * mul * dt);
+    const tmp = { x:g.x, y:g.y, r:13 };
+    moveCircle(tmp, dx/l * g.speed * mul * dt, dy/l * g.speed * mul * dt);
+    g.x = tmp.x; g.y = tmp.y;
+  }
+
+  function guardQuip(g, msg) {
+    g.talk = 2.4;
+    setComms(`${g.name}: ${msg}`);
+  }
+
+  function canSeePlayer(x, y, angle, range, fov) {
+    if (player.smokeTimer > 0) return false;
+    const d = dist(x, y, player.x, player.y);
+    if (d > range) return false;
+    const a = Math.atan2(player.y - y, player.x - x);
+    if (Math.abs(normAngle(a - angle)) > fov) return false;
+    return los(x, y, player.x, player.y);
+  }
+
+  function updateCameras(dt) {
+    for (const c of state.cameras) {
+      c.disabled = Math.max(0, c.disabled - dt);
+      c.phase += dt;
+      c.angle = c.base + Math.sin(c.phase * 0.75) * c.sweep;
+      if (c.disabled <= 0 && canSeePlayer(c.x, c.y, c.angle, c.range, c.fov)) {
+        state.alert += 42 * dt;
+        if (state.time % 1 < dt) setComms('SECURITY CAMERA: Fabulous movement detected. Very suspicious.');
+      }
+    }
+  }
+
+  function updateLasers(dt) {
+    for (const l of state.lasers) {
+      l.pulse += dt;
+      if (!l.off && segDist(player.x, player.y, l.x1, l.y1, l.x2, l.y2) < player.r + 4 && player.smokeTimer <= 0) {
+        state.alert += 70 * dt;
+        if (state.time % 1 < dt) toast('Laser trip. The building is judging you.');
+      }
+    }
+  }
+
+  function segDist(px, py, ax, ay, bx, by) {
+    const dx = bx - ax, dy = by - ay;
+    const t = clamp(((px-ax)*dx + (py-ay)*dy) / (dx*dx + dy*dy || 1), 0, 1);
+    return Math.hypot(px - (ax + dx*t), py - (ay + dy*t));
+  }
+
+  function noiseAt(x, y, radius, chance) {
+    for (const g of state.guards) {
+      if (g.stun > 0) continue;
+      if (dist(x,y,g.x,g.y) < radius && Math.random() < chance) {
+        g.state = 'investigate';
+        g.investigate = { x, y };
+      }
+    }
+  }
+
+  function updateEffects(dt) {
+    for (let i = state.decoys.length - 1; i >= 0; i--) {
+      const d = state.decoys[i];
+      d.t -= dt;
+      d.pulse += dt;
+      noiseAt(d.x, d.y, 300, 0.7 * dt);
+      if (d.t <= 0) state.decoys.splice(i, 1);
+    }
+    for (let i = state.smoke.length - 1; i >= 0; i--) {
+      const s = state.smoke[i];
+      s.t -= dt;
+      s.r = Math.min(120, s.r + dt * 45);
+      if (s.t <= 0) state.smoke.splice(i, 1);
+    }
+    for (let i = state.sparkles.length - 1; i >= 0; i--) {
+      state.sparkles[i].t -= dt;
+      state.sparkles[i].x += state.sparkles[i].vx * dt;
+      state.sparkles[i].y += state.sparkles[i].vy * dt;
+      if (state.sparkles[i].t <= 0) state.sparkles.splice(i, 1);
+    }
+  }
+
+  function updateNear() {
+    state.near = null;
+    let bestD = 72;
+    for (const o of state.objectives) {
+      if (o.done) continue;
+      const d = dist(player.x, player.y, o.x, o.y);
+      if (d < bestD) { bestD = d; state.near = { type:'objective', obj:o, text:`E: ${o.label}` }; }
+    }
+    for (const c of state.cameras) {
+      const d = dist(player.x, player.y, c.x, c.y);
+      if (d < bestD && c.disabled <= 0) { bestD = d; state.near = { type:'camera', obj:c, text:'E: hack camera grid' }; }
+    }
+    for (const l of state.lasers) {
+      const d = segDist(player.x, player.y, l.x1, l.y1, l.x2, l.y2);
+      if (d < bestD && !l.off) { bestD = d; state.near = { type:'laser', obj:l, text:'E: disable laser' }; }
+    }
+    for (const g of state.guards) {
+      if (g.stun > 0) continue;
+      const d = dist(player.x, player.y, g.x, g.y);
+      const behind = Math.abs(normAngle(Math.atan2(player.y - g.y, player.x - g.x) - g.angle)) > 2.25;
+      if (d < bestD && behind) { bestD = d; state.near = { type:'takedown', obj:g, text:'E: velvet takedown' }; }
+    }
+    if (allObjectivesDone() && rectContains(state.exit, player.x, player.y)) {
+      state.near = { type:'exit', obj:state.exit, text:'E: escape' };
+    }
+    if (state.near) {
+      interact.textContent = state.near.text;
+      interact.classList.add('on');
+    } else {
+      interact.classList.remove('on');
+    }
+  }
+
+  function updateAlert(dt) {
+    const decay = player.crouch || player.smokeTimer > 0 ? 15 : 7;
+    state.alert = clamp(state.alert - decay * dt, 0, 100);
+    if (state.alert >= 100) failMission('The whole base saw you. On the bright side, the outfit got excellent reviews.');
+  }
+
+  function updateCamera() {
+    const marginX = W * 0.5, marginY = H * 0.5;
+    camera.x = clamp(player.x - marginX, 0, Math.max(0, state.mission.w - W));
+    camera.y = clamp(player.y - marginY, 0, Math.max(0, state.mission.h - H));
+  }
+
+  function updateHud() {
+    $('missionName').textContent = `${state.missionIndex + 1}/${MISSIONS.length} ${state.mission.name}`;
+    $('hudStats').innerHTML = `DARTS <b>${player.darts}</b>  DECOYS <b>${player.decoys}</b>  SMOKE <b>${player.smoke}</b>  CHARM <b>${player.charms}</b><br>STYLE <b>${Math.floor(state.score)}</b>  ALERT <b>${Math.floor(state.alert)}%</b>  ${player.crouch ? '<b>CROUCH</b>' : 'WALK'}`;
+    $('alertFill').style.width = state.alert + '%';
+    $('objectives').innerHTML = state.objectives.map(o => `<div class="${o.done ? 'done' : ''}">${o.done ? 'DONE' : 'TODO'} - ${escapeHTML(o.label)}</div>`).join('') +
+      `<div class="${allObjectivesDone() ? '' : 'todo'}">${allObjectivesDone() ? 'ESCAPE AVAILABLE' : 'FINISH OBJECTIVES TO UNLOCK EXIT'}</div>`;
+  }
+
+  function setComms(msg) {
+    state.lastComms = msg;
+    $('comms').textContent = msg;
+  }
+
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('on');
+    toastTimer = 2.5;
+  }
+
+  function interactAction() {
+    if (state.mode !== 'play' || !state.near) return;
+    const n = state.near;
+    if (n.type === 'objective') {
+      n.obj.done = true;
+      state.score += 500;
+      burst(n.obj.x, n.obj.y, 24, '#ffd166');
+      toast(n.obj.text);
+      setComms(randLines[Math.floor(Math.random() * randLines.length)]);
+      if (allObjectivesDone()) toast('All objectives complete. Exit unlocked.');
+    } else if (n.type === 'camera') {
+      for (const c of state.cameras) c.disabled = 9;
+      state.score += 160;
+      burst(n.obj.x, n.obj.y, 18, '#7fffd4');
+      toast('Camera grid hacked. The walls promise not to look.');
+    } else if (n.type === 'laser') {
+      n.obj.off = true;
+      state.score += 130;
+      burst(player.x, player.y, 18, '#7fffd4');
+      toast('Laser disabled with a cufflink and a raised eyebrow.');
+    } else if (n.type === 'takedown') {
+      n.obj.stun = 999;
+      n.obj.state = 'stunned';
+      state.score += 260;
+      burst(n.obj.x, n.obj.y, 20, '#ff5fa2');
+      toast('Velvet takedown. Silent, moisturized, effective.');
+    } else if (n.type === 'exit') {
+      completeMission();
+    }
+  }
+
+  function allObjectivesDone() { return state.objectives.every(o => o.done); }
+
+  function fireDart() {
+    if (state.mode !== 'play') return;
+    if (player.darts <= 0) { toast('No darts. Q says budget cuts.'); return; }
+    player.darts--;
+    const a = Math.atan2(input.worldY - player.y, input.worldX - player.x);
+    let best = null, bestD = 620;
+    for (const g of state.guards) {
+      if (g.stun > 0) continue;
+      const d = dist(player.x, player.y, g.x, g.y);
+      const da = Math.abs(normAngle(Math.atan2(g.y - player.y, g.x - player.x) - a));
+      if (d < bestD && da < 0.18 && los(player.x, player.y, g.x, g.y)) { best = g; bestD = d; }
+    }
+    if (best) {
+      best.stun = 12;
+      best.state = 'stunned';
+      state.score += 180;
+      burst(best.x, best.y, 18, '#7fffd4');
+      toast('Cufflink dart deployed. Nap time, darling.');
+    } else {
+      noiseAt(input.worldX, input.worldY, 190, 0.8);
+      toast('Dart missed and hit something expensive.');
+    }
+  }
+
+  function throwDecoy() {
+    if (state.mode !== 'play') return;
+    if (player.decoys <= 0) { toast('No decoys. The tiny disco balls are gone.'); return; }
+    player.decoys--;
+    const p = clampPointToMap(input.worldX, input.worldY);
+    state.decoys.push({ x:p.x, y:p.y, t:5.2, pulse:0 });
+    burst(p.x, p.y, 20, '#ffd166');
+    toast('Glitter decoy thrown. Guards respect sparkle.');
+    for (const g of state.guards) {
+      if (dist(g.x,g.y,p.x,p.y) < 360) { g.state = 'investigate'; g.investigate = { x:p.x, y:p.y }; }
+    }
+  }
+
+  function smokeBomb() {
+    if (state.mode !== 'play') return;
+    if (player.smoke <= 0) { toast('No smoke. Drama reserves depleted.'); return; }
+    player.smoke--;
+    player.smokeTimer = 5.5;
+    state.smoke.push({ x:player.x, y:player.y, r:30, t:5.5 });
+    burst(player.x, player.y, 30, '#dfe8ef');
+    toast('Lipstick smoke cloud. Extremely opaque, lightly scented.');
+  }
+
+  function charmPulse() {
+    if (state.mode !== 'play') return;
+    if (player.charms <= 0) { toast('No charm charges. Impossible, but true.'); return; }
+    if (player.charmCd > 0) return;
+    player.charms--;
+    player.charmCd = 1.2;
+    let hit = 0;
+    for (const g of state.guards) {
+      if (g.stun <= 0 && dist(player.x,player.y,g.x,g.y) < 150 && los(player.x,player.y,g.x,g.y)) {
+        g.stun = 4.5;
+        g.state = 'stunned';
+        hit++;
+        burst(g.x, g.y, 12, '#ff5fa2');
+      }
+    }
+    state.score += hit * 120;
+    toast(hit ? 'Charm pulse. Security briefly questions its career.' : 'Charm pulse whiffs. Still a great pose.');
+  }
+
+  function clampPointToMap(x, y) {
+    return { x: clamp(x, 20, state.mission.w - 20), y: clamp(y, 20, state.mission.h - 20) };
+  }
+
+  function burst(x, y, n, color) {
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const s = 60 + Math.random() * 120;
+      state.sparkles.push({ x, y, vx:Math.cos(a)*s, vy:Math.sin(a)*s, t:0.45 + Math.random()*0.45, color });
+    }
+  }
+
+  function completeMission() {
+    state.mode = 'complete';
+    const bonus = Math.max(0, 1000 - Math.floor(state.alert) * 8) + player.darts * 40 + player.decoys * 35 + player.smoke * 50;
+    state.score += bonus;
+    $('completeTitle').textContent = `${state.mission.name} complete`;
+    $('completeText').textContent = `Clean escape. Style bonus ${bonus}. Total style ${Math.floor(state.score)}. HQ says the villain is furious and the decor is improved.`;
+    complete.classList.remove('hidden');
+    hud.classList.add('hidden');
+    rightHud.classList.add('hidden');
+  }
+
+  function failMission(reason) {
+    state.mode = 'failed';
+    $('overText').textContent = reason;
+    gameover.classList.remove('hidden');
+    hud.classList.add('hidden');
+    rightHud.classList.add('hidden');
+  }
+
+  function draw() {
+    ctx.clearRect(0,0,W,H);
+    if (state.mode === 'menu' || !state.mission) {
+      drawMenuBackdrop();
+      requestAnimationFrame(loop);
+      return;
+    }
+    ctx.save();
+    ctx.translate(-camera.x, -camera.y);
+    drawFloor();
+    drawExit();
+    drawObjectives();
+    drawLasers();
+    drawCameras();
+    drawDecoys();
+    drawSmoke();
+    drawGuards();
+    drawPlayer();
+    drawSparkles();
+    drawWalls();
+    ctx.restore();
+    drawVignette();
+    if (state.mapSeen) drawMinimap();
+    requestAnimationFrame(loop);
+  }
+
+  function drawMenuBackdrop() {
+    ctx.fillStyle = '#060814';
+    ctx.fillRect(0,0,W,H);
+    const t = performance.now() * 0.001;
+    for (let i = 0; i < 32; i++) {
+      const x = (i * 137 + t * 24) % (W + 120) - 60;
+      const y = (i * 73 + Math.sin(t + i) * 30) % (H + 120) - 60;
+      ctx.fillStyle = i % 2 ? 'rgba(255,95,162,0.09)' : 'rgba(127,255,212,0.08)';
+      ctx.beginPath(); ctx.arc(x,y,20 + (i%5)*5,0,Math.PI*2); ctx.fill();
+    }
+  }
+
+  function drawFloor() {
+    const m = state.mission;
+    const grd = ctx.createLinearGradient(0,0,m.w,m.h);
+    grd.addColorStop(0, m.palette[0]);
+    grd.addColorStop(0.55, m.palette[1]);
+    grd.addColorStop(1, '#050711');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0,0,m.w,m.h);
+    ctx.strokeStyle = 'rgba(255,255,255,0.035)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < m.w; x += 80) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,m.h); ctx.stroke(); }
+    for (let y = 0; y < m.h; y += 80) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(m.w,y); ctx.stroke(); }
+  }
+
+  function drawWalls() {
+    ctx.fillStyle = 'rgba(4,6,16,0.94)';
+    ctx.strokeStyle = 'rgba(248,238,247,0.18)';
+    ctx.lineWidth = 2;
+    for (const w of state.walls) {
+      ctx.fillRect(w.x,w.y,w.w,w.h);
+      ctx.strokeRect(w.x,w.y,w.w,w.h);
+    }
+  }
+
+  function drawExit() {
+    const e = state.exit;
+    ctx.save();
+    ctx.fillStyle = allObjectivesDone() ? 'rgba(127,255,212,0.18)' : 'rgba(255,255,255,0.04)';
+    ctx.strokeStyle = allObjectivesDone() ? '#7fffd4' : 'rgba(255,255,255,0.18)';
+    ctx.setLineDash([8, 6]);
+    ctx.lineWidth = 3;
+    ctx.fillRect(e.x,e.y,e.w,e.h);
+    ctx.strokeRect(e.x,e.y,e.w,e.h);
+    ctx.setLineDash([]);
+    ctx.fillStyle = allObjectivesDone() ? '#7fffd4' : 'rgba(255,255,255,0.35)';
+    ctx.font = 'bold 12px Courier New';
+    ctx.textAlign = 'center';
+    ctx.fillText('EXIT', e.x + e.w/2, e.y + e.h/2 + 4);
+    ctx.restore();
+  }
+
+  function drawObjectives() {
+    for (const o of state.objectives) {
+      o.t += 0.02;
+      ctx.save();
+      ctx.translate(o.x,o.y);
+      ctx.rotate(Math.sin(o.t) * 0.08);
+      ctx.fillStyle = o.done ? 'rgba(127,255,212,0.18)' : 'rgba(255,209,102,0.22)';
+      ctx.strokeStyle = o.done ? '#7fffd4' : '#ffd166';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.rect(-16,-16,32,32);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = o.done ? '#7fffd4' : '#ffd166';
+      ctx.font = 'bold 11px Courier New';
+      ctx.textAlign = 'center';
+      ctx.fillText(o.done ? 'OK' : 'OBJ', 0, 4);
+      ctx.restore();
+    }
+  }
+
+  function drawLasers() {
+    for (const l of state.lasers) {
+      if (l.off) {
+        ctx.strokeStyle = 'rgba(127,255,212,0.15)';
+        ctx.lineWidth = 2;
+      } else {
+        const alpha = 0.45 + Math.sin(l.pulse * 7) * 0.18;
+        ctx.strokeStyle = `rgba(255,77,109,${alpha})`;
+        ctx.lineWidth = 5;
+      }
+      ctx.beginPath(); ctx.moveTo(l.x1,l.y1); ctx.lineTo(l.x2,l.y2); ctx.stroke();
+    }
+  }
+
+  function drawCameras() {
+    for (const c of state.cameras) {
+      if (c.disabled <= 0) drawCone(c.x,c.y,c.angle,c.range,c.fov,'rgba(255,77,109,0.18)');
+      ctx.save();
+      ctx.translate(c.x,c.y);
+      ctx.rotate(c.angle);
+      ctx.fillStyle = c.disabled > 0 ? '#7fffd4' : '#ff4d6d';
+      ctx.fillRect(-10,-8,20,16);
+      ctx.fillRect(6,-4,16,8);
+      ctx.restore();
+    }
+  }
+
+  function drawCone(x, y, a, range, fov, color) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(x,y);
+    ctx.arc(x,y,range,a-fov,a+fov);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function drawGuards() {
+    for (const g of state.guards) {
+      if (g.stun <= 0) drawCone(g.x,g.y,g.angle,g.cone,g.fov,g.state === 'alert' ? 'rgba(255,77,109,0.22)' : 'rgba(255,209,102,0.14)');
+    }
+    for (const g of state.guards) {
+      ctx.save();
+      ctx.translate(g.x,g.y);
+      ctx.rotate(g.angle);
+      ctx.fillStyle = g.stun > 0 ? '#5c6472' : g.state === 'alert' ? '#ff4d6d' : '#ffd166';
+      ctx.beginPath();
+      ctx.arc(0,0,14,0,Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle = '#060814';
+      ctx.fillRect(0,-4,16,8);
+      ctx.fillStyle = '#f8eef7';
+      ctx.beginPath(); ctx.arc(6,-4,2,0,Math.PI*2); ctx.arc(6,4,2,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+      if (g.stun > 0) {
+        ctx.fillStyle = 'rgba(248,238,247,0.55)';
+        ctx.font = '10px Courier New';
+        ctx.textAlign = 'center';
+        ctx.fillText('ZZZ', g.x, g.y - 22);
+      }
+    }
+  }
+
+  function drawPlayer() {
+    ctx.save();
+    ctx.translate(player.x, player.y);
+    ctx.rotate(player.angle);
+    if (player.smokeTimer > 0) {
+      ctx.globalAlpha = 0.62;
+      ctx.shadowColor = '#dfe8ef';
+      ctx.shadowBlur = 16;
+    }
+    ctx.fillStyle = player.crouch ? '#7fffd4' : '#ff5fa2';
+    ctx.beginPath();
+    ctx.arc(0,0,player.r,0,Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = '#060814';
+    ctx.fillRect(-5,-10,10,20);
+    ctx.strokeStyle = '#ffd166';
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(4,0); ctx.lineTo(23,0); ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawDecoys() {
+    for (const d of state.decoys) {
+      const r = 12 + Math.sin(d.pulse * 9) * 4;
+      ctx.fillStyle = 'rgba(255,209,102,0.22)';
+      ctx.beginPath(); ctx.arc(d.x,d.y,42 + r,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#ffd166';
+      ctx.beginPath(); ctx.arc(d.x,d.y,r,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#060814';
+      ctx.font = 'bold 10px Courier New';
+      ctx.textAlign = 'center';
+      ctx.fillText('G', d.x, d.y + 3);
+    }
+  }
+
+  function drawSmoke() {
+    for (const s of state.smoke) {
+      ctx.fillStyle = `rgba(220,232,239,${0.12 + Math.min(0.18, s.t * 0.03)})`;
+      ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill();
+    }
+  }
+
+  function drawSparkles() {
+    for (const p of state.sparkles) {
+      ctx.globalAlpha = clamp(p.t * 2, 0, 1);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(p.x - 2, p.y - 2, 4, 4);
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  function drawVignette() {
+    const g = ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*0.18,W/2,H/2,Math.max(W,H)*0.7);
+    g.addColorStop(0,'rgba(0,0,0,0)');
+    g.addColorStop(1, state.alert > 70 ? 'rgba(255,0,60,0.24)' : 'rgba(0,0,0,0.42)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,W,H);
+  }
+
+  function drawMinimap() {
+    const m = state.mission;
+    miniCtx.clearRect(0,0,mini.width,mini.height);
+    miniCtx.fillStyle = '#061014';
+    miniCtx.fillRect(0,0,mini.width,mini.height);
+    const sx = mini.width / m.w, sy = mini.height / m.h;
+    miniCtx.fillStyle = 'rgba(248,238,247,0.22)';
+    for (const w of state.walls) miniCtx.fillRect(w.x*sx,w.y*sy,w.w*sx,w.h*sy);
+    miniCtx.fillStyle = '#ffd166';
+    for (const o of state.objectives) if (!o.done) miniCtx.fillRect(o.x*sx-3,o.y*sy-3,6,6);
+    miniCtx.fillStyle = '#ff4d6d';
+    for (const g of state.guards) if (g.stun <= 0) miniCtx.fillRect(g.x*sx-2,g.y*sy-2,4,4);
+    miniCtx.fillStyle = '#7fffd4';
+    miniCtx.fillRect(player.x*sx-4,player.y*sy-4,8,8);
+  }
+
+  function screenToWorld(x, y) { return { x: x + camera.x, y: y + camera.y }; }
+
+  function loop(now) {
+    const dt = Math.min(0.05, (now - last) / 1000 || 0);
+    last = now;
+    update(dt);
+    draw();
+  }
+
+  function bind() {
+    $('startBtn').addEventListener('click', () => showBriefing(0));
+    $('skipBtn').addEventListener('click', () => showBriefing(Math.min(state.missionIndex, MISSIONS.length - 1)));
+    $('briefStart').addEventListener('click', () => startMission(state.missionIndex));
+    $('briefBack').addEventListener('click', () => { briefing.classList.add('hidden'); title.classList.remove('hidden'); state.mode = 'menu'; });
+    $('retryBtn').addEventListener('click', () => startMission(state.missionIndex));
+    $('menuBtn').addEventListener('click', () => { gameover.classList.add('hidden'); title.classList.remove('hidden'); state.mode = 'menu'; });
+    $('menuBtn2').addEventListener('click', () => { complete.classList.add('hidden'); title.classList.remove('hidden'); state.mode = 'menu'; });
+    $('nextBtn').addEventListener('click', () => {
+      complete.classList.add('hidden');
+      if (state.missionIndex + 1 >= MISSIONS.length) {
+        title.classList.remove('hidden');
+        state.mode = 'menu';
+        toast('Campaign complete. Baron Beige is in tasteful custody.');
+      } else {
+        showBriefing(state.missionIndex + 1);
+      }
+    });
+    addEventListener('keydown', e => {
+      const k = e.key.toLowerCase();
+      keys[k] = true;
+      if (['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k)) e.preventDefault();
+      if (state.mode !== 'play') return;
+      if (k === 'e') interactAction();
+      if (k === 'f') fireDart();
+      if (k === 'q') throwDecoy();
+      if (k === ' ') smokeBomb();
+      if (k === 'c') charmPulse();
+      if (k === 'm') toggleMap();
+    });
+    addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+    canvas.addEventListener('mousemove', e => { input.mouseX = e.clientX; input.mouseY = e.clientY; });
+    canvas.addEventListener('mousedown', e => {
+      if (state.mode !== 'play') return;
+      if (e.button === 0) fireDart();
+      if (e.button === 2) throwDecoy();
+    });
+    addEventListener('contextmenu', e => e.preventDefault());
+    bindTouch();
+  }
+
+  function readKeys() {
+    input.up = !!(keys.w || keys.arrowup);
+    input.down = !!(keys.s || keys.arrowdown);
+    input.left = !!(keys.a || keys.arrowleft);
+    input.right = !!(keys.d || keys.arrowright);
+    input.shift = !!keys.shift;
+  }
+
+  function toggleMap() {
+    state.mapSeen = !state.mapSeen;
+    minimapWrap.classList.toggle('on', state.mapSeen);
+  }
+
+  function bindTouch() {
+    const stick = $('stick'), knob = $('knob');
+    let id = null;
+    function setStick(x, y) {
+      const r = stick.getBoundingClientRect();
+      const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      let dx = x - cx, dy = y - cy;
+      const max = r.width * 0.36;
+      const len = Math.hypot(dx,dy);
+      if (len > max) { dx = dx / len * max; dy = dy / len * max; }
+      input.stickX = dx / max; input.stickY = dy / max;
+      knob.style.transform = `translate(${dx}px, ${dy}px)`;
+      if (Math.hypot(input.stickX,input.stickY) > 0.1) player.angle = Math.atan2(input.stickY,input.stickX);
+    }
+    function endStick(e) {
+      if (id !== e.pointerId) return;
+      id = null; input.stickX = 0; input.stickY = 0; knob.style.transform = '';
+      try { stick.releasePointerCapture(e.pointerId); } catch (_) {}
+    }
+    stick.addEventListener('pointerdown', e => { id = e.pointerId; stick.setPointerCapture(e.pointerId); setStick(e.clientX,e.clientY); });
+    stick.addEventListener('pointermove', e => { if (id === e.pointerId) setStick(e.clientX,e.clientY); });
+    stick.addEventListener('pointerup', endStick);
+    stick.addEventListener('pointercancel', endStick);
+    $('tbAct').addEventListener('pointerdown', e => { e.preventDefault(); interactAction(); });
+    $('tbDart').addEventListener('pointerdown', e => { e.preventDefault(); aimForward(); fireDart(); });
+    $('tbDecoy').addEventListener('pointerdown', e => { e.preventDefault(); aimForward(160); throwDecoy(); });
+    $('tbSmoke').addEventListener('pointerdown', e => { e.preventDefault(); smokeBomb(); });
+    $('tbCharm').addEventListener('pointerdown', e => { e.preventDefault(); charmPulse(); });
+    $('tbCrouch').addEventListener('pointerdown', e => { e.preventDefault(); player.crouch = !player.crouch; $('tbCrouch').classList.toggle('on', player.crouch); });
+  }
+
+  function aimForward(range = 500) {
+    input.worldX = player.x + Math.cos(player.angle) * range;
+    input.worldY = player.y + Math.sin(player.angle) * range;
+  }
+
+  setInterval(readKeys, 16);
+  setInterval(() => {
+    if (state.mode === 'play' && Math.random() < 0.45) setComms(randLines[Math.floor(Math.random() * randLines.length)]);
+  }, 8500);
+
+  bind();
+  requestAnimationFrame(loop);
+})();
+</script>
+<script src="game3d.js"></script>
+</body>
+</html>

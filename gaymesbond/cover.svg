@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="45%" r="78%">
+      <stop offset="0%" stop-color="#251025"/>
+      <stop offset="55%" stop-color="#0b1324"/>
+      <stop offset="100%" stop-color="#03050a"/>
+    </radialGradient>
+    <linearGradient id="pink" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff5fa2"/>
+      <stop offset="100%" stop-color="#ffd166"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="4"/>
+    </filter>
+  </defs>
+  <rect width="600" height="400" fill="url(#bg)"/>
+  <g opacity="0.18" stroke="#7fffd4" stroke-width="1">
+    <path d="M0 90H600M0 140H600M0 190H600M0 240H600M0 290H600M0 340H600"/>
+    <path d="M60 0V400M120 0V400M180 0V400M240 0V400M300 0V400M360 0V400M420 0V400M480 0V400M540 0V400"/>
+  </g>
+  <g filter="url(#glow)" opacity="0.65">
+    <polygon points="108,132 220,352 8,352" fill="#ff4d6d" opacity="0.35"/>
+    <polygon points="492,132 592,352 376,352" fill="#7fffd4" opacity="0.26"/>
+  </g>
+  <g transform="translate(300 215)">
+    <circle r="82" fill="#050711" stroke="#ffd166" stroke-width="3"/>
+    <circle r="66" fill="none" stroke="#ff5fa2" stroke-width="2" stroke-dasharray="7 8"/>
+    <path d="M-18 56L-10 -18H10L18 56Z" fill="#101827" stroke="#7fffd4" stroke-width="2"/>
+    <circle cy="-42" r="18" fill="#ffd0a6"/>
+    <path d="M-28 -20C-10 -36 14 -36 30 -18C28 -42 10 -54 -12 -52C-36 -48 -42 -28 -28 -20Z" fill="#151515"/>
+    <path d="M-35 3C-12 20 16 20 38 1" fill="none" stroke="#ff5fa2" stroke-width="5" stroke-linecap="round"/>
+    <path d="M28 -9L78 -32" stroke="#dfe8ef" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="86" cy="-36" r="7" fill="#ffd166"/>
+    <path d="M-5 -17L5 -17L12 12L0 28L-12 12Z" fill="url(#pink)"/>
+  </g>
+  <g font-family="Helvetica,Arial,sans-serif" text-anchor="middle">
+    <text x="300" y="62" font-size="44" font-weight="800" letter-spacing="8" fill="#f8eef7">GAYMES BOND</text>
+    <text x="300" y="92" font-size="10" letter-spacing="6" fill="#ffd166">LICENSED TO FLIRT · CLASSIFIED TO THE MAX</text>
+    <text x="300" y="370" font-size="12" letter-spacing="4" fill="#7fffd4">STEALTH · GADGETS · MANY MISSIONS · ABSURD ESPIONAGE</text>
+  </g>
+  <g opacity="0.65">
+    <rect x="44" y="112" width="96" height="8" fill="#ff5fa2"/>
+    <rect x="460" y="112" width="96" height="8" fill="#7fffd4"/>
+    <circle cx="92" cy="316" r="9" fill="#ff4d6d"/>
+    <circle cx="508" cy="316" r="9" fill="#ffd166"/>
+  </g>
+</svg>
