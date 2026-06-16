@@ -111,6 +111,18 @@
       "controls": "WASD + mouse + click + R/G/F/B (desktop) - joystick + FIRE + side buttons (mobile)"
     },
     {
+      "id": "graveyardshift",
+      "title": "Graveyard Shift",
+      "blurb": "A legally distinct 3D slasher tag parody with singleplayer bots and lightweight room-code multiplayer. Repair generators, rescue teammates, drop pallets, stun the killer, open the gate, or play killer and conduct mandatory feedback.",
+      "tags": ["3d", "horror", "multiplayer", "singleplayer", "survival", "parody"],
+      "minutes": 12,
+      "accent": "#ff5d73",
+      "background": "linear-gradient(135deg, #0d0f14, #2a1119)",
+      "cover": "graveyardshift/cover.svg",
+      "href": "graveyardshift/",
+      "controls": "WASD + mouse + E/Q/R/click (desktop) - gamepad + mobile sticks/buttons"
+    },
+    {
       "id": "girth",
       "title": "Girth",
       "blurb": "A ridiculous first-person garden gag: rub the magic log, build friction, splash water, grow flowers, and get the big fertile payoff.",

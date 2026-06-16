@@ -49,6 +49,7 @@
   };
 </script>
 <script src="omenly.js" defer></script>
+<script src="/gamepad.js" defer></script>
 <script defer src="/_vercel/insights/script.js"></script>
 <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
 <style>
@@ -110,6 +111,10 @@
   #objectives { display: grid; gap: 5px; font-size: 11px; line-height: 1.35; }
   #objectives div { color: var(--dim); }
   #objectives .done { color: var(--aqua); text-decoration: line-through; }
+  #objectivePips { display: none; }
+  #objectivePips .pip { width: 10px; height: 10px; border-radius: 50%; border: 1px solid rgba(255,209,102,0.7); background: rgba(255,209,102,0.16); box-shadow: 0 0 10px rgba(255,209,102,0.15); }
+  #objectivePips .pip.done { border-color: var(--aqua); background: var(--aqua); box-shadow: 0 0 12px rgba(127,255,212,0.45); }
+  #nextObjective { display: none; color: var(--gold); font-size: 10px; letter-spacing: 2px; line-height: 1.25; max-width: 34vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   #alertMeter { height: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16); margin-top: 6px; }
   #alertFill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--aqua), var(--gold), var(--red)); box-shadow: 0 0 12px rgba(255,77,109,0.45); transition: width 0.08s linear; }
   #rightHud { position: fixed; top: 14px; right: 14px; z-index: 10; pointer-events: none; width: min(360px, 44vw); }
@@ -145,7 +150,12 @@
   @media (max-width: 680px) {
     .card { padding: 20px 14px; }
     .mission-list { grid-template-columns: 1fr; }
-    #hud { min-width: 0; width: calc(100vw - 28px); }
+    #hud { min-width: 0; width: auto; max-width: calc(100vw - 28px); }
+    #hud .hudbox:first-child { display: inline-block; min-width: 188px; padding: 8px 10px; }
+    #hud .hudbox:nth-child(2) { margin-top: 6px; display: inline-flex; align-items: center; gap: 9px; width: auto; max-width: calc(100vw - 28px); padding: 7px 9px; }
+    #objectives { display: none; }
+    #objectivePips, #nextObjective { display: flex; }
+    #objectivePips { gap: 5px; align-items: center; flex-shrink: 0; }
     #rightHud { top: auto; bottom: 16px; left: 14px; right: auto; width: calc(100vw - 170px); }
     #comms { display: none; }
     #minimapWrap { display: none; }
@@ -163,7 +173,7 @@
     <div id="hudStats"></div>
     <div id="alertMeter"><div id="alertFill"></div></div>
   </div>
-  <div class="hudbox"><div id="objectives"></div></div>
+  <div class="hudbox"><div id="objectives"></div><div id="objectivePips"></div><div id="nextObjective"></div></div>
 </div>
 <div id="rightHud" class="hidden"><div id="comms"></div></div>
 <div id="interact">E TO INTERACT</div>

@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Graveyard Shift - 3D Slasher Tag Parody</title>
+<meta name="description" content="A legally distinct 3D slasher tag parody with singleplayer bots and lightweight room-code multiplayer. Repair generators, rescue teammates, dodge the killer, and escape.">
+<meta name="theme-color" content="#0d0f14">
+<link rel="canonical" href="https://omenly.vercel.app/graveyardshift/">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="../omenly.css">
+<script>
+  window.OMENLY_CONFIG = {
+    game: 'graveyardshift',
+    gameTitle: 'Graveyard Shift',
+    price: 3,
+    isHub: false,
+    donateUrl: 'https://www.paypal.me/vikas117/3',
+    allAccessDonateUrl: 'https://www.paypal.me/vikas117/10',
+    theme: { accent: '#ff5d73' }
+  };
+</script>
+<script src="../omenly.js" defer></script>
+<script src="../gamepad.js" defer></script>
+<script defer src="/_vercel/insights/script.js"></script>
+<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+  :root {
+    --bg: #0d0f14;
+    --ink: #f4efe6;
+    --muted: rgba(244,239,230,0.66);
+    --line: rgba(244,239,230,0.17);
+    --red: #ff5d73;
+    --amber: #ffd166;
+    --green: #75e6a0;
+    --blue: #8cc8ff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); color: var(--ink); font-family: "Courier New", monospace; user-select: none; -webkit-user-select: none; touch-action: none; }
+  #game { display: block; width: 100vw; height: 100vh; height: 100dvh; background: #0d0f14; cursor: crosshair; }
+  .hidden { display: none !important; }
+  .panel { position: fixed; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center; padding: 18px; background: radial-gradient(ellipse at 50% 30%, rgba(255,93,115,0.16), transparent 55%), rgba(6,7,10,0.88); backdrop-filter: blur(8px); overflow: auto; }
+  .card { width: min(780px, 96vw); max-height: calc(100dvh - 28px); overflow: auto; border: 1px solid rgba(255,93,115,0.36); background: rgba(13,15,20,0.94); box-shadow: 0 28px 80px rgba(0,0,0,0.62), 0 0 42px rgba(255,93,115,0.12); padding: 24px; text-align: center; }
+  .kicker { color: var(--amber); font-size: 10px; letter-spacing: 5px; text-transform: uppercase; margin-bottom: 12px; }
+  h1 { font: italic clamp(38px, 8vw, 72px) Georgia, serif; letter-spacing: 4px; color: var(--red); text-shadow: 0 0 24px rgba(255,93,115,0.42); line-height: 0.95; margin-bottom: 12px; }
+  h2 { font: italic clamp(26px, 5vw, 40px) Georgia, serif; color: var(--red); margin-bottom: 10px; }
+  p { color: var(--muted); line-height: 1.6; font-size: 13px; margin: 0 auto 14px; max-width: 680px; }
+  .row { display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; margin: 12px 0; }
+  button, input { font: inherit; }
+  .btn { border: 1px solid var(--red); background: transparent; color: var(--red); padding: 11px 16px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
+  .btn:hover, .btn:focus-visible, .btn.on { outline: none; background: var(--red); color: #090b10; box-shadow: 0 0 18px rgba(255,93,115,0.45); }
+  .btn.alt { border-color: var(--blue); color: var(--blue); }
+  .btn.alt:hover, .btn.alt:focus-visible, .btn.alt.on { background: var(--blue); color: #071018; }
+  .btn.good { border-color: var(--green); color: var(--green); }
+  .btn.good:hover, .btn.good:focus-visible, .btn.good.on { background: var(--green); color: #07130c; }
+  input { background: rgba(255,255,255,0.05); border: 1px solid var(--line); color: var(--ink); padding: 11px 12px; letter-spacing: 2px; text-transform: uppercase; width: 150px; text-align: center; }
+  .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 16px 0; text-align: left; }
+  .tile { border: 1px solid var(--line); background: rgba(255,255,255,0.035); padding: 12px; min-height: 96px; }
+  .tile b { color: var(--amber); display: block; margin-bottom: 6px; font-size: 12px; }
+  .tile span { color: var(--muted); line-height: 1.4; font-size: 12px; }
+  #hud { position: fixed; left: 14px; top: 14px; z-index: 10; pointer-events: none; display: grid; gap: 7px; min-width: 255px; }
+  .hudbox { border: 1px solid var(--line); background: rgba(8,10,14,0.75); padding: 9px 11px; box-shadow: 0 12px 30px rgba(0,0,0,0.3); }
+  #role { color: var(--red); letter-spacing: 3px; font-size: 12px; font-weight: bold; }
+  #stats { color: var(--muted); font-size: 11px; line-height: 1.65; letter-spacing: 1px; }
+  #stats b { color: var(--amber); font-weight: normal; }
+  #objective { color: var(--green); font-size: 12px; line-height: 1.4; }
+  #prompt { position: fixed; left: 50%; top: 58%; transform: translate(-50%, -50%); z-index: 12; pointer-events: none; padding: 8px 12px; border: 1px solid rgba(117,230,160,0.6); background: rgba(5,8,10,0.82); color: var(--green); font-size: 11px; letter-spacing: 2px; opacity: 0; transition: opacity 0.12s; }
+  #prompt.on { opacity: 1; }
+  #toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 14; pointer-events: none; padding: 9px 14px; border: 1px solid rgba(255,209,102,0.55); background: rgba(8,10,14,0.86); color: var(--amber); font-size: 11px; letter-spacing: 2px; opacity: 0; transition: opacity 0.16s; text-align: center; max-width: min(680px, 92vw); }
+  #toast.on { opacity: 1; }
+  #center { position: fixed; left: 50%; top: 50%; width: 18px; height: 18px; transform: translate(-50%, -50%); z-index: 8; pointer-events: none; border: 1px solid rgba(244,239,230,0.82); border-radius: 50%; }
+  #center::before, #center::after { content: ''; position: absolute; background: rgba(244,239,230,0.78); }
+  #center::before { left: 50%; top: -7px; width: 1px; height: 30px; transform: translateX(-50%); }
+  #center::after { top: 50%; left: -7px; width: 30px; height: 1px; transform: translateY(-50%); }
+  #touch { position: fixed; inset: 0; z-index: 22; display: none; pointer-events: none; }
+  body.touch #touch { display: block; }
+  .stick { position: absolute; bottom: max(64px, env(safe-area-inset-bottom,0px) + 54px); width: 124px; height: 124px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.28); background: rgba(255,255,255,0.055); pointer-events: auto; touch-action: none; }
+  #moveStick { left: max(24px, env(safe-area-inset-left,0px) + 14px); }
+  #lookStick { right: max(142px, env(safe-area-inset-right,0px) + 130px); }
+  .knob { position: absolute; left: 50%; top: 50%; width: 52px; height: 52px; margin: -26px 0 0 -26px; border-radius: 50%; border: 2px solid var(--red); background: rgba(255,93,115,0.18); box-shadow: 0 0 14px rgba(255,93,115,0.4); }
+  #touchBtns { position: absolute; right: max(18px, env(safe-area-inset-right,0px) + 12px); bottom: max(64px, env(safe-area-inset-bottom,0px) + 54px); display: grid; grid-template-columns: repeat(2, 72px); gap: 7px; pointer-events: auto; }
+  #touchBtns button { min-height: 46px; border: 1px solid rgba(255,255,255,0.32); background: rgba(8,10,14,0.76); color: var(--ink); font-size: 10px; letter-spacing: 1px; }
+  #touchBtns button.hot { border-color: var(--red); color: var(--red); }
+  #donate { position: fixed; right: 14px; bottom: 14px; z-index: 30; }
+  #donate a { display: inline-block; padding: 8px 13px; border: 1px solid var(--red); color: var(--red); background: rgba(8,10,14,0.7); text-decoration: none; font-size: 10px; letter-spacing: 2px; }
+  @media (max-width: 700px) {
+    .grid { grid-template-columns: 1fr; }
+    #hud { min-width: 0; width: calc(100vw - 28px); }
+    #donate { display: none; }
+    .card { padding: 18px 14px; }
+  }
+  @media (orientation: landscape) and (max-height: 480px) {
+    .stick { width: 100px; height: 100px; bottom: max(34px, env(safe-area-inset-bottom,0px) + 26px); }
+    .knob { width: 42px; height: 42px; margin: -21px 0 0 -21px; }
+    #touchBtns { bottom: max(34px, env(safe-area-inset-bottom,0px) + 26px); grid-template-columns: repeat(2, 62px); }
+    #touchBtns button { min-height: 40px; font-size: 9px; }
+  }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="hud" class="hidden">
+  <div class="hudbox">
+    <div id="role">SURVIVOR</div>
+    <div id="stats"></div>
+  </div>
+  <div class="hudbox" id="objective"></div>
+</div>
+<div id="prompt"></div>
+<div id="toast"></div>
+<div id="center" class="hidden"></div>
+
+<div id="menu" class="panel">
+  <div class="card">
+    <div class="kicker">OMENLY PRESENTS - TOTALLY ORIGINAL CAMPFIRE LAWSUIT BAIT</div>
+    <h1>Graveyard Shift</h1>
+    <p>Four interns versus one masked performance reviewer in a foggy salvage yard. Repair generators, unhook teammates, drop pallets, open the gate, and try not to become an onboarding video.</p>
+    <div class="grid">
+      <div class="tile"><b>Survivors</b><span>Repair five humming legal liabilities. Rescue friends. Escape through the gate.</span></div>
+      <div class="tile"><b>Killer</b><span>Track interns, bonk them with a clipboard, and hook them for mandatory feedback.</span></div>
+      <div class="tile"><b>Modes</b><span>Singleplayer bots, host a room, or join a friend with a short code.</span></div>
+    </div>
+    <div class="row">
+      <button class="btn good" id="soloSurvivor">Solo Survivor</button>
+      <button class="btn" id="soloKiller">Solo Killer</button>
+      <button class="btn alt" id="hostBtn">Host Room</button>
+    </div>
+    <div class="row">
+      <input id="joinCode" maxlength="6" placeholder="ROOM">
+      <button class="btn alt" id="joinBtn">Join Room</button>
+    </div>
+    <p id="netStatus">Room multiplayer is lightweight peer-to-peer. Singleplayer works offline after assets load.</p>
+    <div data-omenly-ad style="margin-top:18px;"></div>
+  </div>
+</div>
+
+<div id="end" class="panel hidden">
+  <div class="card">
+    <div class="kicker" id="endKicker">SHIFT OVER</div>
+    <h2 id="endTitle">Result</h2>
+    <p id="endText"></p>
+    <div class="row">
+      <button class="btn good" id="againBtn">Play Again</button>
+      <button class="btn alt" id="menuBtn">Menu</button>
+    </div>
+  </div>
+</div>
+
+<div id="touch">
+  <div id="moveStick" class="stick"><div class="knob"></div></div>
+  <div id="lookStick" class="stick"><div class="knob"></div></div>
+  <div id="touchBtns">
+    <button id="actBtn" class="hot">ACTION</button>
+    <button id="toolBtn" class="hot">TOOL</button>
+    <button id="palletBtn">PALLET</button>
+    <button id="reloadBtn">BATTERY</button>
+  </div>
+</div>
+
+<div id="donate"><a href="https://www.paypal.me/vikas117/3" target="_blank" rel="noopener" data-omenly-cta>SUPPORT</a></div>
+
+<script>
+(() => {
+  'use strict';
+
+  const $ = id => document.getElementById(id);
+  const canvas = $('game');
+  const hud = $('hud');
+  const roleEl = $('role');
+  const statsEl = $('stats');
+  const objectiveEl = $('objective');
+  const promptEl = $('prompt');
+  const toastEl = $('toast');
+  const centerEl = $('center');
+  const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0 || matchMedia('(pointer: coarse)').matches;
+  if (isTouch) document.body.classList.add('touch');
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+  renderer.setSize(innerWidth, innerHeight, false);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.1;
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x10141d);
+  scene.fog = new THREE.Fog(0x10141d, 16, 74);
+  const camera = new THREE.PerspectiveCamera(66, innerWidth / innerHeight, 0.1, 160);
+  camera.rotation.order = 'YXZ';
+
+  scene.add(new THREE.HemisphereLight(0xb7d5ff, 0x1c221b, 1.15));
+  const moon = new THREE.DirectionalLight(0xbed9ff, 1.6);
+  moon.position.set(-14, 24, 9);
+  scene.add(moon);
+  const redFill = new THREE.PointLight(0xff5d73, 1.4, 25);
+  redFill.position.set(0, 5, 0);
+  scene.add(redFill);
+
+  const world = new THREE.Group();
+  scene.add(world);
+
+  const ARENA = 44;
+  const keys = Object.create(null);
+  const input = { mx: 0, mz: 0, lookX: 0, lookY: 0, toolHeld: false };
+  const state = {
+    running: false,
+    localRole: 'survivor',
+    multiplayer: false,
+    host: false,
+    roomCode: '',
+    peer: null,
+    conns: [],
+    time: 0,
+    gateOpen: false,
+    gateProgress: 0,
+    gensNeeded: 4,
+    near: null,
+    toastT: 0
+  };
+
+  const local = makePlayer('local', 'YOU', 'survivor', true);
+  const players = [local];
+  const generators = [];
+  const hooks = [];
+  const pallets = [];
+  const obstacles = [];
+  const sparks = [];
+  let killer = null;
+  let pointerLocked = false;
+  let last = performance.now();
+
+  buildArena();
+  bind();
+  setupTouch();
+  requestAnimationFrame(loop);
+
+  function makePlayer(id, name, role, isLocal) {
+    return {
+      id, name, role, isLocal,
+      x: 0, z: 0, y: 0, yaw: 0, pitch: 0,
+      speed: role === 'killer' ? 4.65 : 4.1,
+      hp: role === 'killer' ? 999 : 2,
+      down: false,
+      hooked: false,
+      escaped: false,
+      bot: false,
+      repair: null,
+      rescueT: 0,
+      attackCd: 0,
+      toolCharge: 100,
+      mesh: null,
+      target: null,
+      aiT: 0
+    };
+  }
+
+  function buildArena() {
+    const floor = new THREE.Mesh(
+      new THREE.PlaneGeometry(ARENA * 2, ARENA * 2, 1, 1),
+      new THREE.MeshStandardMaterial({ color: 0x263021, roughness: 1 })
+    );
+    floor.rotation.x = -Math.PI / 2;
+    world.add(floor);
+
+    const grid = new THREE.GridHelper(ARENA * 2, 22, 0x465443, 0x2e392d);
+    grid.position.y = 0.015;
+    world.add(grid);
+
+    addWall(0, -ARENA, ARENA * 2, 1.2);
+    addWall(0, ARENA, ARENA * 2, 1.2);
+    addWall(-ARENA, 0, 1.2, ARENA * 2);
+    addWall(ARENA, 0, 1.2, ARENA * 2);
+
+    const propMat = new THREE.MeshStandardMaterial({ color: 0x4a3f34, roughness: 0.9 });
+    const junkMat = new THREE.MeshStandardMaterial({ color: 0x5c6871, roughness: 0.8, metalness: 0.1 });
+    const coords = [
+      [-25, -22, 8, 3], [-8, -27, 3, 9], [18, -23, 10, 3], [27, -7, 3, 11],
+      [10, 1, 12, 3], [-18, 8, 3, 12], [-30, 25, 10, 3], [18, 25, 3, 10],
+      [-4, 24, 9, 3], [31, 16, 8, 3], [-31, -4, 7, 3]
+    ];
+    coords.forEach((c, i) => {
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(c[2], 1.8, c[3]), i % 2 ? propMat : junkMat);
+      mesh.position.set(c[0], 0.9, c[1]);
+      world.add(mesh);
+      obstacles.push({ x: c[0], z: c[1], hw: c[2] / 2 + 0.35, hd: c[3] / 2 + 0.35, mesh });
+    });
+
+    const genPos = [[-30,-30], [-4,-33], [30,-25], [-28,6], [4,6], [30,18], [-8,31]];
+    genPos.forEach((p, i) => addGenerator(p[0], p[1], i));
+    [[-35,31], [35,-34], [34,34], [-36,-8]].forEach((p, i) => addHook(p[0], p[1], i));
+    [[-15,-16], [17,-8], [-26,17], [9,30], [31,4]].forEach((p, i) => addPallet(p[0], p[1], i));
+    addGate(0, ARENA - 0.8);
+    addTrees();
+  }
+
+  function addWall(x, z, w, d) {
+    const mesh = new THREE.Mesh(
+      new THREE.BoxGeometry(w, 3.4, d),
+      new THREE.MeshStandardMaterial({ color: 0x171b20, roughness: 0.95 })
+    );
+    mesh.position.set(x, 1.7, z);
+    world.add(mesh);
+    obstacles.push({ x, z, hw: w / 2 + 0.4, hd: d / 2 + 0.4, mesh });
+  }
+
+  function addGenerator(x, z, i) {
+    const g = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.2, 1.6), new THREE.MeshStandardMaterial({ color: 0x3a4650, roughness: 0.78 }));
+    body.position.y = 0.6;
+    const coil = new THREE.Mesh(new THREE.TorusGeometry(0.34, 0.05, 8, 16), new THREE.MeshStandardMaterial({ color: 0xffd166, emissive: 0xffd166, emissiveIntensity: 0.2 }));
+    coil.rotation.x = Math.PI / 2;
+    coil.position.set(0, 1.32, 0);
+    g.add(body, coil);
+    g.position.set(x, 0, z);
+    world.add(g);
+    generators.push({ x, z, progress: 0, done: false, mesh: g, coil, worker: null });
+  }
+
+  function addHook(x, z, i) {
+    const g = new THREE.Group();
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 3, 8), new THREE.MeshStandardMaterial({ color: 0x1b1b1d, roughness: 0.9 }));
+    post.position.y = 1.5;
+    const hook = new THREE.Mesh(new THREE.TorusGeometry(0.32, 0.04, 8, 16, Math.PI * 1.25), new THREE.MeshStandardMaterial({ color: 0xff5d73, emissive: 0xff5d73, emissiveIntensity: 0.25 }));
+    hook.position.set(0.35, 2.65, 0);
+    hook.rotation.z = Math.PI * 0.8;
+    g.add(post, hook);
+    g.position.set(x, 0, z);
+    world.add(g);
+    hooks.push({ x, z, usedBy: null, mesh: g });
+  }
+
+  function addPallet(x, z, i) {
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.25, 0.5), new THREE.MeshStandardMaterial({ color: 0xa36d36, roughness: 0.85 }));
+    mesh.position.set(x, 0.18, z);
+    world.add(mesh);
+    pallets.push({ x, z, dropped: false, used: false, angle: 0, mesh });
+  }
+
+  let gate = null;
+  function addGate(x, z) {
+    const g = new THREE.Group();
+    const mat = new THREE.MeshStandardMaterial({ color: 0x263a4e, roughness: 0.8 });
+    const a = new THREE.Mesh(new THREE.BoxGeometry(0.35, 4, 1.2), mat);
+    const b = a.clone();
+    a.position.set(-3.2, 2, 0); b.position.set(3.2, 2, 0);
+    const sign = new THREE.Mesh(new THREE.BoxGeometry(6.6, 0.55, 0.35), new THREE.MeshStandardMaterial({ color: 0x75e6a0, emissive: 0x75e6a0, emissiveIntensity: 0.25 }));
+    sign.position.y = 3.7;
+    g.add(a, b, sign);
+    g.position.set(x, 0, z);
+    world.add(g);
+    gate = { x, z, mesh: g, progress: 0 };
+  }
+
+  function addTrees() {
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x2c2118, roughness: 1 });
+    const leafMat = new THREE.MeshStandardMaterial({ color: 0x152717, roughness: 1 });
+    for (let i = 0; i < 54; i++) {
+      const edge = Math.random() < 0.5;
+      const x = edge ? (Math.random() < 0.5 ? -40 - Math.random() * 2 : 40 + Math.random() * 2) : -39 + Math.random() * 78;
+      const z = edge ? -39 + Math.random() * 78 : (Math.random() < 0.5 ? -40 - Math.random() * 2 : 40 + Math.random() * 2);
+      const t = new THREE.Group();
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.2, 2.3, 7), trunkMat);
+      trunk.position.y = 1.15;
+      const leaves = new THREE.Mesh(new THREE.ConeGeometry(1.2, 3.2, 8), leafMat);
+      leaves.position.y = 3.0;
+      t.add(trunk, leaves);
+      t.position.set(x, 0, z);
+      world.add(t);
+    }
+  }
+
+  function makeHuman(role, color) {
+    const g = new THREE.Group();
+    const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.75 });
+    const dark = new THREE.MeshStandardMaterial({ color: 0x101216, roughness: 0.85 });
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.28, 14, 12), new THREE.MeshStandardMaterial({ color: role === 'killer' ? 0xf3e7d3 : 0xc89467, roughness: 0.7 }));
+    head.position.y = 1.78;
+    const body = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.9, 0.34), mat);
+    body.position.y = 1.12;
+    const legL = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.66, 0.24), dark);
+    const legR = legL.clone();
+    legL.position.set(-0.18, 0.42, 0); legR.position.set(0.18, 0.42, 0);
+    const armL = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.72, 0.18), dark);
+    const armR = armL.clone();
+    armL.position.set(-0.44, 1.14, 0); armR.position.set(0.44, 1.14, 0);
+    g.add(head, body, legL, legR, armL, armR);
+    g.parts = { legL, legR, armL, armR, body, head };
+    if (role === 'killer') {
+      const weapon = new THREE.Mesh(new THREE.BoxGeometry(0.14, 1.0, 0.14), new THREE.MeshStandardMaterial({ color: 0xff5d73, emissive: 0xff5d73, emissiveIntensity: 0.18 }));
+      weapon.position.set(0.62, 1.0, -0.18);
+      weapon.rotation.z = -0.45;
+      g.add(weapon);
+      const mask = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.42, 0.05), new THREE.MeshStandardMaterial({ color: 0xf5efe0, roughness: 0.6 }));
+      mask.position.set(0, 1.78, -0.25);
+      g.add(mask);
+    }
+    return g;
+  }
+
+  function resetGame(role, multiplayer) {
+    state.running = true;
+    state.localRole = role;
+    state.multiplayer = !!multiplayer;
+    state.time = 0;
+    state.gateOpen = false;
+    state.gateProgress = 0;
+    state.near = null;
+    local.role = role;
+    local.speed = role === 'killer' ? 4.65 : 4.1;
+    players.length = 0;
+    players.push(local);
+    for (const g of generators) { g.progress = 0; g.done = false; g.worker = null; g.coil.material.emissiveIntensity = 0.2; }
+    for (const h of hooks) h.usedBy = null;
+    for (const p of pallets) { p.dropped = false; p.used = false; p.angle = 0; p.mesh.rotation.y = 0; p.mesh.position.y = 0.18; }
+    if (role === 'killer') {
+      place(local, 0, 0, Math.PI);
+      spawnBots('survivor', 4);
+      killer = local;
+    } else {
+      place(local, -30, 34, Math.PI);
+      const k = makePlayer('killer_bot', 'MANAGER', 'killer', false);
+      k.bot = true;
+      place(k, 0, -28, 0);
+      players.push(k);
+      killer = k;
+      spawnBots('survivor', 3);
+    }
+    rebuildMeshes();
+    $('menu').classList.add('hidden');
+    $('end').classList.add('hidden');
+    hud.classList.remove('hidden');
+    centerEl.classList.remove('hidden');
+    toast(role === 'killer' ? 'You are the killer. Conduct mandatory feedback.' : 'Repair generators. Open the gate. Leave the internship.');
+    tryLockPointer();
+  }
+
+  function spawnBots(role, count) {
+    const starts = [[-34,34], [-18,32], [18,32], [33,28], [-32,-20], [26,-34]];
+    for (let i = 0; i < count; i++) {
+      const b = makePlayer(role + '_bot_' + i, role === 'killer' ? 'MANAGER' : ['JUNE','MOSS','KIP','TARA','NIA'][i % 5], role, false);
+      b.bot = true;
+      const s = starts[i % starts.length];
+      place(b, s[0] + Math.random() * 3, s[1] - Math.random() * 3, Math.PI);
+      players.push(b);
+    }
+  }
+
+  function place(p, x, z, yaw) {
+    p.x = x; p.z = z; p.y = 0; p.yaw = yaw || 0; p.pitch = 0;
+    p.hp = p.role === 'killer' ? 999 : 2;
+    p.down = false; p.hooked = false; p.escaped = false; p.repair = null; p.rescueT = 0; p.attackCd = 0; p.toolCharge = 100;
+  }
+
+  function rebuildMeshes() {
+    for (const p of players) {
+      if (p.mesh) world.remove(p.mesh);
+      p.mesh = makeHuman(p.role, p.role === 'killer' ? 0x552533 : (p.isLocal ? 0x75e6a0 : 0x8cc8ff));
+      world.add(p.mesh);
+    }
+  }
+
+  function bind() {
+    $('soloSurvivor').addEventListener('click', () => resetGame('survivor', false));
+    $('soloKiller').addEventListener('click', () => resetGame('killer', false));
+    $('againBtn').addEventListener('click', () => resetGame(state.localRole, state.multiplayer));
+    $('menuBtn').addEventListener('click', showMenu);
+    $('hostBtn').addEventListener('click', hostRoom);
+    $('joinBtn').addEventListener('click', joinRoom);
+    $('joinCode').addEventListener('keydown', e => { if (e.key === 'Enter') joinRoom(); });
+    window.addEventListener('resize', resize);
+    window.addEventListener('keydown', e => {
+      const k = e.key.toLowerCase();
+      keys[k] = true;
+      if (['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k)) e.preventDefault();
+      if (!state.running && (k === ' ' || k === 'enter')) resetGame('survivor', false);
+      if (state.running) {
+        if (k === 'e') action();
+        if (k === 'q') dropPallet();
+        if (k === 'r') reloadTool();
+      }
+    });
+    window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; input.toolHeld = false; });
+    window.addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
+    canvas.addEventListener('click', () => { if (state.running && !isTouch) tryLockPointer(); });
+    canvas.addEventListener('mousedown', e => {
+      if (!state.running) return;
+      if (e.button === 0) useTool();
+    });
+    window.addEventListener('mousemove', e => {
+      if (!pointerLocked || !state.running) return;
+      local.yaw -= (e.movementX || 0) * 0.0018;
+      local.pitch = clamp(local.pitch - (e.movementY || 0) * 0.0012, -0.9, 0.9);
+    });
+    document.addEventListener('pointerlockchange', () => { pointerLocked = document.pointerLockElement === canvas; });
+    $('actBtn').addEventListener('pointerdown', e => { e.preventDefault(); action(); });
+    $('toolBtn').addEventListener('pointerdown', e => { e.preventDefault(); useTool(); });
+    $('palletBtn').addEventListener('pointerdown', e => { e.preventDefault(); dropPallet(); });
+    $('reloadBtn').addEventListener('pointerdown', e => { e.preventDefault(); reloadTool(); });
+  }
+
+  function hostRoom() {
+    if (typeof Peer === 'undefined') { $('netStatus').textContent = 'PeerJS failed to load. Solo still works.'; return; }
+    const code = Math.random().toString(36).slice(2, 8).toUpperCase();
+    state.roomCode = code;
+    state.host = true;
+    state.multiplayer = true;
+    $('netStatus').textContent = 'ROOM ' + code + ' - waiting for friends. You can start as killer now.';
+    try {
+      state.peer = new Peer(code);
+      state.peer.on('connection', conn => {
+        state.conns.push(conn);
+        conn.on('data', msg => handleNet(msg, conn));
+        conn.on('open', () => conn.send({ t: 'hello', code }));
+      });
+      resetGame('killer', true);
+      toast('Room ' + code + ' live. Share the code, then hunt.');
+    } catch (err) {
+      $('netStatus').textContent = 'Host failed: ' + err.message;
+    }
+  }
+
+  function joinRoom() {
+    if (typeof Peer === 'undefined') { $('netStatus').textContent = 'PeerJS failed to load. Solo still works.'; return; }
+    const code = $('joinCode').value.trim().toUpperCase();
+    if (code.length < 4) { $('netStatus').textContent = 'Enter a room code.'; return; }
+    state.host = false;
+    state.multiplayer = true;
+    state.roomCode = code;
+    try {
+      state.peer = new Peer();
+      state.peer.on('open', () => {
+        const conn = state.peer.connect(code);
+        state.conns = [conn];
+        conn.on('open', () => {
+          $('netStatus').textContent = 'Connected to ' + code + '. Starting survivor.';
+          conn.send({ t: 'join', name: 'GUEST' });
+          resetGame('survivor', true);
+        });
+        conn.on('data', msg => handleNet(msg, conn));
+      });
+    } catch (err) {
+      $('netStatus').textContent = 'Join failed: ' + err.message;
+    }
+  }
+
+  function handleNet(msg, conn) {
+    if (!msg || typeof msg !== 'object') return;
+    if (msg.t === 'join' && state.host) {
+      const p = makePlayer('remote_' + Math.random().toString(36).slice(2, 6), msg.name || 'GUEST', 'survivor', false);
+      place(p, -28 + Math.random() * 6, 32, Math.PI);
+      players.push(p);
+      rebuildMeshes();
+      conn._pid = p.id;
+      conn.send({ t: 'start', role: 'survivor' });
+    } else if (msg.t === 'input' && state.host && conn._pid) {
+      const p = players.find(x => x.id === conn._pid);
+      if (p) Object.assign(p, { x: msg.x, z: msg.z, yaw: msg.yaw, pitch: msg.pitch, down: msg.down, hooked: msg.hooked, escaped: msg.escaped });
+    } else if (msg.t === 'snap' && !state.host) {
+      applySnap(msg);
+    }
+  }
+
+  function broadcast(msg) {
+    for (const c of state.conns) {
+      try { if (c.open) c.send(msg); } catch (_) {}
+    }
+  }
+
+  function applySnap(msg) {
+    if (!msg.players) return;
+    for (const rp of msg.players) {
+      if (rp.id === 'local') continue;
+      let p = players.find(x => x.id === rp.id);
+      if (!p) {
+        p = makePlayer(rp.id, rp.name || 'REMOTE', rp.role, false);
+        players.push(p);
+        rebuildMeshes();
+      }
+      Object.assign(p, rp);
+    }
+    if (Array.isArray(msg.gens)) {
+      msg.gens.forEach((g, i) => { if (generators[i]) Object.assign(generators[i], g); });
+    }
+    state.gateOpen = !!msg.gateOpen;
+    state.gateProgress = msg.gateProgress || 0;
+  }
+
+  function showMenu() {
+    state.running = false;
+    hud.classList.add('hidden');
+    centerEl.classList.add('hidden');
+    $('end').classList.add('hidden');
+    $('menu').classList.remove('hidden');
+    document.exitPointerLock?.();
+  }
+
+  function tryLockPointer() {
+    if (!isTouch) canvas.requestPointerLock?.();
+  }
+
+  function setupTouch() {
+    bindStick($('moveStick'), $('moveStick').querySelector('.knob'), (x, y) => { input.mx = x; input.mz = y; });
+    bindStick($('lookStick'), $('lookStick').querySelector('.knob'), (x, y) => { input.lookX = x; input.lookY = y; });
+  }
+
+  function bindStick(el, knob, cb) {
+    let id = null;
+    function set(clientX, clientY) {
+      const r = el.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      let dx = clientX - cx, dy = clientY - cy;
+      const max = r.width * 0.38;
+      const len = Math.hypot(dx, dy);
+      if (len > max) { dx = dx / len * max; dy = dy / len * max; }
+      knob.style.transform = `translate(${dx}px,${dy}px)`;
+      cb(dx / max, dy / max);
+    }
+    function end(e) {
+      if (id !== e.pointerId) return;
+      id = null;
+      knob.style.transform = '';
+      cb(0, 0);
+    }
+    el.addEventListener('pointerdown', e => { id = e.pointerId; el.setPointerCapture(e.pointerId); set(e.clientX, e.clientY); });
+    el.addEventListener('pointermove', e => { if (id === e.pointerId) set(e.clientX, e.clientY); });
+    el.addEventListener('pointerup', end);
+    el.addEventListener('pointercancel', end);
+  }
+
+  function update(dt) {
+    state.time += dt;
+    if (state.toastT > 0) state.toastT -= dt; else toastEl.classList.remove('on');
+    readGamepad(dt);
+    updateLocal(dt);
+    updateNear(dt);
+    updateBots(dt);
+    updateWorld(dt);
+    checkWinLoss();
+    if (state.host) broadcastSnap();
+    else if (state.multiplayer) broadcast({ t: 'input', x: local.x, z: local.z, yaw: local.yaw, pitch: local.pitch, down: local.down, hooked: local.hooked, escaped: local.escaped });
+  }
+
+  function readGamepad(dt) {
+    if (!window.OmenlyGamepad) return;
+    const GP = window.OmenlyGamepad;
+    GP.poll();
+    const a = GP.axis(0);
+    if (a.x || a.y) { input.mx = a.x; input.mz = a.y; }
+    const l = GP.axis(1);
+    if (l.x || l.y) {
+      local.yaw -= l.x * dt * 2.7;
+      local.pitch = clamp(local.pitch - l.y * dt * 1.7, -0.9, 0.9);
+    }
+    if (GP.pressed('a')) action();
+    if (GP.pressed('x')) dropPallet();
+    if (GP.pressed('b')) reloadTool();
+    if (GP.button('rt')) useTool();
+  }
+
+  function updateLocal(dt) {
+    if (local.down || local.hooked || local.escaped) return;
+    let mx = input.mx;
+    let mz = input.mz;
+    if (keys.w || keys.arrowup) mz -= 1;
+    if (keys.s || keys.arrowdown) mz += 1;
+    if (keys.a || keys.arrowleft) mx -= 1;
+    if (keys.d || keys.arrowright) mx += 1;
+    const len = Math.hypot(mx, mz);
+    if (len > 1) { mx /= len; mz /= len; }
+    if (input.lookX || input.lookY) {
+      local.yaw -= input.lookX * dt * 2.4;
+      local.pitch = clamp(local.pitch - input.lookY * dt * 1.4, -0.9, 0.9);
+    }
+    const sprint = keys.shift && local.role === 'survivor';
+    const sp = local.speed * (sprint ? 1.35 : 1);
+    const cy = Math.cos(local.yaw), sy = Math.sin(local.yaw);
+    movePlayer(local, (mx * cy + mz * sy) * sp * dt, (-mx * sy + mz * cy) * sp * dt);
+    if (keys.e) action(true);
+    if (input.toolHeld) useTool();
+    local.attackCd = Math.max(0, local.attackCd - dt);
+    if (local.toolCharge < 100 && local.role === 'survivor') local.toolCharge = Math.min(100, local.toolCharge + dt * 8);
+  }
+
+  function movePlayer(p, dx, dz) {
+    let nx = clamp(p.x + dx, -ARENA + 1.2, ARENA - 1.2);
+    let nz = clamp(p.z + dz, -ARENA + 1.2, ARENA - 1.2);
+    for (const o of obstacles) {
+      if (Math.abs(nx - o.x) < o.hw && Math.abs(nz - o.z) < o.hd) {
+        if (Math.abs(p.x - o.x) >= o.hw) nx = p.x;
+        if (Math.abs(p.z - o.z) >= o.hd) nz = p.z;
+      }
+    }
+    for (const pal of pallets) {
+      if (pal.dropped && !pal.used && Math.abs(nx - pal.x) < 1.9 && Math.abs(nz - pal.z) < 0.7) {
+        if (p.role === 'killer') {
+          p.attackCd = Math.max(p.attackCd, 0.9);
+          pal.used = true;
+          pal.mesh.material.color.setHex(0x513519);
+          toast('Pallet stun. The board meeting is delayed.');
+        }
+        nx = p.x; nz = p.z;
+      }
+    }
+    p.x = nx; p.z = nz;
+  }
+
+  function updateNear(dt) {
+    state.near = null;
+    let best = 2.5;
+    if (local.role === 'survivor' && !local.down && !local.hooked) {
+      for (const g of generators) {
+        if (g.done) continue;
+        const d = dist(local, g);
+        if (d < best) { best = d; state.near = { type: 'gen', obj: g, text: 'E / A: repair generator' }; }
+      }
+      for (const p of players) {
+        if (p === local || (!p.down && !p.hooked)) continue;
+        const d = dist(local, p);
+        if (d < best) { best = d; state.near = { type: 'rescue', obj: p, text: 'E / A: rescue teammate' }; }
+      }
+      if (state.gateOpen && Math.hypot(local.x - gate.x, local.z - gate.z) < 4.2) {
+        state.near = { type: 'escape', obj: gate, text: 'E / A: escape' };
+      } else if (doneGens() >= state.gensNeeded && Math.hypot(local.x - gate.x, local.z - gate.z) < 4.2) {
+        state.near = { type: 'gate', obj: gate, text: 'E / A: open gate' };
+      }
+    } else if (local.role === 'killer') {
+      for (const p of players) {
+        if (p.role !== 'survivor' || p.escaped || p.hooked || !p.down) continue;
+        const d = dist(local, p);
+        if (d < best) { best = d; state.near = { type: 'hook', obj: p, text: 'E / A: hook intern' }; }
+      }
+    }
+    promptEl.textContent = state.near ? state.near.text : '';
+    promptEl.classList.toggle('on', !!state.near);
+  }
+
+  function action(held) {
+    if (!state.running || !state.near) return;
+    const n = state.near;
+    if (n.type === 'gen') {
+      n.obj.progress += held ? 0.18 : 2.5;
+      if (Math.random() < 0.035) spark(n.obj.x, n.obj.z, 0xffd166);
+      if (n.obj.progress >= 100) {
+        n.obj.progress = 100;
+        n.obj.done = true;
+        n.obj.coil.material.emissiveIntensity = 1.4;
+        toast('Generator fixed. It now hums like a paid invoice.');
+      }
+    } else if (n.type === 'rescue') {
+      n.obj.down = false;
+      n.obj.hooked = false;
+      n.obj.hp = 1;
+      const hook = hooks.find(h => h.usedBy === n.obj.id);
+      if (hook) hook.usedBy = null;
+      toast('Teammate rescued. HR calls this collaboration.');
+    } else if (n.type === 'gate') {
+      state.gateProgress += held ? 0.25 : 4;
+      if (state.gateProgress >= 100) {
+        state.gateOpen = true;
+        toast('Gate open. Leave before the exit interview.');
+      }
+    } else if (n.type === 'escape') {
+      local.escaped = true;
+      endGame('Escaped', 'You left the yard and updated your resume in the parking lot.');
+    } else if (n.type === 'hook') {
+      const h = nearestFreeHook(local.x, local.z);
+      if (h) {
+        n.obj.hooked = true;
+        n.obj.down = false;
+        n.obj.x = h.x; n.obj.z = h.z;
+        h.usedBy = n.obj.id;
+        toast('Intern hooked for mandatory feedback.');
+      }
+    }
+  }
+
+  function useTool() {
+    if (!state.running || local.attackCd > 0) return;
+    input.toolHeld = true;
+    if (local.role === 'killer') {
+      local.attackCd = 0.8;
+      const target = nearestSurvivor(local.x, local.z, 2.5, true);
+      if (target) {
+        if (target.hp > 1) {
+          target.hp--;
+          toast(target.name + ' injured. Performance note added.');
+        } else {
+          target.down = true;
+          toast(target.name + ' is down. Find a hook.');
+        }
+        spark(target.x, target.z, 0xff5d73);
+      } else {
+        toast('Swing whiff. The clipboard tastes fog.');
+      }
+    } else {
+      if (local.toolCharge < 18) { toast('Battery empty. Reload the flashlight.'); return; }
+      local.toolCharge -= 18;
+      const k = killer;
+      if (k && Math.hypot(k.x - local.x, k.z - local.z) < 7) {
+        const facing = Math.abs(wrap(Math.atan2(k.x - local.x, k.z - local.z) - local.yaw)) < 0.55;
+        if (facing) {
+          k.attackCd = Math.max(k.attackCd, 1.1);
+          toast('Flashlight stun. The manager forgets why he entered the room.');
+          spark(k.x, k.z, 0x8cc8ff);
+        }
+      }
+    }
+  }
+
+  function dropPallet() {
+    if (local.role !== 'survivor') return;
+    let best = null, bd = 2.2;
+    for (const p of pallets) {
+      if (p.dropped) continue;
+      const d = Math.hypot(local.x - p.x, local.z - p.z);
+      if (d < bd) { bd = d; best = p; }
+    }
+    if (!best) { toast('No pallet nearby. Try a strongly worded glance.'); return; }
+    best.dropped = true;
+    best.angle = Math.PI / 2;
+    best.mesh.rotation.y = best.angle;
+    best.mesh.position.y = 0.26;
+    toast('Pallet dropped. Wood beats quarterly review.');
+  }
+
+  function reloadTool() {
+    if (local.role !== 'survivor') return;
+    local.toolCharge = 100;
+    toast('Battery reloaded.');
+  }
+
+  function updateBots(dt) {
+    for (const p of players) {
+      if (!p.bot || p.escaped || p.hooked) continue;
+      p.attackCd = Math.max(0, p.attackCd - dt);
+      if (p.down) {
+        if (killer && Math.hypot(killer.x - p.x, killer.z - p.z) > 4 && Math.random() < dt * 0.4) {
+          const helper = nearestSurvivor(p.x, p.z, 10, false);
+          if (helper && helper !== p) helper.target = p;
+        }
+        continue;
+      }
+      if (p.role === 'killer') updateKillerBot(p, dt);
+      else updateSurvivorBot(p, dt);
+    }
+  }
+
+  function updateSurvivorBot(p, dt) {
+    const kd = killer ? Math.hypot(killer.x - p.x, killer.z - p.z) : 99;
+    if (kd < 8) {
+      const dx = p.x - killer.x;
+      const dz = p.z - killer.z;
+      botMove(p, p.x + dx, p.z + dz, dt, 1.35);
+      return;
+    }
+    if (p.target && (p.target.down || p.target.hooked)) {
+      botMove(p, p.target.x, p.target.z, dt, 1.1);
+      if (dist(p, p.target) < 1.8) {
+        p.target.down = false; p.target.hooked = false; p.target.hp = 1; p.target = null;
+      }
+      return;
+    }
+    const g = generators.filter(x => !x.done).sort((a, b) => dist(p, a) - dist(p, b))[0];
+    if (!g) {
+      botMove(p, gate.x, gate.z, dt, 1.0);
+      if (state.gateOpen && Math.hypot(p.x - gate.x, p.z - gate.z) < 3) p.escaped = true;
+      return;
+    }
+    if (dist(p, g) > 1.4) botMove(p, g.x, g.z, dt, 1.0);
+    else {
+      g.progress += dt * 7.5;
+      if (g.progress >= 100) { g.progress = 100; g.done = true; g.coil.material.emissiveIntensity = 1.4; }
+    }
+  }
+
+  function updateKillerBot(p, dt) {
+    const target = players.filter(x => x.role === 'survivor' && !x.escaped && !x.hooked).sort((a, b) => dist(p, a) - dist(p, b))[0];
+    if (!target) return;
+    if (target.down) {
+      botMove(p, target.x, target.z, dt, 1.0);
+      if (dist(p, target) < 1.7) {
+        const h = nearestFreeHook(target.x, target.z);
+        if (h) {
+          target.hooked = true; target.down = false; target.x = h.x; target.z = h.z; h.usedBy = target.id;
+          toast(target.name + ' hooked.');
+        }
+      }
+      return;
+    }
+    botMove(p, target.x, target.z, dt, 1.18);
+    if (dist(p, target) < 2.1 && p.attackCd <= 0) {
+      p.attackCd = 1.0;
+      if (target.hp > 1) target.hp--;
+      else target.down = true;
+      spark(target.x, target.z, 0xff5d73);
+      if (target.isLocal) toast('Hit. Your internship is becoming hands-on.');
+    }
+  }
+
+  function botMove(p, tx, tz, dt, mul) {
+    const dx = tx - p.x, dz = tz - p.z;
+    const len = Math.hypot(dx, dz) || 1;
+    p.yaw = Math.atan2(dx, dz);
+    movePlayer(p, dx / len * p.speed * mul * dt, dz / len * p.speed * mul * dt);
+  }
+
+  function updateWorld(dt) {
+    for (const p of players) {
+      if (!p.mesh) continue;
+      p.mesh.visible = !p.escaped;
+      p.mesh.position.set(p.x, p.down ? -0.2 : 0, p.z);
+      p.mesh.rotation.y = p.yaw;
+      p.mesh.rotation.z = p.down ? 1.25 : 0;
+      if (p.hooked) p.mesh.position.y = 0.9 + Math.sin(state.time * 4) * 0.04;
+      const walk = Math.sin(state.time * 8 + p.x) * 0.45;
+      if (p.mesh.parts) {
+        p.mesh.parts.legL.rotation.x = walk;
+        p.mesh.parts.legR.rotation.x = -walk;
+        p.mesh.parts.armL.rotation.x = -walk * 0.4;
+        p.mesh.parts.armR.rotation.x = p.attackCd > 0 ? -1.4 : walk * 0.4;
+      }
+    }
+    for (const g of generators) {
+      g.coil.rotation.y += dt * (g.done ? 8 : 2 + g.progress * 0.05);
+      g.mesh.scale.y = 1 + Math.sin(state.time * 9 + g.x) * (g.done ? 0.025 : 0.006);
+    }
+    for (let i = sparks.length - 1; i >= 0; i--) {
+      const s = sparks[i];
+      s.t -= dt;
+      s.mesh.position.y += dt * 1.6;
+      s.mesh.material.opacity = Math.max(0, s.t * 2);
+      if (s.t <= 0) { world.remove(s.mesh); sparks.splice(i, 1); }
+    }
+    updateCamera(dt);
+    updateHud();
+  }
+
+  function updateCamera(dt) {
+    const back = local.role === 'killer' ? 5.6 : 5.0;
+    const height = local.role === 'killer' ? 2.9 : 2.45;
+    const sin = Math.sin(local.yaw), cos = Math.cos(local.yaw);
+    const tx = local.x - sin * back;
+    const tz = local.z - cos * back;
+    const ty = height + local.pitch * 0.8;
+    const t = 1 - Math.pow(0.001, dt);
+    camera.position.x += (tx - camera.position.x) * t;
+    camera.position.y += (ty - camera.position.y) * t;
+    camera.position.z += (tz - camera.position.z) * t;
+    camera.lookAt(local.x + sin * 5, 1.25 + local.pitch * 2.8, local.z + cos * 5);
+  }
+
+  function updateHud() {
+    roleEl.textContent = local.role === 'killer' ? 'KILLER' : 'SURVIVOR';
+    const live = players.filter(p => p.role === 'survivor' && !p.escaped && !p.hooked).length;
+    const down = players.filter(p => p.role === 'survivor' && p.down).length;
+    statsEl.innerHTML = `GENS <b>${doneGens()}/${state.gensNeeded}</b>  GATE <b>${state.gateOpen ? 'OPEN' : Math.floor(state.gateProgress) + '%'}</b><br>SURVIVORS <b>${live}</b>  DOWN <b>${down}</b>  TOOL <b>${Math.floor(local.toolCharge || 0)}%</b>`;
+    objectiveEl.textContent = local.role === 'killer'
+      ? 'Down survivors, hook them, and stop the gate from opening.'
+      : (state.gateOpen ? 'Gate open. Get out.' : doneGens() >= state.gensNeeded ? 'Open the exit gate.' : 'Repair generators and rescue teammates.');
+  }
+
+  function checkWinLoss() {
+    const survivors = players.filter(p => p.role === 'survivor');
+    if (local.role === 'survivor' && local.hooked) endGame('Hooked', 'Mandatory feedback lasts forever. The killer wins this shift.');
+    if (local.role === 'survivor' && local.escaped) return;
+    if (survivors.length && survivors.every(p => p.escaped || p.hooked)) {
+      endGame(local.role === 'killer' ? 'Killer Wins' : 'Shift Failed', local.role === 'killer' ? 'Every intern was filed correctly.' : 'Nobody made it through the gate.');
+    }
+    if (local.role === 'killer' && survivors.some(p => p.escaped)) {
+      endGame('Survivors Escaped', 'Someone got past the gate and will leave a one-star review.');
+    }
+  }
+
+  function endGame(title, text) {
+    if (!state.running) return;
+    state.running = false;
+    $('endTitle').textContent = title;
+    $('endText').textContent = text;
+    $('end').classList.remove('hidden');
+    hud.classList.add('hidden');
+    centerEl.classList.add('hidden');
+    document.exitPointerLock?.();
+  }
+
+  function broadcastSnap() {
+    broadcast({
+      t: 'snap',
+      players: players.map(p => ({ id: p.id, name: p.name, role: p.role, x: p.x, z: p.z, yaw: p.yaw, pitch: p.pitch, down: p.down, hooked: p.hooked, escaped: p.escaped })),
+      gens: generators.map(g => ({ progress: g.progress, done: g.done })),
+      gateOpen: state.gateOpen,
+      gateProgress: state.gateProgress
+    });
+  }
+
+  function nearestSurvivor(x, z, range, allowDown) {
+    let best = null, bd = range;
+    for (const p of players) {
+      if (p.role !== 'survivor' || p.escaped || p.hooked || (!allowDown && p.down)) continue;
+      const d = Math.hypot(p.x - x, p.z - z);
+      if (d < bd) { bd = d; best = p; }
+    }
+    return best;
+  }
+
+  function nearestFreeHook(x, z) {
+    return hooks.filter(h => !h.usedBy).sort((a, b) => Math.hypot(a.x - x, a.z - z) - Math.hypot(b.x - x, b.z - z))[0];
+  }
+
+  function doneGens() { return generators.filter(g => g.done).length; }
+  function dist(a, b) { return Math.hypot(a.x - b.x, a.z - b.z); }
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function wrap(a) { while (a > Math.PI) a -= Math.PI * 2; while (a < -Math.PI) a += Math.PI * 2; return a; }
+
+  function spark(x, z, color) {
+    for (let i = 0; i < 8; i++) {
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 0.06), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 1 }));
+      mesh.position.set(x + (Math.random() - 0.5) * 0.5, 0.6 + Math.random() * 0.7, z + (Math.random() - 0.5) * 0.5);
+      world.add(mesh);
+      sparks.push({ mesh, t: 0.45 + Math.random() * 0.3 });
+    }
+  }
+
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('on');
+    state.toastT = 2.4;
+  }
+
+  function resize() {
+    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+    renderer.setSize(innerWidth, innerHeight, false);
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+  }
+
+  function loop(now) {
+    const dt = Math.min(0.05, (now - last) / 1000 || 0);
+    last = now;
+    if (state.running) update(dt);
+    renderer.render(scene, camera);
+    requestAnimationFrame(loop);
+  }
+})();
+</script>
+</body>
+</html>

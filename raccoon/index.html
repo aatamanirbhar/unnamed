@@ -108,6 +108,8 @@
   #weap-btn { bottom: max(260px, env(safe-area-inset-bottom, 0px) + 250px); right: max(28px, env(safe-area-inset-right, 0px) + 18px); }
   #knife-btn { bottom: max(260px, env(safe-area-inset-bottom, 0px) + 250px); right: max(106px, env(safe-area-inset-right, 0px) + 96px); }
   #katana-btn { bottom: max(330px, env(safe-area-inset-bottom, 0px) + 320px); right: max(106px, env(safe-area-inset-right, 0px) + 96px); }
+  #rocket-btn { bottom: max(330px, env(safe-area-inset-bottom, 0px) + 320px); right: max(28px, env(safe-area-inset-right, 0px) + 18px); }
+  #grenade-btn { bottom: max(400px, env(safe-area-inset-bottom, 0px) + 390px); right: max(28px, env(safe-area-inset-right, 0px) + 18px); }
   /* Title-screen options (time of day + weather) */
   #opts .opt-row { display:flex; align-items:center; gap:6px; flex-wrap:wrap; justify-content:center; }
   #opts .opt-label { font-size:10px; letter-spacing:3px; color:#c8503a; min-width:90px; text-align:right; opacity:0.85; }
@@ -159,6 +161,8 @@
     #weap-btn { bottom: max(218px, env(safe-area-inset-bottom, 0px) + 206px); right: max(18px, env(safe-area-inset-right, 0px) + 10px); }
     #knife-btn { bottom: max(218px, env(safe-area-inset-bottom, 0px) + 206px); right: max(86px, env(safe-area-inset-right, 0px) + 78px); }
     #katana-btn { bottom: max(266px, env(safe-area-inset-bottom, 0px) + 252px); right: max(86px, env(safe-area-inset-right, 0px) + 78px); }
+    #rocket-btn { bottom: max(266px, env(safe-area-inset-bottom, 0px) + 252px); right: max(18px, env(safe-area-inset-right, 0px) + 10px); }
+    #grenade-btn { bottom: max(314px, env(safe-area-inset-bottom, 0px) + 298px); right: max(18px, env(safe-area-inset-right, 0px) + 10px); }
     #stick-move { bottom: max(40px, env(safe-area-inset-bottom, 0px) + 30px); left: max(18px, env(safe-area-inset-left, 0px) + 10px); }
     #stick-look { bottom: max(40px, env(safe-area-inset-bottom, 0px) + 30px); right: max(120px, env(safe-area-inset-right, 0px) + 110px); }
     #fire-btn { bottom: max(40px, env(safe-area-inset-bottom, 0px) + 30px); right: max(18px, env(safe-area-inset-right, 0px) + 10px); }
@@ -247,6 +251,8 @@
   <button id="weap-btn" class="touch-tool-btn" type="button">SWAP</button>
   <button id="knife-btn" class="touch-tool-btn" type="button">KNIFE</button>
   <button id="katana-btn" class="touch-tool-btn" type="button">KATANA</button>
+  <button id="rocket-btn" class="touch-tool-btn" type="button">RPG</button>
+  <button id="grenade-btn" class="touch-tool-btn" type="button">FRAG</button>
 </div>
 
 <div id="donate">
@@ -1008,6 +1014,8 @@
   for (const k in WEAPONS) ammoState[k] = { ammo: WEAPONS[k].mag, reserve: WEAPONS[k].reserve, unlocked: false };
   ammoState.pistol.unlocked = true;
   ammoState.knife.unlocked  = true;
+  ammoState.rocket.unlocked = true;
+  ammoState.grenade.unlocked = true;
   // Hotbar keys 1–9 (10–12 cycled via Q/E)
   const HOTBAR = ['pistol','knife','blade','shotgun','uzi','ak','sniper','rocket','grenade','m4','mp5','minigun','revolver'];
   // Grenades on hand — counted separately so we don't run out instantly.
@@ -1919,6 +1927,8 @@
       ammoState[k].reserve = WEAPONS[k].reserve;
     }
     grenadeStock.count = 2;
+    unlockWeapon('rocket');
+    unlockWeapon('grenade');
     for (const k in keys) keys[k] = false;
     // reset extraction cinematic state from a previous run
     if (extraction.chopper) scene.remove(extraction.chopper);
@@ -3258,11 +3268,7 @@
       if (target && ammoState[target] && ammoState[target].unlocked) setWeapon(target);
     }
     if (k === 'q' || k === 'e') {
-      const unlocked = HOTBAR.filter(x => ammoState[x] && ammoState[x].unlocked);
-      const cur = unlocked.indexOf(player.weapon);
-      const step = k === 'e' ? 1 : -1;
-      const next = unlocked[(cur + step + unlocked.length) % unlocked.length];
-      if (next) setWeapon(next);
+      cycleWeapon(k === 'e' ? 1 : -1);
     }
   });
   window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
@@ -3431,6 +3437,38 @@
     katanaBtn.addEventListener('pointerdown', e => doSelectMelee('blade', e));
     katanaBtn.addEventListener('touchstart', e => doSelectMelee('blade', e), { passive: false });
     katanaBtn.addEventListener('contextmenu', e => e.preventDefault());
+  }
+
+  function doSelectWeapon(kind, e) {
+    e.preventDefault();
+    e.stopPropagation();
+    ensureAudio();
+    if (!started) { start(); return; }
+    if (!alive) { start(); return; }
+    if (ammoState[kind]?.unlocked) {
+      setWeapon(kind);
+      objective(kind === 'rocket' ? 'Rocket launcher ready. FIRE launches a wide blast.' : 'Grenade ready. FIRE throws a timed frag.', 1300);
+    }
+  }
+  const rocketBtn = document.getElementById('rocket-btn');
+  const grenadeBtn = document.getElementById('grenade-btn');
+  if (rocketBtn) {
+    rocketBtn.addEventListener('pointerdown', e => doSelectWeapon('rocket', e));
+    rocketBtn.addEventListener('touchstart', e => doSelectWeapon('rocket', e), { passive: false });
+    rocketBtn.addEventListener('contextmenu', e => e.preventDefault());
+  }
+  if (grenadeBtn) {
+    grenadeBtn.addEventListener('pointerdown', e => doSelectWeapon('grenade', e));
+    grenadeBtn.addEventListener('touchstart', e => doSelectWeapon('grenade', e), { passive: false });
+    grenadeBtn.addEventListener('contextmenu', e => e.preventDefault());
+  }
+
+  function cycleWeapon(step) {
+    const unlocked = HOTBAR.filter(x => ammoState[x] && ammoState[x].unlocked);
+    if (!unlocked.length) return;
+    const cur = Math.max(0, unlocked.indexOf(player.weapon));
+    const next = unlocked[(cur + step + unlocked.length) % unlocked.length];
+    if (next) setWeapon(next);
   }
 
   // ── collision ──
@@ -3808,6 +3846,8 @@
         if (GP.pressed('b')) reload();
         if (GP.pressed('x')) setWeapon(player.weapon === 'pistol' ? (player.rockets > 0 ? 'rocket' : 'pistol') : 'pistol');
         if (GP.pressed('y') && player.rockets > 0) setWeapon('rocket');
+        if (GP.pressed('lb')) cycleWeapon(-1);
+        if (GP.pressed('rb')) cycleWeapon(1);
         if (GP.button('rt')) fire();
       }
     }

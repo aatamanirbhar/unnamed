@@ -937,21 +937,22 @@
 
   function setScopeState(on) {
     const me = players.get(localId);
-    const sniperScoped = me && me.weap && WEAPONS[me.weap] && WEAPONS[me.weap].family === 'sniper';
-    scopeActive = !!on && !!sniperScoped;
+    const canScope = me && me.alive && me.weap && WEAPONS[me.weap];
+    scopeActive = !!on && !!canScope;
     scopeOverlay.classList.toggle('on', scopeActive);
-    camera.fov = scopeActive ? 38 : baseFov;
+    const family = canScope ? WEAPONS[me.weap].family : '';
+    camera.fov = scopeActive ? (family === 'sniper' ? 38 : 46) : baseFov;
     camera.updateProjectionMatrix();
   }
   function toggleScope() {
     const me = players.get(localId);
     if (!me) return;
-    if (!WEAPONS[me.weap] || WEAPONS[me.weap].family !== 'sniper') return;
+    if (!WEAPONS[me.weap]) return;
     setScopeState(!scopeActive);
   }
   function clearScopeIfNeeded() {
     const me = players.get(localId);
-    if (!me || !WEAPONS[me.weap] || WEAPONS[me.weap].family !== 'sniper') setScopeState(false);
+    if (!me || !me.alive || !WEAPONS[me.weap]) setScopeState(false);
   }
   function showVoiceStatus(msg, ms = 1800) {
     voiceStatus.classList.remove('hidden');
@@ -2126,8 +2127,9 @@
       const d = new THREE.Vector3();
       camera.getWorldDirection(d);
       // spread
-      const spreadBase = scopeActive && w.family === 'sniper' ? (w.scopedSpread ?? w.spread * 0.25) : w.spread;
-      const sp = spreadBase * (myInput.walk ? 0.4 : (Math.hypot(myInput.mx, myInput.mz) > 0.05 ? 1.6 : 1));
+      const scopedSpread = w.scopedSpread ?? w.spread * (w.family === 'sniper' ? 0.22 : 0.48);
+      const spreadBase = scopeActive ? scopedSpread : w.spread;
+      const sp = spreadBase * (myInput.walk || scopeActive ? 0.45 : (Math.hypot(myInput.mx, myInput.mz) > 0.05 ? 1.25 : 0.82));
       d.x += (Math.random() - 0.5) * sp;
       d.y += (Math.random() - 0.5) * sp;
       d.z += (Math.random() - 0.5) * sp;
@@ -2135,7 +2137,7 @@
       originX = o.x; originY = o.y; originZ = o.z;
       dirX = d.x; dirY = d.y; dirZ = d.z;
       // camera recoil
-      player.pitch += w.recoil * (scopeActive ? 0.32 : 0.5) * (0.5 + Math.random() * 0.5);
+      player.pitch += w.recoil * (scopeActive ? 0.16 : 0.30) * (0.45 + Math.random() * 0.45);
       player.pitch = Math.min(1.2, player.pitch);
     } else {
       // remote/bot: aim toward p.targetPx/Py/Pz set by AI or last known
@@ -3866,9 +3868,9 @@
     const len = Math.hypot(mx, mz);
     if (len > 1) { mx /= len; mz /= len; }
     myInput.mx = mx; myInput.mz = mz;
-    myInput.walk = !!keys['shift'] || (window.OmenlyGamepad && window.OmenlyGamepad.button('lt'));
+    myInput.walk = !!keys['shift'] || (window.OmenlyGamepad && window.OmenlyGamepad.button('ls'));
     const moveMul = WEAPONS[me.weap]?.moveMul || 1;
-    const baseSp = me.alive ? (keys['shift'] ? 2.6 : 4.4) * moveMul * (scopeActive ? 0.58 : 1) : 0;
+    const baseSp = me.alive ? (myInput.walk ? 2.6 : 4.4) * moveMul * (scopeActive ? 0.58 : 1) : 0;
     // touch look
     if (stickLookVec.x || stickLookVec.y) {
       const lookMul = scopeActive ? 0.42 : 0.72;
@@ -4146,10 +4148,12 @@
         if (GP.pressed('rb')) cycleGren(me);
         if (GP.pressed('lb')) { if (buyOpen) closeBuyMenu(); else openBuyMenu(); }
         if (GP.pressed('start')) { if (scoreboardEl.classList.contains('hidden')) openScoreboard(); else closeScoreboard(); }
+        if (GP.button('lt')) setScopeState(true);
+        else if (scopeActive) setScopeState(false);
         // RT = fire (auto if held + autofire weapon, else per-press)
         if (GP.pressed('rt')) tryFire(me, nowSec, false);
-        // LT = walk (suppress sprint)
-        myInput.walk = myInput.walk || GP.button('lt');
+        // LS = walk (suppress sprint)
+        myInput.walk = myInput.walk || GP.button('ls');
       }
     }
 

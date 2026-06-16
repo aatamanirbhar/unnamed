@@ -101,6 +101,7 @@
     up: false, down: false, left: false, right: false, shift: false,
     stickX: 0, stickY: 0,
     lookDX: 0, lookDY: 0,
+    gamepadX: 0, gamepadY: 0,
     moveTouchId: null, lookTouchId: null
   };
   const keys = Object.create(null);
@@ -948,6 +949,7 @@
     if (toastTimer > 0) toastTimer -= dt; else toastEl.classList.remove('on');
     player.smokeTimer = Math.max(0, player.smokeTimer - dt);
     player.charmCd = Math.max(0, player.charmCd - dt);
+    readGamepad(dt);
     if (input.lookDX || input.lookDY) {
       cameraYaw += input.lookDX * 0.0027;
       cameraPitch = clamp(cameraPitch + input.lookDY * 0.0012, -0.14, 0.42);
@@ -955,8 +957,8 @@
       input.lookDY = 0;
     }
 
-    const strafe = (input.right ? 1 : 0) - (input.left ? 1 : 0) + input.stickX;
-    const forward = (input.up ? 1 : 0) - (input.down ? 1 : 0) - input.stickY;
+    const strafe = (input.right ? 1 : 0) - (input.left ? 1 : 0) + input.stickX + input.gamepadX;
+    const forward = (input.up ? 1 : 0) - (input.down ? 1 : 0) - input.stickY - input.gamepadY;
     const moveLen = Math.hypot(strafe, forward);
     const crouch = input.shift || player.crouch;
     const speed = (crouch ? 1.9 : 3.15) * (player.smokeTimer > 0 ? 1.08 : 1);
@@ -992,6 +994,35 @@
     input.left = !!(keys.a || keys.arrowleft);
     input.right = !!(keys.d || keys.arrowright);
     input.shift = !!keys.shift;
+  }
+
+  function readGamepad(dt) {
+    input.gamepadX = 0;
+    input.gamepadY = 0;
+    if (!window.OmenlyGamepad) return;
+    const GP = window.OmenlyGamepad;
+    GP.poll();
+    const move = GP.axis(0);
+    input.gamepadX = move.x || 0;
+    input.gamepadY = move.y || 0;
+    const look = GP.axis(1);
+    if (look.x || look.y) {
+      const lookMul = player.crouch ? 0.82 : 1;
+      cameraYaw += look.x * dt * 2.8 * lookMul;
+      cameraPitch = clamp(cameraPitch + look.y * dt * 1.35 * lookMul, -0.14, 0.42);
+    }
+    if (GP.button('ls')) player.crouch = true;
+    if (GP.pressed('b')) {
+      player.crouch = !player.crouch;
+      const b = $('tbCrouch');
+      if (b) b.classList.toggle('on', player.crouch);
+    }
+    if (GP.pressed('a')) interactAction();
+    if (GP.pressed('rt') || GP.pressed('x')) fireDart();
+    if (GP.pressed('y')) throwDecoy();
+    if (GP.pressed('rb')) smokeBomb();
+    if (GP.pressed('lb')) charmPulse();
+    if (GP.pressed('start')) toggleMap();
   }
 
   function updateWorldTransforms() {
@@ -1244,6 +1275,13 @@
     $('alertFill').style.width = state.alert + '%';
     $('objectives').innerHTML = state.objectives.map(o => `<div class="${o.done ? 'done' : ''}">${o.done ? 'DONE' : 'TODO'} - ${escapeHTML(o.label)}</div>`).join('') +
       `<div>${allObjectivesDone() ? 'ESCAPE AVAILABLE' : 'FINISH OBJECTIVES TO UNLOCK EXIT'}</div>`;
+    const pips = $('objectivePips');
+    const next = $('nextObjective');
+    if (pips && next) {
+      pips.innerHTML = state.objectives.map(o => `<span class="pip ${o.done ? 'done' : ''}"></span>`).join('');
+      const pending = state.objectives.find(o => !o.done);
+      next.textContent = pending ? pending.label : 'Exit unlocked';
+    }
     if (state.mapSeen) drawMinimap();
   }
 
