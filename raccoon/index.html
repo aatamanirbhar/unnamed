@@ -2706,6 +2706,62 @@
     }, 180);
   }
 
+  const katanaImpales = [];
+  function spawnKatanaImpale(z, dir) {
+    const forward = dir.clone();
+    forward.y = 0;
+    if (forward.lengthSq() < 0.0001) forward.set(Math.sin(player.yaw) * -1, 0, Math.cos(player.yaw) * -1);
+    forward.normalize();
+    const side = new THREE.Vector3(-forward.z, 0, forward.x).normalize();
+    const center = new THREE.Vector3(z.position.x, 1.28, z.position.z);
+    const steel = new THREE.MeshStandardMaterial({ color: 0xd8dde4, roughness: 0.18, metalness: 0.9, transparent: true, opacity: 1 });
+    const hiltMat = new THREE.MeshStandardMaterial({ color: 0x2a1810, roughness: 0.6, metalness: 0.15, transparent: true, opacity: 1 });
+    const g = new THREE.Group();
+    const bladeMesh = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.045, 3.05), steel);
+    bladeMesh.position.z = 0.72;
+    const tip = new THREE.Mesh(new THREE.ConeGeometry(0.065, 0.22, 4), steel);
+    tip.rotation.x = Math.PI / 2;
+    tip.position.z = 2.36;
+    const hilt = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.075, 0.075), hiltMat);
+    hilt.position.z = -0.9;
+    const grip = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.44), hiltMat);
+    grip.position.z = -1.14;
+    g.add(bladeMesh, tip, hilt, grip);
+    g.userData.mats = [steel, hiltMat];
+    g.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), side);
+    g.position.copy(center).addScaledVector(side, -1.75);
+    scene.add(g);
+    katanaImpales.push({ mesh: g, zombie: z, center, side, t: 0, life: 1.15 });
+    spawnBlood(center.clone().addScaledVector(side, -0.2), side, 32);
+    setTimeout(() => spawnBlood(center.clone().addScaledVector(side, 0.55), side, 26), 140);
+  }
+
+  function tickKatanaImpales(dt) {
+    for (let i = katanaImpales.length - 1; i >= 0; i--) {
+      const k = katanaImpales[i];
+      k.t += dt / k.life;
+      const p = Math.min(1, k.t);
+      const ease = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+      const pass = -1.75 + ease * 3.25;
+      if (k.zombie && k.zombie.parent) {
+        k.center.set(k.zombie.position.x, 1.28, k.zombie.position.z);
+        k.zombie.rotation.z = Math.sin(p * Math.PI) * 0.18;
+      }
+      k.mesh.position.copy(k.center).addScaledVector(k.side, pass);
+      k.mesh.rotation.z = Math.sin(p * Math.PI) * 0.12;
+      const fade = p > 0.74 ? Math.max(0, 1 - (p - 0.74) / 0.26) : 1;
+      for (const m of k.mesh.userData.mats || []) m.opacity = fade;
+      if (p >= 1) {
+        scene.remove(k.mesh);
+        k.mesh.traverse(o => {
+          if (o.geometry) o.geometry.dispose();
+        });
+        for (const m of k.mesh.userData.mats || []) m.dispose();
+        katanaImpales.splice(i, 1);
+      }
+    }
+  }
+
   function meleeSwing(W) {
     if (fireCool > 0) return;
     fireCool = W.cycle;
@@ -2757,11 +2813,12 @@
         SFX.death();
         forceHeadSever(z, dir);
         spawnSlashThrough(z, dir, true);
+        if (isKatana) spawnKatanaImpale(z, dir);
         spawnBlood(hitPoint, dir, isKatana ? 70 : 52);
         spawnBloodPool(z.position.x, z.position.z);
         showLensSplatter();
         sayCallout(isKatana ? 'execution' : 'headshot');
-        startSloMo(550, 0.28);
+        startSloMo(isKatana ? 850 : 550, isKatana ? 0.22 : 0.28);
       }
     }
     if (hitOne) shakeCamera(0.35, 0.18);
@@ -3423,6 +3480,7 @@
     ensureAudio();
     if (!started) { start(); return; }
     if (!alive) { start(); return; }
+    if (kind === 'blade' && !ammoState.blade.unlocked) unlockWeapon('blade');
     if (ammoState[kind]?.unlocked) {
       setWeapon(kind);
       objective(kind === 'blade' ? 'Katana selected. Tap FIRE to slash through zombies.' : 'Knife selected. Tap FIRE for close kills.', 1300);
@@ -3795,6 +3853,7 @@
     tickWeather(dt);
     tickPickups(dt);
     tickCampaign(dt);
+    tickKatanaImpales(dt);
     for (const f of flickerObjs) if (f.userData.update) f.userData.update(dt);
 
     // shake decay

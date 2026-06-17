@@ -1271,7 +1271,9 @@
 
   function updateHud() {
     $('missionName').textContent = `${state.missionIndex + 1}/${MISSIONS.length} ${state.mission.name}`;
-    $('hudStats').innerHTML = `DARTS <b>${player.darts}</b>  DECOYS <b>${player.decoys}</b>  SMOKE <b>${player.smoke}</b>  CHARM <b>${player.charms}</b><br>STYLE <b>${Math.floor(state.score)}</b>  ALERT <b>${Math.floor(state.alert)}%</b>  ${player.crouch ? '<b>CROUCH</b>' : 'WALK'}`;
+    $('hudStats').innerHTML = isTouch
+      ? `<span class="mobileStat">D<b>${player.darts}</b></span><span class="mobileStat">Q<b>${player.decoys}</b></span><span class="mobileStat">S<b>${player.smoke}</b></span><span class="mobileStat">C<b>${player.charms}</b></span><span class="mobileStat mobileAlert">A<b>${Math.floor(state.alert)}</b></span>`
+      : `DARTS <b>${player.darts}</b>  DECOYS <b>${player.decoys}</b>  SMOKE <b>${player.smoke}</b>  CHARM <b>${player.charms}</b><br>STYLE <b>${Math.floor(state.score)}</b>  ALERT <b>${Math.floor(state.alert)}%</b>  ${player.crouch ? '<b>CROUCH</b>' : 'WALK'}`;
     $('alertFill').style.width = state.alert + '%';
     $('objectives').innerHTML = state.objectives.map(o => `<div class="${o.done ? 'done' : ''}">${o.done ? 'DONE' : 'TODO'} - ${escapeHTML(o.label)}</div>`).join('') +
       `<div>${allObjectivesDone() ? 'ESCAPE AVAILABLE' : 'FINISH OBJECTIVES TO UNLOCK EXIT'}</div>`;
@@ -1517,6 +1519,10 @@
 
   function setComms(msg) {
     state.lastComms = msg;
+    if (isTouch) {
+      toast(msg.replace(/^HQ:\s*/, ''));
+      return;
+    }
     $('comms').textContent = msg;
   }
 

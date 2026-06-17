@@ -123,6 +123,18 @@
       "controls": "WASD + mouse + E/Q/R/click (desktop) - gamepad + mobile sticks/buttons"
     },
     {
+      "id": "brickvice",
+      "title": "Brick Vice: Sunset Nonsense",
+      "blurb": "A GTA-style open-city parody with solo play and room-code co-op. Mason Brick runs jobs through neon streets, while a second player can join as Foccoia Bread for supercar theft, yacht-row errands, bike jumps, swamp cash, cops, and hip-hop loading-screen energy.",
+      "tags": ["open-city", "crime", "parody", "multiplayer", "singleplayer", "driving"],
+      "minutes": 15,
+      "accent": "#ff4fa3",
+      "background": "linear-gradient(135deg, #15112b, #ff4fa3)",
+      "cover": "brickvice/cover.svg",
+      "href": "brickvice/",
+      "controls": "WASD + E/Q/H/SHIFT (desktop) - touch sticks + ACT/BOOST/HORN/JOB (mobile)"
+    },
+    {
       "id": "girth",
       "title": "Girth",
       "blurb": "A ridiculous first-person garden gag: rub the magic log, build friction, splash water, grow flowers, and get the big fertile payoff.",

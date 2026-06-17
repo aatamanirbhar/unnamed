@@ -24,6 +24,11 @@
 <script src="../gamepad.js" defer></script>
 <script defer src="/_vercel/insights/script.js"></script>
 <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+<script>
+  if (!window.THREE) {
+    document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"><\/script>');
+  }
+</script>
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <style>
   :root {
@@ -165,6 +170,11 @@
   'use strict';
 
   const $ = id => document.getElementById(id);
+  if (!window.THREE) {
+    const status = $('netStatus');
+    if (status) status.textContent = '3D engine failed to load. Refresh once, then try Solo Survivor.';
+    return;
+  }
   const canvas = $('game');
   const hud = $('hud');
   const roleEl = $('role');
@@ -461,9 +471,9 @@
   }
 
   function bind() {
-    $('soloSurvivor').addEventListener('click', () => resetGame('survivor', false));
-    $('soloKiller').addEventListener('click', () => resetGame('killer', false));
-    $('againBtn').addEventListener('click', () => resetGame(state.localRole, state.multiplayer));
+    $('soloSurvivor').addEventListener('click', () => startGame('survivor', false));
+    $('soloKiller').addEventListener('click', () => startGame('killer', false));
+    $('againBtn').addEventListener('click', () => startGame(state.localRole, state.multiplayer));
     $('menuBtn').addEventListener('click', showMenu);
     $('hostBtn').addEventListener('click', hostRoom);
     $('joinBtn').addEventListener('click', joinRoom);
@@ -497,6 +507,20 @@
     $('toolBtn').addEventListener('pointerdown', e => { e.preventDefault(); useTool(); });
     $('palletBtn').addEventListener('pointerdown', e => { e.preventDefault(); dropPallet(); });
     $('reloadBtn').addEventListener('pointerdown', e => { e.preventDefault(); reloadTool(); });
+  }
+
+  function startGame(role, multiplayer) {
+    try {
+      resetGame(role, multiplayer);
+    } catch (err) {
+      state.running = false;
+      $('menu').classList.remove('hidden');
+      hud.classList.add('hidden');
+      centerEl.classList.add('hidden');
+      const status = $('netStatus');
+      if (status) status.textContent = 'Start failed: ' + (err && err.message ? err.message : err);
+      console.error(err);
+    }
   }
 
   function hostRoom() {

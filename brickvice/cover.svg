@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-labelledby="t d">
+  <title id="t">Brick Vice cover art</title>
+  <desc id="d">A neon parody city with supercars, yacht lights, palms, swamp water, and two crime-comedy leads.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#291150"/>
+      <stop offset=".45" stop-color="#ff4fa3"/>
+      <stop offset="1" stop-color="#ffd166"/>
+    </linearGradient>
+    <linearGradient id="road" x1="0" x2="1">
+      <stop offset="0" stop-color="#10131f"/>
+      <stop offset="1" stop-color="#252039"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="1200" height="900" fill="url(#sky)"/>
+  <circle cx="970" cy="180" r="92" fill="#ffd166" opacity=".9"/>
+  <rect y="560" width="1200" height="340" fill="#0b1320"/>
+  <path d="M0 690 C150 625 260 650 420 615 C620 570 740 630 920 590 C1040 565 1130 585 1200 555 L1200 900 L0 900 Z" fill="#10464d"/>
+  <path d="M130 900 L520 520 L710 520 L430 900 Z" fill="url(#road)"/>
+  <path d="M775 900 L620 520 L730 520 L960 900 Z" fill="url(#road)"/>
+  <path d="M1030 900 L790 510 L870 500 L1200 830 L1200 900 Z" fill="url(#road)"/>
+  <g stroke="#ffd166" stroke-width="8" stroke-dasharray="34 30" opacity=".75">
+    <path d="M325 890 L608 530"/>
+    <path d="M865 885 L680 530"/>
+  </g>
+  <g fill="#102033" stroke="#ff78bd" stroke-width="3" opacity=".94">
+    <rect x="70" y="310" width="120" height="220"/>
+    <rect x="225" y="250" width="145" height="280"/>
+    <rect x="410" y="330" width="100" height="205"/>
+    <rect x="740" y="270" width="130" height="265"/>
+    <rect x="910" y="335" width="95" height="190"/>
+    <rect x="1035" y="295" width="115" height="235"/>
+  </g>
+  <g fill="#80ffd8" opacity=".85">
+    <rect x="92" y="338" width="20" height="20"/><rect x="132" y="338" width="20" height="20"/><rect x="172" y="338" width="20" height="20"/>
+    <rect x="252" y="282" width="24" height="20"/><rect x="305" y="282" width="24" height="20"/><rect x="252" y="340" width="24" height="20"/><rect x="305" y="340" width="24" height="20"/>
+    <rect x="770" y="306" width="24" height="20"/><rect x="820" y="306" width="24" height="20"/><rect x="770" y="365" width="24" height="20"/><rect x="820" y="365" width="24" height="20"/>
+    <rect x="1062" y="332" width="22" height="20"/><rect x="1110" y="332" width="22" height="20"/><rect x="1062" y="390" width="22" height="20"/>
+  </g>
+  <g transform="translate(620 660) rotate(-8)" filter="url(#glow)">
+    <rect x="-118" y="-42" width="236" height="84" rx="22" fill="#ff2f87"/>
+    <path d="M-78 -42 H46 L105 2 H-118 Z" fill="#ff79bc"/>
+    <rect x="-16" y="-32" width="56" height="32" fill="#201326"/>
+    <circle cx="-70" cy="48" r="28" fill="#0a0c12"/><circle cx="78" cy="48" r="28" fill="#0a0c12"/>
+    <circle cx="-70" cy="48" r="12" fill="#e7f6ff"/><circle cx="78" cy="48" r="12" fill="#e7f6ff"/>
+  </g>
+  <g transform="translate(900 650) rotate(7)">
+    <path d="M-80 35 H90 L130 -5 H-40 Z" fill="#f7f4e9"/>
+    <rect x="-10" y="-28" width="70" height="24" fill="#8fffea"/>
+    <path d="M60 -30 L100 -80 L112 -72 L88 -25 Z" fill="#f7f4e9"/>
+    <circle cx="-40" cy="46" r="7" fill="#ffd166"/><circle cx="60" cy="46" r="7" fill="#ffd166"/>
+  </g>
+  <g transform="translate(230 690)">
+    <rect x="-42" y="-88" width="84" height="150" rx="36" fill="#221728"/>
+    <circle cy="-122" r="40" fill="#b66a48"/>
+    <path d="M-44 -128 C-20 -175 36 -164 50 -118 C22 -138 -8 -138 -44 -128 Z" fill="#22100d"/>
+    <rect x="-50" y="-30" width="100" height="88" rx="26" fill="#80ffd8"/>
+  </g>
+  <g transform="translate(405 682)">
+    <rect x="-38" y="-92" width="76" height="154" rx="34" fill="#151821"/>
+    <circle cy="-128" r="39" fill="#d49b70"/>
+    <path d="M-46 -142 C-20 -172 25 -170 48 -126 C12 -145 -18 -145 -46 -142 Z" fill="#3b1d16"/>
+    <rect x="-50" y="-22" width="100" height="82" rx="24" fill="#ffd166"/>
+  </g>
+  <g fill="#1d6b3c">
+    <rect x="102" y="520" width="15" height="120"/><path d="M110 520 C60 470 54 426 96 444 C95 406 132 392 132 462 C170 425 203 448 146 520 Z"/>
+    <rect x="1110" y="510" width="15" height="124"/><path d="M1118 510 C1070 456 1082 420 1112 450 C1118 394 1155 406 1140 468 C1188 432 1200 470 1150 513 Z"/>
+  </g>
+  <g filter="url(#glow)">
+    <text x="74" y="125" font-family="Georgia,serif" font-style="italic" font-size="94" fill="#fff3d0">Brick Vice</text>
+    <text x="82" y="188" font-family="Courier New,monospace" font-size="24" letter-spacing="8" fill="#80ffd8">SUNSET NONSENSE</text>
+  </g>
+</svg>

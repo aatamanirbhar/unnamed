@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Brick Vice: Sunset Nonsense - open city crime parody</title>
+<meta name="description" content="Brick Vice: Sunset Nonsense is a GTA-style browser parody with solo and room-code multiplayer, supercars, cops, yachts, bikes, swamp chaos, delivery jobs, and neon trouble.">
+<meta name="theme-color" content="#15112b">
+<link rel="canonical" href="https://omenly.vercel.app/brickvice/">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="../omenly.css">
+<script>
+  window.OMENLY_CONFIG = {
+    game: 'brickvice',
+    gameTitle: 'Brick Vice: Sunset Nonsense',
+    price: 3,
+    isHub: false,
+    donateUrl: 'https://www.paypal.me/vikas117/3',
+    allAccessDonateUrl: 'https://www.paypal.me/vikas117/10',
+    theme: { accent: '#ff4fa3' }
+  };
+</script>
+<script src="../omenly.js" defer></script>
+<script src="../gamepad.js" defer></script>
+<script defer src="/_vercel/insights/script.js"></script>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+  :root {
+    --bg: #090816;
+    --ink: #fff5e0;
+    --muted: rgba(255,245,224,0.68);
+    --line: rgba(255,245,224,0.18);
+    --pink: #ff4fa3;
+    --aqua: #80ffd8;
+    --gold: #ffd166;
+    --orange: #ff8a3d;
+    --blue: #6fb6ff;
+    --red: #ff415d;
+    --green: #6fffa5;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; user-select: none; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); color: var(--ink); font-family: "Courier New", monospace; touch-action: none; }
+  body { position: fixed; inset: 0; }
+  canvas { display: block; width: 100vw; height: 100vh; background: #15112b; }
+  .hidden { display: none !important; }
+  button, input { font: inherit; }
+  .panel { position: fixed; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center; padding: 18px; background: radial-gradient(ellipse at 20% 18%, rgba(255,79,163,0.24), transparent 48%), radial-gradient(ellipse at 78% 30%, rgba(128,255,216,0.14), transparent 46%), linear-gradient(145deg, rgba(8,8,20,0.95), rgba(34,13,43,0.96)); overflow: auto; }
+  .card { width: min(940px, 96vw); max-height: calc(100dvh - 30px); overflow: auto; border: 1px solid rgba(255,79,163,0.38); background: rgba(11,12,28,0.88); box-shadow: 0 28px 90px rgba(0,0,0,0.58), 0 0 42px rgba(255,79,163,0.18); padding: 24px; }
+  .heroGrid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr); gap: 22px; align-items: center; }
+  .kicker { color: var(--gold); font-size: 10px; letter-spacing: 5px; text-transform: uppercase; margin-bottom: 12px; }
+  h1 { font: italic clamp(42px, 9vw, 90px) Georgia, serif; line-height: 0.9; letter-spacing: 2px; color: #fff3d0; text-shadow: 0 0 28px rgba(255,79,163,0.56); margin-bottom: 14px; }
+  h1 span { color: var(--pink); }
+  h2 { font: italic clamp(28px, 5vw, 48px) Georgia, serif; color: var(--pink); margin-bottom: 10px; }
+  p { color: var(--muted); font-size: 13px; line-height: 1.55; margin-bottom: 12px; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 12px 0; }
+  .btn { border: 1px solid var(--pink); background: rgba(255,79,163,0.06); color: var(--pink); padding: 11px 15px; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; }
+  .btn:hover, .btn:focus-visible, .btn.on { background: var(--pink); color: #100817; outline: none; box-shadow: 0 0 18px rgba(255,79,163,0.6); }
+  .btn.alt { border-color: var(--aqua); color: var(--aqua); background: rgba(128,255,216,0.05); }
+  .btn.alt:hover, .btn.alt:focus-visible { background: var(--aqua); color: #061014; }
+  .btn.gold { border-color: var(--gold); color: var(--gold); background: rgba(255,209,102,0.06); }
+  .btn.gold:hover, .btn.gold:focus-visible { background: var(--gold); color: #140d05; }
+  input { background: rgba(255,255,255,0.06); border: 1px solid var(--line); color: var(--ink); padding: 11px 12px; width: 158px; text-align: center; letter-spacing: 3px; text-transform: uppercase; }
+  .posterWall { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+  .poster { min-height: 132px; border: 1px solid rgba(255,255,255,0.18); background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015)); padding: 12px; position: relative; overflow: hidden; }
+  .poster b { position: relative; z-index: 2; display: block; color: var(--gold); font-size: 12px; letter-spacing: 3px; text-transform: uppercase; }
+  .poster small { position: relative; z-index: 2; display: block; margin-top: 6px; color: var(--muted); line-height: 1.4; }
+  .poster::after { content: ''; position: absolute; inset: auto -20px -24px auto; width: 120px; height: 120px; border-radius: 26px; transform: rotate(22deg); background: var(--shape, #ff4fa3); opacity: 0.72; }
+  .poster.car::before { content: ''; position: absolute; right: 18px; bottom: 26px; width: 132px; height: 54px; border-radius: 18px 38px 12px 12px; background: #ff4fa3; box-shadow: 0 0 18px rgba(255,79,163,0.6); }
+  .poster.yacht::before { content: ''; position: absolute; right: 16px; bottom: 20px; width: 150px; height: 44px; clip-path: polygon(0 38%, 100% 12%, 74% 100%, 14% 100%); background: #fff3d0; }
+  .poster.bike::before { content: ''; position: absolute; right: 20px; bottom: 25px; width: 150px; height: 72px; background: radial-gradient(circle at 22% 74%, transparent 0 17px, #80ffd8 18px 23px, transparent 24px), radial-gradient(circle at 78% 74%, transparent 0 17px, #80ffd8 18px 23px, transparent 24px), linear-gradient(20deg, transparent 42%, #ff8a3d 43% 58%, transparent 59%); }
+  .poster.swamp::before { content: ''; position: absolute; right: 14px; bottom: 18px; width: 150px; height: 50px; border-radius: 50%; background: #1b7e46; box-shadow: -35px -12px 0 -10px #6fffa5; }
+  #hud { position: fixed; left: 14px; top: 14px; z-index: 10; display: grid; gap: 6px; pointer-events: none; }
+  .hudbox { background: rgba(9,8,22,0.72); border: 1px solid rgba(255,255,255,0.16); padding: 8px 10px; box-shadow: 0 12px 34px rgba(0,0,0,0.32); }
+  #role { color: var(--pink); font-size: 12px; letter-spacing: 3px; font-weight: bold; }
+  #stats, #objective { color: var(--muted); font-size: 11px; line-height: 1.45; letter-spacing: 1px; }
+  #stats b { color: var(--aqua); font-weight: normal; }
+  #objective { color: var(--gold); max-width: 360px; }
+  #mini { position: fixed; right: 14px; top: 14px; z-index: 9; width: 150px; height: 150px; border: 1px solid rgba(128,255,216,0.34); background: rgba(4,10,17,0.72); pointer-events: none; }
+  #toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 16; pointer-events: none; border: 1px solid rgba(255,209,102,0.52); background: rgba(9,8,22,0.88); color: var(--gold); padding: 9px 14px; font-size: 11px; letter-spacing: 2px; opacity: 0; transition: opacity 0.16s; text-align: center; max-width: min(680px, 92vw); }
+  #toast.on { opacity: 1; }
+  #center { position: fixed; left: 50%; top: 50%; width: 16px; height: 16px; border: 1px solid rgba(255,245,224,0.82); transform: translate(-50%, -50%); border-radius: 50%; z-index: 8; pointer-events: none; }
+  #center::before, #center::after { content: ''; position: absolute; background: rgba(255,245,224,0.75); }
+  #center::before { left: 50%; top: -6px; width: 1px; height: 26px; transform: translateX(-50%); }
+  #center::after { top: 50%; left: -6px; width: 26px; height: 1px; transform: translateY(-50%); }
+  #loading { position: fixed; inset: 0; z-index: 70; display: none; background: #090816; color: var(--ink); overflow: hidden; }
+  #loading.on { display: block; }
+  #loading .loadBg { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(4, 1fr); }
+  .loadPoster { position: relative; overflow: hidden; border-right: 1px solid rgba(255,255,255,0.1); background: linear-gradient(150deg, var(--a), var(--b)); }
+  .loadPoster img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.72; filter: saturate(1.15) contrast(1.05); }
+  .loadPoster::before { content: attr(data-label); position: absolute; left: 24px; bottom: 34px; font: italic clamp(28px, 5vw, 58px) Georgia, serif; color: #fff3d0; text-shadow: 0 0 20px rgba(0,0,0,0.55); z-index: 2; }
+  .loadPoster::after { content: ''; position: absolute; right: -46px; top: 18%; width: 210px; height: 210px; border-radius: 36px; transform: rotate(20deg); background: rgba(255,255,255,0.2); }
+  .loadPoster i { position: absolute; inset: auto 22px 104px auto; width: 180px; height: 105px; border: 2px solid rgba(255,255,255,0.5); transform: rotate(-7deg); opacity: .9; }
+  #loading .barWrap { position: absolute; left: 28px; right: 28px; bottom: 24px; height: 9px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); }
+  #loading .bar { width: 0%; height: 100%; background: linear-gradient(90deg, var(--pink), var(--gold), var(--aqua)); box-shadow: 0 0 20px rgba(255,79,163,0.7); }
+  #loading .loadText { position: absolute; left: 28px; bottom: 44px; color: var(--gold); font-size: 11px; letter-spacing: 4px; text-transform: uppercase; }
+  #touch { position: fixed; inset: 0; display: none; z-index: 20; pointer-events: none; }
+  body.touch #touch { display: block; }
+  .stick { position: absolute; width: 118px; height: 118px; bottom: max(34px, env(safe-area-inset-bottom,0px) + 24px); border-radius: 50%; border: 2px solid rgba(255,255,255,0.34); background: rgba(255,255,255,0.06); pointer-events: auto; touch-action: none; }
+  #moveStick { left: max(20px, env(safe-area-inset-left,0px) + 14px); }
+  #lookStick { right: max(138px, env(safe-area-inset-right,0px) + 126px); }
+  .knob { position: absolute; left: 50%; top: 50%; width: 48px; height: 48px; margin: -24px 0 0 -24px; border-radius: 50%; border: 2px solid var(--aqua); background: rgba(128,255,216,0.18); box-shadow: 0 0 14px rgba(128,255,216,0.45); }
+  #touchBtns { position: absolute; right: max(18px, env(safe-area-inset-right,0px) + 12px); bottom: max(38px, env(safe-area-inset-bottom,0px) + 28px); display: grid; grid-template-columns: repeat(2, 64px); gap: 7px; pointer-events: auto; }
+  #touchBtns button { min-height: 42px; border: 1px solid rgba(255,255,255,0.32); background: rgba(9,8,22,0.72); color: var(--ink); font-size: 9px; letter-spacing: 1px; }
+  #touchBtns button.hot { border-color: var(--pink); color: var(--pink); }
+  #weaponWheel { position: fixed; inset: 0; z-index: 55; display: none; align-items: center; justify-content: center; background: rgba(6,5,14,0.48); pointer-events: auto; }
+  #weaponWheel.on { display: flex; }
+  #weaponWheel .wheel { position: relative; width: min(560px, 88vmin); height: min(560px, 88vmin); border-radius: 50%; border: 1px solid rgba(255,245,224,0.18); background: radial-gradient(circle, rgba(9,8,22,0.86) 0 18%, rgba(255,79,163,0.10) 19% 42%, rgba(9,8,22,0.72) 43% 100%); box-shadow: 0 0 48px rgba(0,0,0,0.55); }
+  #weaponWheel .slot { position: absolute; left: 50%; top: 50%; width: 92px; min-height: 52px; margin: -26px 0 0 -46px; border: 1px solid rgba(255,245,224,0.24); background: rgba(9,8,22,0.82); color: var(--ink); transform: rotate(var(--ang)) translateY(-218px) rotate(calc(-1 * var(--ang))); text-align: center; padding: 7px 5px; cursor: pointer; }
+  #weaponWheel .slot b { display: block; color: var(--gold); font-size: 10px; letter-spacing: 1px; }
+  #weaponWheel .slot small { display: block; color: var(--muted); font-size: 8px; margin-top: 2px; }
+  #weaponWheel .slot.sel { border-color: var(--pink); color: var(--pink); box-shadow: 0 0 16px rgba(255,79,163,0.45); }
+  #weaponWheel .slot.carry { border-color: var(--aqua); }
+  #weaponWheel .hub { position: absolute; left: 50%; top: 50%; width: 148px; height: 148px; margin: -74px 0 0 -74px; border-radius: 50%; border: 1px solid rgba(128,255,216,0.46); display: flex; align-items: center; justify-content: center; text-align: center; color: var(--aqua); font-size: 10px; letter-spacing: 2px; line-height: 1.4; background: rgba(9,8,22,0.88); }
+  #donate { position: fixed; right: 14px; bottom: 14px; z-index: 30; }
+  #donate a { display: inline-block; padding: 8px 13px; border: 1px solid var(--pink); color: var(--pink); background: rgba(9,8,22,0.74); text-decoration: none; font-size: 10px; letter-spacing: 2px; }
+  @media (max-width: 720px), (orientation: landscape) and (max-height: 520px) {
+    .heroGrid { grid-template-columns: 1fr; }
+    .posterWall { grid-template-columns: 1fr 1fr; }
+    .card { padding: 18px 14px; }
+    #mini { width: 104px; height: 104px; }
+    #objective { display: none; }
+    #donate { display: none; }
+    #hud .hudbox { padding: 6px 8px; background: rgba(9,8,22,0.56); }
+    #stats { font-size: 10px; }
+    #loading .loadBg { grid-template-columns: repeat(2, 1fr); }
+    #weaponWheel .slot { width: 78px; min-height: 48px; margin-left: -39px; transform: rotate(var(--ang)) translateY(-39vmin) rotate(calc(-1 * var(--ang))); }
+    #weaponWheel .slot b { font-size: 9px; }
+    #weaponWheel .hub { width: 120px; height: 120px; margin: -60px 0 0 -60px; }
+  }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div id="hud" class="hidden">
+  <div class="hudbox"><div id="role">MASON BRICK</div><div id="stats"></div></div>
+  <div class="hudbox" id="objective">Choose a job.</div>
+</div>
+<canvas id="mini" class="hidden" width="300" height="300"></canvas>
+<div id="center" class="hidden"></div>
+<div id="toast"></div>
+
+<div id="menu" class="panel">
+  <div class="card">
+    <div class="heroGrid">
+      <div>
+        <div class="kicker">A legally distant sunshine crime vacation</div>
+        <h1>Brick Vice:<br><span>Sunset Nonsense</span></h1>
+        <p>Play as Mason Brick, the man who treats every errand like a felony audition. Go solo or host a room: the second player joins as Foccoia Bread, a stylish getaway driver with no patience for boring crime.</p>
+        <p>Rip through Vice-ish streets, steal novelty supercars, outrun budget cops, deliver suspicious sandwiches, jump canals, visit yacht row, and avoid swamp reptiles with excellent legal counsel.</p>
+        <div class="row">
+          <button class="btn gold" id="soloBtn">Play Solo</button>
+          <button class="btn alt" id="hostBtn">Host Code</button>
+          <input id="joinCode" maxlength="6" placeholder="CODE">
+          <button class="btn" id="joinBtn">Join</button>
+        </div>
+        <p id="netStatus">Room-code multiplayer is peer-to-peer. Solo works without a room.</p>
+      </div>
+      <div class="posterWall">
+        <div class="poster car" style="--shape:#ff4fa3"><b>Supercars</b><small>Borrowed forever, returned emotionally.</small></div>
+        <div class="poster yacht" style="--shape:#fff3d0"><b>Yachts</b><small>Rich people docks. Poor decisions.</small></div>
+        <div class="poster bike" style="--shape:#ff8a3d"><b>Bikes</b><small>Canal jumps, bad helmets, worse music.</small></div>
+        <div class="poster swamp" style="--shape:#1b7e46"><b>Swamp</b><small>Crocodiles, cash bags, humidity crimes.</small></div>
+      </div>
+    </div>
+    <div data-omenly-ad style="margin-top:18px;"></div>
+  </div>
+</div>
+
+<div id="loading">
+  <div class="loadBg">
+    <div class="loadPoster" data-label="Supercars" data-art="supercars" style="--a:#21144a;--b:#ff4fa3"><i></i></div>
+    <div class="loadPoster" data-label="Yacht Row" data-art="yachts" style="--a:#08364a;--b:#80ffd8"><i></i></div>
+    <div class="loadPoster" data-label="Bike Heat" data-art="bikes" style="--a:#3a160c;--b:#ff8a3d"><i></i></div>
+    <div class="loadPoster" data-label="Swamp Law" data-art="swamp" style="--a:#071d14;--b:#1b7e46"><i></i></div>
+  </div>
+  <div class="loadText" id="loadText">loading neon mistakes</div>
+  <div class="barWrap"><div class="bar" id="loadBar"></div></div>
+</div>
+
+<div id="touch">
+  <div id="moveStick" class="stick"><div class="knob"></div></div>
+  <div id="lookStick" class="stick"><div class="knob"></div></div>
+  <div id="touchBtns">
+    <button id="actBtn" class="hot">ACT</button>
+    <button id="fireBtn" class="hot">FIRE</button>
+    <button id="weaponBtn">WEAPON</button>
+    <button id="boostBtn" class="hot">BOOST</button>
+    <button id="hornBtn">HORN</button>
+    <button id="mapBtn">JOB</button>
+  </div>
+</div>
+
+<div id="weaponWheel">
+  <div class="wheel" id="weaponWheelInner">
+    <div class="hub" id="weaponHub">CARRY 3<br>SELECT TOOL</div>
+  </div>
+</div>
+
+<div id="donate"><a href="https://www.paypal.me/vikas117/3" target="_blank" rel="noopener" data-omenly-cta>SUPPORT</a></div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const canvas = $('game');
+  const ctx = canvas.getContext('2d');
+  const mini = $('mini');
+  const miniCtx = mini.getContext('2d');
+  const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0 || matchMedia('(pointer: coarse)').matches;
+  if (isTouch) document.body.classList.add('touch');
+
+  let W = 1, H = 1, DPR = 1;
+  function resize() {
+    const vv = window.visualViewport;
+    W = Math.round(vv ? vv.width : innerWidth);
+    H = Math.round(vv ? vv.height : innerHeight);
+    DPR = Math.min(devicePixelRatio || 1, 2);
+    canvas.width = Math.max(1, Math.floor(W * DPR));
+    canvas.height = Math.max(1, Math.floor(H * DPR));
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  addEventListener('resize', resize);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', resize);
+  resize();
+
+  const MAP = { w: 3600, h: 2600 };
+  const keys = Object.create(null);
+  const input = { mx: 0, my: 0, lookX: 0, lookY: 0, boost: false };
+  const players = new Map();
+  const vehicles = [];
+  const cops = [];
+  const npcs = [];
+  const particles = [];
+  const floating = [];
+  const projectiles = [];
+  const fireZones = [];
+  const jobs = [
+    { id: 'sandwich', label: 'Deliver the suspicious sandwich', x: 520, y: 2040, tx: 3080, ty: 690, reward: 850, color: '#ffd166' },
+    { id: 'yacht', label: 'Photograph yacht row evidence', x: 2960, y: 420, tx: 3180, ty: 410, reward: 700, color: '#80ffd8' },
+    { id: 'bike', label: 'Jump the canal on a bike', x: 1290, y: 920, tx: 1750, ty: 900, reward: 900, color: '#ff8a3d' },
+    { id: 'swamp', label: 'Grab swamp cash before it bites', x: 2820, y: 2060, tx: 3180, ty: 2230, reward: 1100, color: '#6fffa5' }
+  ];
+  let activeJob = null;
+  let localId = 'mason';
+  let localRole = 'Mason Brick';
+  let mode = 'menu';
+  let camX = 0, camY = 0;
+  let toastT = 0;
+  let last = performance.now();
+  let peer = null;
+  let roomCode = '';
+  let hostConn = null;
+  let conns = [];
+  let isHost = false;
+  let beat = null;
+  let beatOn = false;
+  const ROOM_PREFIX = 'ombv-';
+  const playerArt = { mason: null, foccoia: null };
+  const artExts = ['jpg', 'jpeg', 'png', 'webp'];
+  const WEAPONS = [
+    { id:'pistol', name:'Pistol', type:'bullet', dmg:18, rate:0.28, range:520, speed:960, color:'#ffd166' },
+    { id:'smg', name:'SMG', type:'bullet', dmg:10, rate:0.09, range:480, speed:980, color:'#80ffd8' },
+    { id:'shotgun', name:'Shotgun', type:'spread', dmg:13, rate:0.65, range:300, speed:880, pellets:7, color:'#ff8a3d' },
+    { id:'rifle', name:'Rifle', type:'bullet', dmg:24, rate:0.18, range:700, speed:1100, color:'#6fb6ff' },
+    { id:'sniper', name:'Sniper', type:'bullet', dmg:75, rate:1.0, range:980, speed:1400, color:'#d7e7ff' },
+    { id:'revolver', name:'Revolver', type:'bullet', dmg:42, rate:0.5, range:560, speed:1040, color:'#fff3d0' },
+    { id:'uzi', name:'Twin Uzi', type:'bullet', dmg:8, rate:0.06, range:430, speed:980, color:'#ff4fa3' },
+    { id:'bat', name:'Bat', type:'melee', dmg:28, rate:0.48, range:58, color:'#ffd166' },
+    { id:'knife', name:'Knife', type:'melee', dmg:38, rate:0.34, range:48, color:'#d7e7ff' },
+    { id:'katana', name:'Katana', type:'melee', dmg:62, rate:0.42, range:72, color:'#80ffd8' },
+    { id:'chainsaw', name:'Chainsaw', type:'melee', dmg:75, rate:0.75, range:70, color:'#ff8a3d' },
+    { id:'molotov', name:'Molotov', type:'firebomb', dmg:10, rate:0.9, range:430, speed:540, radius:130, color:'#ff8a3d' },
+    { id:'flamethrower', name:'Flamer', type:'flame', dmg:16, rate:0.12, range:185, color:'#ff5a1f' },
+    { id:'grenade', name:'Grenade', type:'bomb', dmg:90, rate:0.9, range:460, speed:560, radius:150, color:'#6fffa5' },
+    { id:'sticky', name:'Sticky Bomb', type:'sticky', dmg:115, rate:0.75, range:430, speed:520, radius:170, color:'#ff4fa3' },
+    { id:'rocket', name:'Rocket Launcher', type:'rocket', dmg:160, rate:1.2, range:850, speed:640, radius:210, color:'#ff415d' },
+    { id:'minigun', name:'Minigun', type:'bullet', dmg:12, rate:0.045, range:650, speed:1180, color:'#ffd166' },
+    { id:'taser', name:'Taser', type:'stun', dmg:6, rate:0.7, range:220, speed:860, color:'#80ffd8' },
+    { id:'paintball', name:'Paint Gun', type:'paint', dmg:4, rate:0.11, range:400, speed:760, color:'#b66bff' },
+    { id:'watergun', name:'Water Cannon', type:'push', dmg:2, rate:0.08, range:250, speed:820, color:'#6fb6ff' },
+    { id:'nailgun', name:'Nailgun', type:'bullet', dmg:15, rate:0.12, range:420, speed:930, color:'#d7e7ff' },
+    { id:'flare', name:'Flare Gun', type:'fireball', dmg:24, rate:0.6, range:520, speed:560, radius:85, color:'#ff415d' },
+    { id:'boomerang', name:'Boomerang', type:'boomerang', dmg:28, rate:0.8, range:360, speed:500, color:'#ffd166' },
+    { id:'foam', name:'Foam Cannon', type:'foam', dmg:1, rate:0.18, range:300, speed:620, color:'#fff3d0' }
+  ];
+  const weaponById = Object.fromEntries(WEAPONS.map(w => [w.id, w]));
+
+  function tryLoadImage(paths, done) {
+    let i = 0;
+    function next() {
+      if (i >= paths.length) { done(null); return; }
+      const img = new Image();
+      img.onload = () => done(img);
+      img.onerror = next;
+      img.src = paths[i++];
+    }
+    next();
+  }
+  function loadOptionalArt() {
+    tryLoadImage(artExts.map(ext => `players/mason.${ext}`), img => { playerArt.mason = img; });
+    tryLoadImage(artExts.map(ext => `players/foccoia.${ext}`), img => { playerArt.foccoia = img; });
+    document.querySelectorAll('.loadPoster[data-art]').forEach(el => {
+      const key = el.dataset.art;
+      tryLoadImage(artExts.map(ext => `players/${key}.${ext}`), img => {
+        if (!img) return;
+        const node = document.createElement('img');
+        node.src = img.src;
+        node.alt = '';
+        el.prepend(node);
+      });
+    });
+  }
+  loadOptionalArt();
+
+  function makePlayer(id, name, x, y, color, local) {
+    return { id, name, x, y, vx: 0, vy: 0, a: -Math.PI / 2, hp: 100, cash: 0, stars: 0, wantedT: 0, color, local: !!local, vehicle: null, cooldown: 0, weapons: ['pistol','bat','sticky'], weapon: 'pistol' };
+  }
+  function seedWorld() {
+    vehicles.length = 0; cops.length = 0; npcs.length = 0; particles.length = 0; floating.length = 0; projectiles.length = 0; fireZones.length = 0;
+    const carColors = ['#ff4fa3','#80ffd8','#ffd166','#6fb6ff','#ff8a3d','#d7e7ff'];
+    const spots = [
+      [610,1900,'car'],[910,1620,'car'],[1320,720,'bike'],[1730,880,'bike'],[2140,640,'car'],[2930,520,'car'],
+      [3150,1070,'car'],[2540,1720,'car'],[3040,2180,'swamp'],[540,540,'car'],[1810,1910,'car'],[2160,2220,'bike']
+    ];
+    spots.forEach((s, i) => vehicles.push({ id: 'v'+i, x:s[0], y:s[1], a: Math.random()*6.28, type:s[2], color: carColors[i%carColors.length], vx:0, vy:0, driver:null, boost:0, hp:100 }));
+    for (let i = 0; i < 42; i++) npcs.push({ x: 200 + Math.random()*(MAP.w-400), y: 220 + Math.random()*(MAP.h-440), a: Math.random()*6.28, t: Math.random()*3, color: i%3 ? '#fff3d0' : '#ffb6d8', hp:100, panic:0, burn:0, stun:0, foam:0, dead:false, react:'' });
+    for (let i = 0; i < 5; i++) cops.push({ x: 200 + Math.random()*3200, y: 250 + Math.random()*2100, a: Math.random()*6.28, vx:0, vy:0, flash: Math.random(), hp:120, burn:0, stun:0, dead:false });
+  }
+
+  function startBeat() {
+    if (beatOn) return;
+    beatOn = true;
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      const ac = beat || new AC();
+      beat = ac;
+      const master = ac.createGain();
+      master.gain.value = 0.05;
+      master.connect(ac.destination);
+      let step = 0;
+      function tick() {
+        if (!beatOn) return;
+        const t = ac.currentTime;
+        const kick = ac.createOscillator();
+        const kg = ac.createGain();
+        kick.frequency.setValueAtTime(step % 4 === 0 ? 82 : 56, t);
+        kick.frequency.exponentialRampToValueAtTime(32, t + 0.08);
+        kg.gain.setValueAtTime(step % 4 === 0 ? 1.0 : 0.55, t);
+        kg.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+        kick.connect(kg).connect(master);
+        kick.start(t); kick.stop(t + 0.13);
+        if (step % 2 === 1) {
+          const hat = ac.createBufferSource();
+          const buf = ac.createBuffer(1, ac.sampleRate * 0.04, ac.sampleRate);
+          const data = buf.getChannelData(0);
+          for (let i = 0; i < data.length; i++) data[i] = (Math.random()*2-1) * Math.pow(1 - i/data.length, 2);
+          const hg = ac.createGain(); hg.gain.value = 0.18;
+          const hp = ac.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 5000;
+          hat.buffer = buf; hat.connect(hp).connect(hg).connect(master); hat.start(t);
+        }
+        step++;
+        setTimeout(tick, 165);
+      }
+      ac.resume?.();
+      tick();
+    } catch (_) {}
+  }
+
+  function showLoading(done) {
+    const load = $('loading');
+    const bar = $('loadBar');
+    const txt = $('loadText');
+    const lines = ['loading neon mistakes', 'waxing stolen supercars', 'overpricing yacht fuel', 'feeding swamp lawyers', 'tuning hip hop beat', 'printing wanted stars'];
+    load.classList.add('on');
+    let p = 0;
+    const timer = setInterval(() => {
+      p = Math.min(100, p + 8 + Math.random()*12);
+      bar.style.width = p + '%';
+      txt.textContent = lines[(Math.random()*lines.length)|0];
+      if (p >= 100) {
+        clearInterval(timer);
+        setTimeout(() => { load.classList.remove('on'); done(); }, 260);
+      }
+    }, 150);
+  }
+
+  function startSolo() {
+    startBeat();
+    showLoading(() => {
+      isHost = false; mode = 'play'; localId = 'mason'; localRole = 'Mason Brick';
+      players.clear();
+      players.set('mason', makePlayer('mason', 'Mason Brick', 460, 2040, '#ff4fa3', true));
+      seedWorld();
+      activeJob = jobs[0];
+      showGame();
+      toast('Mason Brick is loose. Find a ride and do something questionable.');
+    });
+  }
+  function startHost() {
+    startBeat();
+    if (typeof Peer === 'undefined') { $('netStatus').textContent = 'PeerJS failed to load. Solo still works.'; return; }
+    roomCode = genCode();
+    $('netStatus').textContent = 'Room ' + roomCode + ' ready. Share it.';
+    try {
+      peer?.destroy?.();
+      peer = new Peer(ROOM_PREFIX + roomCode);
+      peer.on('connection', conn => {
+        conns.push(conn);
+        conn.on('data', msg => handleClient(msg, conn));
+        conn.on('open', () => {
+          const foc = makePlayer('foccoia', 'Foccoia Bread', 560, 2010, '#ffd166', false);
+          players.set('foccoia', foc);
+          conn.send({ t:'welcome', id:'foccoia', world: packWorld(), players: packPlayers(), job: activeJob?.id || null });
+          toast('Foccoia Bread joined the mess.');
+        });
+      });
+      showLoading(() => {
+        isHost = true; mode = 'play'; localId = 'mason'; localRole = 'Mason Brick';
+        players.clear();
+        players.set('mason', makePlayer('mason', 'Mason Brick', 460, 2040, '#ff4fa3', true));
+        seedWorld();
+        activeJob = jobs[0];
+        showGame();
+        toast('Room ' + roomCode + '. Mason hosts the bad idea.');
+      });
+    } catch (err) {
+      $('netStatus').textContent = 'Host failed: ' + err.message;
+    }
+  }
+  function joinRoom() {
+    startBeat();
+    if (typeof Peer === 'undefined') { $('netStatus').textContent = 'PeerJS failed to load.'; return; }
+    const code = $('joinCode').value.trim().toUpperCase();
+    if (code.length < 4) { $('netStatus').textContent = 'Enter a room code.'; return; }
+    try {
+      peer?.destroy?.();
+      peer = new Peer();
+      peer.on('open', () => {
+        hostConn = peer.connect(ROOM_PREFIX + code);
+        hostConn.on('open', () => hostConn.send({ t:'join' }));
+        hostConn.on('data', msg => handleHost(msg));
+      });
+      $('netStatus').textContent = 'Connecting to ' + code + '...';
+    } catch (err) {
+      $('netStatus').textContent = 'Join failed: ' + err.message;
+    }
+  }
+  function handleHost(msg) {
+    if (!msg || typeof msg !== 'object') return;
+    if (msg.t === 'welcome') {
+      localId = msg.id; localRole = 'Foccoia Bread'; isHost = false; mode = 'play';
+      unpackWorld(msg.world); unpackPlayers(msg.players);
+      const me = players.get(localId); if (me) me.local = true;
+      activeJob = jobs.find(j => j.id === msg.job) || jobs[0];
+      showLoading(() => { showGame(); toast('Foccoia Bread joins. Try not to scratch the supercar.'); });
+    } else if (msg.t === 'snap') {
+      unpackPlayers(msg.players);
+      if (msg.vehicles) unpackVehicles(msg.vehicles);
+      activeJob = jobs.find(j => j.id === msg.job) || activeJob;
+    }
+  }
+  function handleClient(msg, conn) {
+    if (!msg || typeof msg !== 'object') return;
+    if (msg.t === 'input') {
+      const p = players.get('foccoia');
+      if (p) Object.assign(p, msg.p);
+    }
+  }
+  function broadcast(msg) {
+    for (const c of conns) try { if (c.open) c.send(msg); } catch (_) {}
+  }
+  function genCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let s = '';
+    for (let i=0;i<6;i++) s += chars[(Math.random()*chars.length)|0];
+    return s;
+  }
+  function packPlayers() { return [...players.values()].map(p => ({...p, vehicle: p.vehicle ? p.vehicle.id : null, local:false})); }
+  function unpackPlayers(arr) {
+    if (!Array.isArray(arr)) return;
+    for (const rp of arr) {
+      const old = players.get(rp.id);
+      const vehId = rp.vehicle;
+      const p = old || makePlayer(rp.id, rp.name, rp.x, rp.y, rp.color, rp.id === localId);
+      Object.assign(p, rp);
+      p.local = rp.id === localId;
+      p.vehicle = vehId ? vehicles.find(v => v.id === vehId) || null : null;
+      players.set(p.id, p);
+    }
+  }
+  function packWorld() { return { vehicles: vehicles.map(v => ({...v, driver: v.driver ? v.driver.id : null})), cops: cops.map(c => ({...c})) }; }
+  function unpackWorld(w) { seedWorld(); if (w?.vehicles) unpackVehicles(w.vehicles); }
+  function unpackVehicles(arr) {
+    vehicles.length = 0;
+    for (const rv of arr || []) vehicles.push({ ...rv, driver: rv.driver ? players.get(rv.driver) || null : null });
+  }
+  function showGame() {
+    $('menu').classList.add('hidden');
+    $('hud').classList.remove('hidden');
+    mini.classList.remove('hidden');
+    $('center').classList.remove('hidden');
+    buildWeaponWheel();
+  }
+
+  function buildWeaponWheel() {
+    const wheel = $('weaponWheelInner');
+    wheel.querySelectorAll('.slot').forEach(n => n.remove());
+    const me = players.get(localId);
+    WEAPONS.forEach((w, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'slot';
+      btn.style.setProperty('--ang', (i / WEAPONS.length * 360) + 'deg');
+      btn.innerHTML = `<b>${w.name}</b><small>${w.type.toUpperCase()}</small>`;
+      btn.addEventListener('pointerdown', e => { e.preventDefault(); chooseWeapon(w.id); closeWeaponWheel(); });
+      if (me?.weapon === w.id) btn.classList.add('sel');
+      if (me?.weapons?.includes(w.id)) btn.classList.add('carry');
+      wheel.appendChild(btn);
+    });
+    updateWeaponHub();
+  }
+  function updateWeaponHub() {
+    const me = players.get(localId);
+    const names = (me?.weapons || []).map(id => weaponById[id]?.name || id).join('<br>');
+    $('weaponHub').innerHTML = `CARRY ${me?.weapons?.length || 0}/3<br>${names || 'SELECT TOOL'}`;
+  }
+  function openWeaponWheel() {
+    buildWeaponWheel();
+    $('weaponWheel').classList.add('on');
+  }
+  function closeWeaponWheel() {
+    $('weaponWheel').classList.remove('on');
+  }
+  function toggleWeaponWheel() {
+    if ($('weaponWheel').classList.contains('on')) closeWeaponWheel();
+    else openWeaponWheel();
+  }
+  function chooseWeapon(id) {
+    const me = players.get(localId);
+    if (!me || !weaponById[id]) return;
+    if (!me.weapons.includes(id)) {
+      while (me.weapons.length >= 3) me.weapons.shift();
+      me.weapons.push(id);
+    }
+    me.weapon = id;
+    toast('Equipped ' + weaponById[id].name + '.');
+    buildWeaponWheel();
+  }
+  function cycleCarry(dir = 1) {
+    const me = players.get(localId);
+    if (!me || !me.weapons.length) return;
+    const i = me.weapons.indexOf(me.weapon);
+    me.weapon = me.weapons[(i + dir + me.weapons.length) % me.weapons.length];
+    toast('Equipped ' + weaponById[me.weapon].name + '.');
+  }
+
+  function update(dt) {
+    const me = players.get(localId);
+    if (!me) return;
+    readKeys();
+    updatePlayer(me, dt);
+    if (isHost || mode === 'play' && !hostConn) {
+      updateNpc(dt);
+      updateCops(dt);
+      updateJobs(dt);
+    }
+    updateProjectiles(dt);
+    updateFireZones(dt);
+    updateParticles(dt);
+    if (toastT > 0) toastT -= dt; else $('toast').classList.remove('on');
+    if (isHost) broadcast({ t:'snap', players: packPlayers(), vehicles: vehicles.map(v => ({...v, driver: v.driver ? v.driver.id : null})), job: activeJob?.id || null });
+    if (!isHost && hostConn?.open && me) hostConn.send({ t:'input', p:{ x:me.x, y:me.y, vx:me.vx, vy:me.vy, a:me.a, hp:me.hp, cash:me.cash, stars:me.stars, vehicle:me.vehicle ? me.vehicle.id : null, weapons:me.weapons, weapon:me.weapon } });
+    updateHud(me);
+  }
+  function readKeys() {
+    input.mx = 0; input.my = 0;
+    if (keys.a || keys.arrowleft) input.mx -= 1;
+    if (keys.d || keys.arrowright) input.mx += 1;
+    if (keys.w || keys.arrowup) input.my -= 1;
+    if (keys.s || keys.arrowdown) input.my += 1;
+    input.boost = !!keys.shift || input.boost;
+  }
+  function updatePlayer(p, dt) {
+    p.cooldown = Math.max(0, p.cooldown - dt);
+    if (p.vehicle) {
+      const v = p.vehicle;
+      const turn = input.mx * dt * 2.8;
+      v.a += turn * (v.type === 'bike' ? 1.45 : 1);
+      const accel = -input.my * (v.type === 'bike' ? 650 : 500) * (input.boost ? 1.75 : 1);
+      v.vx += Math.cos(v.a) * accel * dt;
+      v.vy += Math.sin(v.a) * accel * dt;
+      v.vx *= Math.pow(0.985, dt*60); v.vy *= Math.pow(0.985, dt*60);
+      const max = (v.type === 'bike' ? 520 : v.type === 'swamp' ? 280 : 430) * (input.boost ? 1.25 : 1);
+      const sp = Math.hypot(v.vx, v.vy);
+      if (sp > max) { v.vx = v.vx / sp * max; v.vy = v.vy / sp * max; }
+      moveThing(v, v.vx * dt, v.vy * dt);
+      p.x = v.x; p.y = v.y; p.a = v.a; p.vx = v.vx; p.vy = v.vy;
+      if (input.boost && Math.random() < dt*12) spark(v.x - Math.cos(v.a)*34, v.y - Math.sin(v.a)*34, '#ffd166');
+    } else {
+      const len = Math.hypot(input.mx, input.my);
+      let mx = input.mx, my = input.my;
+      if (len > 1) { mx /= len; my /= len; }
+      const speed = 170 * (keys.shift ? 1.35 : 1);
+      p.vx = mx * speed; p.vy = my * speed;
+      if (len > 0.05) p.a = Math.atan2(my, mx);
+      moveThing(p, p.vx * dt, p.vy * dt);
+    }
+    p.wantedT = Math.max(0, p.wantedT - dt);
+    if (p.wantedT <= 0) p.stars = Math.max(0, p.stars - dt*0.08);
+  }
+  function moveThing(o, dx, dy) {
+    o.x = clamp(o.x + dx, 60, MAP.w - 60);
+    o.y = clamp(o.y + dy, 60, MAP.h - 60);
+    for (const b of buildings) {
+      if (o.x > b.x && o.x < b.x+b.w && o.y > b.y && o.y < b.y+b.h) {
+        if (Math.abs((o.x-dx) - (b.x+b.w/2)) > b.w/2) o.x -= dx;
+        if (Math.abs((o.y-dy) - (b.y+b.h/2)) > b.h/2) o.y -= dy;
+        o.vx = (o.vx || 0) * -0.25; o.vy = (o.vy || 0) * -0.25;
+      }
+    }
+  }
+  function updateNpc(dt) {
+    for (const n of npcs) {
+      if (n.dead) continue;
+      n.panic = Math.max(0, n.panic - dt);
+      n.stun = Math.max(0, n.stun - dt);
+      n.foam = Math.max(0, n.foam - dt);
+      if (n.burn > 0) {
+        n.burn -= dt;
+        damageActor(n, 12 * dt, 'fire', { x:n.x, y:n.y });
+        if (Math.random() < dt * 16) spark(n.x, n.y, '#ff8a3d');
+        n.panic = Math.max(n.panic, 1.8);
+        n.react = 'burn';
+      }
+      if (n.stun > 0) continue;
+      n.t -= dt;
+      if (n.t <= 0 || n.panic > 0) {
+        n.t = 0.35 + Math.random()*1.2;
+        n.a += (Math.random()-0.5) * (n.panic > 0 ? 5 : 1.8);
+      }
+      const sp = (n.panic > 0 ? 96 : 24) * (n.foam > 0 ? 0.35 : 1);
+      n.x += Math.cos(n.a)*sp*dt; n.y += Math.sin(n.a)*sp*dt;
+      n.x = clamp(n.x, 80, MAP.w-80); n.y = clamp(n.y, 80, MAP.h-80);
+    }
+  }
+  function updateCops(dt) {
+    const target = [...players.values()].sort((a,b) => b.stars - a.stars)[0];
+    for (const c of cops) {
+      if (c.dead) continue;
+      c.stun = Math.max(0, c.stun - dt);
+      if (c.burn > 0) {
+        c.burn -= dt;
+        damageActor(c, 10 * dt, 'fire', { x:c.x, y:c.y });
+        if (Math.random() < dt * 10) spark(c.x, c.y, '#ff8a3d');
+      }
+      c.flash += dt * 8;
+      if (c.stun > 0) continue;
+      if (target && target.stars > 0.2) {
+        const dx = target.x - c.x, dy = target.y - c.y;
+        const d = Math.hypot(dx,dy) || 1;
+        c.a = Math.atan2(dy, dx);
+        c.vx += dx/d * 250 * dt; c.vy += dy/d * 250 * dt;
+        if (d < 54) {
+          target.hp = Math.max(0, target.hp - dt*18);
+          target.stars = Math.max(target.stars, 2);
+          if (Math.random() < dt*8) spark(target.x, target.y, '#6fb6ff');
+        }
+      } else {
+        c.a += Math.sin(performance.now()*0.001 + c.x)*dt;
+        c.vx += Math.cos(c.a)*40*dt; c.vy += Math.sin(c.a)*40*dt;
+      }
+      c.vx *= Math.pow(0.98, dt*60); c.vy *= Math.pow(0.98, dt*60);
+      moveThing(c, c.vx*dt, c.vy*dt);
+    }
+  }
+  function updateJobs(dt) {
+    if (!activeJob) activeJob = jobs[0];
+    for (const p of players.values()) {
+      if (Math.hypot(p.x-activeJob.tx, p.y-activeJob.ty) < 70) {
+        p.cash += activeJob.reward;
+        p.stars = Math.min(5, p.stars + 0.8);
+        p.wantedT = 12;
+        floating.push({ x:p.x, y:p.y-30, text:'+$'+activeJob.reward, t:1.4, color:activeJob.color });
+        activeJob = jobs[(jobs.indexOf(activeJob)+1) % jobs.length];
+        toast(activeJob.label);
+      }
+    }
+  }
+  function updateParticles(dt) {
+    for (let i=particles.length-1;i>=0;i--) {
+      const p=particles[i]; p.t-=dt; p.x+=p.vx*dt; p.y+=p.vy*dt;
+      if (p.t<=0) particles.splice(i,1);
+    }
+    for (let i=floating.length-1;i>=0;i--) {
+      const f=floating[i]; f.t-=dt; f.y-=28*dt;
+      if (f.t<=0) floating.splice(i,1);
+    }
+  }
+
+  function fireWeapon() {
+    const me = players.get(localId);
+    if (!me || me.cooldown > 0) return;
+    const w = weaponById[me.weapon] || weaponById.pistol;
+    me.cooldown = w.rate;
+    me.stars = Math.min(5, me.stars + (['rocket','bomb','sticky','firebomb','flame'].includes(w.type) ? 0.55 : 0.18));
+    me.wantedT = 12;
+    const origin = muzzlePoint(me);
+    const baseA = me.a;
+    if (w.type === 'melee') return meleeHit(me, w);
+    if (w.type === 'flame') return flameBurst(me, w);
+    if (w.type === 'spread') {
+      for (let i = 0; i < (w.pellets || 6); i++) spawnProjectile(me, w, baseA + (Math.random()-0.5)*0.5, origin);
+      return;
+    }
+    spawnProjectile(me, w, baseA, origin);
+  }
+  function muzzlePoint(p) {
+    return { x: p.x + Math.cos(p.a) * 24, y: p.y + Math.sin(p.a) * 24 };
+  }
+  function spawnProjectile(owner, w, a, origin) {
+    const speed = w.speed || 700;
+    projectiles.push({
+      x: origin.x, y: origin.y, ox: origin.x, oy: origin.y,
+      vx: Math.cos(a) * speed, vy: Math.sin(a) * speed,
+      a, t: 1.8, owner: owner.id, weapon: w.id, stuck: false,
+      color: w.color, radius: w.radius || 0
+    });
+  }
+  function updateProjectiles(dt) {
+    for (let i = projectiles.length - 1; i >= 0; i--) {
+      const p = projectiles[i];
+      const w = weaponById[p.weapon];
+      if (!w) { projectiles.splice(i,1); continue; }
+      p.t -= dt;
+      if (p.stuck) {
+        if (p.t <= 0) { explode(p.x, p.y, w.radius || 155, w.dmg || 90, p.weapon); projectiles.splice(i,1); }
+        continue;
+      }
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      const travel = Math.hypot(p.x - p.ox, p.y - p.oy);
+      if (travel > (w.range || 500) || p.t <= 0) {
+        if (['rocket','bomb','firebomb','fireball'].includes(w.type)) explode(p.x, p.y, w.radius || 120, w.dmg || 50, p.weapon);
+        if (w.type === 'sticky') { p.stuck = true; p.vx = 0; p.vy = 0; p.t = 1.25; continue; }
+        projectiles.splice(i,1);
+        continue;
+      }
+      const hit = hitActor(p.x, p.y, w.type === 'rocket' ? 26 : 14);
+      if (hit) {
+        if (['rocket','bomb','firebomb','fireball'].includes(w.type)) explode(p.x, p.y, w.radius || 120, w.dmg || 50, p.weapon);
+        else if (w.type === 'sticky') { p.stuck = true; p.vx = 0; p.vy = 0; p.t = 1.05; }
+        else damageActor(hit, w.dmg, w.type, p);
+        if (!p.stuck) projectiles.splice(i,1);
+      } else if (w.type === 'rocket' && Math.random() < dt * 20) spark(p.x, p.y, '#ff8a3d');
+    }
+  }
+  function hitActor(x, y, r) {
+    let best = null, bd = r;
+    for (const n of npcs) {
+      if (n.dead) continue;
+      const d = Math.hypot(n.x-x, n.y-y);
+      if (d < bd) { bd = d; best = n; }
+    }
+    for (const c of cops) {
+      if (c.dead) continue;
+      const d = Math.hypot(c.x-x, c.y-y);
+      if (d < bd) { bd = d; best = c; }
+    }
+    return best;
+  }
+  function damageActor(a, dmg, kind, src) {
+    if (!a || a.dead) return;
+    a.hp -= dmg;
+    a.panic = Math.max(a.panic || 0, kind === 'fire' ? 2.2 : 1.2);
+    a.react = kind;
+    if (kind === 'fire' || kind === 'fireball') a.burn = Math.max(a.burn || 0, 2.6);
+    if (kind === 'stun') a.stun = Math.max(a.stun || 0, 1.8);
+    if (kind === 'foam') a.foam = Math.max(a.foam || 0, 3.0);
+    if (kind === 'push' && src) {
+      const dx = a.x - src.x, dy = a.y - src.y, d = Math.hypot(dx,dy) || 1;
+      a.x += dx/d * 26; a.y += dy/d * 26;
+    }
+    if (src) {
+      const dx = a.x - src.x, dy = a.y - src.y, d = Math.hypot(dx,dy) || 1;
+      a.x += dx/d * 9; a.y += dy/d * 9;
+    }
+    spark(a.x, a.y, kind === 'fire' || kind === 'fireball' ? '#ff8a3d' : kind === 'stun' ? '#80ffd8' : kind === 'paint' ? '#b66bff' : '#ff415d');
+    if (a.hp <= 0) {
+      a.dead = true;
+      floating.push({ x:a.x, y:a.y-20, text: kind === 'fire' ? 'BURNED' : kind === 'bomb' || kind === 'rocket' || kind === 'sticky' ? 'BOOM' : 'DOWN', t:1.2, color:'#ff415d' });
+    }
+  }
+  function explode(x, y, radius, dmg, kind) {
+    for (let i=0;i<38;i++) {
+      const a = Math.random()*Math.PI*2, r = Math.random()*radius;
+      particles.push({ x, y, vx:Math.cos(a)*(80+r*3), vy:Math.sin(a)*(80+r*3), t:0.5+Math.random()*0.5, color:i%2?'#ff8a3d':'#ffd166' });
+    }
+    for (const n of npcs) {
+      if (n.dead) continue;
+      const d = Math.hypot(n.x-x,n.y-y);
+      if (d < radius) damageActor(n, dmg * (1 - d/radius), kind === 'firebomb' ? 'fire' : kind, { x, y });
+    }
+    for (const c of cops) {
+      if (c.dead) continue;
+      const d = Math.hypot(c.x-x,c.y-y);
+      if (d < radius) damageActor(c, dmg * (1 - d/radius), kind === 'firebomb' ? 'fire' : kind, { x, y });
+    }
+    if (kind === 'molotov' || kind === 'flare') fireZones.push({ x, y, r: radius * 0.75, t:4.2 });
+  }
+  function flameBurst(me, w) {
+    for (let i=0;i<8;i++) {
+      const a = me.a + (Math.random()-0.5)*0.46;
+      const d = 40 + Math.random() * w.range;
+      const x = me.x + Math.cos(a)*d, y = me.y + Math.sin(a)*d;
+      particles.push({ x:me.x, y:me.y, vx:Math.cos(a)*(180+Math.random()*240), vy:Math.sin(a)*(180+Math.random()*240), t:0.28+Math.random()*0.22, color:'#ff8a3d' });
+      const hit = hitActor(x,y,34);
+      if (hit) damageActor(hit, w.dmg, 'fire', { x:me.x, y:me.y });
+    }
+  }
+  function meleeHit(me, w) {
+    let hit = null, bd = w.range || 60;
+    for (const n of npcs) {
+      if (n.dead) continue;
+      const d = Math.hypot(n.x-me.x,n.y-me.y);
+      const dot = ((n.x-me.x)*Math.cos(me.a)+(n.y-me.y)*Math.sin(me.a))/(d||1);
+      if (d < bd && dot > 0.35) { bd=d; hit=n; }
+    }
+    for (const c of cops) {
+      if (c.dead) continue;
+      const d = Math.hypot(c.x-me.x,c.y-me.y);
+      const dot = ((c.x-me.x)*Math.cos(me.a)+(c.y-me.y)*Math.sin(me.a))/(d||1);
+      if (d < bd && dot > 0.35) { bd=d; hit=c; }
+    }
+    if (hit) damageActor(hit, w.dmg, 'melee', { x:me.x, y:me.y });
+    for (let i=0;i<8;i++) spark(me.x + Math.cos(me.a)*34, me.y + Math.sin(me.a)*34, w.color);
+  }
+  function updateFireZones(dt) {
+    for (let i=fireZones.length-1;i>=0;i--) {
+      const f=fireZones[i]; f.t-=dt;
+      if (Math.random()<dt*20) spark(f.x+(Math.random()-0.5)*f.r, f.y+(Math.random()-0.5)*f.r, '#ff8a3d');
+      for (const n of npcs) if (!n.dead && Math.hypot(n.x-f.x,n.y-f.y)<f.r) damageActor(n, 10*dt, 'fire', f);
+      for (const c of cops) if (!c.dead && Math.hypot(c.x-f.x,c.y-f.y)<f.r) damageActor(c, 8*dt, 'fire', f);
+      if (f.t<=0) fireZones.splice(i,1);
+    }
+  }
+  function action() {
+    const me = players.get(localId);
+    if (!me) return;
+    if (me.vehicle) {
+      me.vehicle.driver = null;
+      me.vehicle = null;
+      toast(me.name + ' exits the ride.');
+      return;
+    }
+    let best = null, bd = 70;
+    for (const v of vehicles) {
+      if (v.driver) continue;
+      const d = Math.hypot(me.x-v.x, me.y-v.y);
+      if (d < bd) { bd = d; best = v; }
+    }
+    if (best) {
+      me.vehicle = best; best.driver = me; me.stars = Math.min(5, me.stars + 0.35); me.wantedT = 8;
+      toast(me.name + ' borrows a ' + (best.type === 'bike' ? 'bike' : best.type === 'swamp' ? 'swamp buggy' : 'supercar') + '.');
+    } else if (activeJob) {
+      toast(activeJob.label);
+    }
+  }
+  function honk() {
+    const me = players.get(localId);
+    if (!me) return;
+    me.stars = Math.min(5, me.stars + 0.1); me.wantedT = 5;
+    toast('HONK. A tiny crime, emotionally.');
+    for (let i=0;i<8;i++) spark(me.x, me.y, i%2?'#ff4fa3':'#ffd166');
+  }
+  function nextJob() {
+    activeJob = jobs[(jobs.indexOf(activeJob)+1) % jobs.length];
+    toast(activeJob.label);
+  }
+
+  const buildings = [
+    {x:180,y:170,w:430,h:320,c:'#21144a'}, {x:760,y:170,w:340,h:250,c:'#1b2450'}, {x:1280,y:160,w:510,h:300,c:'#241840'},
+    {x:2080,y:120,w:380,h:320,c:'#172d42'}, {x:2660,y:150,w:520,h:260,c:'#27304b'}, {x:160,y:710,w:410,h:330,c:'#2a1633'},
+    {x:780,y:660,w:300,h:390,c:'#1b3040'}, {x:2020,y:720,w:500,h:260,c:'#35172e'}, {x:2740,y:820,w:430,h:330,c:'#182d2a'},
+    {x:220,y:1280,w:500,h:270,c:'#2f243d'}, {x:960,y:1260,w:430,h:350,c:'#171d36'}, {x:1620,y:1260,w:340,h:280,c:'#332646'},
+    {x:2260,y:1320,w:330,h:360,c:'#1f2f38'}, {x:2860,y:1450,w:420,h:250,c:'#263719'}, {x:760,y:1960,w:500,h:290,c:'#251d31'},
+    {x:1500,y:2060,w:430,h:270,c:'#1d3240'}, {x:2220,y:2040,w:360,h:320,c:'#301b2a'}
+  ];
+  function draw() {
+    ctx.clearRect(0,0,W,H);
+    const me = players.get(localId);
+    if (me) { camX += (me.x - W/2 - camX) * 0.12; camY += (me.y - H/2 - camY) * 0.12; }
+    camX = clamp(camX, 0, MAP.w-W); camY = clamp(camY, 0, MAP.h-H);
+    ctx.save();
+    ctx.translate(-camX, -camY);
+    drawWorld();
+    for (const n of npcs) drawNpc(n);
+    for (const v of vehicles) drawVehicle(v);
+    for (const c of cops) drawCop(c);
+    for (const p of players.values()) drawPlayer(p);
+    for (const p of particles) { ctx.globalAlpha = Math.max(0,p.t); ctx.fillStyle=p.color; ctx.fillRect(p.x-2,p.y-2,4,4); ctx.globalAlpha=1; }
+    for (const f of floating) { ctx.globalAlpha=Math.max(0,f.t); ctx.fillStyle=f.color; ctx.font='bold 18px Courier New'; ctx.textAlign='center'; ctx.fillText(f.text,f.x,f.y); ctx.globalAlpha=1; }
+    ctx.restore();
+    drawVignette();
+    drawMini();
+  }
+  function drawWorld() {
+    const g = ctx.createLinearGradient(0,0,MAP.w,MAP.h);
+    g.addColorStop(0,'#261750'); g.addColorStop(0.48,'#1a1d35'); g.addColorStop(1,'#153723');
+    ctx.fillStyle = g; ctx.fillRect(0,0,MAP.w,MAP.h);
+    ctx.fillStyle = '#102b45'; ctx.fillRect(2650, 0, 950, 690);
+    ctx.fillStyle = '#17483e'; ctx.fillRect(2700, 1850, 900, 750);
+    ctx.fillStyle = '#23324a';
+    for (let x=320;x<MAP.w;x+=520) ctx.fillRect(x,0,72,MAP.h);
+    for (let y=360;y<MAP.h;y+=520) ctx.fillRect(0,y,MAP.w,72);
+    ctx.strokeStyle = 'rgba(255,209,102,0.35)'; ctx.lineWidth = 5; ctx.setLineDash([28,28]);
+    for (let x=356;x<MAP.w;x+=520) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,MAP.h); ctx.stroke(); }
+    for (let y=396;y<MAP.h;y+=520) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(MAP.w,y); ctx.stroke(); }
+    ctx.setLineDash([]);
+    for (const b of buildings) {
+      ctx.fillStyle = b.c; ctx.fillRect(b.x,b.y,b.w,b.h);
+      ctx.strokeStyle = 'rgba(255,79,163,0.24)'; ctx.strokeRect(b.x,b.y,b.w,b.h);
+      ctx.fillStyle = 'rgba(128,255,216,0.5)';
+      for (let x=b.x+26;x<b.x+b.w-20;x+=54) for (let y=b.y+24;y<b.y+b.h-20;y+=58) ctx.fillRect(x,y,18,16);
+    }
+    for (const j of jobs) {
+      ctx.strokeStyle = j.color; ctx.lineWidth = activeJob === j ? 5 : 2;
+      ctx.beginPath(); ctx.arc(j.tx,j.ty, activeJob === j ? 58 + Math.sin(performance.now()*0.006)*8 : 32, 0, Math.PI*2); ctx.stroke();
+      ctx.fillStyle = j.color; ctx.font = 'bold 12px Courier New'; ctx.textAlign='center'; ctx.fillText(j.id.toUpperCase(), j.tx, j.ty-42);
+    }
+    ctx.fillStyle = 'rgba(255,255,255,0.18)';
+    for (let i=0;i<34;i++) {
+      const x = 120 + (i*311)%3300, y = 140 + (i*197)%2300;
+      ctx.fillRect(x,y,10,42);
+    }
+  }
+  function drawVehicle(v) {
+    ctx.save(); ctx.translate(v.x, v.y); ctx.rotate(v.a);
+    if (v.type === 'bike') {
+      ctx.strokeStyle = v.color; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(-22,0); ctx.lineTo(18,0); ctx.stroke();
+      ctx.strokeStyle = '#0a0b12'; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(-26,0,12,0,Math.PI*2); ctx.arc(26,0,12,0,Math.PI*2); ctx.stroke();
+    } else {
+      ctx.fillStyle = v.color; roundRect(-34,-18,68,36,10); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.5)'; roundRect(-4,-14,24,28,6); ctx.fill();
+      ctx.fillStyle = '#fff7b3'; ctx.fillRect(26,-13,8,8); ctx.fillRect(26,5,8,8);
+    }
+    ctx.restore();
+  }
+  function drawCop(c) {
+    ctx.save(); ctx.translate(c.x,c.y); ctx.rotate(c.a);
+    ctx.fillStyle = '#e7f6ff'; roundRect(-32,-17,64,34,8); ctx.fill();
+    ctx.fillStyle = Math.sin(c.flash)>0 ? '#ff415d' : '#6fb6ff'; ctx.fillRect(-5,-8,10,16);
+    ctx.restore();
+  }
+  function drawPlayer(p) {
+    if (p.vehicle) return;
+    const portrait = p.id === 'foccoia' ? playerArt.foccoia : playerArt.mason;
+    ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.a);
+    if (portrait) {
+      ctx.save();
+      ctx.beginPath(); ctx.arc(0,0,19,0,Math.PI*2); ctx.clip();
+      ctx.rotate(-p.a);
+      ctx.drawImage(portrait, -19, -19, 38, 38);
+      ctx.restore();
+      ctx.strokeStyle = p.color; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0,0,20,0,Math.PI*2); ctx.stroke();
+    } else {
+      ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(0,0,15,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#0b0c12'; ctx.fillRect(4,-5,18,10);
+    }
+    ctx.restore();
+    ctx.fillStyle = '#fff3d0'; ctx.font='10px Courier New'; ctx.textAlign='center'; ctx.fillText(p.name, p.x, p.y-24);
+  }
+  function drawNpc(n) {
+    ctx.fillStyle = n.color; ctx.beginPath(); ctx.arc(n.x,n.y,8,0,Math.PI*2); ctx.fill();
+  }
+  function drawVignette() {
+    const me = players.get(localId);
+    const danger = me ? me.stars/5 : 0;
+    const g = ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*0.2,W/2,H/2,Math.max(W,H)*0.78);
+    g.addColorStop(0,'rgba(0,0,0,0)');
+    g.addColorStop(1, danger > 0.2 ? `rgba(255,65,93,${0.16+danger*0.18})` : 'rgba(0,0,0,0.25)');
+    ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+  }
+  function drawMini() {
+    if (mini.classList.contains('hidden')) return;
+    miniCtx.clearRect(0,0,300,300);
+    miniCtx.fillStyle='#08101a'; miniCtx.fillRect(0,0,300,300);
+    const sx=300/MAP.w, sy=300/MAP.h;
+    miniCtx.fillStyle='rgba(255,255,255,0.13)';
+    for (const b of buildings) miniCtx.fillRect(b.x*sx,b.y*sy,b.w*sx,b.h*sy);
+    if (activeJob) { miniCtx.fillStyle=activeJob.color; miniCtx.fillRect(activeJob.tx*sx-4, activeJob.ty*sy-4,8,8); }
+    for (const p of players.values()) { miniCtx.fillStyle=p.color; miniCtx.fillRect(p.x*sx-3,p.y*sy-3,6,6); }
+    for (const c of cops) { miniCtx.fillStyle='#6fb6ff'; miniCtx.fillRect(c.x*sx-2,c.y*sy-2,4,4); }
+  }
+  function updateHud(me) {
+    $('role').textContent = localRole.toUpperCase();
+    $('stats').innerHTML = `CASH <b>$${Math.floor(me.cash)}</b>  HEAT <b>${Math.floor(me.stars)}★</b>  HP <b>${Math.floor(me.hp)}%</b><br>${me.vehicle ? 'RIDE <b>' + me.vehicle.type.toUpperCase() + '</b>' : 'ON FOOT'}  ROOM <b>${roomCode || 'SOLO'}</b>`;
+    $('objective').textContent = activeJob ? activeJob.label : 'Choose a job.';
+  }
+  function toast(msg) { $('toast').textContent = msg; $('toast').classList.add('on'); toastT = 2.4; }
+  function spark(x,y,color) { particles.push({ x,y,vx:(Math.random()-0.5)*90,vy:(Math.random()-0.5)*90,t:0.55,color }); }
+  function roundRect(x,y,w,h,r) { ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x,y,w,h,r) : ctx.rect(x,y,w,h); }
+  function clamp(v,a,b) { return Math.max(a, Math.min(b,v)); }
+
+  function bindStick(el, knob, cb) {
+    let id = null;
+    function set(x,y) {
+      const r = el.getBoundingClientRect();
+      const cx = r.left + r.width/2, cy = r.top + r.height/2;
+      let dx=x-cx, dy=y-cy; const max = r.width*0.38; const len=Math.hypot(dx,dy);
+      if (len>max) { dx=dx/len*max; dy=dy/len*max; }
+      knob.style.transform = `translate(${dx}px,${dy}px)`;
+      cb(dx/max, dy/max);
+    }
+    function end(e) { if (id!==e.pointerId) return; id=null; knob.style.transform=''; cb(0,0); }
+    el.addEventListener('pointerdown', e => { e.preventDefault(); id=e.pointerId; el.setPointerCapture(e.pointerId); set(e.clientX,e.clientY); });
+    el.addEventListener('pointermove', e => { if (id===e.pointerId) { e.preventDefault(); set(e.clientX,e.clientY); } });
+    el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
+  }
+  bindStick($('moveStick'), $('moveStick').querySelector('.knob'), (x,y) => { input.mx=x; input.my=y; });
+  bindStick($('lookStick'), $('lookStick').querySelector('.knob'), (x,y) => { input.lookX=x; input.lookY=y; });
+  $('actBtn').addEventListener('pointerdown', e => { e.preventDefault(); action(); });
+  $('boostBtn').addEventListener('pointerdown', e => { e.preventDefault(); input.boost = true; });
+  $('boostBtn').addEventListener('pointerup', e => { e.preventDefault(); input.boost = false; });
+  $('boostBtn').addEventListener('pointercancel', e => { e.preventDefault(); input.boost = false; });
+  $('hornBtn').addEventListener('pointerdown', e => { e.preventDefault(); honk(); });
+  $('mapBtn').addEventListener('pointerdown', e => { e.preventDefault(); nextJob(); });
+
+  addEventListener('keydown', e => {
+    keys[e.key.toLowerCase()] = true;
+    if (['arrowup','arrowdown','arrowleft','arrowright',' '].includes(e.key.toLowerCase())) e.preventDefault();
+    if (mode === 'play') {
+      if (e.key.toLowerCase() === 'e') action();
+      if (e.key.toLowerCase() === 'q') nextJob();
+      if (e.key.toLowerCase() === 'h') honk();
+    }
+  });
+  addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+  addEventListener('blur', () => { for (const k in keys) keys[k] = false; input.boost = false; });
+  $('soloBtn').addEventListener('click', startSolo);
+  $('hostBtn').addEventListener('click', startHost);
+  $('joinBtn').addEventListener('click', joinRoom);
+  $('joinCode').addEventListener('keydown', e => { if (e.key === 'Enter') joinRoom(); });
+
+  function loop(now) {
+    const dt = Math.min(0.05, (now-last)/1000 || 0);
+    last = now;
+    if (mode === 'play') update(dt);
+    draw();
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

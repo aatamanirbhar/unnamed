@@ -929,26 +929,29 @@
   const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.05, 250);
   const baseFov = camera.fov;
   let scopeActive = false;
+  let scopeSource = null;
   let voiceStream = null;
   let voiceCalls = new Map();
   let voiceReady = false;
   let voiceAttempted = false;
   let voiceSuppressed = false;
 
-  function setScopeState(on) {
+  function setScopeState(on, source = null) {
     const me = players.get(localId);
     const canScope = me && me.alive && me.weap && WEAPONS[me.weap];
     scopeActive = !!on && !!canScope;
+    scopeSource = scopeActive ? source : null;
     scopeOverlay.classList.toggle('on', scopeActive);
+    $('btn-scope')?.classList.toggle('on', scopeActive);
     const family = canScope ? WEAPONS[me.weap].family : '';
     camera.fov = scopeActive ? (family === 'sniper' ? 38 : 46) : baseFov;
     camera.updateProjectionMatrix();
   }
-  function toggleScope() {
+  function toggleScope(source = 'toggle') {
     const me = players.get(localId);
     if (!me) return;
     if (!WEAPONS[me.weap]) return;
-    setScopeState(!scopeActive);
+    setScopeState(!scopeActive, source);
   }
   function clearScopeIfNeeded() {
     const me = players.get(localId);
@@ -3225,7 +3228,7 @@
     if (menuPanel.classList.contains('hidden') && soloPanel.classList.contains('hidden') && hostPanel.classList.contains('hidden') && joinPanel.classList.contains('hidden') && teamPanel.classList.contains('hidden')) {
       if (!pointerLocked && !isTouch) { tryLockPointer(); return; }
       if (e.button === 2) {
-        toggleScope();
+        toggleScope('mouse');
         return;
       }
       if (e.button === 0) {
@@ -3241,7 +3244,7 @@
     player.pitch -= e.movementY * sens;
     player.pitch = Math.max(-1.2, Math.min(1.2, player.pitch));
   });
-  window.addEventListener('mouseup', e => { if (e.button === 2) setScopeState(false); });
+  window.addEventListener('mouseup', e => { if (e.button === 2 && scopeSource === 'mouse') setScopeState(false); });
   window.addEventListener('contextmenu', e => { if (pointerLocked) e.preventDefault(); });
 
   // ── touch sticks ──
@@ -3301,7 +3304,7 @@
   });
   $('btn-buy')?.addEventListener('pointerdown', e => { e.preventDefault(); if (buyOpen) closeBuyMenu(); else openBuyMenu(); });
   $('btn-use').addEventListener('pointerdown', e => { e.preventDefault(); tryUseHostage(); });
-  $('btn-scope')?.addEventListener('pointerdown', e => { e.preventDefault(); toggleScope(); });
+  $('btn-scope')?.addEventListener('pointerdown', e => { e.preventDefault(); ensureAudio(); toggleScope('touch'); });
 
   // ── PEERJS MULTIPLAYER ──
   const ROOM_PREFIX = 'omsl-';
@@ -4148,8 +4151,8 @@
         if (GP.pressed('rb')) cycleGren(me);
         if (GP.pressed('lb')) { if (buyOpen) closeBuyMenu(); else openBuyMenu(); }
         if (GP.pressed('start')) { if (scoreboardEl.classList.contains('hidden')) openScoreboard(); else closeScoreboard(); }
-        if (GP.button('lt')) setScopeState(true);
-        else if (scopeActive) setScopeState(false);
+        if (GP.button('lt')) setScopeState(true, 'gamepad');
+        else if (scopeActive && scopeSource === 'gamepad') setScopeState(false);
         // RT = fire (auto if held + autofire weapon, else per-press)
         if (GP.pressed('rt')) tryFire(me, nowSec, false);
         // LS = walk (suppress sprint)
