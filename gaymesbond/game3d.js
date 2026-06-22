@@ -101,6 +101,7 @@
     up: false, down: false, left: false, right: false, shift: false,
     stickX: 0, stickY: 0,
     lookDX: 0, lookDY: 0,
+    lookStickX: 0, lookStickY: 0,
     gamepadX: 0, gamepadY: 0,
     moveTouchId: null, lookTouchId: null
   };
@@ -287,8 +288,6 @@
     const knob = $('knob');
     let moveId = null;
     let lookId = null;
-    let lastLookX = 0;
-    let lastLookY = 0;
     const max = 46;
 
     function setStick(dx, dy) {
@@ -323,41 +322,39 @@
     stick.addEventListener('pointerup', e => { resetStick(e.pointerId); });
     stick.addEventListener('pointercancel', e => { resetStick(e.pointerId); });
 
+    const lookMax = 38;
+
+    function setLookStick(dx, dy) {
+      const len = Math.hypot(dx, dy);
+      const cap = len > lookMax ? lookMax / len : 1;
+      const sx = dx * cap;
+      const sy = dy * cap;
+      input.lookStickX = sx / lookMax;
+      input.lookStickY = sy / lookMax;
+      lookKnob.style.transform = `translate(${sx}px, ${sy}px)`;
+    }
+
+    function resetLookStick(id) {
+      if (lookId !== id) return;
+      lookId = null;
+      input.lookStickX = 0;
+      input.lookStickY = 0;
+      lookKnob.style.transform = '';
+    }
+
     lookPad.addEventListener('pointerdown', e => {
       lookId = e.pointerId;
-      lastLookX = e.clientX;
-      lastLookY = e.clientY;
       lookPad.setPointerCapture(e.pointerId);
+      const r = lookPad.getBoundingClientRect();
+      setLookStick(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2));
     });
     lookPad.addEventListener('pointermove', e => {
       if (lookId !== e.pointerId) return;
-      const dx = e.clientX - lastLookX;
-      const dy = e.clientY - lastLookY;
-      lastLookX = e.clientX;
-      lastLookY = e.clientY;
-      input.lookDX += dx;
-      input.lookDY += dy;
       const r = lookPad.getBoundingClientRect();
-      const cx = r.left + r.width / 2;
-      const cy = r.top + r.height / 2;
-      const rawOx = e.clientX - cx;
-      const rawOy = e.clientY - cy;
-      const len = Math.hypot(rawOx, rawOy);
-      const cap = len > 38 ? 38 / len : 1;
-      const ox = rawOx * cap;
-      const oy = rawOy * cap;
-      lookKnob.style.transform = `translate(${ox}px, ${oy}px)`;
+      setLookStick(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2));
     });
-    lookPad.addEventListener('pointerup', e => {
-      if (lookId !== e.pointerId) return;
-      lookId = null;
-      lookKnob.style.transform = '';
-    });
-    lookPad.addEventListener('pointercancel', e => {
-      if (lookId !== e.pointerId) return;
-      lookId = null;
-      lookKnob.style.transform = '';
-    });
+    lookPad.addEventListener('pointerup', e => { resetLookStick(e.pointerId); });
+    lookPad.addEventListener('pointercancel', e => { resetLookStick(e.pointerId); });
   }
 
   function showMenu() {
@@ -955,6 +952,11 @@
       cameraPitch = clamp(cameraPitch + input.lookDY * 0.0012, -0.14, 0.42);
       input.lookDX = 0;
       input.lookDY = 0;
+    }
+    if (input.lookStickX || input.lookStickY) {
+      const lookMul = player.crouch ? 0.82 : 1;
+      cameraYaw += input.lookStickX * dt * 2.8 * lookMul;
+      cameraPitch = clamp(cameraPitch + input.lookStickY * dt * 1.35 * lookMul, -0.14, 0.42);
     }
 
     const strafe = (input.right ? 1 : 0) - (input.left ? 1 : 0) + input.stickX + input.gamepadX;
