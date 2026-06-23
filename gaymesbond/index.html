@@ -130,6 +130,12 @@
   #donate a { display: inline-block; padding: 8px 13px; border: 1px solid var(--pink); color: var(--pink); text-decoration: none; background: rgba(8,12,26,0.72); font-size: 10px; letter-spacing: 3px; }
   #donate a:hover { background: var(--pink); color: #080c1a; }
   [data-omenly-ad] { position: fixed; left: 50%; bottom: 62px; transform: translateX(-50%); z-index: 8; width: min(728px, 92vw); min-height: 1px; pointer-events: auto; }
+  #title [data-omenly-ad], #briefing [data-omenly-ad], #gameover [data-omenly-ad], #complete [data-omenly-ad] {
+    position: static;
+    transform: none;
+    width: min(728px, 100%);
+    margin: 16px auto 0;
+  }
 
   #touch { position: fixed; inset: 0; z-index: 20; pointer-events: none; display: none; }
   body.touch #touch { display: block; }
@@ -187,6 +193,7 @@
     #minimapWrap { display: none; }
     #donate { display: none; }
     #centerHint, #lockHint { display: none; }
+    #title [data-omenly-ad] { display: none; }
   }
   @media (orientation: landscape) and (max-height: 520px) {
     body.touch {

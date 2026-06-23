@@ -21,6 +21,7 @@
   if (isTouch) document.body.classList.add('touch');
 
   const SCALE = 0.02;
+  const GAMEPAD_DEADZONE = 0.18;
   const MISSIONS = createSunlitMissions();
   const COMMS = [
     'HQ: The island is public-facing. Smile like you belong there.',
@@ -32,7 +33,7 @@
   ];
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isTouch ? 1.5 : 1.75));
   renderer.setSize(window.innerWidth, window.innerHeight, false);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -114,6 +115,17 @@
   let mouseLocked = false;
   let cameraYaw = 0;
   let cameraPitch = 0.18;
+  const hudCache = {
+    t: 0,
+    force: true,
+    mission: '',
+    stats: '',
+    alert: '',
+    objectives: '',
+    pips: '',
+    next: '',
+    near: ''
+  };
 
   previewMissions();
   bind();
@@ -234,6 +246,11 @@
     });
     window.addEventListener('resize', resize);
     window.addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
+    document.addEventListener('visibilitychange', () => {
+      last = performance.now();
+      input.lookDX = 0;
+      input.lookDY = 0;
+    });
     document.addEventListener('pointerlockchange', () => {
       mouseLocked = document.pointerLockElement === canvas;
       lockHint.classList.toggle('hidden', mouseLocked || isTouch || state.mode !== 'play');
@@ -323,6 +340,8 @@
     stick.addEventListener('pointercancel', e => { resetStick(e.pointerId); });
 
     const lookMax = 38;
+    let lookOriginX = 0;
+    let lookOriginY = 0;
 
     function setLookStick(dx, dy) {
       const len = Math.hypot(dx, dy);
@@ -343,15 +362,17 @@
     }
 
     lookPad.addEventListener('pointerdown', e => {
+      e.preventDefault();
       lookId = e.pointerId;
+      lookOriginX = e.clientX;
+      lookOriginY = e.clientY;
       lookPad.setPointerCapture(e.pointerId);
-      const r = lookPad.getBoundingClientRect();
-      setLookStick(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2));
+      setLookStick(0, 0);
     });
     lookPad.addEventListener('pointermove', e => {
+      e.preventDefault();
       if (lookId !== e.pointerId) return;
-      const r = lookPad.getBoundingClientRect();
-      setLookStick(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2));
+      setLookStick(e.clientX - lookOriginX, e.clientY - lookOriginY);
     });
     lookPad.addEventListener('pointerup', e => { resetLookStick(e.pointerId); });
     lookPad.addEventListener('pointercancel', e => { resetLookStick(e.pointerId); });
@@ -404,6 +425,8 @@
     state.cameras = [];
     state.lasers = [];
     state.worldBounds = { w: state.mission.w, h: state.mission.h };
+    hudCache.force = true;
+    hudCache.near = '';
     player.x = state.mission.start[0];
     player.z = state.mission.start[1];
     player.yaw = 0;
@@ -924,9 +947,10 @@
   }
 
   function clearWorld() {
-    while (worldRoot.children.length) disposeObject(worldRoot.children[0]);
-    while (fxRoot.children.length) disposeObject(fxRoot.children[0]);
+    for (const child of worldRoot.children.slice()) disposeObject(child);
+    for (const child of fxRoot.children.slice()) disposeObject(child);
     state.world = null;
+    player.mesh = null;
   }
 
   function disposeObject(obj) {
@@ -1001,18 +1025,30 @@
   function readGamepad(dt) {
     input.gamepadX = 0;
     input.gamepadY = 0;
-    if (!window.OmenlyGamepad) return;
-    const GP = window.OmenlyGamepad;
-    GP.poll();
-    const move = GP.axis(0);
+    const raw = readRawGamepad();
+    let move;
+    let look;
+    if (raw?.rightJoyCon) {
+      move = { x: 0, y: 0 };
+      look = raw.primary;
+    } else if (window.OmenlyGamepad) {
+      const GP = window.OmenlyGamepad;
+      GP.poll();
+      move = GP.axis(0);
+      look = GP.axis(1);
+    } else {
+      move = raw?.primary || { x: 0, y: 0 };
+      look = raw?.secondary || { x: 0, y: 0 };
+    }
     input.gamepadX = move.x || 0;
     input.gamepadY = move.y || 0;
-    const look = GP.axis(1);
     if (look.x || look.y) {
       const lookMul = player.crouch ? 0.82 : 1;
       cameraYaw += look.x * dt * 2.8 * lookMul;
       cameraPitch = clamp(cameraPitch + look.y * dt * 1.35 * lookMul, -0.14, 0.42);
     }
+    if (!window.OmenlyGamepad) return;
+    const GP = window.OmenlyGamepad;
     if (GP.button('ls')) player.crouch = true;
     if (GP.pressed('b')) {
       player.crouch = !player.crouch;
@@ -1025,6 +1061,38 @@
     if (GP.pressed('rb')) smokeBomb();
     if (GP.pressed('lb')) charmPulse();
     if (GP.pressed('start')) toggleMap();
+  }
+
+  function readRawGamepad() {
+    if (!navigator.getGamepads) return null;
+    const pads = navigator.getGamepads();
+    if (!pads) return null;
+    let pad = null;
+    for (const candidate of pads) {
+      if (candidate?.connected) {
+        pad = candidate;
+        break;
+      }
+    }
+    if (!pad) return null;
+    const id = String(pad.id || '').toLowerCase();
+    const a = pad.axes || [];
+    const primary = {
+      x: applyGamepadDeadzone(a[0] || 0),
+      y: applyGamepadDeadzone(a[1] || 0)
+    };
+    const secondary = {
+      x: applyGamepadDeadzone(a[2] || 0),
+      y: applyGamepadDeadzone(a[3] || 0)
+    };
+    const rightJoyCon = id.includes('joy-con') && id.includes('(r)') && a.length < 4;
+    return { id, primary, secondary, rightJoyCon };
+  }
+
+  function applyGamepadDeadzone(v) {
+    if (Math.abs(v) < GAMEPAD_DEADZONE) return 0;
+    const sign = v < 0 ? -1 : 1;
+    return sign * (Math.abs(v) - GAMEPAD_DEADZONE) / (1 - GAMEPAD_DEADZONE);
   }
 
   function updateWorldTransforms() {
@@ -1163,7 +1231,7 @@
         d.mesh.scale.setScalar(0.8 + Math.sin(d.pulse * 8) * 0.15);
       }
       if (d.t <= 0) {
-        d.mesh?.parent?.remove(d.mesh);
+        if (d.mesh) disposeObject(d.mesh);
         state.decoys.splice(i, 1);
       }
     }
@@ -1177,7 +1245,7 @@
         s.mesh.material.opacity = 0.12 + Math.min(0.18, s.t * 0.03);
       }
       if (s.t <= 0) {
-        s.mesh?.parent?.remove(s.mesh);
+        if (s.mesh) disposeObject(s.mesh);
         state.smoke.splice(i, 1);
       }
     }
@@ -1191,7 +1259,7 @@
         p.mesh.material.opacity = clamp(p.t * 2, 0, 1);
       }
       if (p.t <= 0) {
-        p.mesh?.parent?.remove(p.mesh);
+        if (p.mesh) disposeObject(p.mesh);
         state.sparkles.splice(i, 1);
       }
     }
@@ -1222,11 +1290,15 @@
     if (allObjectivesDone() && state.exit && rectContains(state.exit, player.x, player.z)) {
       state.near = { type: 'exit', obj: state.exit, text: 'E: escape' };
     }
-    if (state.near) {
-      interact.textContent = state.near.text;
-      interact.classList.add('on');
-    } else {
-      interact.classList.remove('on');
+    const nearText = state.near ? state.near.text : '';
+    if (hudCache.near !== nearText) {
+      hudCache.near = nearText;
+      if (state.near) {
+        interact.textContent = state.near.text;
+        interact.classList.add('on');
+      } else {
+        interact.classList.remove('on');
+      }
     }
   }
 
@@ -1272,19 +1344,46 @@
   }
 
   function updateHud() {
-    $('missionName').textContent = `${state.missionIndex + 1}/${MISSIONS.length} ${state.mission.name}`;
-    $('hudStats').innerHTML = isTouch
+    hudCache.t += 1;
+    if (!hudCache.force && hudCache.t % 5 !== 0) return;
+    hudCache.force = false;
+    const missionText = `${state.missionIndex + 1}/${MISSIONS.length} ${state.mission.name}`;
+    if (hudCache.mission !== missionText) {
+      hudCache.mission = missionText;
+      $('missionName').textContent = missionText;
+    }
+    const statsHTML = isTouch
       ? `<span class="mobileStat">D<b>${player.darts}</b></span><span class="mobileStat">Q<b>${player.decoys}</b></span><span class="mobileStat">S<b>${player.smoke}</b></span><span class="mobileStat">C<b>${player.charms}</b></span><span class="mobileStat mobileAlert">A<b>${Math.floor(state.alert)}</b></span>`
       : `DARTS <b>${player.darts}</b>  DECOYS <b>${player.decoys}</b>  SMOKE <b>${player.smoke}</b>  CHARM <b>${player.charms}</b><br>STYLE <b>${Math.floor(state.score)}</b>  ALERT <b>${Math.floor(state.alert)}%</b>  ${player.crouch ? '<b>CROUCH</b>' : 'WALK'}`;
-    $('alertFill').style.width = state.alert + '%';
-    $('objectives').innerHTML = state.objectives.map(o => `<div class="${o.done ? 'done' : ''}">${o.done ? 'DONE' : 'TODO'} - ${escapeHTML(o.label)}</div>`).join('') +
+    if (hudCache.stats !== statsHTML) {
+      hudCache.stats = statsHTML;
+      $('hudStats').innerHTML = statsHTML;
+    }
+    const alertWidth = `${Math.floor(state.alert)}%`;
+    if (hudCache.alert !== alertWidth) {
+      hudCache.alert = alertWidth;
+      $('alertFill').style.width = state.alert + '%';
+    }
+    const objectivesHTML = state.objectives.map(o => `<div class="${o.done ? 'done' : ''}">${o.done ? 'DONE' : 'TODO'} - ${escapeHTML(o.label)}</div>`).join('') +
       `<div>${allObjectivesDone() ? 'ESCAPE AVAILABLE' : 'FINISH OBJECTIVES TO UNLOCK EXIT'}</div>`;
+    if (hudCache.objectives !== objectivesHTML) {
+      hudCache.objectives = objectivesHTML;
+      $('objectives').innerHTML = objectivesHTML;
+    }
     const pips = $('objectivePips');
     const next = $('nextObjective');
     if (pips && next) {
-      pips.innerHTML = state.objectives.map(o => `<span class="pip ${o.done ? 'done' : ''}"></span>`).join('');
+      const pipsHTML = state.objectives.map(o => `<span class="pip ${o.done ? 'done' : ''}"></span>`).join('');
+      if (hudCache.pips !== pipsHTML) {
+        hudCache.pips = pipsHTML;
+        pips.innerHTML = pipsHTML;
+      }
       const pending = state.objectives.find(o => !o.done);
-      next.textContent = pending ? pending.label : 'Exit unlocked';
+      const nextText = pending ? pending.label : 'Exit unlocked';
+      if (hudCache.next !== nextText) {
+        hudCache.next = nextText;
+        next.textContent = nextText;
+      }
     }
     if (state.mapSeen) drawMinimap();
   }
@@ -1544,14 +1643,15 @@
   }
 
   function resize() {
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isTouch ? 1.5 : 1.75));
     renderer.setSize(window.innerWidth, window.innerHeight, false);
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
   }
 
   function loop(now) {
-    const dt = Math.min(0.05, (now - last) / 1000 || 0);
+    let dt = Math.min(0.05, (now - last) / 1000 || 0);
+    if (document.hidden) dt = 0;
     last = now;
     if (state.mode === 'play') update(dt);
     renderer.render(scene, camera);
