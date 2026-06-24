@@ -113,6 +113,7 @@
   let last = performance.now();
   let toastTimer = 0;
   let mouseLocked = false;
+  let contextLost = false;
   let cameraYaw = 0;
   let cameraPitch = 0.18;
   const hudCache = {
@@ -245,11 +246,16 @@
       }
     });
     window.addEventListener('resize', resize);
-    window.addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
+    window.addEventListener('blur', () => {
+      for (const k in keys) keys[k] = false;
+      input.lookDX = 0;
+      input.lookDY = 0;
+    });
     document.addEventListener('visibilitychange', () => {
       last = performance.now();
       input.lookDX = 0;
       input.lookDY = 0;
+      if (document.hidden) for (const k in keys) keys[k] = false;
     });
     document.addEventListener('pointerlockchange', () => {
       mouseLocked = document.pointerLockElement === canvas;
@@ -265,11 +271,19 @@
       input.lookDY += e.movementY || 0;
     });
     canvas.addEventListener('mousedown', e => {
-      if (state.mode !== 'play') return;
-      if (!mouseLocked && !isTouch) { canvas.requestPointerLock?.(); return; }
+      if (state.mode !== 'play' || isTouch) return;
+      if (!mouseLocked) { canvas.requestPointerLock?.(); return; }
       if (e.button === 0) fireDart();
       if (e.button === 2) throwDecoy();
     });
+    canvas.addEventListener('webglcontextlost', e => {
+      e.preventDefault();
+      contextLost = true;
+    }, false);
+    canvas.addEventListener('webglcontextrestored', () => {
+      contextLost = false;
+      last = performance.now();
+    }, false);
     canvas.addEventListener('contextmenu', e => e.preventDefault());
     window.addEventListener('keydown', e => {
       const k = e.key.toLowerCase();
@@ -305,20 +319,32 @@
     const knob = $('knob');
     let moveId = null;
     let lookId = null;
-    const max = 46;
+    let moveOriginX = 0;
+    let moveOriginY = 0;
+    let moveMax = 56;
+    let lookMax = 52;
+    let lookOriginX = 0;
+    let lookOriginY = 0;
+
+    function padRadius(el, fallback) {
+      const r = el.getBoundingClientRect();
+      const size = Math.min(r.width, r.height);
+      if (!size) return fallback;
+      return Math.max(28, size * 0.42);
+    }
 
     function setStick(dx, dy) {
       const len = Math.hypot(dx, dy);
-      const cap = len > max ? max / len : 1;
+      const cap = len > moveMax ? moveMax / len : 1;
       const sx = dx * cap;
       const sy = dy * cap;
-      input.stickX = sx / max;
-      input.stickY = sy / max;
+      input.stickX = sx / moveMax;
+      input.stickY = sy / moveMax;
       knob.style.transform = `translate(${sx}px, ${sy}px)`;
     }
 
     function resetStick(id) {
-      if (moveId !== id) return;
+      if (id != null && moveId !== id) return;
       moveId = null;
       input.stickX = 0;
       input.stickY = 0;
@@ -326,22 +352,22 @@
     }
 
     stick.addEventListener('pointerdown', e => {
+      e.preventDefault();
       moveId = e.pointerId;
-      stick.setPointerCapture(e.pointerId);
-      const r = stick.getBoundingClientRect();
-      setStick(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2));
+      moveOriginX = e.clientX;
+      moveOriginY = e.clientY;
+      moveMax = padRadius(stick, 56);
+      try { stick.setPointerCapture(e.pointerId); } catch (_) {}
+      setStick(0, 0);
     });
     stick.addEventListener('pointermove', e => {
       if (moveId !== e.pointerId) return;
-      const r = stick.getBoundingClientRect();
-      setStick(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2));
+      e.preventDefault();
+      setStick(e.clientX - moveOriginX, e.clientY - moveOriginY);
     });
     stick.addEventListener('pointerup', e => { resetStick(e.pointerId); });
     stick.addEventListener('pointercancel', e => { resetStick(e.pointerId); });
-
-    const lookMax = 38;
-    let lookOriginX = 0;
-    let lookOriginY = 0;
+    stick.addEventListener('lostpointercapture', e => { resetStick(e.pointerId); });
 
     function setLookStick(dx, dy) {
       const len = Math.hypot(dx, dy);
@@ -354,7 +380,7 @@
     }
 
     function resetLookStick(id) {
-      if (lookId !== id) return;
+      if (id != null && lookId !== id) return;
       lookId = null;
       input.lookStickX = 0;
       input.lookStickY = 0;
@@ -366,16 +392,23 @@
       lookId = e.pointerId;
       lookOriginX = e.clientX;
       lookOriginY = e.clientY;
-      lookPad.setPointerCapture(e.pointerId);
+      lookMax = padRadius(lookPad, 52);
+      try { lookPad.setPointerCapture(e.pointerId); } catch (_) {}
       setLookStick(0, 0);
     });
     lookPad.addEventListener('pointermove', e => {
-      e.preventDefault();
       if (lookId !== e.pointerId) return;
+      e.preventDefault();
       setLookStick(e.clientX - lookOriginX, e.clientY - lookOriginY);
     });
     lookPad.addEventListener('pointerup', e => { resetLookStick(e.pointerId); });
     lookPad.addEventListener('pointercancel', e => { resetLookStick(e.pointerId); });
+    lookPad.addEventListener('lostpointercapture', e => { resetLookStick(e.pointerId); });
+
+    window.addEventListener('blur', () => { resetStick(); resetLookStick(); });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) { resetStick(); resetLookStick(); }
+    });
   }
 
   function showMenu() {
@@ -973,14 +1006,14 @@
     readGamepad(dt);
     if (input.lookDX || input.lookDY) {
       cameraYaw += input.lookDX * 0.0027;
-      cameraPitch = clamp(cameraPitch + input.lookDY * 0.0012, -0.14, 0.42);
+      cameraPitch = clamp(cameraPitch + input.lookDY * 0.0022, -0.55, 0.7);
       input.lookDX = 0;
       input.lookDY = 0;
     }
     if (input.lookStickX || input.lookStickY) {
       const lookMul = player.crouch ? 0.82 : 1;
-      cameraYaw += input.lookStickX * dt * 2.8 * lookMul;
-      cameraPitch = clamp(cameraPitch + input.lookStickY * dt * 1.35 * lookMul, -0.14, 0.42);
+      cameraYaw += input.lookStickX * dt * 3.4 * lookMul;
+      cameraPitch = clamp(cameraPitch + input.lookStickY * dt * 2.2 * lookMul, -0.55, 0.7);
     }
 
     const strafe = (input.right ? 1 : 0) - (input.left ? 1 : 0) + input.stickX + input.gamepadX;
@@ -1044,8 +1077,8 @@
     input.gamepadY = move.y || 0;
     if (look.x || look.y) {
       const lookMul = player.crouch ? 0.82 : 1;
-      cameraYaw += look.x * dt * 2.8 * lookMul;
-      cameraPitch = clamp(cameraPitch + look.y * dt * 1.35 * lookMul, -0.14, 0.42);
+      cameraYaw += look.x * dt * 3.4 * lookMul;
+      cameraPitch = clamp(cameraPitch + look.y * dt * 2.2 * lookMul, -0.55, 0.7);
     }
     if (!window.OmenlyGamepad) return;
     const GP = window.OmenlyGamepad;
@@ -1651,10 +1684,14 @@
 
   function loop(now) {
     let dt = Math.min(0.05, (now - last) / 1000 || 0);
-    if (document.hidden) dt = 0;
+    if (document.hidden || contextLost) dt = 0;
     last = now;
-    if (state.mode === 'play') update(dt);
-    renderer.render(scene, camera);
+    if (!document.hidden && state.mode === 'play') {
+      try { update(dt); } catch (err) { console.error('gaymesbond update error', err); }
+    }
+    if (!contextLost) {
+      try { renderer.render(scene, camera); } catch (err) { console.error('gaymesbond render error', err); }
+    }
     requestAnimationFrame(loop);
   }
 })();

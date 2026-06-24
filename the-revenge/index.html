@@ -167,10 +167,19 @@
     transition: opacity 0.14s;
   }
   #toast.on { opacity: 1; }
-  #crosshair { position: fixed; left: 50%; top: 50%; width: 18px; height: 18px; transform: translate(-50%, -50%); z-index: 10; pointer-events: none; }
-  #crosshair::before, #crosshair::after { content: ""; position: absolute; background: rgba(255, 230, 200, 0.75); }
-  #crosshair::before { left: 8px; top: 0; width: 2px; height: 18px; }
-  #crosshair::after { left: 0; top: 8px; width: 18px; height: 2px; }
+  #crosshair {
+    position: fixed; left: 50%; top: 50%; width: 34px; height: 34px; transform: translate(-50%, -50%);
+    z-index: 24; pointer-events: none; border: 1px solid rgba(255, 230, 200, 0.62); border-radius: 50%;
+    box-shadow: 0 0 16px rgba(233, 180, 76, 0.25);
+  }
+  #crosshair::before, #crosshair::after { content: ""; position: absolute; background: rgba(255, 230, 200, 0.9); box-shadow: 0 0 8px rgba(233, 180, 76, 0.38); }
+  #crosshair::before { left: 16px; top: -7px; width: 2px; height: 48px; }
+  #crosshair::after { left: -7px; top: 16px; width: 48px; height: 2px; }
+  #crosshair.fire { animation: reticleFire 0.1s ease-out; border-color: #fff0a8; box-shadow: 0 0 26px rgba(255, 240, 168, 0.65); }
+  @keyframes reticleFire {
+    from { transform: translate(-50%, -50%) scale(1.28); opacity: 1; }
+    to { transform: translate(-50%, -50%) scale(1); opacity: 0.82; }
+  }
   #damageVignette { position: fixed; inset: 0; z-index: 9; pointer-events: none; opacity: 0; background: rgba(211, 77, 63, 0.08); box-shadow: inset 0 0 120px rgba(211, 77, 63, 0.82); transition: opacity 0.08s; }
   #slowmoVignette { position: fixed; inset: 0; z-index: 8; pointer-events: none; opacity: 0; box-shadow: inset 0 0 220px rgba(207, 163, 126, 0.55); transition: opacity 0.3s; }
   #donate { position: fixed; right: 16px; bottom: 16px; z-index: 31; }

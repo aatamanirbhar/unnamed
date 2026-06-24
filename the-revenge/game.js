@@ -2,6 +2,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+import { clone as cloneSkeleton } from 'three/addons/utils/SkeletonUtils.js';
 
 // ─────────────────────────────────────────────────────────────────────────
 // Constants
@@ -76,7 +77,7 @@ function resolveDOM() {
 }
 resolveDOM();
 
-const isTouch = matchMedia('(hover: none) and (pointer: coarse)').matches || ('ontouchstart' in window);
+const isTouch = matchMedia('(hover: none) and (pointer: coarse)').matches || ('ontouchstart' in window) || innerWidth <= 820;
 if (isTouch) document.body.classList.add('touch');
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -161,6 +162,86 @@ function flashDamage() {
   setTimeout(()=>damageVignette.style.opacity = '0', 220);
 }
 
+// Procedural audio keeps the build self-contained when no SFX files are supplied.
+let audioCtx = null;
+function getAudioCtx() {
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) return null;
+  if (!audioCtx) audioCtx = new Ctx();
+  if (audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
+  return audioCtx;
+}
+
+function playTone({ freq = 220, endFreq = freq, type = 'sine', duration = 0.2, gain = 0.08, when = 0, detune = 0, attack = 0.005 }) {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  const t = ctx.currentTime + when;
+  const osc = ctx.createOscillator();
+  const amp = ctx.createGain();
+  osc.type = type;
+  osc.detune.value = detune;
+  osc.frequency.setValueAtTime(freq, t);
+  osc.frequency.exponentialRampToValueAtTime(Math.max(1, endFreq), t + duration);
+  amp.gain.setValueAtTime(0.0001, t);
+  amp.gain.exponentialRampToValueAtTime(Math.max(0.0002, gain), t + attack);
+  amp.gain.exponentialRampToValueAtTime(0.0001, t + duration);
+  osc.connect(amp).connect(ctx.destination);
+  osc.start(t);
+  osc.stop(t + duration + 0.03);
+}
+
+function playNoise({ duration = 0.12, gain = 0.08, when = 0, lowpass = 3000 }) {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  const t = ctx.currentTime + when;
+  const buffer = ctx.createBuffer(1, Math.max(1, Math.floor(ctx.sampleRate * duration)), ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+  const src = ctx.createBufferSource();
+  const filter = ctx.createBiquadFilter();
+  const amp = ctx.createGain();
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(lowpass, t);
+  amp.gain.setValueAtTime(gain, t);
+  amp.gain.exponentialRampToValueAtTime(0.0001, t + duration);
+  src.buffer = buffer;
+  src.connect(filter).connect(amp).connect(ctx.destination);
+  src.start(t);
+  src.stop(t + duration);
+}
+
+function playGunshot() {
+  playNoise({ duration: 0.07, gain: 0.11, lowpass: 5200 });
+  playTone({ freq: 90, endFreq: 42, type: 'square', duration: 0.08, gain: 0.05 });
+}
+
+function playEnemyMoan() {
+  playTone({ freq: rand(165, 210), endFreq: rand(62, 86), type: 'sawtooth', duration: 0.65, gain: 0.06 });
+  playTone({ freq: rand(95, 120), endFreq: rand(42, 58), type: 'triangle', duration: 0.8, gain: 0.045, when: 0.05 });
+}
+
+function playSickleSound() {
+  playNoise({ duration: 0.18, gain: 0.035, lowpass: 7400 });
+  playTone({ freq: 920, endFreq: 260, type: 'sine', duration: 0.24, gain: 0.045 });
+}
+
+function playSickleCatchSound() {
+  playTone({ freq: 360, endFreq: 210, type: 'triangle', duration: 0.1, gain: 0.035 });
+}
+
+function playIqbalCutScream() {
+  playTone({ freq: 520, endFreq: 180, type: 'sawtooth', duration: 1.15, gain: 0.09 });
+  playTone({ freq: 760, endFreq: 220, type: 'triangle', duration: 0.85, gain: 0.055, when: 0.04, detune: -18 });
+  playNoise({ duration: 0.55, gain: 0.045, when: 0.08, lowpass: 1800 });
+}
+
+function pulseReticle() {
+  if (!crosshair) return;
+  crosshair.classList.remove('fire');
+  void crosshair.offsetWidth;
+  crosshair.classList.add('fire');
+}
+
 // ─────────────────────────────────────────────────────────────────────────
 // Loaders
 // ─────────────────────────────────────────────────────────────────────────
@@ -205,30 +286,38 @@ async function loadAllFBXs() {
   return out;
 }
 
+async function loadFBXKeys(keys, label='Loading animations') {
+  const out = {};
+  for (let i = 0; i < keys.length; i++) {
+    const k = keys[i];
+    loadText.textContent = `${label}: ${k}... (${i+1}/${keys.length})`;
+    try { out[k] = await loadFBX(k); }
+    catch (e) { console.warn('fbx failed', k, e); out[k] = null; }
+  }
+  return out;
+}
+
+async function loadDeferredAnimationKeys(keys) {
+  for (const k of keys) {
+    if (fbxRigs[k]) continue;
+    try {
+      const fbx = await loadFBX(k);
+      fbxRigs[k] = fbx;
+      const clip = extractClips({ [k]: fbx })[k];
+      if (!clip) continue;
+      animClips[k] = clip;
+      if (hero) hero.addAnimationClip(k, clip);
+    } catch (e) {
+      console.warn('deferred fbx failed', k, e);
+    }
+  }
+}
+
 function withTimeout(promise, ms, fallback = null) {
   return Promise.race([
     promise,
     new Promise(resolve => setTimeout(() => resolve(fallback), ms))
   ]);
-}
-
-async function loadFastPlayableAssets() {
-  loadText.textContent = 'Preparing playable level...';
-  const out = {};
-  try { out.dynamite = await withTimeout(loadGLB('dynamite'), 1800, null); }
-  catch (e) { console.warn('asset failed dynamite', e); out.dynamite = null; }
-
-  loadText.textContent = 'Preparing hero...';
-  try { out.hero = await withTimeout(loadGLB('hero'), 4200, null); }
-  catch (e) { console.warn('asset failed hero', e); out.hero = null; }
-
-  out.iqbalBefore = null;
-  out.iqbalAfter = null;
-  out.goon = null;
-  out.ak47 = null;
-  out.sickle = null;
-  out.cig = null;
-  return out;
 }
 
 // Extract animation clips from loaded FBX objects
@@ -244,9 +333,9 @@ function extractClips(fbxAnims) {
 }
 
 // Clone / helper
-function cloneGLBScene(gltf, opts={}) {
-  if (!gltf || !gltf.scene) return null;
-  const root = gltf.scene.clone(true);
+function cloneObject3D(obj, opts={}) {
+  if (!obj) return null;
+  const root = findSkinnedMeshes(obj).length ? cloneSkeleton(obj) : obj.clone(true);
   root.traverse(o => {
     if (o.isMesh) {
       o.castShadow = true;
@@ -258,6 +347,11 @@ function cloneGLBScene(gltf, opts={}) {
     }
   });
   return root;
+}
+
+function cloneGLBScene(gltf, opts={}) {
+  if (!gltf || !gltf.scene) return null;
+  return cloneObject3D(gltf.scene, opts);
 }
 
 function fitHeight(obj, targetH) {
@@ -300,6 +394,100 @@ function logBones(obj) {
   obj.traverse(o => { if (o.isBone) bones.push(o.name); });
   console.log('Bones found:', bones);
   return bones;
+}
+
+function cleanBoneName(name) {
+  return String(name || '')
+    .replace(/^.*\|/, '')
+    .replace(/^.*:/, '')
+    .replace(/^mixamorig/i, '')
+    .replace(/^armature/i, '')
+    .replace(/[^a-z0-9]/gi, '')
+    .toLowerCase();
+}
+
+function buildRigBoneMap(root) {
+  const map = new Map();
+  root.traverse(o => {
+    if (!o.isBone) return;
+    const names = [
+      o.name,
+      o.name.replace(/^mixamorig[:_]?/i, ''),
+      o.name.replace(/^.*:/, ''),
+      o.name.replace(/^.*\|/, '')
+    ];
+    for (const n of names) {
+      const key = cleanBoneName(n);
+      if (key && !map.has(key)) map.set(key, o);
+    }
+  });
+  return map;
+}
+
+function remapClipToRig(clip, rigRoot) {
+  const boneMap = buildRigBoneMap(rigRoot);
+  const tracks = [];
+  let remapped = 0;
+  let kept = 0;
+  let dropped = 0;
+
+  for (const track of clip.tracks) {
+    const dot = track.name.lastIndexOf('.');
+    if (dot === -1) {
+      tracks.push(track.clone());
+      kept++;
+      continue;
+    }
+
+    const nodeName = track.name.slice(0, dot);
+    const propertyName = track.name.slice(dot + 1);
+    const bone = boneMap.get(cleanBoneName(nodeName));
+
+    if (bone) {
+      const cloned = track.clone();
+      cloned.name = `${bone.name}.${propertyName}`;
+      tracks.push(cloned);
+      remapped++;
+      continue;
+    }
+
+    if (propertyName === 'scale') {
+      dropped++;
+      continue;
+    }
+
+    tracks.push(track.clone());
+    kept++;
+  }
+
+  const out = new THREE.AnimationClip(clip.name || 'fbx', clip.duration, tracks);
+  out.userData = { source: clip.name, remapped, kept, dropped };
+  console.log(`Rig clip "${clip.name}" tracks: ${remapped} remapped, ${kept} kept, ${dropped} dropped`);
+  return out;
+}
+
+function prepareRigClips(animClips, rigRoot) {
+  const clips = {};
+  for (const [key, clip] of Object.entries(animClips || {})) {
+    clips[key] = remapClipToRig(clip, rigRoot);
+  }
+  return clips;
+}
+
+function selectHeroBody(gltfHero) {
+  if (gltfHero && gltfHero.scene && findSkeleton(gltfHero.scene)) {
+    console.log('Using rigged hero.glb body');
+    return gltfHero.scene;
+  }
+
+  const rigSource = fbxRigs.walkGun || fbxRigs.walk || fbxRigs.throwDyn || fbxRigs.throwGrenade;
+  if (rigSource && findSkeleton(rigSource)) {
+    console.warn('hero.glb has no skeleton/skin; using rigged FBX hero body for animation.');
+    return cloneObject3D(rigSource);
+  }
+
+  console.warn('No rigged hero body found; using fallback humanoid.');
+  return makeFallbackHumanoid(0x2f6f5e);
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -655,9 +843,7 @@ class Hero {
     this.animClips = animClips || {};
     this.group = new THREE.Group();
 
-    // Use the ORIGINAL scene (not cloned) so we get the skeleton with bones intact.
-    // Clone would duplicate meshes but the skeleton reference stays, which is fine.
-    this.body = (gltfHero && gltfHero.scene) ? gltfHero.scene : makeFallbackHumanoid(0x2f6f5e);
+    this.body = selectHeroBody(gltfHero);
     // Ensure all meshes cast shadows
     this.body.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = false; } });
     fitHeight(this.body, 1.85);
@@ -679,6 +865,8 @@ class Hero {
       this.bones.hips      = findBone(this.body, 'hips') || findBone(this.body, 'mixamorig_hips');
       console.log('Mapped bones:', Object.entries(this.bones).filter(([_,v])=>v).map(([k,v])=>`${k}=${v.name}`));
     }
+
+    this.animClips = prepareRigClips(this.animClips, this.body);
 
     // Animation mixer
     this.mixer = new THREE.AnimationMixer(this.body);
@@ -735,6 +923,14 @@ class Hero {
     this.weapons = {};
     this.lastDamageT = 0;
     this.currentAction = null;
+  }
+
+  addAnimationClip(name, clip) {
+    const prepared = remapClipToRig(clip, this.body);
+    this.animClips[name] = prepared;
+    this.actions[name] = this.mixer.clipAction(prepared);
+    this.walkClip = this.actions.walkGun || this.actions.walk;
+    this.throwClip = this.actions.throwDyn || this.actions.throwGrenade;
   }
 
   playAction(name, fadeIn=0.15, speed=1) {
@@ -809,9 +1005,7 @@ class Hero {
     if (this.alive) {
       if (this.moving) {
         const speed = this.running ? 1.6 : 1.0;
-        if (this.equipped === 'ak' && this.walkClip) {
-          this.playAction('walkGun', 0.15, speed);
-        } else if (this.walkClip) {
+        if (this.equipped === 'ak' && this.actions.walkGun) {
           this.playAction('walkGun', 0.15, speed);
         } else if (this.actions.walk) {
           this.playAction('walk', 0.15, speed);
@@ -974,6 +1168,7 @@ class Goon {
     this.alive = false;
     this.state = 'dead';
     this.deathT = 0;
+    playEnemyMoan();
   }
   update(dt, realDt) {
     if (!this.alive) {
@@ -1070,6 +1265,7 @@ class Boss {
     this.group.add(this.body);
     spawnBloodBurst(this.pos.clone().add(v3(0, 1.4, 0)));
     spawnFlyingLimb(this.pos.clone().add(v3(0, 1.5, 0)));
+    playIqbalCutScream();
     showToast('SICKLE CONNECTS — IQBAL LOSES THE ARM');
     setComms('Iqbal screams. The sickle did its work. Finish him.');
     this.hp = Math.min(this.hp, this.maxHp * 0.5);
@@ -1147,6 +1343,7 @@ const smokes = [];
 const blood = [];
 const flyingLimbs = [];
 const explosions = [];
+const casings = [];
 
 function spawnTracer(from, to) {
   const g = new THREE.BufferGeometry().setFromPoints([from, to]);
@@ -1168,6 +1365,24 @@ function spawnMuzzleFlash(origin, facing) {
   light.position.copy(mesh.position);
   scene.add(light);
   flashes.push({ mesh, light, t: 0, life: 0.06 });
+  playGunshot();
+}
+
+function spawnShellCasing(origin, facing) {
+  const g = new THREE.CylinderGeometry(0.018, 0.018, 0.12, 8);
+  const m = new THREE.MeshStandardMaterial({ color: 0xd8a44c, roughness: 0.35, metalness: 0.55 });
+  const mesh = new THREE.Mesh(g, m);
+  mesh.rotation.z = Math.PI / 2;
+  mesh.position.copy(origin);
+  scene.add(mesh);
+  const right = v3(Math.cos(facing), 0, -Math.sin(facing));
+  casings.push({
+    mesh,
+    t: 0,
+    life: 1.4,
+    vel: right.multiplyScalar(rand(1.8, 2.8)).add(v3(rand(-0.25,0.25), rand(1.4,2.2), rand(-0.25,0.25))),
+    spin: v3(rand(8,16), rand(6,12), rand(8,16))
+  });
 }
 
 function spawnSmokePuff(pos) {
@@ -1237,6 +1452,7 @@ function throwSickle() {
   if (hero.sickleInFlight) return;
   if (!sickleVisual) return;
   hero.sickleInFlight = true;
+  playSickleSound();
   const start = hero.rightHandMount.getWorldPosition(tmpV).clone();
   const dir = v3(Math.sin(hero.aimYaw), 0, Math.cos(hero.aimYaw)).normalize();
   scene.add(sickleVisual);
@@ -1264,10 +1480,8 @@ function throwDynamite() {
     kind: 'dynamite', mesh, pos: start.clone(), vel: dir.clone().multiplyScalar(16),
     t: 0, fuse: DYN_FUSE, spin: 8
   });
-  // Play throw animation if available
-  if (hero.throwClip) {
-    hero.throwClip.reset().setEffectiveTimeScale(1).play();
-  }
+  if (hero.actions.throwDyn) hero.playAction('throwDyn', 0.08, 1.1);
+  else if (hero.actions.throwGrenade) hero.playAction('throwGrenade', 0.08, 1.1);
 }
 
 function shootAK() {
@@ -1281,6 +1495,8 @@ function shootAK() {
   origin.y = lerp(origin.y, hero.pos.y + 1.55, 0.5);
   const dir = v3(Math.sin(hero.aimYaw), -hero.aimPitch*0.6, Math.cos(hero.aimYaw)).normalize();
   spawnMuzzleFlash(origin, hero.aimYaw);
+  spawnShellCasing(origin.clone().add(v3(0, 0.02, 0)), hero.aimYaw);
+  pulseReticle();
   const ray = new THREE.Raycaster(origin, dir, 0.5, AK_RANGE);
   const targets = [];
   entities.goons.forEach(g => { if (g.alive) targets.push(g.body); });
@@ -1435,7 +1651,8 @@ addEventListener('mousemove', e => {
 function setupTouch() {
   const stick = $('stick'); const stickKnob = $('stickKnob');
   const look = $('look'); const lookKnob = $('lookKnob');
-  let stickId = null, lookId = null, stickCx = 0, stickCy = 0, lookCx = 0, lookCy = 0;
+  let stickId = null, lookId = null;
+  let stickCx = 0, stickCy = 0, lookLastX = 0, lookLastY = 0;
   const maxR = 50;
   function move(knob, dx, dy) {
     const d = Math.hypot(dx, dy);
@@ -1443,47 +1660,64 @@ function setupTouch() {
     knob.style.transform = `translate(${dx*k - 24}px, ${dy*k - 24}px)`;
   }
   function reset(knob) { knob.style.transform = 'translate(-50%, -50%)'; }
-  function inEl(el, x, y) {
-    const r = el.getBoundingClientRect();
-    return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+
+  stick.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    stickId = e.pointerId;
+    stick.setPointerCapture(e.pointerId);
+    const r = stick.getBoundingClientRect();
+    stickCx = r.left + r.width / 2;
+    stickCy = r.top + r.height / 2;
+  });
+  stick.addEventListener('pointermove', e => {
+    if (e.pointerId !== stickId) return;
+    e.preventDefault();
+    const dx = e.clientX - stickCx;
+    const dy = e.clientY - stickCy;
+    move(stickKnob, dx, dy);
+    touchStick.x = clamp(dx / maxR, -1, 1);
+    touchStick.y = -clamp(dy / maxR, -1, 1);
+  });
+  function endStick(e) {
+    if (e.pointerId !== stickId) return;
+    stickId = null;
+    touchStick.x = 0;
+    touchStick.y = 0;
+    reset(stickKnob);
   }
-  canvas.addEventListener('touchstart', e => {
-    for (const t of e.changedTouches) {
-      if (stickId === null && inEl(stick, t.clientX, t.clientY)) {
-        stickId = t.identifier;
-        const r = stick.getBoundingClientRect();
-        stickCx = r.left + r.width/2; stickCy = r.top + r.height/2;
-      } else if (lookId === null && inEl(look, t.clientX, t.clientY)) {
-        lookId = t.identifier;
-        const r = look.getBoundingClientRect();
-        lookCx = r.left + r.width/2; lookCy = r.top + r.height/2;
-      } else if (lookId === null && stickId !== null) {
-        beginFire();
-      }
-    }
-  }, { passive: true });
-  canvas.addEventListener('touchmove', e => {
-    for (const t of e.changedTouches) {
-      if (t.identifier === stickId) {
-        const dx = t.clientX - stickCx, dy = t.clientY - stickCy;
-        move(stickKnob, dx, dy);
-        touchStick.x = clamp(dx/maxR, -1, 1);
-        touchStick.y = -clamp(dy/maxR, -1, 1);
-      } else if (t.identifier === lookId) {
-        const dx = t.clientX - lookCx, dy = t.clientY - lookCy;
-        move(lookKnob, dx, dy);
-        hero.aimYaw   -= dx * 0.0025;
-        hero.aimPitch -= dy * 0.0018;
-        hero.aimPitch = clamp(hero.aimPitch, -0.6, 0.6);
-      }
-    }
-  }, { passive: true });
-  canvas.addEventListener('touchend', e => {
-    for (const t of e.changedTouches) {
-      if (t.identifier === stickId) { stickId = null; touchStick.x = touchStick.y = 0; reset(stickKnob); }
-      if (t.identifier === lookId) { lookId = null; reset(lookKnob); endFire(); }
-    }
-  }, { passive: true });
+  stick.addEventListener('pointerup', endStick);
+  stick.addEventListener('pointercancel', endStick);
+
+  look.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    lookId = e.pointerId;
+    look.setPointerCapture(e.pointerId);
+    lookLastX = e.clientX;
+    lookLastY = e.clientY;
+    touchLook.active = true;
+  });
+  look.addEventListener('pointermove', e => {
+    if (e.pointerId !== lookId || !hero) return;
+    e.preventDefault();
+    const dx = e.clientX - lookLastX;
+    const dy = e.clientY - lookLastY;
+    lookLastX = e.clientX;
+    lookLastY = e.clientY;
+    move(lookKnob, e.clientX - (look.getBoundingClientRect().left + look.offsetWidth / 2), e.clientY - (look.getBoundingClientRect().top + look.offsetHeight / 2));
+    hero.aimYaw   -= dx * 0.008;
+    hero.aimPitch -= dy * 0.006;
+    hero.aimPitch = clamp(hero.aimPitch, -0.6, 0.6);
+  });
+  function endLook(e) {
+    if (e.pointerId !== lookId) return;
+    lookId = null;
+    touchLook.active = false;
+    touchLook.x = 0;
+    touchLook.y = 0;
+    reset(lookKnob);
+  }
+  look.addEventListener('pointerup', endLook);
+  look.addEventListener('pointercancel', endLook);
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -1502,7 +1736,7 @@ $('dynamiteBtn').onclick = () => switchWeapon('dynamite');
 $('fireBtn').addEventListener('pointerdown', e => { e.preventDefault(); beginFire(); });
 $('fireBtn').addEventListener('pointerup', e => { e.preventDefault(); endFire(); });
 $('fireBtn').addEventListener('pointercancel', e => { e.preventDefault(); endFire(); });
-$('fireBtn').addEventListener('pointerleave', e => { if (e.buttons === 0) endFire(); });
+$('fireBtn').addEventListener('pointerleave', e => { if (e.buttons === 0 || e.pointerType === 'touch') endFire(); });
 $('cigBtn').onclick = () => lightCigarette();
 $('pauseBtn').onclick = () => togglePause();
 $('resumeBtn').onclick = () => togglePause();
@@ -1569,6 +1803,8 @@ function setupHeroWeapons(assets) {
 // ─────────────────────────────────────────────────────────────────────────
 let assets = null;
 let hero = null;
+let animClips = {};
+let fbxRigs = {};
 let clock = 0;
 let playing = false;
 let paused = false;
@@ -1583,14 +1819,20 @@ async function boot() {
   buildMinaretsAndSkyline();
   buildBossArena();
 
-  assets = await loadFastPlayableAssets();
-  const animClips = {};
+  assets = await loadAllGLBs();
+  fbxRigs = await loadFBXKeys(['walkGun'], 'Loading rigged hero');
+  animClips = extractClips(fbxRigs);
   window.__animClips = animClips;
+  loadDeferredAnimationKeys(['walk', 'throwDyn', 'throwGrenade']);
 
   loading.classList.add('hidden');
   menu.classList.remove('hidden');
 
   $('levelYaari').onclick = () => startLevel(animClips);
+  if (new URLSearchParams(location.search).get('autoplay') === 'yaari') {
+    startLevel(animClips);
+    setTimeout(endIntro, 120);
+  }
 }
 
 function startLevel(animClips) {
@@ -1680,6 +1922,9 @@ function updateIntro(realDt) {
   camera.lookAt(0, 2.5, 2);
   hero.pos.z = Math.min(-4, -22 + t * 1.6);
   hero.facing = 0; hero.aimYaw = 0;
+  hero.moving = true;
+  if (hero.actions.walkGun) hero.playAction('walkGun', 0.15, 0.8);
+  else if (hero.actions.walk) hero.playAction('walk', 0.15, 0.8);
   hero.group.position.copy(hero.pos);
   hero.group.rotation.y = 0;
   const linePer = 3.0;
@@ -1811,6 +2056,28 @@ function updateExplosions(realDt) {
     }
   }
 }
+function updateCasings(realDt) {
+  for (let i = casings.length - 1; i >= 0; i--) {
+    const c = casings[i];
+    c.t += realDt;
+    c.vel.y -= 8.5 * realDt;
+    c.mesh.position.addScaledVector(c.vel, realDt);
+    c.mesh.rotation.x += c.spin.x * realDt;
+    c.mesh.rotation.y += c.spin.y * realDt;
+    c.mesh.rotation.z += c.spin.z * realDt;
+    if (c.mesh.position.y < 0.05) {
+      c.mesh.position.y = 0.05;
+      c.vel.multiplyScalar(0.48);
+      c.spin.multiplyScalar(0.55);
+    }
+    if (c.t > c.life) {
+      scene.remove(c.mesh);
+      c.mesh.geometry.dispose();
+      c.mesh.material.dispose();
+      casings.splice(i, 1);
+    }
+  }
+}
 function updateProjectiles(dt) {
   for (let i = projectiles.length-1; i >= 0; i--) {
     const p = projectiles[i];
@@ -1852,6 +2119,7 @@ function updateProjectiles(dt) {
           p.mesh.rotation.set(0, 0, -0.5);
           p.mesh.scale.setScalar(1);
           hero.sickleInFlight = false;
+          playSickleCatchSound();
           projectiles.splice(i, 1);
           continue;
         }
@@ -1967,6 +2235,7 @@ function animate() {
   updateBlood(dt);
   updateFlyingLimbs(dt);
   updateExplosions(realDt);
+  updateCasings(realDt);
   updateFlicker(realDt);
   updateFlags(realDt);
 
