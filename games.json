@@ -258,21 +258,22 @@
                       "controls":  "click / tap"
                   },
                   {
-                      "id":  "dhurandar",
-                      "title":  "Dhurandar: Brigadier Iqbal",
-                      "blurb":  "Enter Lyari Town under the welcome arch, fight goon patrols with AK47, sickle, and dynamite, then wound and finish Brigadier Iqbal in a third-person 3D browser level.",
+                      "id":  "the-revenge",
+                      "title":  "The Revenge: Hunt for Iqbal",
+                      "blurb":  "Yaari Town belongs to Brigadier Iqbal. Walk in past the welcome sign, fight goon patrols with AK47 and dynamite, throw the sickle like a boomerang, smoke a cigarette to slow time, and take the warlord limb by limb.",
                       "tags":  [
                                    "3d",
                                    "action",
                                    "third-person",
                                    "shooter",
-                                   "boss-fight"
+                                   "boss-fight",
+                                   "bullet-time"
                                ],
                       "minutes":  15,
-                      "accent":  "#e9b44c",
-                      "background":  "linear-gradient(135deg, #16120d, #2d5e62)",
-                      "cover":  "dhurandar/cover.svg",
-                      "href":  "dhurandar/",
+                      "accent":  "#d34d3f",
+                      "background":  "linear-gradient(135deg, #120a08, #3a1814)",
+                      "cover":  "the-revenge/cover.svg",
+                      "href":  "the-revenge/",
                       "controls":  "WASD + mouse + click/F + 1-3/Q (desktop) - touch sticks + weapon buttons (mobile)"
                   }
               ]
