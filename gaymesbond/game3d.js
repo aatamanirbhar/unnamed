@@ -116,6 +116,10 @@
   let contextLost = false;
   let cameraYaw = 0;
   let cameraPitch = 0.18;
+  let audio = null;
+  let alertSoundT = 0;
+  let lastLoopError = '';
+  let loopErrorCount = 0;
   const hudCache = {
     t: 0,
     force: true,
@@ -308,10 +312,6 @@
       player.crouch = !player.crouch;
       $('tbCrouch').classList.toggle('on', player.crouch);
     });
-    setInterval(readKeys, 16);
-    setInterval(() => {
-      if (state.mode === 'play' && Math.random() < 0.45) setComms(COMMS[Math.floor(Math.random() * COMMS.length)]);
-    }, 8500);
   }
 
   function setupTouch() {
@@ -481,6 +481,7 @@
     clearWorld();
     buildWorld();
     setComms(`HQ: ${state.mission.brief}`);
+    playSfx('hack', 0.7);
     toast('Infiltration started. Try subtle. We rehearsed subtle.');
   }
 
@@ -1000,6 +1001,7 @@
   function update(dt) {
     if (state.mode !== 'play' || !state.mission) return;
     state.time += dt;
+    readKeys();
     if (toastTimer > 0) toastTimer -= dt; else toastEl.classList.remove('on');
     player.smokeTimer = Math.max(0, player.smokeTimer - dt);
     player.charmCd = Math.max(0, player.charmCd - dt);
@@ -1032,6 +1034,7 @@
       const desired = Math.atan2(dx, dz);
       player.yaw = lerpAngle(player.yaw, desired, 0.18);
       if (!crouch) noiseAt(player.x, player.z, 3.2, 0.18);
+      if (!crouch && state.time % 0.36 < dt) playSfx('step', 0.8);
     } else {
       player.yaw = lerpAngle(player.yaw, cameraYaw, 0.06);
     }
@@ -1045,6 +1048,10 @@
     updateCamera(dt);
     updateHud();
     updateWorldTransforms();
+    if (state.time > state.messageT) {
+      state.messageT = state.time + 8.5;
+      if (Math.random() < 0.45) setComms(COMMS[Math.floor(Math.random() * COMMS.length)]);
+    }
   }
 
   function readKeys() {
@@ -1209,6 +1216,7 @@
       const target = c.route[c.idx];
       moveNpc(c, target.x, target.z, dt, 0.72);
       if (dist(c.x, c.z, target.x, target.z) < 0.2) c.idx = (c.idx + 1) % c.route.length;
+      if (dist(c.x, c.z, player.x, player.z) < 2.8 && Math.random() < dt * 0.08) playSfx('civilian', 0.55);
     }
   }
 
@@ -1338,6 +1346,11 @@
   function updateAlert(dt) {
     const decay = player.crouch || player.smokeTimer > 0 ? 15 : 7;
     state.alert = clamp(state.alert - decay * dt, 0, 100);
+    alertSoundT -= dt;
+    if (state.alert > 35 && alertSoundT <= 0) {
+      playSfx('alarm', clamp(state.alert / 100, 0.4, 1));
+      alertSoundT = Math.max(0.42, 1.35 - state.alert / 120);
+    }
     if (state.alert >= 100) failMission('The whole base saw you. On the bright side, the outfit got excellent reviews.');
   }
 
@@ -1447,6 +1460,7 @@
       n.obj.done = true;
       state.score += 500;
       burst(n.obj.x, 0.35, n.obj.z, 18, 0xffd166);
+      playSfx('hack');
       toast(n.obj.text);
       setComms(COMMS[Math.floor(Math.random() * COMMS.length)]);
       if (allObjectivesDone()) toast('All objectives complete. Exit unlocked.');
@@ -1454,17 +1468,20 @@
       for (const c of state.cameras) c.disabled = 9;
       state.score += 160;
       burst(n.obj.x, 0.35, n.obj.z, 14, 0x7fffd4);
+      playSfx('hack');
       toast('Camera grid hacked. The walls promise not to look.');
     } else if (n.type === 'laser') {
       n.obj.off = true;
       state.score += 130;
       burst(player.x, 0.25, player.z, 14, 0x7fffd4);
+      playSfx('hack', 0.85);
       toast('Laser disabled with a cufflink and a raised eyebrow.');
     } else if (n.type === 'takedown') {
       n.obj.stun = 8.5;
       n.obj.state = 'stunned';
       state.score += 260;
       burst(n.obj.x, 0.25, n.obj.z, 16, 0xff5fa2);
+      playSfx('takedown');
       toast('Velvet takedown. Silent, moisturized, effective.');
     } else if (n.type === 'exit') {
       completeMission();
@@ -1475,6 +1492,7 @@
     if (state.mode !== 'play') return;
     if (player.darts <= 0) { toast('No darts. Q says budget cuts.'); return; }
     player.darts--;
+    playSfx('dart');
     const a = cameraYaw;
     let best = null;
     let bestD = 6.5;
@@ -1491,6 +1509,7 @@
       best.state = 'stunned';
       state.score += 180;
       burst(best.x, 0.28, best.z, 14, 0x7fffd4);
+      playSfx('guard', 0.65);
       toast('Cufflink dart deployed. Nap time, darling.');
     } else {
       const tx = player.x + Math.sin(cameraYaw) * 6;
@@ -1504,6 +1523,7 @@
     if (state.mode !== 'play') return;
     if (player.decoys <= 0) { toast('No decoys. The tiny disco balls are gone.'); return; }
     player.decoys--;
+    playSfx('decoy');
     const p = { x: clamp(player.x + Math.sin(cameraYaw) * 4.2, 0.2, state.worldBounds.w - 0.2), z: clamp(player.z + Math.cos(cameraYaw) * 4.2, 0.2, state.worldBounds.h - 0.2) };
     const mesh = new THREE.Mesh(
       new THREE.SphereGeometry(0.18, 10, 10),
@@ -1523,6 +1543,7 @@
     if (player.smoke <= 0) { toast('No smoke. Drama reserves depleted.'); return; }
     player.smoke--;
     player.smokeTimer = 5.5;
+    playSfx('smoke');
     const mesh = new THREE.Mesh(
       new THREE.SphereGeometry(0.55, 14, 14),
       new THREE.MeshStandardMaterial({ color: 0xdfe8ef, transparent: true, opacity: 0.18, roughness: 1 })
@@ -1539,6 +1560,7 @@
     if (player.charmCd > 0) return;
     player.charms--;
     player.charmCd = 1.2;
+    playSfx('charm');
     let hit = 0;
     for (const g of state.guards) {
       if (g.stun <= 0 && dist(player.x, player.z, g.x, g.z) < 3.3 && los(player.x, player.z, g.x, g.z)) {
@@ -1546,6 +1568,7 @@
         g.state = 'stunned';
         hit++;
         burst(g.x, 0.25, g.z, 10, 0xff5fa2);
+        playSfx('guard', 0.45);
       }
     }
     state.score += hit * 120;
@@ -1581,6 +1604,7 @@
 
   function completeMission() {
     state.mode = 'complete';
+    playSfx('complete');
     const bonus = Math.max(0, 1000 - Math.floor(state.alert) * 8) + player.darts * 40 + player.decoys * 35 + player.smoke * 50;
     state.score += bonus;
     $('completeTitle').textContent = `${state.mission.name} complete`;
@@ -1593,6 +1617,7 @@
   function failMission(reason) {
     if (state.mode === 'failed') return;
     state.mode = 'failed';
+    playSfx('fail');
     $('overText').textContent = reason;
     gameover.classList.remove('hidden');
     hud.classList.add('hidden');
@@ -1651,6 +1676,92 @@
   function wrapAngle(a) { while (a > Math.PI) a -= Math.PI * 2; while (a < -Math.PI) a += Math.PI * 2; return a; }
   function lerpAngle(a, b, t) { return a + wrapAngle(b - a) * t; }
 
+  function audioCtx() {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      audio = audio || new AC();
+      audio.resume?.();
+      return audio;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function tone(freq, endFreq, dur, gain=0.04, type='sine', when=0) {
+    const ac = audioCtx();
+    if (!ac) return;
+    const t = ac.currentTime + when;
+    const osc = ac.createOscillator();
+    const amp = ac.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(Math.max(1, freq), t);
+    osc.frequency.exponentialRampToValueAtTime(Math.max(1, endFreq ?? freq), t + dur);
+    amp.gain.setValueAtTime(0.0001, t);
+    amp.gain.exponentialRampToValueAtTime(Math.max(0.0002, gain), t + 0.01);
+    amp.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(amp).connect(ac.destination);
+    osc.start(t);
+    osc.stop(t + dur + 0.03);
+  }
+
+  function noise(dur=0.12, gain=0.035, lowpass=2800, when=0) {
+    const ac = audioCtx();
+    if (!ac) return;
+    const t = ac.currentTime + when;
+    const buffer = ac.createBuffer(1, Math.max(1, Math.floor(ac.sampleRate * dur)), ac.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+    const src = ac.createBufferSource();
+    const filter = ac.createBiquadFilter();
+    const amp = ac.createGain();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(lowpass, t);
+    amp.gain.setValueAtTime(gain, t);
+    amp.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.buffer = buffer;
+    src.connect(filter).connect(amp).connect(ac.destination);
+    src.start(t);
+    src.stop(t + dur);
+  }
+
+  function playSfx(name, intensity=1) {
+    if (name === 'dart') {
+      noise(0.045, 0.025 * intensity, 5200);
+      tone(820, 320, 0.12, 0.025 * intensity, 'triangle');
+    } else if (name === 'hack') {
+      tone(520, 760, 0.08, 0.03 * intensity, 'square');
+      tone(920, 420, 0.13, 0.025 * intensity, 'triangle', 0.08);
+    } else if (name === 'decoy') {
+      tone(660, 880, 0.18, 0.025 * intensity, 'sine');
+      tone(990, 520, 0.28, 0.025 * intensity, 'triangle', 0.05);
+    } else if (name === 'smoke') {
+      noise(0.55, 0.055 * intensity, 900);
+      tone(180, 90, 0.42, 0.025 * intensity, 'triangle');
+    } else if (name === 'charm') {
+      tone(440, 880, 0.18, 0.035 * intensity, 'sine');
+      tone(660, 1320, 0.24, 0.025 * intensity, 'triangle', 0.08);
+    } else if (name === 'takedown') {
+      noise(0.08, 0.035 * intensity, 1800);
+      tone(170, 64, 0.16, 0.04 * intensity, 'triangle');
+    } else if (name === 'guard') {
+      tone(210 + Math.random() * 120, 86 + Math.random() * 40, 0.38, 0.04 * intensity, 'sawtooth');
+    } else if (name === 'civilian') {
+      tone(420 + Math.random() * 180, 260 + Math.random() * 80, 0.2, 0.022 * intensity, 'triangle');
+    } else if (name === 'alarm') {
+      tone(760, 540, 0.22, 0.035 * intensity, 'square');
+      tone(380, 270, 0.22, 0.02 * intensity, 'triangle');
+    } else if (name === 'complete') {
+      tone(392, 784, 0.18, 0.035 * intensity, 'triangle');
+      tone(523, 1046, 0.24, 0.03 * intensity, 'sine', 0.08);
+    } else if (name === 'fail') {
+      tone(220, 82, 0.5, 0.05 * intensity, 'sawtooth');
+      noise(0.18, 0.03 * intensity, 1000, 0.05);
+    } else if (name === 'step') {
+      noise(0.035, 0.012 * intensity, 700);
+    }
+  }
+
   function setComms(msg) {
     state.lastComms = msg;
     if (isTouch) {
@@ -1687,7 +1798,20 @@
     if (document.hidden || contextLost) dt = 0;
     last = now;
     if (!document.hidden && state.mode === 'play') {
-      try { update(dt); } catch (err) { console.error('gaymesbond update error', err); }
+      try {
+        update(dt);
+        loopErrorCount = 0;
+        lastLoopError = '';
+      } catch (err) {
+        const msg = err?.stack || err?.message || String(err);
+        console.error('gaymesbond update error', err);
+        loopErrorCount = msg === lastLoopError ? loopErrorCount + 1 : 1;
+        lastLoopError = msg;
+        if (loopErrorCount > 12) {
+          failMission('Mission systems jammed. Restart the op from the menu.');
+          loopErrorCount = 0;
+        }
+      }
     }
     if (!contextLost) {
       try { renderer.render(scene, camera); } catch (err) { console.error('gaymesbond render error', err); }

@@ -136,6 +136,25 @@ const clamp = (x,a,b)=>Math.max(a,Math.min(b,x));
 const lerp = (a,b,t)=>a+(b-a)*t;
 const rand = (a,b)=>a+Math.random()*(b-a);
 
+function aimDirection(yaw, pitch=0) {
+  return v3(Math.sin(yaw), -pitch * 0.6, Math.cos(yaw)).normalize();
+}
+
+function flatAimDirection(yaw) {
+  return v3(Math.sin(yaw), 0, Math.cos(yaw)).normalize();
+}
+
+function shortestAngleDiff(from, to) {
+  let diff = to - from;
+  while (diff > Math.PI) diff -= Math.PI*2;
+  while (diff < -Math.PI) diff += Math.PI*2;
+  return diff;
+}
+
+function rotateTowardsAngle(from, to, amount) {
+  return from + shortestAngleDiff(from, to) * clamp(amount, 0, 1);
+}
+
 function makeCanvasTexture(w, h, draw) {
   const c = document.createElement('canvas'); c.width = w; c.height = h;
   draw(c.getContext('2d'), w, h);
@@ -424,6 +443,24 @@ function buildRigBoneMap(root) {
   return map;
 }
 
+function isRootMotionBone(name) {
+  const key = cleanBoneName(name);
+  return key === 'hips' || key === 'root' || key === 'rootnode' || key === 'armature';
+}
+
+function holdHorizontalRoot(track) {
+  const cloned = track.clone();
+  const values = cloned.values;
+  if (!values || values.length < 3) return cloned;
+  const baseX = values[0];
+  const baseZ = values[2];
+  for (let i = 0; i < values.length; i += 3) {
+    values[i] = baseX;
+    values[i + 2] = baseZ;
+  }
+  return cloned;
+}
+
 function remapClipToRig(clip, rigRoot) {
   const boneMap = buildRigBoneMap(rigRoot);
   const tracks = [];
@@ -444,7 +481,9 @@ function remapClipToRig(clip, rigRoot) {
     const bone = boneMap.get(cleanBoneName(nodeName));
 
     if (bone) {
-      const cloned = track.clone();
+      const cloned = propertyName === 'position' && isRootMotionBone(bone.name)
+        ? holdHorizontalRoot(track)
+        : track.clone();
       cloned.name = `${bone.name}.${propertyName}`;
       tracks.push(cloned);
       remapped++;
@@ -456,7 +495,7 @@ function remapClipToRig(clip, rigRoot) {
       continue;
     }
 
-    tracks.push(track.clone());
+    tracks.push(propertyName === 'position' && isRootMotionBone(nodeName) ? holdHorizontalRoot(track) : track.clone());
     kept++;
   }
 
@@ -834,6 +873,96 @@ const bossSpawn = v3(0,0,0);
 // Entities
 // ─────────────────────────────────────────────────────────────────────────
 const entities = { goons: [], boss: null };
+let aimPointer = null;
+let aimPointerRing = null;
+let aimPointerTarget = null;
+
+function createAimPointer() {
+  const group = new THREE.Group();
+  const ringMat = new THREE.MeshBasicMaterial({
+    color: 0xffe082,
+    transparent: true,
+    opacity: 0.85,
+    depthWrite: false
+  });
+  const ring = new THREE.Mesh(new THREE.RingGeometry(0.22, 0.32, 36), ringMat);
+  ring.rotation.x = -Math.PI / 2;
+  group.add(ring);
+
+  const dot = new THREE.Mesh(
+    new THREE.SphereGeometry(0.08, 16, 8),
+    new THREE.MeshBasicMaterial({ color: 0xfff3b0, transparent: true, opacity: 0.95, depthWrite: false })
+  );
+  dot.position.y = 0.04;
+  group.add(dot);
+
+  const stem = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.012, 0.012, 0.8, 8),
+    new THREE.MeshBasicMaterial({ color: 0xffe082, transparent: true, opacity: 0.5, depthWrite: false })
+  );
+  stem.rotation.z = Math.PI / 2;
+  stem.position.y = 0.03;
+  group.add(stem);
+
+  group.visible = false;
+  group.renderOrder = 9;
+  scene.add(group);
+  aimPointerRing = ring;
+  return group;
+}
+
+function getAimOrigin() {
+  if (!hero) return v3(0, 1.55, 0);
+  const origin = hero.rightHandMount.getWorldPosition(tmpV).clone();
+  origin.y = lerp(origin.y, hero.pos.y + 1.55, 0.5);
+  return origin;
+}
+
+function collectAimTargets() {
+  const targets = [];
+  entities.goons.forEach(g => { if (g.alive) targets.push(g.body); });
+  if (entities.boss && entities.boss.alive) targets.push(entities.boss.body);
+  return targets;
+}
+
+function resolveAimPoint(range=AK_RANGE, includePitch=true) {
+  const origin = getAimOrigin();
+  const dir = includePitch ? aimDirection(hero.aimYaw, hero.aimPitch) : flatAimDirection(hero.aimYaw);
+  const ray = new THREE.Raycaster(origin, dir, 0.25, range);
+  const hits = ray.intersectObjects(collectAimTargets(), true);
+  if (hits.length) {
+    return { origin, dir, point: hits[0].point.clone(), ent: findEntity(hits[0].object), hit: true };
+  }
+  const point = origin.clone().addScaledVector(dir, range);
+  if (Math.abs(dir.y) > 0.001) {
+    const groundT = (0.08 - origin.y) / dir.y;
+    if (groundT > 0 && groundT < range) point.copy(origin).addScaledVector(dir, groundT);
+  }
+  point.y = Math.max(0.08, point.y);
+  return { origin, dir, point, ent: null, hit: false };
+}
+
+function updateAimPointer(realDt) {
+  if (!hero || !hero.alive || cinemaActive || paused || !playing) {
+    if (aimPointer) aimPointer.visible = false;
+    aimPointerTarget = null;
+    return;
+  }
+  if (!aimPointer) aimPointer = createAimPointer();
+  const range = hero.equipped === 'sickle' ? SICKLE_RANGE : (hero.equipped === 'dynamite' ? 28 : AK_RANGE);
+  const aim = resolveAimPoint(range, hero.equipped !== 'sickle');
+  aimPointer.visible = true;
+  aimPointer.position.lerp(aim.point, Math.min(1, realDt * 18));
+  aimPointer.position.y = Math.max(0.08, aimPointer.position.y);
+  aimPointer.rotation.y = hero.aimYaw;
+  const scale = aim.hit ? 1.55 : (hero.equipped === 'sickle' ? 1.2 : 1.0);
+  aimPointer.scale.lerp(v3(scale, scale, scale), Math.min(1, realDt * 12));
+  if (aimPointerRing) {
+    aimPointerRing.material.color.setHex(aim.hit ? 0xff4f3f : (hero.equipped === 'sickle' ? 0x8ecdc5 : 0xffe082));
+    aimPointerRing.material.opacity = aim.hit ? 1 : 0.72;
+  }
+  aimPointerTarget = aim;
+}
 
 // ─────────────────────────────────────────────────────────────────────────
 // Hero — uses rigged skeleton from hero.glb + FBX animation clips
@@ -976,14 +1105,18 @@ class Hero {
       const f = (input.up ? 1 : 0) - (input.down ? 1 : 0) + (touchStick.y || 0);
       const r = (input.right ? 1 : 0) - (input.left ? 1 : 0) + (touchStick.x || 0);
       const speed = (input.run ? HERO_RUN : HERO_SPEED);
-      fwd.set(Math.sin(this.facing), 0, Math.cos(this.facing));
-      rgt.set(Math.cos(this.facing), 0, -Math.sin(this.facing));
+      const moveYaw = isTouch && !touchLook.active ? this.aimYaw : this.facing;
+      fwd.set(Math.sin(moveYaw), 0, Math.cos(moveYaw));
+      rgt.set(Math.cos(moveYaw), 0, -Math.sin(moveYaw));
       const move = v3(0,0,0);
       move.addScaledVector(fwd, f);
       move.addScaledVector(rgt, r);
       const mag = move.length();
       this.moving = mag > 0.02;
       this.running = this.moving && (input.run || mag > 0.9);
+      if (this.moving && isTouch && !touchLook.active) {
+        this.aimYaw = Math.atan2(move.x, move.z);
+      }
       if (this.moving) move.normalize().multiplyScalar(speed * realDt);
       const nx = this.pos.x + move.x;
       if (!collidesAt(nx, this.pos.z, 0.55)) this.pos.x = nx;
@@ -993,11 +1126,7 @@ class Hero {
     this.group.position.copy(this.pos);
 
     if (this.alive) {
-      const target = this.aimYaw;
-      let diff = target - this.facing;
-      while (diff > Math.PI) diff -= Math.PI*2;
-      while (diff < -Math.PI) diff += Math.PI*2;
-      this.facing += diff * Math.min(1, realDt * 8);
+      this.facing = rotateTowardsAngle(this.facing, this.aimYaw, realDt * 8);
       this.group.rotation.y = this.facing;
     }
 
@@ -1011,10 +1140,7 @@ class Hero {
           this.playAction('walk', 0.15, speed);
         }
       } else {
-        // Idle — slow action to near-zero or just stop
-        if (this.currentAction) {
-          this.currentAction.timeScale = 0.05;
-        }
+        this.stopAction(0.12);
       }
     }
 
@@ -1454,7 +1580,11 @@ function throwSickle() {
   hero.sickleInFlight = true;
   playSickleSound();
   const start = hero.rightHandMount.getWorldPosition(tmpV).clone();
-  const dir = v3(Math.sin(hero.aimYaw), 0, Math.cos(hero.aimYaw)).normalize();
+  const aim = aimPointerTarget || resolveAimPoint(SICKLE_RANGE, false);
+  const dir = aim.point.clone().sub(start);
+  dir.y = 0;
+  if (dir.lengthSq() < 0.0001) dir.copy(flatAimDirection(hero.aimYaw));
+  dir.normalize();
   scene.add(sickleVisual);
   sickleVisual.position.copy(start);
   sickleVisual.visible = true;
@@ -1491,22 +1621,15 @@ function shootAK() {
   if (now - hero.lastShot < 60 / AK_RPM) return;
   hero.lastShot = now;
   hero.ammo--;
-  const origin = hero.rightHandMount.getWorldPosition(tmpV).clone();
-  origin.y = lerp(origin.y, hero.pos.y + 1.55, 0.5);
-  const dir = v3(Math.sin(hero.aimYaw), -hero.aimPitch*0.6, Math.cos(hero.aimYaw)).normalize();
+  const aim = resolveAimPoint(AK_RANGE, true);
+  const { origin, dir } = aim;
   spawnMuzzleFlash(origin, hero.aimYaw);
   spawnShellCasing(origin.clone().add(v3(0, 0.02, 0)), hero.aimYaw);
   pulseReticle();
-  const ray = new THREE.Raycaster(origin, dir, 0.5, AK_RANGE);
-  const targets = [];
-  entities.goons.forEach(g => { if (g.alive) targets.push(g.body); });
-  if (entities.boss && entities.boss.alive) targets.push(entities.boss.body);
-  const intersects = ray.intersectObjects(targets, true);
   let end = origin.clone().addScaledVector(dir, AK_RANGE);
-  if (intersects.length) {
-    const i = intersects[0];
-    end = i.point;
-    const ent = findEntity(i.object);
+  if (aim.hit) {
+    end = aim.point;
+    const ent = aim.ent;
     if (ent === entities.boss) entities.boss.takeDamage(AK_DMG);
     else if (ent && ent.takeDamage) ent.takeDamage(AK_DMG);
   }
@@ -2240,6 +2363,7 @@ function animate() {
   updateFlags(realDt);
 
   if (!cinemaActive) updateCamera(realDt);
+  updateAimPointer(realDt);
   updateHUD();
   maybeCompletionChecks();
 

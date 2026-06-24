@@ -144,6 +144,8 @@
   let netT = 0;
   let beat = null;
   let beatOn = false;
+  let engineTone = null;
+  let sirenState = { t: 0, next: 0, high: false };
   const hudCache = { stats: '', role: '', objective: '' };
 
   buildStaticWorld();
@@ -734,6 +736,8 @@
     updateParticles(dt);
     updateActors();
     updateCamera(dt);
+    updateVehiclePrompts(me);
+    updateVehicleAudio(dt);
     updateHud(me);
     updateNetwork(dt, me);
     if (toastT > 0) toastT -= dt;
@@ -822,6 +826,8 @@
     let nz = clamp(o.z + dz, 0.9, MAP.h - 0.9);
     for (const b of BUILDINGS) if (circleRect(nx, nz, r, b)) nz = o.z;
     if ((nx !== o.x || nz !== o.z) && (nx === o.x || nz === o.z)) {
+      const impact = Math.hypot(o.vx || 0, o.vz || 0);
+      if (impact > 3.2 && o.type) playSfx('crash', clamp(impact / 9, 0.35, 1));
       o.vx = (o.vx || 0) * -0.2;
       o.vz = (o.vz || 0) * -0.2;
     }
@@ -973,8 +979,15 @@
       x: me.x + Math.sin(me.yaw) * 0.55,
       z: me.z + Math.cos(me.yaw) * 0.55
     };
-    if (w.type === 'melee') return meleeHit(me, w);
-    if (w.type === 'flame') return flameBurst(me, w);
+    if (w.type === 'melee') {
+      playSfx('melee');
+      return meleeHit(me, w);
+    }
+    if (w.type === 'flame') {
+      playSfx('gun', 0.45);
+      return flameBurst(me, w);
+    }
+    playSfx('gun', ['rocket', 'bomb', 'sticky', 'firebomb', 'fireball'].includes(w.type) ? 1.15 : w.type === 'spread' ? 0.85 : 1);
     if (w.type === 'spread') {
       for (let i = 0; i < (w.pellets || 6); i++) spawnProjectile(me, w, me.yaw + (Math.random() - 0.5) * 0.5, origin);
       return;
@@ -1086,8 +1099,10 @@
 
   function damageActor(a, dmg, kind, src) {
     if (!a || a.dead) return;
+    const wasAlive = a.hp > 0;
     a.hp -= dmg;
     a.panic = Math.max(a.panic || 0, kind === 'fire' ? 2.2 : 1.2);
+    if (wasAlive && Math.random() < (kind === 'fire' ? 0.08 : 0.28)) playSfx(a.id && a.id[0] === 'n' ? 'panic' : 'pain', 0.8);
     if (kind === 'fire' || kind === 'fireball') a.burn = Math.max(a.burn || 0, 2.6);
     if (kind === 'stun') a.stun = Math.max(a.stun || 0, 1.8);
     if (kind === 'foam') a.foam = Math.max(a.foam || 0, 3.0);
@@ -1106,11 +1121,13 @@
     spark(a.x, a.z, kind === 'fire' || kind === 'fireball' ? COLORS.orange : kind === 'stun' ? COLORS.aqua : kind === 'paint' ? 0xb66bff : COLORS.red);
     if (a.hp <= 0) {
       a.dead = true;
+      playSfx(a.id && a.id[0] === 'n' ? 'cry' : 'pain', 1);
       floating.push(makeFloating(a.x, a.z, kind === 'fire' ? 'BURNED' : ['bomb', 'rocket', 'sticky'].includes(kind) ? 'BOOM' : 'DOWN', COLORS.red));
     }
   }
 
   function explode(x, z, radius, dmg, kind) {
+    playSfx('explosion', clamp(radius / 3, 0.6, 1.25));
     for (let i = 0; i < 38; i++) {
       const a = Math.random() * Math.PI * 2;
       const r = Math.random() * radius;
@@ -1204,6 +1221,31 @@
     }
   }
 
+  function nearestVehicle(me, radius=2.1) {
+    let best = null;
+    let bd = radius;
+    for (const v of vehicles) {
+      if (v.driverId || v.dead) continue;
+      const d = Math.hypot(me.x - v.x, me.z - v.z);
+      if (d < bd) {
+        bd = d;
+        best = v;
+      }
+    }
+    return best;
+  }
+
+  function updateVehiclePrompts(me) {
+    const act = $('actBtn');
+    if (!act || !me) return;
+    if (me.vehicleId) {
+      act.textContent = 'Exit Ride';
+      return;
+    }
+    const near = nearestVehicle(me, 2.1);
+    act.textContent = near ? 'Drive ' + (near.type === 'bike' ? 'Bike' : near.type === 'swamp' ? 'Buggy' : 'Car') : 'Action';
+  }
+
   function action() {
     const me = players.get(localId);
     if (!me) return;
@@ -1213,24 +1255,17 @@
       me.vehicleId = null;
       me.x += Math.sin(me.yaw + Math.PI / 2) * 0.8;
       me.z += Math.cos(me.yaw + Math.PI / 2) * 0.8;
+      playSfx('engineStop');
       toast(me.name + ' exits the ride.');
       return;
     }
-    let best = null;
-    let bd = 1.45;
-    for (const v of vehicles) {
-      if (v.driverId || v.dead) continue;
-      const d = Math.hypot(me.x - v.x, me.z - v.z);
-      if (d < bd) {
-        bd = d;
-        best = v;
-      }
-    }
+    const best = nearestVehicle(me, 2.1);
     if (best) {
       me.vehicleId = best.id;
       best.driverId = me.id;
       me.stars = Math.min(5, me.stars + 0.35);
       me.wantedT = 8;
+      playSfx('engineStart');
       toast(me.name + ' borrows a ' + (best.type === 'bike' ? 'bike' : best.type === 'swamp' ? 'swamp buggy' : 'supercar') + '.');
     } else if (activeJob) {
       toast(activeJob.label);
@@ -1242,6 +1277,7 @@
     if (!me) return;
     me.stars = Math.min(5, me.stars + 0.1);
     me.wantedT = 5;
+    playSfx('horn');
     toast('HONK. A tiny crime, emotionally.');
     for (let i = 0; i < 8; i++) spark(me.x, me.z, i % 2 ? COLORS.pink : COLORS.gold);
   }
@@ -1576,6 +1612,127 @@
     let out = '';
     for (let i = 0; i < 6; i++) out += chars[(Math.random() * chars.length) | 0];
     return out;
+  }
+
+  function audioCtx() {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      beat = beat || new AC();
+      beat.resume?.();
+      return beat;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function tone(freq, endFreq, dur, gain=0.04, type='sine', when=0) {
+    const ac = audioCtx();
+    if (!ac) return;
+    const t = ac.currentTime + when;
+    const osc = ac.createOscillator();
+    const amp = ac.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(Math.max(1, freq), t);
+    osc.frequency.exponentialRampToValueAtTime(Math.max(1, endFreq ?? freq), t + dur);
+    amp.gain.setValueAtTime(0.0001, t);
+    amp.gain.exponentialRampToValueAtTime(Math.max(0.0002, gain), t + 0.01);
+    amp.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(amp).connect(ac.destination);
+    osc.start(t);
+    osc.stop(t + dur + 0.03);
+  }
+
+  function noise(dur=0.12, gain=0.04, lowpass=3200, when=0) {
+    const ac = audioCtx();
+    if (!ac) return;
+    const t = ac.currentTime + when;
+    const buffer = ac.createBuffer(1, Math.max(1, Math.floor(ac.sampleRate * dur)), ac.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+    const src = ac.createBufferSource();
+    const filter = ac.createBiquadFilter();
+    const amp = ac.createGain();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(lowpass, t);
+    amp.gain.setValueAtTime(gain, t);
+    amp.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.buffer = buffer;
+    src.connect(filter).connect(amp).connect(ac.destination);
+    src.start(t);
+    src.stop(t + dur);
+  }
+
+  function playSfx(name, intensity=1) {
+    if (name === 'horn') {
+      tone(330, 320, 0.22, 0.07 * intensity, 'square');
+      tone(248, 244, 0.22, 0.05 * intensity, 'square');
+    } else if (name === 'siren') {
+      tone(sirenState.high ? 760 : 520, sirenState.high ? 520 : 760, 0.42, 0.035 * intensity, 'sawtooth');
+      tone(sirenState.high ? 380 : 260, sirenState.high ? 260 : 380, 0.42, 0.02 * intensity, 'triangle');
+      sirenState.high = !sirenState.high;
+    } else if (name === 'engineStart') {
+      tone(70, 120, 0.28, 0.055, 'sawtooth');
+      noise(0.18, 0.025, 900);
+    } else if (name === 'engineStop') {
+      tone(120, 48, 0.22, 0.035, 'sawtooth');
+    } else if (name === 'crash') {
+      noise(0.16, 0.07 * intensity, 1600);
+      tone(92, 36, 0.16, 0.04 * intensity, 'square');
+    } else if (name === 'gun') {
+      noise(0.055, 0.065 * intensity, 5200);
+      tone(96, 42, 0.07, 0.035 * intensity, 'square');
+    } else if (name === 'melee') {
+      noise(0.08, 0.035 * intensity, 2600);
+      tone(220, 90, 0.09, 0.035 * intensity, 'triangle');
+    } else if (name === 'explosion') {
+      noise(0.34, 0.11 * intensity, 1800);
+      tone(78, 28, 0.42, 0.08 * intensity, 'sawtooth');
+    } else if (name === 'pain') {
+      tone(210 + Math.random() * 90, 72 + Math.random() * 26, 0.42, 0.045 * intensity, 'sawtooth');
+      tone(130 + Math.random() * 40, 48 + Math.random() * 20, 0.5, 0.025 * intensity, 'triangle', 0.04);
+    } else if (name === 'cry') {
+      tone(360 + Math.random() * 120, 120 + Math.random() * 50, 0.72, 0.055 * intensity, 'sawtooth');
+      noise(0.2, 0.025 * intensity, 1200, 0.08);
+    } else if (name === 'panic') {
+      tone(460 + Math.random() * 140, 300 + Math.random() * 80, 0.16, 0.025 * intensity, 'triangle');
+    }
+  }
+
+  function updateVehicleAudio(dt) {
+    const me = players.get(localId);
+    const vehicle = me?.vehicleId ? vehicles.find(v => v.id === me.vehicleId) : null;
+    const ac = vehicle ? audioCtx() : beat;
+    if (vehicle && ac) {
+      if (!engineTone) {
+        const osc = ac.createOscillator();
+        const amp = ac.createGain();
+        osc.type = 'sawtooth';
+        amp.gain.value = 0.0001;
+        osc.connect(amp).connect(ac.destination);
+        osc.start();
+        engineTone = { osc, amp };
+      }
+      const speed = Math.hypot(vehicle.vx, vehicle.vz);
+      const t = ac.currentTime;
+      engineTone.osc.frequency.setTargetAtTime(72 + speed * 13 + (input.boostButton ? 28 : 0), t, 0.05);
+      engineTone.amp.gain.setTargetAtTime(0.012 + Math.min(0.05, speed * 0.005), t, 0.06);
+    } else if (engineTone && ac) {
+      engineTone.amp.gain.setTargetAtTime(0.0001, ac.currentTime, 0.04);
+      const old = engineTone;
+      engineTone = null;
+      setTimeout(() => {
+        try { old.osc.stop(); } catch (_) {}
+      }, 180);
+    }
+
+    const heat = me?.stars || 0;
+    const activeCops = cops.some(c => !c.dead);
+    sirenState.t += dt;
+    if (mode === 'play' && activeCops && heat > 0.35 && sirenState.t >= sirenState.next) {
+      playSfx('siren', clamp(heat / 4, 0.35, 1));
+      sirenState.next = sirenState.t + Math.max(0.45, 1.2 - heat * 0.12);
+    }
   }
 
   function startBeat() {
