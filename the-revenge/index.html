@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<title>The Revenge: Hunt for Iqbal</title>
+<meta name="description" content="Play The Revenge — a third-person 3D action game set in Yaari Town. AK47, dynamite, sickle-throw boomerang, cigarette bullet-time, and a brutal Iqbal boss fight.">
+<meta name="keywords" content="the revenge game, omenly, dhurandar, 3d browser game, action game, boss fight, yaari town">
+<meta name="author" content="Omenly">
+<meta name="theme-color" content="#120a08">
+<link rel="canonical" href="https://omenly.vercel.app/the-revenge/">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Omenly">
+<meta property="og:title" content="The Revenge: Hunt for Iqbal">
+<meta property="og:description" content="Yaari Town burns. Throw the sickle. Sever the warlord. Smoke a cigarette in bullet-time.">
+<meta property="og:url" content="https://omenly.vercel.app/the-revenge/">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "The Revenge: Hunt for Iqbal",
+  "url": "https://omenly.vercel.app/the-revenge/",
+  "description": "Third-person 3D browser action game set in Yaari Town with AK47, dynamite, sickle-throw, cigarette bullet-time, goon patrols, and a brutal Iqbal boss fight.",
+  "genre": ["Action", "Third-Person", "3D", "Browser Game"],
+  "playMode": "SinglePlayer",
+  "gamePlatform": ["Web browser", "HTML5", "WebGL", "Desktop", "Mobile"],
+  "applicationCategory": "Game",
+  "operatingSystem": "Web",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "publisher": { "@type": "Organization", "name": "Omenly" }
+}
+</script>
+<link rel="stylesheet" href="omenly.css">
+<script>
+  window.OMENLY_CONFIG = {
+    game: 'the-revenge',
+    gameTitle: 'The Revenge',
+    price: 3,
+    isHub: false,
+    donateUrl: 'https://www.paypal.me/vikas117/3',
+    allAccessDonateUrl: 'https://www.paypal.me/vikas117/10',
+    theme: { accent: '#d34d3f' }
+  };
+</script>
+<script src="omenly.js" defer></script>
+<script defer src="/_vercel/insights/script.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<style>
+  :root {
+    --bg: #120a08;
+    --panel: rgba(18, 10, 8, 0.9);
+    --ink: #ffe6c8;
+    --muted: rgba(255, 230, 200, 0.66);
+    --line: rgba(255, 230, 200, 0.18);
+    --gold: #e9b44c;
+    --red: #d34d3f;
+    --green: #6f9d70;
+    --cyan: #8ecdc5;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; user-select: none; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); color: var(--ink); font-family: "Courier New", monospace; touch-action: none; overscroll-behavior: none; }
+  body { position: fixed; inset: 0; }
+  #game { display: block; width: 100vw; height: 100vh; height: 100dvh; background: #120a08; cursor: crosshair; }
+  .hidden { display: none !important; }
+
+  #menu, #pause, #complete, #failed, #loading, #intro {
+    position: fixed; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center;
+    padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+    background:
+      linear-gradient(180deg, rgba(10, 6, 4, 0.78), rgba(20, 10, 8, 0.95)),
+      linear-gradient(110deg, rgba(170, 60, 40, 0.32), rgba(50, 30, 20, 0.24));
+  }
+  #menuPanel, .modal {
+    width: min(920px, 96vw);
+    max-height: calc(100dvh - 30px);
+    overflow: auto;
+    padding: clamp(18px, 4vw, 34px);
+    border: 1px solid rgba(211, 77, 63, 0.4);
+    background: rgba(18, 10, 8, 0.92);
+    box-shadow: 0 26px 80px rgba(0, 0, 0, 0.6);
+  }
+  .kicker { color: var(--gold); letter-spacing: 5px; font-size: 11px; text-transform: uppercase; margin-bottom: 10px; }
+  h1 { font-family: Georgia, serif; font-size: clamp(42px, 9vw, 88px); line-height: 0.92; letter-spacing: 0; color: var(--ink); }
+  h1 span { color: var(--red); }
+  h2 { font-family: Georgia, serif; font-size: clamp(30px, 6vw, 50px); letter-spacing: 0; color: var(--red); margin-bottom: 12px; }
+  .copy { color: var(--muted); font-size: 13px; line-height: 1.65; max-width: 760px; margin: 14px 0 20px; }
+  .levels { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 20px 0 18px; }
+  .level {
+    min-height: 88px; padding: 14px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.035);
+    color: var(--ink); text-align: left; font: inherit; cursor: pointer; transition: border-color 0.16s, transform 0.16s, background 0.16s;
+  }
+  .level strong { display: block; color: var(--red); letter-spacing: 2px; font-size: 13px; margin-bottom: 8px; text-transform: uppercase; }
+  .level small { display: block; color: var(--muted); line-height: 1.45; font-size: 11px; }
+  .level:not(:disabled):hover, .level:not(:disabled):focus-visible { border-color: var(--red); background: rgba(211, 77, 63, 0.09); outline: none; transform: translateY(-1px); }
+  .level:disabled { cursor: default; opacity: 0.45; }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .btn {
+    min-height: 42px; padding: 0 15px; border: 1px solid var(--gold); background: rgba(233, 180, 76, 0.1);
+    color: var(--gold); font: 12px "Courier New", monospace; letter-spacing: 2px; text-transform: uppercase; cursor: pointer;
+  }
+  .btn:hover, .btn:focus-visible, .btn.on { background: var(--gold); color: #15110d; outline: none; }
+  .btn.red { border-color: var(--red); color: #ffb0a7; background: rgba(211, 77, 63, 0.1); }
+  .btn.red:hover, .btn.red:focus-visible, .btn.red.on { background: var(--red); color: #190d0a; }
+  .btn.green { border-color: var(--green); color: #c6efbf; background: rgba(111, 157, 112, 0.1); }
+  .btn.green:hover, .btn.green:focus-visible, .btn.green.on { background: var(--green); color: #07120b; }
+  .btn.cyan { border-color: var(--cyan); color: var(--cyan); background: rgba(142, 205, 197, 0.1); }
+  .btn.cyan:hover, .btn.cyan:focus-visible, .btn.cyan.on { background: var(--cyan); color: #07120f; }
+  .btn.smoke { border-color: #cfa37e; color: #f0d3b6; background: rgba(207, 163, 126, 0.12); }
+  .btn.smoke:hover, .btn.smoke:focus-visible, .btn.smoke.on { background: #cfa37e; color: #1a0e07; }
+  .btn.fire {
+    min-width: 92px;
+    border-color: #ffe082;
+    background: #e9b44c;
+    color: #15110d;
+    font-weight: 700;
+    box-shadow: 0 0 18px rgba(233, 180, 76, 0.25);
+  }
+  .btn.fire:hover, .btn.fire:focus-visible, .btn.fire.holding {
+    background: #fff0a8;
+    border-color: #fff0a8;
+    color: #15110d;
+    box-shadow: 0 0 24px rgba(255, 240, 168, 0.38);
+  }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  [data-omenly-ad] { width: min(728px, 92vw); min-height: 1px; margin-top: 18px; }
+
+  #hud { position: fixed; left: 14px; top: 14px; z-index: 12; width: min(360px, calc(100vw - 28px)); pointer-events: none; display: grid; gap: 8px; }
+  .hudBox { border: 1px solid var(--line); background: var(--panel); padding: 10px 12px; box-shadow: 0 10px 32px rgba(0, 0, 0, 0.3); }
+  #levelName { color: var(--red); letter-spacing: 3px; font-size: 12px; text-transform: uppercase; margin-bottom: 6px; }
+  #stats { color: var(--muted); font-size: 11px; letter-spacing: 2px; line-height: 1.7; }
+  #stats b { color: var(--cyan); font-weight: normal; }
+  #healthBar, #bossBar, #cigBar { height: 8px; margin-top: 7px; border: 1px solid rgba(255,255,255,0.16); background: rgba(0,0,0,0.28); }
+  #healthFill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--green), var(--gold), var(--red)); }
+  #bossFill { height: 100%; width: 100%; background: linear-gradient(90deg, #a12623, #e9b44c); }
+  #cigFill { height: 100%; width: 0%; background: linear-gradient(90deg, #cfa37e, #ffe6c8); }
+  #objectiveList { display: grid; gap: 5px; font-size: 11px; line-height: 1.35; color: var(--muted); }
+  #objectiveList div.done { color: var(--cyan); text-decoration: line-through; }
+  #comms {
+    position: fixed; right: 14px; top: 14px; z-index: 12; width: min(360px, 42vw); pointer-events: none;
+    border: 1px solid rgba(142, 205, 197, 0.32); background: rgba(18, 10, 8, 0.82); padding: 10px 12px;
+    color: var(--cyan); font-size: 12px; line-height: 1.45; min-height: 48px;
+  }
+  #weaponBar {
+    position: fixed; left: 50%; bottom: max(16px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 20;
+    display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; max-width: calc(100vw - 28px);
+  }
+  #weaponBar .btn { pointer-events: auto; }
+  #prompt {
+    position: fixed; left: 50%; top: 62%; transform: translate(-50%, -50%); z-index: 18; opacity: 0;
+    border: 1px solid rgba(233, 180, 76, 0.65); background: rgba(18, 10, 8, 0.86); color: var(--gold);
+    padding: 8px 12px; font-size: 11px; letter-spacing: 2px; text-align: center; pointer-events: none;
+    transition: opacity 0.12s;
+  }
+  #prompt.on { opacity: 1; }
+  #toast {
+    position: fixed; left: 50%; bottom: 78px; transform: translateX(-50%); z-index: 22; opacity: 0;
+    border: 1px solid rgba(142, 205, 197, 0.5); background: rgba(18, 10, 8, 0.9); color: var(--cyan);
+    padding: 9px 14px; max-width: min(680px, 92vw); text-align: center; font-size: 11px; letter-spacing: 2px; line-height: 1.35;
+    transition: opacity 0.14s;
+  }
+  #toast.on { opacity: 1; }
+  #crosshair { position: fixed; left: 50%; top: 50%; width: 18px; height: 18px; transform: translate(-50%, -50%); z-index: 10; pointer-events: none; }
+  #crosshair::before, #crosshair::after { content: ""; position: absolute; background: rgba(255, 230, 200, 0.75); }
+  #crosshair::before { left: 8px; top: 0; width: 2px; height: 18px; }
+  #crosshair::after { left: 0; top: 8px; width: 18px; height: 2px; }
+  #damageVignette { position: fixed; inset: 0; z-index: 9; pointer-events: none; opacity: 0; background: rgba(211, 77, 63, 0.08); box-shadow: inset 0 0 120px rgba(211, 77, 63, 0.82); transition: opacity 0.08s; }
+  #slowmoVignette { position: fixed; inset: 0; z-index: 8; pointer-events: none; opacity: 0; box-shadow: inset 0 0 220px rgba(207, 163, 126, 0.55); transition: opacity 0.3s; }
+  #donate { position: fixed; right: 16px; bottom: 16px; z-index: 31; }
+  #donate a { display: inline-flex; min-height: 34px; align-items: center; padding: 0 12px; border: 1px solid var(--red); color: var(--red); background: rgba(18,10,8,0.72); text-decoration: none; font-size: 10px; letter-spacing: 3px; }
+  #donate a:hover { background: var(--red); color: #190d0a; }
+
+  #touch { position: fixed; inset: 0; z-index: 21; pointer-events: none; display: none; }
+  body.touch #touch { display: block; }
+  #stick, #look { position: absolute; bottom: max(18px, env(safe-area-inset-bottom)); width: 118px; height: 118px; border-radius: 50%; border: 2px solid rgba(255,230,200,0.22); background: rgba(255,255,255,0.04); pointer-events: auto; touch-action: none; }
+  #stick { left: max(16px, env(safe-area-inset-left)); }
+  #look { right: max(16px, env(safe-area-inset-right)); }
+  #stickKnob, #lookKnob { position: absolute; left: 50%; top: 50%; width: 48px; height: 48px; margin: -24px 0 0 -24px; border-radius: 50%; border: 2px solid var(--red); background: rgba(211,77,63,0.16); }
+
+  /* Intro / hero entry overlay */
+  #introLines { position: fixed; left: 0; right: 0; bottom: 18%; z-index: 41; text-align: center; font-family: Georgia, serif; pointer-events: none; }
+  #introLines .lineA { color: var(--red); letter-spacing: 6px; font-size: clamp(10px, 1.6vw, 14px); text-transform: uppercase; margin-bottom: 14px; opacity: 0.9; }
+  #introLines .lineB { color: var(--ink); font-size: clamp(20px, 3.4vw, 36px); font-style: italic; max-width: 80vw; margin: 0 auto; }
+  #skipIntro {
+    position: fixed; right: 18px; bottom: 18px; z-index: 42; pointer-events: auto;
+    border: 1px solid var(--line); background: rgba(18,10,8,0.7); color: var(--muted);
+    padding: 6px 12px; font: 11px "Courier New", monospace; letter-spacing: 2px; cursor: pointer;
+  }
+  #skipIntro:hover { color: var(--ink); border-color: var(--red); }
+
+  @media (max-width: 760px) {
+    .levels { grid-template-columns: 1fr; }
+    #comms, #donate { display: none; }
+    #hud { width: min(310px, calc(100vw - 28px)); }
+    #objectiveList { display: none; }
+    #weaponBar { bottom: calc(max(18px, env(safe-area-inset-bottom)) + 126px); }
+    #weaponBar .btn { min-height: 36px; padding: 0 9px; font-size: 10px; letter-spacing: 1px; }
+    #weaponBar .btn.fire { min-width: 76px; }
+  }
+  @media (orientation: landscape) and (max-height: 520px) {
+    #menuPanel, .modal { padding: 14px; }
+    .levels { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .level { min-height: 72px; padding: 10px; }
+    #weaponBar { bottom: max(12px, env(safe-area-inset-bottom)); }
+    #stick, #look { width: 96px; height: 96px; }
+  }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="damageVignette"></div>
+<div id="slowmoVignette"></div>
+<div id="crosshair" class="hidden"></div>
+
+<div id="loading">
+  <div class="modal">
+    <div class="kicker">OMENLY</div>
+    <h2>Loading The Revenge</h2>
+    <p class="copy" id="loadText">Sharpening the sickle.</p>
+  </div>
+</div>
+
+<div id="menu" class="hidden">
+  <div id="menuPanel">
+    <div class="kicker">A revenge mission</div>
+    <h1>The<br><span>Revenge</span></h1>
+    <p class="copy">Yaari Town belongs to Brigadier Iqbal. Walk in. Smoke a cigarette. Throw the sickle. Take a limb. Take the warlord.</p>
+    <div class="levels">
+      <button id="levelYaari" class="level">
+        <strong>Yaari Town</strong>
+        <small>Hero entry past the welcome sign, goon patrols, AK47, dynamite, sickle boomerang, cigarette bullet-time, and the Iqbal limb-cut.</small>
+      </button>
+      <button class="level" disabled><strong>The Docks</strong><small>Coming soon.</small></button>
+      <button class="level" disabled><strong>Inner Sanctum</strong><small>Coming soon.</small></button>
+      <button class="level" disabled><strong>The Final Score</strong><small>Coming soon.</small></button>
+    </div>
+    <div data-omenly-ad></div>
+  </div>
+</div>
+
+<div id="hud" class="hidden">
+  <div class="hudBox">
+    <div id="levelName">Yaari Town</div>
+    <div id="stats"></div>
+    <div id="healthBar"><div id="healthFill"></div></div>
+    <div id="bossBar" class="hidden"><div id="bossFill"></div></div>
+    <div id="cigBar" class="hidden"><div id="cigFill"></div></div>
+  </div>
+  <div class="hudBox"><div id="objectiveList"></div></div>
+</div>
+<div id="comms" class="hidden">Yaari Town is quiet. Too quiet.</div>
+<div id="prompt"></div>
+<div id="toast"></div>
+
+<div id="weaponBar" class="hidden">
+  <button class="btn cyan" id="akBtn">AK47</button>
+  <button class="btn green" id="sickleBtn">Sickle</button>
+  <button class="btn red" id="dynamiteBtn">Dynamite</button>
+  <button class="btn fire" id="fireBtn">Fire</button>
+  <button class="btn smoke" id="cigBtn">Cigarette</button>
+  <button class="btn" id="pauseBtn">Pause</button>
+</div>
+
+<div id="intro" class="hidden">
+  <div id="introLines">
+    <div class="lineA" id="introA">Yaari Town - High Noon</div>
+    <div class="lineB" id="introB">"They killed my brother on this street."</div>
+  </div>
+  <button id="skipIntro">Skip ▸</button>
+</div>
+
+<div id="pause" class="hidden">
+  <div class="modal">
+    <div class="kicker">Paused</div>
+    <h2>The Revenge</h2>
+    <div class="row">
+      <button class="btn" id="resumeBtn">Resume</button>
+      <button class="btn red" id="quitBtn">Level Select</button>
+    </div>
+  </div>
+</div>
+
+<div id="complete" class="hidden">
+  <div class="modal">
+    <div class="kicker">Revenge Complete</div>
+    <h2>Iqbal Falls in Yaari</h2>
+    <p class="copy" id="completeText"></p>
+    <div class="row">
+      <button class="btn" id="againBtn">Replay</button>
+      <button class="btn cyan" id="levelsBtn">Choose Level</button>
+    </div>
+  </div>
+</div>
+
+<div id="failed" class="hidden">
+  <div class="modal">
+    <div class="kicker">Mission Failed</div>
+    <h2>The Warlord Walks Free</h2>
+    <p class="copy" id="failedText"></p>
+    <div class="row">
+      <button class="btn" id="retryBtn">Retry</button>
+      <button class="btn cyan" id="failedLevelsBtn">Choose Level</button>
+    </div>
+  </div>
+</div>
+
+<div id="touch">
+  <div id="stick"><div id="stickKnob"></div></div>
+  <div id="look"><div id="lookKnob"></div></div>
+</div>
+
+<div id="donate"><a href="https://www.paypal.me/vikas117/3" target="_blank" rel="noopener" data-omenly-cta>SUPPORT</a></div>
+<audio id="bgm" src="assets/bgm.mp3" preload="auto" loop></audio>
+<script type="module" src="game.js"></script>
+</body>
+</html>

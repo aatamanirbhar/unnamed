@@ -237,6 +237,7 @@
   const obstacles = [];
   const sparks = [];
   let killer = null;
+  let gate = null;
   let pointerLocked = false;
   let last = performance.now();
 
@@ -347,7 +348,6 @@
     pallets.push({ x, z, dropped: false, used: false, angle: 0, mesh });
   }
 
-  let gate = null;
   function addGate(x, z) {
     const g = new THREE.Group();
     const mat = new THREE.MeshStandardMaterial({ color: 0x263a4e, roughness: 0.8 });
