@@ -9,7 +9,7 @@
 <meta name="author" content="Omenly">
 <meta name="theme-color" content="#120a08">
 <link rel="canonical" href="https://omenly.vercel.app/the-revenge/">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Omenly">
 <meta property="og:title" content="The Revenge: Hunt for Iqbal">
@@ -44,12 +44,11 @@
   };
 </script>
 <script src="omenly.js" defer></script>
-<script defer src="/_vercel/insights/script.js"></script>
 <script type="importmap">
 {
   "imports": {
-    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    "three": "./vendor/three/build/three.module.js",
+    "three/addons/": "./vendor/three/examples/jsm/"
   }
 }
 </script>
@@ -326,7 +325,7 @@
 </div>
 
 <div id="donate"><a href="https://www.paypal.me/vikas117/3" target="_blank" rel="noopener" data-omenly-cta>SUPPORT</a></div>
-<audio id="bgm" src="assets/bgm.mp3" preload="auto" loop></audio>
+<audio id="bgm" src="assets/bgm/bgm.mp3" preload="auto" loop></audio>
 <script type="module" src="game.js"></script>
 </body>
 </html>
