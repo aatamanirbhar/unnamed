@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(where cloudflared *)",
+      "Bash(where python *)",
+      "Bash(where python3 *)"
+    ]
+  }
+}

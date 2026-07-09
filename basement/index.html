@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#000000">
+<title>Basement — grey-box</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; background: #000; color: #cfc; font-family: monospace; overflow: hidden; overscroll-behavior: none; touch-action: none; }
+  #app { position: fixed; inset: 0; }
+  canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+
+  #hud {
+    position: fixed;
+    top: max(10px, env(safe-area-inset-top));
+    left: max(10px, env(safe-area-inset-left));
+    background: rgba(0,0,0,0.55);
+    padding: 6px 10px;
+    border: 1px solid #2a2;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 1.4;
+    pointer-events: none;
+    white-space: pre;
+    color: #7fffb0;
+    z-index: 10;
+  }
+  #hud .label { color: #4a4; }
+  #hud .warn  { color: #ff8; }
+  #hud .bad   { color: #f77; }
+
+  /* ── Start screen ── */
+  #start {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, #0a0405 0%, #000000 75%);
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ddd;
+    font-family: 'Georgia', serif;
+    padding: 20px;
+  }
+  #start.hidden { display: none; }
+  #start .panel {
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+  }
+  #start .crown {
+    font-family: monospace;
+    color: #c96;
+    letter-spacing: 6px;
+    font-size: 11px;
+    opacity: 0.75;
+    margin-bottom: 14px;
+  }
+  #start h1 {
+    font-style: italic;
+    font-weight: normal;
+    font-size: 42px;
+    letter-spacing: 2px;
+    color: #f4ecf7;
+    margin-bottom: 6px;
+    text-shadow: 0 4px 30px rgba(200,80,58,0.25);
+  }
+  #start .tag {
+    font-style: italic;
+    font-size: 14px;
+    opacity: 0.6;
+    margin-bottom: 32px;
+    letter-spacing: 0.5px;
+  }
+  #start .loading {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  #start .bar {
+    width: 240px;
+    height: 4px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  #start .bar > div {
+    height: 100%;
+    width: 0%;
+    background: #c8503a;
+    transition: width 0.15s linear;
+  }
+  #start .load-label {
+    font-family: monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: #aaa;
+    text-transform: uppercase;
+  }
+  #start .play {
+    display: none;
+    background: none;
+    border: 1px solid #c8503a;
+    color: #f4ecf7;
+    font-family: monospace;
+    letter-spacing: 6px;
+    padding: 14px 40px;
+    font-size: 14px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+  #start .play:hover, #start .play:focus-visible {
+    background: rgba(200,80,58,0.15);
+    box-shadow: 0 0 30px rgba(200,80,58,0.4);
+    outline: none;
+  }
+  #start .play.ready { display: inline-block; }
+  #start .controls-hint {
+    margin-top: 24px;
+    font-family: monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: #666;
+    line-height: 1.7;
+  }
+  #start .warn {
+    margin-top: 20px;
+    padding: 10px 14px;
+    border: 1px solid rgba(255,180,80,0.3);
+    background: rgba(80,50,20,0.25);
+    color: #ffcf8a;
+    font-family: monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    line-height: 1.6;
+    display: none;
+  }
+  #start .warn.on { display: block; }
+
+  #crosshair {
+    position: fixed;
+    left: 50%; top: 50%;
+    width: 4px; height: 4px;
+    background: #fff;
+    border-radius: 50%;
+    opacity: 0.5;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  #prompt {
+    position: fixed;
+    left: 50%; bottom: 20%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.7);
+    color: #fff;
+    padding: 8px 16px;
+    border: 1px solid #555;
+    border-radius: 3px;
+    font-size: 13px;
+    z-index: 6;
+    letter-spacing: 1px;
+    display: none;
+    pointer-events: none;
+  }
+  #prompt.on { display: block; }
+
+  /* Mobile touch UI */
+  #stick {
+    position: fixed;
+    left: max(20px, env(safe-area-inset-left));
+    bottom: max(20px, env(safe-area-inset-bottom));
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.15);
+    z-index: 15;
+    display: none;
+    touch-action: none;
+  }
+  #stick .nub {
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.3);
+    pointer-events: none;
+  }
+  #actbtn {
+    position: fixed;
+    right: max(24px, env(safe-area-inset-right));
+    bottom: max(40px, env(safe-area-inset-bottom));
+    width: 82px; height: 82px;
+    border-radius: 50%;
+    background: rgba(120,255,140,0.08);
+    border: 1px solid rgba(120,255,140,0.5);
+    color: #cfc;
+    font-family: monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    z-index: 15;
+    display: none;
+    touch-action: none;
+    user-select: none;
+  }
+  body.mobile #stick, body.mobile #actbtn { display: block; }
+
+  /* ── Monologue overlay (opening, transitions) ── */
+  #monologue {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 40;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    cursor: pointer;
+    color: #d8d0c8;
+    font-family: 'Georgia', serif;
+    font-style: italic;
+    font-size: 20px;
+    line-height: 1.7;
+    letter-spacing: 0.3px;
+    text-align: center;
+  }
+  #monologue.on { display: flex; }
+  #monologue .mono-inner {
+    max-width: 620px;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+  }
+  #monologue .mono-inner.show { opacity: 1; }
+  #monologue .mono-hint {
+    margin-top: 40px;
+    font-family: monospace;
+    font-style: normal;
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: #555;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+  #monologue .mono-hint.show { opacity: 1; }
+  body.mobile #monologue { font-size: 17px; }
+
+  /* ── Objective banner (top-center) ── */
+  #objective {
+    position: fixed;
+    top: max(14px, env(safe-area-inset-top));
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.55);
+    border: 1px solid rgba(200,150,80,0.35);
+    color: #e8c88a;
+    font-family: monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    padding: 6px 14px;
+    border-radius: 2px;
+    z-index: 8;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    max-width: 80vw;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #objective.on { opacity: 1; }
+
+  /* ── Dialogue box (bottom) ── */
+  #dialogue {
+    position: fixed;
+    left: 50%;
+    bottom: max(24px, env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    width: min(640px, 92vw);
+    background: rgba(0,0,0,0.82);
+    border: 1px solid rgba(200,180,140,0.35);
+    border-radius: 3px;
+    padding: 14px 18px 12px;
+    z-index: 25;
+    display: none;
+    cursor: pointer;
+    color: #ddd;
+    font-family: 'Georgia', serif;
+    text-align: left;
+    box-shadow: 0 6px 30px rgba(0,0,0,0.6);
+  }
+  #dialogue.on { display: block; }
+  #dialogue .who {
+    font-family: monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: #e8c88a;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  #dialogue .body {
+    font-size: 16px;
+    line-height: 1.5;
+    color: #e8e0d4;
+  }
+  #dialogue .cont {
+    text-align: right;
+    font-family: monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: #666;
+    margin-top: 8px;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  #dialogue .cont.show { opacity: 1; }
+  body.mobile #dialogue .body { font-size: 15px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="hud">loading…</div>
+<div id="crosshair"></div>
+<div id="prompt">E — PICK UP</div>
+
+<div id="start">
+  <div class="panel">
+    <div class="crown">— OMENLY —</div>
+    <h1>Basement</h1>
+    <div class="tag">a small errand · fifteen minutes</div>
+
+    <div class="loading">
+      <div class="bar"><div id="bar-fill"></div></div>
+      <div class="load-label" id="load-label">Loading…</div>
+    </div>
+
+    <button class="play" id="play-btn">PLAY</button>
+
+    <div class="warn" id="chrome-warn">
+      not recommended on desktop chrome<br>
+      use firefox for smoother playback
+    </div>
+
+    <div class="controls-hint" id="controls-desktop">wasd · move  ·  mouse · look  ·  e · use</div>
+    <div class="controls-hint" id="controls-mobile" style="display:none">joystick · move  ·  drag right · look  ·  use button</div>
+  </div>
+</div>
+
+<div id="stick"><div class="nub" id="nub"></div></div>
+<button id="actbtn">USE</button>
+
+<div id="objective"></div>
+
+<div id="monologue">
+  <div>
+    <div class="mono-inner" id="mono-text"></div>
+    <div class="mono-hint" id="mono-hint">tap to continue</div>
+  </div>
+</div>
+
+<div id="dialogue">
+  <div class="who" id="dlg-who">MARCUS</div>
+  <div class="body" id="dlg-body">…</div>
+  <div class="cont" id="dlg-cont">▸ tap to continue</div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+// ── Device tier ──
+const ua = navigator.userAgent;
+const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
+const mem = navigator.deviceMemory || (isMobile ? 2 : 8);
+const cores = navigator.hardwareConcurrency || 4;
+const lowEnd = isMobile && (mem <= 3 || cores <= 4);
+const renderScale = lowEnd ? 0.6 : (isMobile ? 0.8 : 1.0);
+const maxDPR = lowEnd ? 1 : (isMobile ? 1.5 : 2);
+
+// Browser detection for the "not recommended on desktop Chrome" warning.
+// Chrome UA contains "Chrome" but Edge/Opera do too; we specifically flag Chrome-on-desktop
+// because that's the combo we've observed dropping frames.
+const isChrome = /Chrome/i.test(ua) && !/Edg|OPR|SamsungBrowser/i.test(ua);
+if (!isMobile && isChrome) {
+  document.getElementById('chrome-warn').classList.add('on');
+}
+
+if (isMobile) {
+  document.body.classList.add('mobile');
+  document.getElementById('controls-desktop').style.display = 'none';
+  document.getElementById('controls-mobile').style.display = 'block';
+}
+
+// ── Renderer ──
+const renderer = new THREE.WebGLRenderer({
+  antialias: !lowEnd,
+  powerPreference: 'high-performance',
+  stencil: false,
+});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, maxDPR));
+renderer.setClearColor(0x000000);
+renderer.shadowMap.enabled = false;
+document.getElementById('app').appendChild(renderer.domElement);
+
+// ── Scene ──
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x050505, 3, 9);
+
+const camera = new THREE.PerspectiveCamera(72, 1, 0.05, 25);
+
+// TEMP LIGHTING — brighter than the horror mood will eventually be, so we can see assets while iterating.
+// Turn these back down once art is in place.
+const hemi = new THREE.HemisphereLight(0xbbccff, 0x332218, 0.85);
+scene.add(hemi);
+const dir = new THREE.DirectionalLight(0xffe6c0, 1.1);
+dir.position.set(3, 6, 2);
+scene.add(dir);
+// A point light in the basement so the boiler nook isn't pitch black.
+const nookLight = new THREE.PointLight(0xffe0a0, 1.6, 8, 1.5);
+nookLight.position.set(-2, -1.5, 6);
+scene.add(nookLight);
+
+// ── Scene groups ──
+// The game has two locations: 'bakery' (opening shift) and 'home' (kitchen + basement).
+// Only one is rendered/collided against at a time — activateScene(name) toggles them.
+// All walls, placed GLBs, floors, and non-shared lights get parented under one of these.
+const scenes = {
+  bakery: new THREE.Group(),
+  home: new THREE.Group(),
+};
+scene.add(scenes.bakery);
+scene.add(scenes.home);
+let activeScene = 'home';   // set by activateScene() below; movement/collision reads this
+function activateScene(name) {
+  activeScene = name;
+  scenes.bakery.visible = (name === 'bakery');
+  scenes.home.visible = (name === 'home');
+}
+
+function teleportPlayer(x, y, z, yaw = 0) {
+  player.x = x; player.y = y; player.z = z;
+  player.yaw = yaw; player.pitch = 0;
+}
+
+// ── Level ──
+// Coordinate system: +X east, +Z south (into screen), Y up.
+// Kitchen at y=0. Stairs descend to basement at y=-3.
+// This is one merged BufferGeometry per material per scene to keep draw calls tiny.
+//
+// walls[] = { x, z, w, d, y0, h, mat, invisible, scene } — axis-aligned box footprint at floor level.
+// We render them merged, and reuse the same array for AABB collision (filtered by active scene).
+const KITCHEN_Y = 0;
+const BASEMENT_Y = -3;
+const CEILING_H = 2.6;
+
+// world walls: {x, z, w, d, y0, h, mat, invisible, scene}
+const walls = [];
+
+// scene defaults to 'home' unless changed via `wallScene(name)` while building. Later tasks
+// will set scene='bakery' before adding bakery walls.
+let _curScene = 'home';
+function wallScene(name) { _curScene = name; }
+function wall(x, z, w, d, y0 = 0, h = CEILING_H, mat = 'wall', invisible = false) {
+  walls.push({ x, z, w, d, y0, h, mat, invisible, scene: _curScene });
+}
+
+// KITCHEN — 6×5, walls all around, doorway to stairs on south (+Z)
+const K = { x0: -3, x1: 3, z0: -6, z1: -1 };
+wall(K.x0 - 0.1, K.z0 - 0.1, K.x1 - K.x0 + 0.2, 0.2, KITCHEN_Y);       // north wall
+wall(K.x0 - 0.1, K.z0 - 0.1, 0.2, K.z1 - K.z0 + 0.2, KITCHEN_Y);       // west wall
+wall(K.x1 - 0.1, K.z0 - 0.1, 0.2, K.z1 - K.z0 + 0.2, KITCHEN_Y);       // east wall
+// south wall of kitchen has a 1.2m doorway at x=[-0.6, 0.6]
+wall(K.x0 - 0.1, K.z1 - 0.1, 2.5, 0.2, KITCHEN_Y);
+wall(0.6, K.z1 - 0.1, 2.5, 0.2, KITCHEN_Y);
+
+// Kitchen counter — invisible collision, GLB provides visuals. Narrower footprint so the model fits nicely.
+wall(-2.5, -5.5, 2.5, 0.6, KITCHEN_Y, 0.9, 'counter', true);
+// Fridge — invisible collision, GLB provides visuals.
+wall(2.0, -5.5, 0.9, 0.7, KITCHEN_Y, 1.95, 'fridge', true);
+
+// STAIRS — descend from KITCHEN_Y (0) down to BASEMENT_Y (-3) over 6 steps between z = -1 and z = 2.
+// Each step is 0.5 m deep, 0.5 m rise. Player collides against a virtual ramp we approximate below.
+// For grey-box we render the steps as visible risers.
+const STAIR_STEPS = 6;
+const STAIR_DEPTH = 0.5;
+const STAIR_RISE = 0.5;
+for (let i = 0; i < STAIR_STEPS; i++) {
+  const z = -1 + i * STAIR_DEPTH;
+  const y = KITCHEN_Y - (i + 1) * STAIR_RISE;
+  wall(-1.0, z, 2.0, STAIR_DEPTH, y, STAIR_RISE, 'stair');
+}
+// Stairwell side walls
+wall(-1.2, -1.0, 0.2, 3.0, BASEMENT_Y, 3.6, 'wall');
+wall(1.0, -1.0, 0.2, 3.0, BASEMENT_Y, 3.6, 'wall');
+
+// BASEMENT — 8×7, entered from north.
+const B = { x0: -4, x1: 4, z0: 2, z1: 9 };
+wall(B.x0 - 0.1, B.z1 - 0.1, B.x1 - B.x0 + 0.2, 0.2, BASEMENT_Y);      // south wall
+wall(B.x0 - 0.1, B.z0 - 0.1, 0.2, B.z1 - B.z0 + 0.2, BASEMENT_Y);      // west wall
+wall(B.x1 - 0.1, B.z0 - 0.1, 0.2, B.z1 - B.z0 + 0.2, BASEMENT_Y);      // east wall
+// north wall segments around the 2m doorway at x=[-1, 1]
+wall(B.x0 - 0.1, B.z0 - 0.1, 3.1, 0.2, BASEMENT_Y);
+wall(1.0, B.z0 - 0.1, 3.1, 0.2, BASEMENT_Y);
+
+// Basement landmarks — invisible collision boxes; GLBs provide visuals.
+// FUSE BOX — on west wall, mid-height
+wall(-3.9, 4.5, 0.3, 0.6, BASEMENT_Y + 1.2, 0.5, 'fuse', true);
+// SHELVES — north-east corner
+wall(2.8, 2.4, 1.0, 0.4, BASEMENT_Y, 2.0, 'shelf', true);
+// BOILER — south-west (the payoff nook). Invisible collision box; visual comes from boiler.glb below.
+wall(-3.5, 7.2, 1.0, 1.2, BASEMENT_Y, 2.2, 'boiler', true);
+// BOXES scattered near center
+wall(-1.0, 5.0, 0.7, 0.7, BASEMENT_Y, 0.7, 'box');
+wall(0.6, 5.6, 0.6, 0.6, BASEMENT_Y, 0.6, 'box');
+wall(1.4, 7.0, 0.8, 0.6, BASEMENT_Y, 0.8, 'box');
+// TOOLBOX (pickup marker) — south-east corner
+const TOOLBOX = { x: 3.0, z: 8.0, w: 0.5, d: 0.5, y0: BASEMENT_Y, h: 0.35 };
+
+// Floors (just visual, not collided against — gravity handles Y)
+function makeFloor(x, z, w, d, y, color, sceneName = 'home') {
+  const g = new THREE.PlaneGeometry(w, d);
+  const m = new THREE.MeshLambertMaterial({ color });
+  const mesh = new THREE.Mesh(g, m);
+  mesh.rotation.x = -Math.PI / 2;
+  mesh.position.set(x + w/2, y, z + d/2);
+  (scenes[sceneName] || scene).add(mesh);
+  return mesh;
+}
+makeFloor(K.x0, K.z0, K.x1 - K.x0, K.z1 - K.z0, KITCHEN_Y, 0x1a1a1a);
+makeFloor(B.x0, B.z0, B.x1 - B.x0, B.z1 - B.z0, BASEMENT_Y, 0x100806);
+// Kitchen ceiling (low overhead — helps sell the space)
+makeFloor(K.x0, K.z0, K.x1 - K.x0, K.z1 - K.z0, KITCHEN_Y + CEILING_H, 0x080808);
+makeFloor(B.x0, B.z0, B.x1 - B.x0, B.z1 - B.z0, BASEMENT_Y + CEILING_H + 1.0, 0x030303);
+
+// Merge walls into as few draw calls as possible — one per material colour.
+const MAT_COLORS = {
+  wall:    0x282828,
+  counter: 0x3a2818,
+  fridge:  0x556066,
+  stair:   0x201812,
+  fuse:    0x3a3a20,
+  shelf:   0x2a1808,
+  boiler:  0x452818,
+  box:     0x4a3520,
+};
+
+// Group walls by scene then by material — one merged mesh per (scene, mat) pair, parented under
+// the scene's group so activateScene() can toggle visibility with one flag.
+const wallsBySceneMat = {};
+for (const w of walls) {
+  if (w.invisible) continue;
+  const s = w.scene || 'home';
+  ((wallsBySceneMat[s] ||= {})[w.mat] ||= []).push(w);
+}
+
+const tempBox = new THREE.BoxGeometry(1, 1, 1);
+for (const sceneKey in wallsBySceneMat) {
+  const parent = scenes[sceneKey] || scenes.home;
+  const matGroups = wallsBySceneMat[sceneKey];
+  for (const matKey in matGroups) {
+    const group = matGroups[matKey];
+    const geoms = [];
+    for (const w of group) {
+      const g = tempBox.clone();
+      g.scale(w.w, w.h, w.d);
+      g.translate(w.x + w.w/2, w.y0 + w.h/2, w.z + w.d/2);
+      geoms.push(g);
+    }
+    const merged = mergeBufferGeometries(geoms);
+    const mesh = new THREE.Mesh(
+      merged,
+      new THREE.MeshLambertMaterial({ color: MAT_COLORS[matKey] || 0x333333 })
+    );
+    parent.add(mesh);
+  }
+}
+
+// ── Asset preload registry ──
+// Every GLB the game needs is declared here. The loading screen won't complete until
+// each one is downloaded, parsed, cheapified, and cached in `assets[]`. When you drop
+// a new GLB into basement/assets/, just add a line here — no other code changes needed.
+const ASSET_MANIFEST = [
+  { key: 'boiler',  file: 'assets/boiler.glb'  },
+  { key: 'fusebox', file: 'assets/fusebox.glb' },
+  { key: 'shelves', file: 'assets/shelves.glb' },
+  { key: 'door',    file: 'assets/door.glb'    },
+  { key: 'bulb',    file: 'assets/bulb.glb'    },
+  { key: 'figure',  file: 'assets/figure.glb'  },
+  { key: 'fridge',  file: 'assets/fridge.glb'  },
+  { key: 'counter', file: 'assets/counter.glb' },
+];
+const assets = {};   // key → gltf.scene (already cheapified, ready to clone/place)
+
+// ── Placements for props once assets are loaded ──
+// Each placement targets a bounding volume; auto-fit and orient inside it.
+// `yaw` optional — radians rotation around Y for facing.
+// `hidden: true` starts the mesh invisible (used for scare reveals).
+// Target volumes are (x, z) = min corner, y = floor, w/h/d = size.
+// Each entry has a `scene` field ('home' or 'bakery'). Bakery entries will be added in T3.
+const PLACEMENTS = [
+  // Kitchen
+  { scene: 'home', asset: 'counter', target: { x: -2.5,  z: -5.5, y: KITCHEN_Y,  w: 2.5, h: 0.9,  d: 0.6 } },
+  { scene: 'home', asset: 'fridge',  target: { x:  2.0,  z: -5.5, y: KITCHEN_Y,  w: 0.9, h: 1.95, d: 0.7 } },
+  // Basement door — stretched to fill the full doorway (1.2m wide, floor-to-ceiling).
+  { scene: 'home', asset: 'door',    target: { x: -0.6,  z: -1.15, y: KITCHEN_Y, w: 1.2, h: CEILING_H, d: 0.15 }, stretch: true },
+  // Basement props. Fusebox back face flush at the inner face of the west wall (x=-3.9).
+  // yaw=Math.PI/2 rotates the model 90° so its front faces east (+X) into the basement.
+  { scene: 'home', asset: 'fusebox', target: { x: -3.9,  z:  4.4, y: BASEMENT_Y + 1.2, w: 0.5, h: 0.6, d: 0.8 }, yaw: Math.PI / 2 },
+  { scene: 'home', asset: 'shelves', target: { x:  2.8,  z:  2.4, y: BASEMENT_Y, w: 1.0, h: 2.0, d: 0.4 } },
+  { scene: 'home', asset: 'boiler',  target: { x: -3.5,  z:  7.2, y: BASEMENT_Y, w: 1.0, h: 2.2, d: 1.2 } },
+  // Hanging bulb over the middle of the basement
+  { scene: 'home', asset: 'bulb',    target: { x: -0.15, z:  5.2, y: BASEMENT_Y + 1.8, w: 0.3, h: 0.6, d: 0.3 } },
+  // Figure — hidden by default; T6 scare beats flip .visible = true at the right moments.
+  { scene: 'home', asset: 'figure',  target: { x:  3.0,  z:  8.5, y: BASEMENT_Y, w: 0.7, h: 1.9, d: 0.5 }, yaw: Math.PI, hidden: true },
+];
+// Walk a loaded model and swap any PBR (MeshStandardMaterial) for MeshLambertMaterial.
+// Keeps the diffuse texture, drops the expensive metalness/roughness shader work.
+// This is the main perf lever for Meshy assets on desktop.
+function cheapifyMaterials(root) {
+  root.traverse(obj => {
+    if (!obj.isMesh || !obj.material) return;
+    const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+    const swapped = mats.map(m => {
+      if (m.isMeshLambertMaterial || m.isMeshBasicMaterial) return m;
+      const lam = new THREE.MeshLambertMaterial({
+        map: m.map || null,
+        color: m.color ? m.color.clone() : 0xffffff,
+        transparent: m.transparent,
+        opacity: m.opacity,
+        side: m.side,
+      });
+      // Downgrade the texture too: linear filtering + no anisotropy is plenty at fog distance.
+      if (lam.map) {
+        lam.map.anisotropy = 1;
+        lam.map.minFilter = THREE.LinearMipmapLinearFilter;
+        lam.map.magFilter = THREE.LinearFilter;
+        lam.map.needsUpdate = true;
+      }
+      m.dispose?.();
+      return lam;
+    });
+    obj.material = Array.isArray(obj.material) ? swapped : swapped[0];
+    // Also turn off shadow-related flags (we don't render shadows anyway).
+    obj.castShadow = false;
+    obj.receiveShadow = false;
+    obj.frustumCulled = true;
+  });
+}
+
+// Place a single loaded model into the scene at its declared target volume.
+// target = { x, z, y, w, h, d }, all in world units. x/z are the min corner of the volume;
+// y is the floor line the model rests on.
+// Optional per-placement flags:
+//   stretch: true  → scale each axis independently to fill the target exactly (breaks aspect ratio).
+//                    Use for walls, doors, anything box-shaped that MUST cover a specific footprint.
+//   yaw: <rad>     → rotation around Y before placement, to fix Meshy models whose forward axis is wrong.
+function placeAsset(asset, target, opts = {}) {
+  const model = asset.clone(true);
+  if (opts.yaw) model.rotation.y = opts.yaw;
+  const bbox = new THREE.Box3().setFromObject(model);
+  const size = new THREE.Vector3(); bbox.getSize(size);
+  const center = new THREE.Vector3(); bbox.getCenter(center);
+
+  if (opts.stretch) {
+    // Non-uniform scale — model fills target on every axis.
+    const sx = target.w / size.x;
+    const sy = target.h / size.y;
+    const sz = target.d / size.z;
+    model.scale.set(sx, sy, sz);
+    model.position.set(
+      -center.x * sx + target.w / 2,
+      -bbox.min.y * sy,
+      -center.z * sz + target.d / 2,
+    );
+  } else {
+    // Uniform scale — preserves the model's aspect ratio, may leave slack on some axes.
+    const s = Math.min(target.w / size.x, target.h / size.y, target.d / size.z);
+    model.scale.setScalar(s);
+    model.position.set(-center.x * s + target.w / 2, -bbox.min.y * s, -center.z * s + target.d / 2);
+  }
+
+  const holder = new THREE.Group();
+  holder.position.set(target.x, target.y, target.z);
+  holder.add(model);
+  const parent = scenes[opts.scene] || scene;
+  parent.add(holder);
+  return holder;
+}
+
+// Keep references to placed assets we may want to manipulate later (figure = scares, bulb = flicker).
+const placed = {};
+
+// ── Preload all assets, updating the loading UI ──
+const loader = new GLTFLoader();
+const barFill = document.getElementById('bar-fill');
+const loadLabel = document.getElementById('load-label');
+const playBtn = document.getElementById('play-btn');
+const startEl = document.getElementById('start');
+
+// Track bytes-per-asset so the progress bar reflects real download progress
+// (some assets are much bigger than others — the boiler alone is 14 MB).
+const progress = new Array(ASSET_MANIFEST.length).fill({ loaded: 0, total: 0 });
+
+function refreshBar() {
+  let loaded = 0, total = 0, anyUnknown = false;
+  for (const p of progress) {
+    loaded += p.loaded;
+    if (p.total > 0) total += p.total;
+    else anyUnknown = true;
+  }
+  const pct = total > 0 ? Math.min(100, (loaded / total) * 100) : 0;
+  barFill.style.width = pct.toFixed(1) + '%';
+  const mb = (loaded / 1048576).toFixed(1);
+  loadLabel.textContent = anyUnknown ? `Loading ${mb} MB…` : `Loading ${mb} MB · ${pct.toFixed(0)}%`;
+}
+
+function loadOne(entry, i) {
+  return new Promise((resolve, reject) => {
+    loader.load(
+      entry.file,
+      (gltf) => {
+        cheapifyMaterials(gltf.scene);
+        assets[entry.key] = gltf.scene;
+        resolve();
+      },
+      (ev) => {
+        progress[i] = { loaded: ev.loaded, total: ev.total || 0 };
+        refreshBar();
+      },
+      (err) => reject(err)
+    );
+  });
+}
+
+async function preloadAll() {
+  refreshBar();
+  const results = await Promise.allSettled(ASSET_MANIFEST.map(loadOne));
+  const failed = results
+    .map((r, i) => r.status === 'rejected' ? ASSET_MANIFEST[i].file : null)
+    .filter(Boolean);
+  if (failed.length) {
+    loadLabel.innerHTML = `<span style="color:#f77">failed to load:<br>${failed.join('<br>')}</span>`;
+    console.error('preload failures:', failed);
+    return false;
+  }
+  return true;
+}
+
+// ── Input lock ──
+// While true, movement/look/interact are all suppressed. Used by Monologue (T1) and Dialogue (T2).
+let inputLocked = false;
+
+// ── Objective banner ──
+const objectiveEl = document.getElementById('objective');
+function setObjective(text) {
+  if (!text) { objectiveEl.classList.remove('on'); objectiveEl.textContent = ''; return; }
+  objectiveEl.textContent = text;
+  objectiveEl.classList.add('on');
+}
+
+// ── Monologue overlay ──
+// Full-screen black overlay, one paragraph at a time. Click/tap anywhere or press any key
+// to advance. When the last line is dismissed, calls onDone.
+const monoEl = document.getElementById('monologue');
+const monoText = document.getElementById('mono-text');
+const monoHint = document.getElementById('mono-hint');
+const Monologue = {
+  active: false,
+  lines: [],
+  idx: 0,
+  onDone: null,
+  show(lines, onDone) {
+    this.lines = lines.slice();
+    this.idx = 0;
+    this.onDone = onDone || null;
+    this.active = true;
+    inputLocked = true;
+    monoEl.classList.add('on');
+    this._render();
+  },
+  _render() {
+    monoText.classList.remove('show');
+    monoHint.classList.remove('show');
+    monoText.textContent = this.lines[this.idx];
+    // let the CSS transition play
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      monoText.classList.add('show');
+      setTimeout(() => monoHint.classList.add('show'), 1200);
+    }));
+  },
+  advance() {
+    if (!this.active) return;
+    this.idx++;
+    if (this.idx >= this.lines.length) {
+      this.active = false;
+      monoEl.classList.remove('on');
+      inputLocked = false;
+      const cb = this.onDone; this.onDone = null;
+      cb?.();
+    } else {
+      this._render();
+    }
+  },
+};
+monoEl.addEventListener('click', () => Monologue.advance());
+monoEl.addEventListener('touchend', (e) => { e.preventDefault(); Monologue.advance(); }, { passive: false });
+window.addEventListener('keydown', (e) => {
+  if (Monologue.active) { e.preventDefault(); Monologue.advance(); }
+});
+
+// ── Dialogue box ──
+// Bottom-of-screen speaker/text panel. `Dialogue.play(lines, onDone)`, where each line is
+//   { who: 'MARCUS', text: '...', color?: '#hex' }
+// Locks input while active (reuses `inputLocked`). Click / tap / any key advances.
+const dlgEl = document.getElementById('dialogue');
+const dlgWho = document.getElementById('dlg-who');
+const dlgBody = document.getElementById('dlg-body');
+const dlgCont = document.getElementById('dlg-cont');
+const Dialogue = {
+  active: false,
+  lines: [],
+  idx: 0,
+  onDone: null,
+  play(lines, onDone) {
+    this.lines = lines.slice();
+    this.idx = 0;
+    this.onDone = onDone || null;
+    this.active = true;
+    inputLocked = true;
+    dlgEl.classList.add('on');
+    this._render();
+  },
+  _render() {
+    const l = this.lines[this.idx];
+    dlgWho.textContent = l.who || '';
+    dlgWho.style.color = l.color || '#e8c88a';
+    dlgBody.textContent = l.text || '';
+    dlgCont.classList.remove('show');
+    // A brief pause before showing the "tap to continue" hint so people don't skip while reading.
+    setTimeout(() => { if (this.active) dlgCont.classList.add('show'); }, 600);
+  },
+  advance() {
+    if (!this.active) return;
+    // small guard: ignore double-click within 250ms so a touch that dismisses one line
+    // doesn't also dismiss the next
+    const now = performance.now();
+    if (now - (this._lastAdv || 0) < 250) return;
+    this._lastAdv = now;
+    this.idx++;
+    if (this.idx >= this.lines.length) {
+      this.active = false;
+      dlgEl.classList.remove('on');
+      inputLocked = false;
+      const cb = this.onDone; this.onDone = null;
+      cb?.();
+    } else {
+      this._render();
+    }
+  },
+};
+dlgEl.addEventListener('click', (e) => { e.stopPropagation(); Dialogue.advance(); });
+dlgEl.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); Dialogue.advance(); }, { passive: false });
+window.addEventListener('keydown', (e) => {
+  if (Dialogue.active) { e.preventDefault(); Dialogue.advance(); }
+});
+
+// ── Interactables registry ──
+// Each entry: { scene, x, z, r, label, onUse, cond? }
+//   scene   — 'home' | 'bakery'; only checked when it matches activeScene
+//   x, z    — world position of the interact point
+//   r       — proximity radius (metres); default 1.2
+//   label   — string shown in the prompt (E/tap prefix is added automatically)
+//   onUse   — function called on interact
+//   cond    — optional () => bool, entry is skipped when it returns false (e.g. one-shot pickups)
+// `nearestInteractable()` scans and returns the closest in-range one for the active scene.
+const interactables = [];
+function addInteractable(entry) {
+  interactables.push({ r: 1.2, ...entry });
+  return entry;
+}
+function nearestInteractable() {
+  let best = null, bestD = Infinity;
+  for (const it of interactables) {
+    if (it.scene && it.scene !== activeScene) continue;
+    if (it.cond && !it.cond()) continue;
+    const dx = player.x - it.x, dz = player.z - it.z;
+    const d = Math.hypot(dx, dz);
+    if (d < it.r && d < bestD) { best = it; bestD = d; }
+  }
+  return best;
+}
+
+// ── Story state machine ──
+// Acts drive objectives, scene, spawn position, and later (T4+) which triggers are armed.
+// advanceAct(name) runs the associated hook, which does the scene setup for that act.
+const ACTS = ['MONOLOGUE_OPEN', 'BAKERY_SHIFT', 'BIKE_HOME', 'HOME_NOTE', 'BASEMENT_DESCENT', 'ENDING'];
+let currentAct = null;
+const actHooks = {
+  MONOLOGUE_OPEN() {
+    setObjective('');
+    activateScene('home'); // hidden behind monologue overlay; harmless
+    Monologue.show([
+      "I could never forget what happened.",
+      "It was the spring of 2012.",
+      "I was working at a bakery before school opened again — just picking up shifts to save for a copy of GTA V.",
+      "I didn't know then what was about to happen to me.",
+      "I struggled working nights for a long time after.",
+    ], () => advanceAct('BAKERY_SHIFT'));
+  },
+  BAKERY_SHIFT() {
+    // T3 will build the bakery scene. For now stub: skip straight to bike-home so we can verify flow.
+    // Once T3 lands, this hook will activate the bakery scene and set the first shift objective.
+    advanceAct('BIKE_HOME');
+  },
+  BIKE_HOME() {
+    setObjective('');
+    Monologue.show([
+      "I locked up the bakery a little after eleven.",
+      "The streetlights on my road were out again. I biked home in the dark.",
+      "The house was quiet when I got in. Mom had left a note on the counter.",
+    ], () => advanceAct('HOME_NOTE'));
+  },
+  HOME_NOTE() {
+    // T5 wires the actual note interactable. For now: land the player in the kitchen so we can walk.
+    activateScene('home');
+    teleportPlayer(0, KITCHEN_Y + 1.6, -4, 0);
+    setObjective('Read the note on the counter');
+  },
+  BASEMENT_DESCENT() {
+    // T6 wires the scare beats.
+    setObjective('Get the flashlight from the basement');
+  },
+  ENDING() {
+    // T7 wires the title card.
+    setObjective('');
+  },
+};
+function advanceAct(name) {
+  currentAct = name;
+  actHooks[name]?.();
+}
+
+let gameStarted = false;
+async function tryStart() {
+  const ok = await preloadAll();
+  if (!ok) return;
+  loadLabel.textContent = 'READY';
+  playBtn.classList.add('ready');
+}
+
+// Once player hits PLAY, spawn every asset in its placement and hide the start screen.
+function startGame() {
+  if (gameStarted) return;
+  gameStarted = true;
+  for (const p of PLACEMENTS) {
+    const a = assets[p.asset];
+    if (!a) continue;
+    const holder = placeAsset(a, p.target, { stretch: p.stretch, yaw: p.yaw, scene: p.scene });
+    if (p.hidden) holder.visible = false;
+    placed[p.asset] = holder;
+  }
+  // Attach the "hanging bulb" point light to the bulb's holder so lighting comes from the visible source.
+  if (placed.bulb) {
+    // Move the existing nook light onto the bulb and increase its warmth/range.
+    nookLight.color.setHex(0xffcf88);
+    nookLight.intensity = 1.9;
+    nookLight.distance = 9;
+    nookLight.decay = 1.6;
+    // Attach as child so it moves with any future bulb sway animation.
+    nookLight.position.set(0, 0.05, 0);
+    placed.bulb.add(nookLight);
+  }
+  startEl.classList.add('hidden');
+  // Nothing to render behind the black monologue overlay — hide both scenes until the hook activates one.
+  scenes.home.visible = false;
+  scenes.bakery.visible = false;
+  // Pointer lock is intentionally NOT requested here — it would eat clicks on the monologue overlay.
+  // The existing canvas-click handler (below) locks the pointer as soon as the player clicks the game
+  // world, which naturally happens after the monologue clears.
+  advanceAct('MONOLOGUE_OPEN');
+}
+playBtn.addEventListener('click', startGame);
+
+tryStart();
+
+// Toolbox — separate so we can hide it after pickup. Parented to the home scene group.
+const toolboxGeom = new THREE.BoxGeometry(TOOLBOX.w, TOOLBOX.h, TOOLBOX.d);
+const toolboxMat = new THREE.MeshLambertMaterial({ color: 0xd88030, emissive: 0x442008, emissiveIntensity: 0.5 });
+const toolboxMesh = new THREE.Mesh(toolboxGeom, toolboxMat);
+toolboxMesh.position.set(TOOLBOX.x + TOOLBOX.w/2, TOOLBOX.y0 + TOOLBOX.h/2, TOOLBOX.z + TOOLBOX.d/2);
+scenes.home.add(toolboxMesh);
+
+// Minimal geometry merger — Three.js has BufferGeometryUtils.mergeGeometries in an addon module,
+// but to keep this file dep-free we do it inline for BoxGeometry (which has only position + normal + uv).
+function mergeBufferGeometries(geoms) {
+  const attrs = ['position', 'normal', 'uv'];
+  const out = {};
+  const counts = {};
+  for (const a of attrs) counts[a] = 0;
+  for (const g of geoms) for (const a of attrs) counts[a] += g.attributes[a].count;
+
+  for (const a of attrs) {
+    const itemSize = geoms[0].attributes[a].itemSize;
+    out[a] = new Float32Array(counts[a] * itemSize);
+  }
+  const offsets = { position: 0, normal: 0, uv: 0 };
+  let indexTotal = 0;
+  for (const g of geoms) indexTotal += g.index.count;
+  const indices = new Uint32Array(indexTotal);
+  let ioff = 0;
+  let vertOffset = 0;
+
+  for (const g of geoms) {
+    for (const a of attrs) {
+      const src = g.attributes[a].array;
+      const itemSize = g.attributes[a].itemSize;
+      out[a].set(src, offsets[a] * itemSize);
+      offsets[a] += g.attributes[a].count;
+    }
+    const idx = g.index.array;
+    for (let i = 0; i < idx.length; i++) indices[ioff + i] = idx[i] + vertOffset;
+    ioff += idx.length;
+    vertOffset += g.attributes.position.count;
+  }
+
+  const merged = new THREE.BufferGeometry();
+  merged.setAttribute('position', new THREE.BufferAttribute(out.position, 3));
+  merged.setAttribute('normal', new THREE.BufferAttribute(out.normal, 3));
+  merged.setAttribute('uv', new THREE.BufferAttribute(out.uv, 2));
+  merged.setIndex(new THREE.BufferAttribute(indices, 1));
+  return merged;
+}
+
+// ── Player ──
+const player = {
+  x: 0, y: KITCHEN_Y + 1.6, z: -4,
+  yaw: 0,             // rotation around Y (mouse X)
+  pitch: 0,           // rotation around X (mouse Y)
+  vy: 0,              // vertical velocity (for stair snapping)
+  radius: 0.28,       // collision radius
+};
+
+// ── Input ──
+const keys = {};
+window.addEventListener('keydown', e => {
+  if (inputLocked) return;
+  keys[e.code] = true;
+  if (e.code === 'KeyE') tryInteract();
+});
+window.addEventListener('keyup', e => { keys[e.code] = false; });
+
+// Pointer lock (desktop) — re-lock when clicking on the canvas after user Esc'd out.
+renderer.domElement.addEventListener('click', () => {
+  if (!isMobile && gameStarted) renderer.domElement.requestPointerLock?.();
+});
+document.addEventListener('mousemove', e => {
+  if (inputLocked) return;
+  if (document.pointerLockElement === renderer.domElement) {
+    player.yaw   -= e.movementX * 0.0022;
+    player.pitch -= e.movementY * 0.0022;
+    player.pitch = Math.max(-1.4, Math.min(1.4, player.pitch));
+  }
+});
+
+// Mobile touch: left half = joystick, right half = look
+const stickEl = document.getElementById('stick');
+const nubEl = document.getElementById('nub');
+const actEl = document.getElementById('actbtn');
+let stickTouchId = null, stickBase = null, stickVec = { x: 0, y: 0 };
+let lookTouchId = null, lookLast = null;
+
+function withinStick(x, y) {
+  const r = stickEl.getBoundingClientRect();
+  return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+}
+function withinAct(x, y) {
+  const r = actEl.getBoundingClientRect();
+  return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+}
+
+window.addEventListener('touchstart', e => {
+  if (inputLocked) return;
+  for (const t of e.changedTouches) {
+    if (withinStick(t.clientX, t.clientY) && stickTouchId === null) {
+      stickTouchId = t.identifier;
+      const r = stickEl.getBoundingClientRect();
+      stickBase = { x: r.left + r.width/2, y: r.top + r.height/2 };
+    } else if (withinAct(t.clientX, t.clientY)) {
+      tryInteract();
+    } else if (t.clientX > window.innerWidth / 2 && lookTouchId === null) {
+      lookTouchId = t.identifier;
+      lookLast = { x: t.clientX, y: t.clientY };
+    }
+  }
+}, { passive: false });
+
+window.addEventListener('touchmove', e => {
+  if (inputLocked) return;
+  for (const t of e.changedTouches) {
+    if (t.identifier === stickTouchId && stickBase) {
+      const dx = t.clientX - stickBase.x;
+      const dy = t.clientY - stickBase.y;
+      const R = 46;
+      const len = Math.hypot(dx, dy) || 1;
+      const cx = Math.max(-R, Math.min(R, dx));
+      const cy = Math.max(-R, Math.min(R, dy));
+      nubEl.style.transform = `translate(calc(-50% + ${cx}px), calc(-50% + ${cy}px))`;
+      stickVec.x = cx / R;
+      stickVec.y = cy / R;
+    } else if (t.identifier === lookTouchId && lookLast) {
+      const dx = t.clientX - lookLast.x;
+      const dy = t.clientY - lookLast.y;
+      player.yaw   -= dx * 0.005;
+      player.pitch -= dy * 0.005;
+      player.pitch = Math.max(-1.4, Math.min(1.4, player.pitch));
+      lookLast = { x: t.clientX, y: t.clientY };
+    }
+  }
+}, { passive: false });
+
+function endTouch(id) {
+  if (id === stickTouchId) {
+    stickTouchId = null; stickBase = null;
+    stickVec.x = 0; stickVec.y = 0;
+    nubEl.style.transform = 'translate(-50%, -50%)';
+  } else if (id === lookTouchId) {
+    lookTouchId = null; lookLast = null;
+  }
+}
+window.addEventListener('touchend', e => { for (const t of e.changedTouches) endTouch(t.identifier); }, { passive: false });
+window.addEventListener('touchcancel', e => { for (const t of e.changedTouches) endTouch(t.identifier); }, { passive: false });
+
+// ── Collision (AABB vs circle) ──
+// For each XZ move, push the player circle out of any wall AABB it intersects.
+function collide(nx, nz) {
+  const r = player.radius;
+  for (const w of walls) {
+    if (w.scene && w.scene !== activeScene) continue;
+    // Only walls that the player's current Y band overlaps.
+    if (player.y < w.y0 - 0.2 || player.y - 1.6 > w.y0 + w.h) continue;
+    // stairs are walkable — handled by Y snapping below
+    if (w.mat === 'stair') continue;
+
+    const minX = w.x, maxX = w.x + w.w;
+    const minZ = w.z, maxZ = w.z + w.d;
+    const cx = Math.max(minX, Math.min(nx, maxX));
+    const cz = Math.max(minZ, Math.min(nz, maxZ));
+    const dx = nx - cx, dz = nz - cz;
+    const dist2 = dx*dx + dz*dz;
+    if (dist2 < r*r) {
+      if (dist2 < 1e-6) {
+        // dead center of the AABB — push out via the shallowest axis
+        const px = Math.min(nx - minX, maxX - nx);
+        const pz = Math.min(nz - minZ, maxZ - nz);
+        if (px < pz) nx = (nx - minX < maxX - nx) ? minX - r : maxX + r;
+        else         nz = (nz - minZ < maxZ - nz) ? minZ - r : maxZ + r;
+      } else {
+        const d = Math.sqrt(dist2);
+        nx = cx + (dx / d) * r;
+        nz = cz + (dz / d) * r;
+      }
+    }
+  }
+  return { x: nx, z: nz };
+}
+
+// Y snapping: find the top of whatever the player is standing on at (x, z).
+function groundHeightAt(x, z) {
+  let best = -Infinity;
+  if (activeScene === 'home') {
+    // Kitchen floor
+    if (x > K.x0 && x < K.x1 && z > K.z0 && z < K.z1) best = Math.max(best, KITCHEN_Y);
+    // Basement floor
+    if (x > B.x0 && x < B.x1 && z > B.z0 && z < B.z1) best = Math.max(best, BASEMENT_Y);
+  }
+  // T3 will add bakery-floor sampling here.
+  // Stairs: each step is a solid platform we can stand on top of
+  for (const w of walls) {
+    if (w.scene && w.scene !== activeScene) continue;
+    if (w.mat !== 'stair') continue;
+    if (x > w.x && x < w.x + w.w && z > w.z && z < w.z + w.d) {
+      best = Math.max(best, w.y0 + w.h);
+    }
+  }
+  return best === -Infinity ? -10 : best;
+}
+
+// ── Interact ──
+// Works off the interactables[] registry declared above with Dialogue.
+// The E-key / USE-button both call tryInteract(), which resolves the nearest matching
+// entry for the active scene and calls its onUse. Prompt text is auto-prefixed with
+// "E — " or "TAP USE — " depending on platform.
+const promptEl = document.getElementById('prompt');
+let toolboxCollected = false;
+function tryInteract() {
+  if (inputLocked) return;
+  const it = nearestInteractable();
+  if (it) it.onUse?.(it);
+}
+
+// Wire the toolbox as an interactable. Reads "FLASHLIGHT" now since T5 will reframe
+// the pickup as the flashlight (per plan), but the model is still the existing toolbox GLB.
+addInteractable({
+  scene: 'home',
+  x: TOOLBOX.x + TOOLBOX.w/2,
+  z: TOOLBOX.z + TOOLBOX.d/2,
+  r: 1.2,
+  label: 'FLASHLIGHT',
+  cond: () => !toolboxCollected,
+  onUse(it) {
+    toolboxCollected = true;
+    scenes.home.remove(toolboxMesh);
+    promptEl.textContent = 'FLASHLIGHT COLLECTED';
+    promptEl.classList.add('on');
+    setTimeout(() => promptEl.classList.remove('on'), 1500);
+    // Test dialogue to prove the flow. T5 will replace this with the actual reaction line.
+    Dialogue.play([
+      { who: 'YOU', text: "Cold. Heavier than I remember." },
+    ]);
+  },
+});
+
+// ── Resize ──
+function resize() {
+  const w = window.innerWidth, h = window.innerHeight;
+  renderer.setSize(w * renderScale, h * renderScale, false);
+  renderer.domElement.style.width = w + 'px';
+  renderer.domElement.style.height = h + 'px';
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+resize();
+window.addEventListener('resize', resize);
+window.addEventListener('orientationchange', () => setTimeout(resize, 100));
+
+// ── HUD ──
+const hud = document.getElementById('hud');
+let frames = 0, acc = 0, lastT = performance.now(), worstMs = 0;
+let displayFps = 0, displayWorst = 0, samples = 0;
+function updateHud() {
+  const info = renderer.info.render;
+  let fpsColor = 'label';
+  if (displayFps < 25) fpsColor = 'bad';
+  else if (displayFps < 30) fpsColor = 'warn';
+  let worstColor = 'label';
+  if (displayWorst > 60) worstColor = 'bad';
+  else if (displayWorst > 45) worstColor = 'warn';
+  hud.innerHTML =
+    `<span class="${fpsColor}">FPS ${displayFps.toFixed(0)}</span>  worst <span class="${worstColor}">${displayWorst.toFixed(0)}ms</span>\n` +
+    `<span class="label">calls</span> ${info.calls}  <span class="label">tris</span> ${info.triangles}\n` +
+    `<span class="label">pos</span>   ${player.x.toFixed(1)} ${player.y.toFixed(1)} ${player.z.toFixed(1)}\n` +
+    `<span class="label">samp</span>  ${samples}s`;
+}
+
+// ── Loop ──
+function frame() {
+  const now = performance.now();
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+
+  // FPS window
+  frames++;
+  acc += dt * 1000;
+  if (acc >= 1000) {
+    displayFps = frames * 1000 / acc;
+    displayWorst = worstMs;
+    frames = 0; acc = 0; worstMs = 0; samples++;
+    updateHud();
+  }
+  if (dt * 1000 > worstMs) worstMs = dt * 1000;
+
+  // Movement input → local vector. Zeroed when a monologue/dialogue is up so held keys
+  // don't keep pushing the player during a story beat.
+  let mx = 0, mz = 0;
+  if (!inputLocked) {
+    if (keys['KeyW'] || keys['ArrowUp'])    mz -= 1;
+    if (keys['KeyS'] || keys['ArrowDown'])  mz += 1;
+    if (keys['KeyA'] || keys['ArrowLeft'])  mx -= 1;
+    if (keys['KeyD'] || keys['ArrowRight']) mx += 1;
+    if (isMobile) {
+      mx += stickVec.x;
+      mz += stickVec.y;
+    }
+  }
+  const len = Math.hypot(mx, mz);
+  if (len > 1) { mx /= len; mz /= len; }
+
+  const SPEED = 2.6;
+  const sy = Math.sin(player.yaw), cy = Math.cos(player.yaw);
+  const wx = (mx * cy + mz * sy) * SPEED * dt;
+  const wz = (-mx * sy + mz * cy) * SPEED * dt;
+
+  const collided = collide(player.x + wx, player.z + wz);
+  player.x = collided.x;
+  player.z = collided.z;
+
+  // Y: snap toward ground height. Simple stair climb.
+  const targetY = groundHeightAt(player.x, player.z) + 1.6;
+  const dy = targetY - player.y;
+  if (Math.abs(dy) < 0.02) player.y = targetY;
+  else player.y += Math.sign(dy) * Math.min(Math.abs(dy), 6 * dt);
+
+  camera.position.set(player.x, player.y, player.z);
+  camera.rotation.set(player.pitch, player.yaw, 0, 'YXZ');
+
+  // Interact prompt — pulled from the interactables registry.
+  if (!inputLocked) {
+    const it = nearestInteractable();
+    if (it) {
+      promptEl.classList.add('on');
+      promptEl.textContent = (isMobile ? 'TAP USE — ' : 'E — ') + it.label;
+    } else if (!promptEl.textContent.endsWith('COLLECTED')) {
+      promptEl.classList.remove('on');
+    }
+  } else {
+    // hide the world prompt while a monologue or dialogue is up
+    if (!promptEl.textContent.endsWith('COLLECTED')) promptEl.classList.remove('on');
+  }
+
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+updateHud();
+</script>
+</body>
+</html>

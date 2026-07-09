@@ -1,0 +1,169 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="sky" cx="50%" cy="20%" r="90%">
+      <stop offset="0%" stop-color="#3a1208"/>
+      <stop offset="40%" stop-color="#1a0804"/>
+      <stop offset="100%" stop-color="#000"/>
+    </radialGradient>
+    <linearGradient id="street" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a0e08"/>
+      <stop offset="100%" stop-color="#050302"/>
+    </linearGradient>
+    <linearGradient id="lampGlow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffb070" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#ffb070" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+  </defs>
+
+  <!-- sky -->
+  <rect width="600" height="400" fill="url(#sky)"/>
+
+  <!-- distant city silhouette -->
+  <g fill="#0a0604" opacity="0.95">
+    <rect x="0" y="170" width="60" height="120"/>
+    <rect x="40" y="150" width="50" height="140"/>
+    <rect x="80" y="190" width="70" height="100"/>
+    <rect x="140" y="160" width="55" height="130"/>
+    <rect x="180" y="180" width="50" height="110"/>
+    <rect x="370" y="170" width="60" height="120"/>
+    <rect x="420" y="190" width="50" height="100"/>
+    <rect x="460" y="150" width="70" height="140"/>
+    <rect x="520" y="180" width="80" height="110"/>
+  </g>
+  <!-- dim windows -->
+  <g fill="#ffb070" opacity="0.4">
+    <rect x="50" y="170" width="3" height="3"/>
+    <rect x="58" y="180" width="3" height="3"/>
+    <rect x="150" y="180" width="3" height="3"/>
+    <rect x="170" y="195" width="3" height="3"/>
+    <rect x="475" y="180" width="3" height="3"/>
+    <rect x="495" y="200" width="3" height="3"/>
+    <rect x="530" y="190" width="3" height="3"/>
+    <rect x="545" y="210" width="3" height="3"/>
+  </g>
+
+  <!-- street -->
+  <polygon points="0,400 220,260 380,260 600,400" fill="url(#street)"/>
+
+  <!-- street center line -->
+  <g stroke="#5a3818" stroke-width="2" stroke-dasharray="14 14" opacity="0.6">
+    <line x1="300" y1="260" x2="300" y2="400"/>
+  </g>
+
+  <!-- lamp post light pool -->
+  <g filter="url(#glow)" opacity="0.7">
+    <ellipse cx="160" cy="335" rx="60" ry="22" fill="url(#lampGlow)"/>
+    <ellipse cx="450" cy="345" rx="55" ry="20" fill="url(#lampGlow)"/>
+  </g>
+
+  <!-- lamp posts -->
+  <g fill="#1a0e08" stroke="#5a3818" stroke-width="1">
+    <rect x="120" y="240" width="3" height="100"/>
+    <rect x="115" y="234" width="13" height="6"/>
+    <circle cx="121.5" cy="232" r="4" fill="#ffb070" opacity="0.9"/>
+    <rect x="475" y="245" width="3" height="100"/>
+    <rect x="470" y="239" width="13" height="6"/>
+    <circle cx="476.5" cy="237" r="4" fill="#ffb070" opacity="0.9"/>
+  </g>
+
+  <!-- overturned car -->
+  <g transform="translate(80 360) rotate(15)" fill="#2a1a14" stroke="#4a2818" stroke-width="1">
+    <rect x="-40" y="-14" width="80" height="14"/>
+    <rect x="-30" y="-22" width="50" height="10"/>
+    <circle cx="-25" cy="0" r="6" fill="#0a0604"/>
+    <circle cx="20" cy="0" r="6" fill="#0a0604"/>
+  </g>
+
+  <!-- zombies (silhouettes shambling toward foreground) -->
+  <g fill="#1a0a06" stroke="#3a1a0e" stroke-width="0.8">
+    <!-- far zombies -->
+    <g transform="translate(255 285)">
+      <ellipse cx="0" cy="-12" rx="4" ry="5"/>
+      <rect x="-4" y="-7" width="8" height="14"/>
+      <rect x="-5" y="6" width="4" height="9"/>
+      <rect x="1" y="6" width="4" height="9"/>
+    </g>
+    <g transform="translate(330 290)">
+      <ellipse cx="0" cy="-14" rx="5" ry="6"/>
+      <rect x="-5" y="-8" width="10" height="17"/>
+      <rect x="-6" y="8" width="5" height="11"/>
+      <rect x="1" y="8" width="5" height="11"/>
+    </g>
+    <!-- mid zombies -->
+    <g transform="translate(220 320)">
+      <ellipse cx="0" cy="-22" rx="8" ry="10"/>
+      <rect x="-9" y="-12" width="18" height="28"/>
+      <rect x="-11" y="14" width="8" height="20"/>
+      <rect x="3" y="14" width="8" height="20"/>
+      <rect x="-18" y="-8" width="6" height="20" transform="rotate(20 -15 0)"/>
+      <rect x="12" y="-8" width="6" height="20" transform="rotate(-15 15 0)"/>
+    </g>
+    <g transform="translate(380 325)">
+      <ellipse cx="0" cy="-24" rx="9" ry="11"/>
+      <rect x="-10" y="-13" width="20" height="30"/>
+      <rect x="-11" y="15" width="9" height="22"/>
+      <rect x="2" y="15" width="9" height="22"/>
+      <rect x="9" y="-8" width="7" height="22" transform="rotate(-25 12 0)"/>
+    </g>
+  </g>
+
+  <!-- eyes -->
+  <g fill="#ff2a3a" opacity="0.9">
+    <circle cx="254" cy="276" r="1"/>
+    <circle cx="256" cy="276" r="1"/>
+    <circle cx="329" cy="277" r="1.2"/>
+    <circle cx="331" cy="277" r="1.2"/>
+    <circle cx="218" cy="302" r="1.5"/>
+    <circle cx="222" cy="302" r="1.5"/>
+    <circle cx="378" cy="304" r="1.6"/>
+    <circle cx="382" cy="304" r="1.6"/>
+  </g>
+
+  <!-- foreground: Leon-style hero from behind -->
+  <g transform="translate(300 370)">
+    <!-- shadow -->
+    <ellipse cx="0" cy="20" rx="32" ry="6" fill="#000" opacity="0.6"/>
+    <!-- legs -->
+    <rect x="-12" y="-10" width="10" height="34" fill="#1a1f2a"/>
+    <rect x="2" y="-10" width="10" height="34" fill="#1a1f2a"/>
+    <!-- jacket / torso -->
+    <path d="M-22 -50 L22 -50 L25 -10 L-25 -10 Z" fill="#3a2818" stroke="#5a3a20" stroke-width="0.8"/>
+    <!-- shoulders -->
+    <ellipse cx="-22" cy="-50" rx="7" ry="9" fill="#3a2818"/>
+    <ellipse cx="22" cy="-50" rx="7" ry="9" fill="#3a2818"/>
+    <!-- right arm extended (holding gun) -->
+    <rect x="22" y="-52" width="38" height="9" fill="#3a2818" stroke="#5a3a20" stroke-width="0.5" transform="rotate(-8 22 -48)"/>
+    <!-- gun -->
+    <g transform="translate(58 -56)">
+      <rect x="0" y="0" width="14" height="6" fill="#0a0a0a"/>
+      <rect x="-2" y="2" width="6" height="8" fill="#0a0a0a"/>
+      <circle cx="14" cy="3" r="1" fill="#ffd089"/>
+    </g>
+    <!-- head with hair -->
+    <ellipse cx="0" cy="-62" rx="10" ry="12" fill="#e8c89a"/>
+    <path d="M-10 -68 Q-8 -78 0 -76 Q8 -78 10 -68 Q9 -60 6 -62 Q0 -65 -6 -62 Q-9 -60 -10 -68 Z" fill="#5a3818"/>
+    <!-- ear hint -->
+    <ellipse cx="-9" cy="-60" rx="1.5" ry="2" fill="#c89870"/>
+  </g>
+
+  <!-- muzzle flash -->
+  <g transform="translate(372 314)" filter="url(#glow)">
+    <circle r="6" fill="#fff5d9" opacity="0.85"/>
+    <circle r="12" fill="#ffb070" opacity="0.4"/>
+  </g>
+
+  <!-- title -->
+  <g font-family="Georgia, serif" fill="#e8d8c8">
+    <text x="300" y="68" text-anchor="middle" font-size="58" font-style="italic" letter-spacing="6" style="text-shadow: 0 0 24px #c8503a;">RACCOON</text>
+    <text x="300" y="96" text-anchor="middle" font-size="11" letter-spacing="6" fill="#c8503a" font-family="Helvetica,sans-serif" font-weight="bold">— ONE NIGHT · ONE HANDGUN —</text>
+  </g>
+
+  <!-- corner stamps -->
+  <g font-family="Helvetica,sans-serif" font-size="9" letter-spacing="3" fill="#c8503a" opacity="0.55">
+    <text x="20" y="390">R.P.D.</text>
+    <text x="580" y="390" text-anchor="end">SEPT 1998</text>
+  </g>
+</svg>

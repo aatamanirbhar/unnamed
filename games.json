@@ -1,0 +1,24 @@
+{
+    "title":  "OMENLY",
+    "tagline":  "A small arcade. Made by hand. Play in a browser.",
+    "games":  [
+                  {
+                      "id":  "raccoon",
+                      "title":  "Raccoon",
+                      "blurb":  "Raccoon City opens into a larger staged survival route: knife and katana stealth kills, guns, rockets, jungle trails, animals, waterfalls, vehicles, fuse-relay puzzles, and a cinematic extraction.",
+                      "tags":  [
+                                   "3d",
+                                   "survival horror",
+                                   "shooter",
+                                   "zombies",
+                                   "third-person"
+                               ],
+                      "minutes":  10,
+                      "accent":  "#c8503a",
+                      "background":  "linear-gradient(135deg, #0a0604, #2a1208)",
+                      "cover":  "raccoon/cover.svg",
+                      "href":  "raccoon/",
+                      "controls":  "WASD + mouse + click + F stealth/use (desktop) - joystick + look + FIRE/USE (mobile)"
+                  }
+              ]
+}
